@@ -88,3 +88,26 @@ Para iniciar el backend en modo `dev` y el frontend simultáneamente, usá:
 ```bash
 npm run start:dev
 ```
+
+# Estrategia de Control de Versiones (Git Flow)
+
+## 1. Ramas Principales
+
+* **`main`**: Contiene el código estable, funcional y testeado. Solo se actualiza al finalizar cada iteración. Es la rama que finalmente se desplegará en producción.
+* **`develop`**: Es la rama de integración principal. Todo el código nuevo de las funcionalidades en curso converge acá.
+
+## 2. Ramas de Soporte
+
+* **`feature/<nombre-tarea>`**: Utilizadas para desarrollar cada nuevo requerimiento (ej. `feature/modelo-dominio`, `feature/health-check`).
+  * **Salen de:** `develop`
+  * **Vuelven a:** `develop`
+* **`bugfix/<nombre-error>`**: Utilizadas para resolver errores puntuales detectados durante la integración en `develop`.
+
+## 3. Flujo de Trabajo
+
+1. **Sincronización:** El desarrollador se posiciona en `develop` y sincroniza su repositorio local (`git pull origin develop`).
+2. **Creación de Rama:** Se crea una nueva rama para la tarea asignada (`git checkout -b feature/modelo-objetos`).
+3. **Desarrollo y Commits:** Se escribe el código realizando commits atómicos y con mensajes claros.
+4. **Pull Request (PR):** Al finalizar la tarea, se sube la rama y se abre un PR hacia `develop`.
+5. **Code Review y Merge:** Otro integrante del equipo revisa el PR. Si todo está correcto, se aprueba y se integra (merge) el código a `develop`.
+6. **Release:** Al finalizar todos los requerimientos de la iteración actual, se realiza un PR desde `develop` hacia `main` para marcar la versión entregable.
