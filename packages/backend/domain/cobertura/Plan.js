@@ -1,23 +1,18 @@
-export class Plan{
+export class Plan {
+  constructor(id, nombre) {
+    this.id = id;
+    this.nombre = nombre;
+    this.coberturasEspecialidad = [];
+    this.coberturasPractica = [];
+  }
 
-    id;
-    nombre;
-    coberturasEspecialidad;
-    coberturasPractica;
+  obtenerCoberturaPorEspecialidad(especialidad) {
+    return this.coberturasEspecialidad.find(
+      (cobertura) => cobertura.especialidad.id == especialidad.id
+    );
+  }
 
-    constructor(id, nombre){
-        this.id = id;
-        this.nombre = nombre;
-        this.coberturasEspecialidad = [];
-        this.coberturasPractica = [];
-    }
-
-    obtenerCobertura(especialidad){
-        return this.coberturasEspecialidad.find(cobertura => cobertura.especialidad.id == especialidad.id);
-    }
-
-    obtenerCobertura(practica){
-        return this.coberturasEspecialidad.find(cobertura => cobertura.practica.id == practica.id);
-    }
-
+  obtenerCoberturaPorPractica(practica) {
+    return this.coberturasPractica.find((cobertura) => cobertura.practica.id == practica.id);
+  }
 }
