@@ -9,17 +9,19 @@ app.use(
     origin: process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
       : true,
-  }),
+  })
 );
 
-app.get("/hello", (req, res) => {
-  res.json({ message: "hello world" });
+app.get("/", (req, res) => {
+  res.send("API Sweet Medical funcionando correctamente.");
 });
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.listen(process.env.SERVER_PORT, () => {
-  console.log(`Backend escuchando en puerto ${process.env.SERVER_PORT}`);
+const PORT = process.env.SERVER_PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Backend escuchando en puerto ${PORT}`);
 });

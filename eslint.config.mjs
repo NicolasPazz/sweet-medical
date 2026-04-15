@@ -10,11 +10,17 @@ export default defineConfig([
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: { globals: globals.node },
+    rules: {
+      "no-unused-vars": "warn",
+    },
   },
   {
     files: ["packages/frontend/src/**/*.{js,jsx,mjs,cjs}"],
     ...pluginReact.configs.flat.recommended,
     settings: { react: { version: "detect" } },
+    rules: {
+      "no-unused-vars": "warn",
+    },
   },
   eslintConfigPrettier,
 ]);
