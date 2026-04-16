@@ -1,16 +1,21 @@
+import { logger } from "../../utils/logger.js";
+
 export class Agenda {
   generarTurnosParaEspecialidad(especialidad, medico) {
     // TODO
-    // Retorna un array de Turno[]
+    logger.debug(`Generando turnos para especialidad ${especialidad} y médico ${medico}`);
+    return []; // Retorna un array de Turno[]
   }
 
   generarTurnosParaPractica(practica, medico) {
     // TODO
-    // Retorna un array de Turno[]
+    logger.debug(`Generando turnos para práctica ${practica} y médico ${medico}`);
+    return []; // Retorna un array de Turno[]
   }
 
   refrescarTurnosSegunDisponibilidadDe(medico) {
     // TODO
-    // Retorna un array de Turno[]
+    logger.debug(`Refrescando turnos para médico ${medico}`);
+    return []; // Retorna un array de Turno[]
   }
 }
