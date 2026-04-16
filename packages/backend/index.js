@@ -17,11 +17,15 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    service: "sweet-medical-backend",
+  });
 });
 
 const PORT = process.env.SERVER_PORT || 3001;
 
 app.listen(PORT, () => {
-  console.log(`Backend escuchando en puerto ${PORT}`);
+  console.log(`Backend de Sweet Medical escuchando en puerto ${PORT}`);
 });

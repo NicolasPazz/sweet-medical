@@ -1,3 +1,5 @@
+import { logger } from "../utils/logger.js";
+
 export class Notificacion {
   constructor(id, destinatario, remitente, mensaje) {
     this.id = id;
@@ -12,6 +14,6 @@ export class Notificacion {
   marcarComoLeida() {
     this.leida = true;
     this.fechaHoraLeida = new Date();
-    console.log(`Notificación ${this.id} marcada como leída el: ${this.fechaHoraLeida}`);
+    logger.debug(`Notificación ${this.id} marcada como leída el: ${this.fechaHoraLeida}`);
   }
 }

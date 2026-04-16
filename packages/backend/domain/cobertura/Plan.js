@@ -1,3 +1,5 @@
+import { logger } from "../utils/logger.js";
+
 export class Plan {
   constructor(id, nombre) {
     this.id = id;
@@ -7,12 +9,16 @@ export class Plan {
   }
 
   obtenerCoberturaPorEspecialidad(especialidad) {
-    return this.coberturasEspecialidad.find(
-      (cobertura) => cobertura.especialidad.id == especialidad.id
+    const cobertura = this.coberturasEspecialidad.find(
+      (c) => c.especialidad.id === especialidad.id
     );
+    logger.debug(`Cobertura encontrada para la especialidad ${especialidad.nombre}:`, cobertura);
+    return cobertura;
   }
 
   obtenerCoberturaPorPractica(practica) {
-    return this.coberturasPractica.find((cobertura) => cobertura.practica.id == practica.id);
+    const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
+    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura);
+    return cobertura;
   }
 }
