@@ -1,24 +1,56 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-function App() {
-  const [message, setMessage] = useState("");
+const HealthCheck = () => {
+  const [healthData, setHealthData] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:3001/health")
-      .then((response) => response.json())
-      .then((data) => setMessage(data.status))
-      .catch((error) => console.error("Error cargando mensaje.", error));
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3001";
+    fetch(`${apiUrl}/health`)
+      .then((res) => res.json())
+      .then((data) => setHealthData(data))
+      .catch(() => setHealthData({ status: "error", message: "Backend inalcanzable" }));
   }, []);
 
   return (
+    <pre
+      style={{
+        padding: "20px",
+        backgroundColor: "#282c34",
+        color: "white",
+        margin: 0,
+        height: "100vh",
+      }}
+    >
+      {healthData ? JSON.stringify(healthData, null, 2) : "Cargando estado..."}
+    </pre>
+  );
+};
+
+const Home = () => {
+  return (
     <div className="App">
       <header className="App-header">
-        <h1>Monorepo Demo</h1>
-        <p>{message ? message : "Cargando mensaje del backend..."}</p>
+        <h1>Sweet Medical</h1>
+        <p>
+          Revisar estado en:{" "}
+          <a href="/health" style={{ color: "#61dafb" }}>
+            /health
+          </a>
+        </p>
       </header>
     </div>
   );
+};
+
+function App() {
+  const currentPath = window.location.pathname;
+
+  if (currentPath === "/health") {
+    return <HealthCheck />;
+  }
+
+  return <Home />;
 }
 
 export default App;

@@ -1,23 +1,24 @@
-export class Plan{
+import { logger } from "../utils/logger.js";
 
-    id;
-    nombre;
-    coberturasEspecialidad;
-    coberturasPractica;
+export class Plan {
+  constructor(id, nombre) {
+    this.id = id;
+    this.nombre = nombre;
+    this.coberturasEspecialidad = [];
+    this.coberturasPractica = [];
+  }
 
-    constructor(id, nombre){
-        this.id = id;
-        this.nombre = nombre;
-        this.coberturasEspecialidad = [];
-        this.coberturasPractica = [];
-    }
+  obtenerCoberturaPorEspecialidad(especialidad) {
+    const cobertura = this.coberturasEspecialidad.find(
+      (c) => c.especialidad.id === especialidad.id
+    );
+    logger.debug(`Cobertura encontrada para la especialidad ${especialidad.nombre}:`, cobertura);
+    return cobertura;
+  }
 
-    obtenerCobertura(especialidad){
-        return this.coberturasEspecialidad.find(cobertura => cobertura.especialidad.id == especialidad.id);
-    }
-
-    obtenerCobertura(practica){
-        return this.coberturasEspecialidad.find(cobertura => cobertura.practica.id == practica.id);
-    }
-
+  obtenerCoberturaPorPractica(practica) {
+    const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
+    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura);
+    return cobertura;
+  }
 }
