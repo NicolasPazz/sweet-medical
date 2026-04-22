@@ -5,7 +5,7 @@ import { logger } from "../../utils/logger.js";
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(turno) {
-    turno.estado.notificar(Usuario.USUARIO_SISTEMA);
+    return turno.estado.notificar(Usuario.USUARIO_SISTEMA);
   }
 
   // Esto se ejecutara desdes un cron
