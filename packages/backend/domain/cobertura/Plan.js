@@ -12,13 +12,16 @@ export class Plan {
     const cobertura = this.coberturasEspecialidad.find(
       (c) => c.especialidad.id === especialidad.id
     );
-    logger.debug(`Cobertura encontrada para la especialidad ${especialidad.nombre}:`, cobertura);
-    return cobertura;
+    logger.debug(
+      `Nivel Cobertura encontrada para la especialidad ${especialidad.nombre}:`,
+      cobertura?.nivel
+    );
+    return cobertura?.nivel;
   }
 
   obtenerCoberturaPorPractica(practica) {
     const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
-    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura);
-    return cobertura;
+    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura?.nivel);
+    return cobertura?.nivel;
   }
 }

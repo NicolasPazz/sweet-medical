@@ -1,8 +1,12 @@
 import { logger } from "../utils/logger.js";
 
 export class Notificacion {
-  constructor(id, destinatario, remitente, mensaje) {
-    this.id = id;
+  // MongoDB va a agregar _id al documento cuando lo insertes, no necesitás anticiparlo en la clase.
+
+  // De ser necesario el acceso a ids en métodos de las clases del dominio, ahí se declara:
+  // _id = null;
+
+  constructor(destinatario, remitente, mensaje) {
     this.destinatario = destinatario;
     this.remitente = remitente;
     this.mensaje = mensaje;
