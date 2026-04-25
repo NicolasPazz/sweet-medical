@@ -4,8 +4,18 @@ import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
 import { logger } from "../../utils/logger.js";
 
 export class Turno {
-  constructor(id, medico, paciente, fechaHora, sede, servicio, costo) {
-    this.id = id;
+  id;
+  medico;
+  paciente;
+  fechaHora;
+  sede;
+  practica;
+  especialidad;
+  estado;
+  historialEstados;
+  costo;
+
+  constructor(medico, paciente, fechaHora, sede, servicio, costo) {
     this.medico = medico;
     this.paciente = paciente;
     this.fechaHora = fechaHora;

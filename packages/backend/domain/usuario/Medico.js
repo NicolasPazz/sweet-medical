@@ -2,8 +2,16 @@ import { logger } from "../../utils/logger.js";
 import { GeneradorDisponibilidad } from "../agenda/GeneradorDisponibilidad.js";
 
 export class Medico {
-  constructor(id, usuario, matricula, nombre) {
-    this.id = id;
+  id;
+  usuario;
+  matricula;
+  nombre;
+  especialidades;
+  practicas;
+  sedes;
+  disponibilidades;
+
+  constructor(usuario, matricula, nombre) {
     this.usuario = usuario;
     this.matricula = matricula;
     this.nombre = nombre;
