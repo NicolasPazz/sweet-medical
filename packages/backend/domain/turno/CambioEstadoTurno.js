@@ -1,4 +1,11 @@
 export class CambioEstadoTurno {
+  id;
+  fechaHoraIngreso;
+  estado;
+  turno;
+  usuario;
+  motivo;
+
   constructor(estado, turno, usuario, motivo) {
     this.fechaHoraIngreso = new Date();
     this.estado = estado;

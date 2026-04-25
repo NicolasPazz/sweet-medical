@@ -1,8 +1,12 @@
-import { logger } from "../utils/logger.js";
+import { logger } from "../../utils/logger.js";
 
 export class Plan {
-  constructor(id, nombre) {
-    this.id = id;
+  id;
+  nombre;
+  coberturasEspecialidad;
+  coberturasPractica;
+
+  constructor(nombre) {
     this.nombre = nombre;
     this.coberturasEspecialidad = [];
     this.coberturasPractica = [];

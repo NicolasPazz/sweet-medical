@@ -2,6 +2,7 @@ import { logger } from "../../utils/logger.js";
 import { Notificacion } from "../Notificacion";
 
 export class Realizado {
+  id;
   constructor(turno) {
     this.turno = turno;
   }
