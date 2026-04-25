@@ -5,6 +5,13 @@ export class Notificacion {
 
   // De ser necesario el acceso a ids en métodos de las clases del dominio, ahí se declara:
   // _id = null;
+  id;
+  destinatario;
+  remitente;
+  mensaje;
+  fechaHoraCreacion;
+  fechaHoraLeida;
+  leida;
 
   constructor(destinatario, remitente, mensaje) {
     this.destinatario = destinatario;

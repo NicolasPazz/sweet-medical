@@ -1,4 +1,5 @@
 export class CambioEstadoTurno {
+  id;
   fechaHoraIngreso;
   estado;
   turno;

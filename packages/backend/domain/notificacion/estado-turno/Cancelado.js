@@ -4,6 +4,7 @@ import { Usuario } from "../usuarios/Usuario.js";
 import { Turno } from "../../turno/Turno.js";
 
 export class Cancelado {
+  id;
   constructor(turno) {
     this.turno = turno;
   }

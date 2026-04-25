@@ -3,6 +3,7 @@ import { Notificacion } from "../Notificacion";
 import { Usuario } from "../usuarios/Usuario.js";
 
 export class Confirmado {
+  id;
   constructor(turno) {
     this.turno = turno;
   }

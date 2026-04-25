@@ -1,4 +1,5 @@
 export class CoberturaPractica {
+  id;
   practica;
   nivel;
 
