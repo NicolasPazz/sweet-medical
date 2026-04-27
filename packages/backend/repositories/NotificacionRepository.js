@@ -6,6 +6,10 @@ export class NotificacionRepository {
     this.nextId = 1;
   }
 
+  findById(id) {
+    return this.notificaciones[id] ?? null;
+  }
+
   guardar(notificacion) {
     const id = notificacion.id ?? this.nextId++;
     notificacion.id = id;
@@ -18,10 +22,6 @@ export class NotificacionRepository {
       (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === true
     );
 
-    leidas.forEach((notificacion) => {
-      notificacion.leida = true;
-    });
-
     return leidas;
   }
 
@@ -30,10 +30,12 @@ export class NotificacionRepository {
       (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === false
     );
 
-    noLeidas.forEach((notificacion) => {
-      notificacion.leida = true;
-    });
-
     return noLeidas;
+  }
+
+  marcarComoLeida(id) {
+    const notificacion = this.notificaciones[id];
+    notificacion.leida = true;
+    return notificacion;
   }
 }

@@ -13,6 +13,11 @@ export class NotificacionService {
     return this.notificacionRepository.obtenerNoLeidas(idUsuario);
   }
 
+  marcarComoLeida(id) {
+    // UPDATE de la notificación ya guardada
+    return this.notificacionRepository.marcarComoLeida(id);
+  }
+
   guardar(notificacion) {
     return this.notificacionRepository.guardar(notificacion);
   }

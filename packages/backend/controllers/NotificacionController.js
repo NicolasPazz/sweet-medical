@@ -33,6 +33,19 @@ export class NotificacionController {
     }
   };
 
+  marcarComoLeida = async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const resultado = this.notificacionService.marcarComoLeida(id);
+      return res.status(200).json({
+        status: "success",
+        data: resultado,
+      });
+    } catch (error) {
+      logger.error(error);
+    }
+  };
+
   guardar = async (req, res) => {
     try {
       const { destinatario, remitente, mensaje } = req.body;
