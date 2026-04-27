@@ -14,9 +14,14 @@ export class NotificacionRepository {
   }
 
   obtenerNoLeidas(idUsuario) {
-    // EL DESTINATARIO DEBE SER UN OBJETO USUARIO. POR AHORA LO TRATO COMO ID SOLO COMO PRUEBA
-    return Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false
+    const noLeidas = Object.values(this.notificaciones).filter(
+      (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === false
     );
+
+    noLeidas.forEach((notificacion) => {
+      notificacion.leida = true;
+    });
+
+    return noLeidas;
   }
 }
