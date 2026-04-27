@@ -7,9 +7,22 @@ export class NotificacionController {
     this.notificacionService = notificacionService;
   }
 
+  obtenerLeidas = async (req, res) => {
+    try {
+      const idUsuario = Number(req.params.idUsuario);
+      const resultado = this.notificacionService.obtenerLeidas(idUsuario);
+      return res.status(200).json({
+        status: "success",
+        data: resultado,
+      });
+    } catch (error) {
+      logger.error(error);
+    }
+  };
+
   obtenerNoLeidas = async (req, res) => {
     try {
-      const idUsuario = Number(req.params.id);
+      const idUsuario = Number(req.params.idUsuario);
       const resultado = this.notificacionService.obtenerNoLeidas(idUsuario);
       return res.status(200).json({
         status: "success",

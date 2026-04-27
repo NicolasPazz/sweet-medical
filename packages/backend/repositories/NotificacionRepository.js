@@ -13,6 +13,18 @@ export class NotificacionRepository {
     return notificacion;
   }
 
+  obtenerLeidas(idUsuario) {
+    const leidas = Object.values(this.notificaciones).filter(
+      (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === true
+    );
+
+    leidas.forEach((notificacion) => {
+      notificacion.leida = true;
+    });
+
+    return leidas;
+  }
+
   obtenerNoLeidas(idUsuario) {
     const noLeidas = Object.values(this.notificaciones).filter(
       (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === false
