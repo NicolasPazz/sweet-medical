@@ -35,7 +35,7 @@ export class NotificacionRepository {
 
   marcarComoLeida(id) {
     const notificacion = this.notificaciones[id];
-    notificacion.leida = true;
+    notificacion.marcarComoLeida();
     return notificacion;
   }
 }
