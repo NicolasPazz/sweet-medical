@@ -12,6 +12,7 @@ app.use(
       : true,
   })
 );
+app.use(router);
 
 app.use(router);
 
@@ -32,3 +33,5 @@ const PORT = process.env.SERVER_PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend de Sweet Medical escuchando en puerto ${PORT}`);
 });
+
+export default app;
