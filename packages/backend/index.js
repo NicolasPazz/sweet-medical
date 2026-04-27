@@ -14,6 +14,8 @@ app.use(
 );
 app.use(router);
 
+app.use(router);
+
 app.get("/", (req, res) => {
   res.send("API Sweet Medical funcionando correctamente.");
 });

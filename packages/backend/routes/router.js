@@ -12,5 +12,3 @@ router.use('/pacientes', pacienteRoutes);
 router.use('/turnos', turnoRoutes);
 router.use('/servicios', servicioRoutes);
 router.use('/notificaciones', notificacionRoutes);
-
-export default router;
