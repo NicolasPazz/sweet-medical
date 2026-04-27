@@ -14,6 +14,7 @@ export class NotificacionRepository {
   }
 
   obtenerNoLeidas(idUsuario) {
+    // EL DESTINATARIO DEBE SER UN OBJETO USUARIO. POR AHORA LO TRATO COMO ID SOLO COMO PRUEBA
     return Object.values(this.notificaciones).filter(
       (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false
     );
