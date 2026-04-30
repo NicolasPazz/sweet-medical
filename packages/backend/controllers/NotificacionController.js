@@ -1,6 +1,5 @@
 import { logger } from "../domain/utils/logger.js";
 import { NotificacionService } from "../services/NotificacionService.js";
-import { Notificacion } from "../domain/notificacion/Notificacion.js";
 
 export class NotificacionController {
   constructor({ notificacionService = new NotificacionService() } = {}) {
@@ -48,9 +47,8 @@ export class NotificacionController {
 
   guardar = async (req, res) => {
     try {
-      const { destinatario, remitente, mensaje } = req.body;
-      const notificacion = new Notificacion(destinatario, remitente, mensaje);
-      const resultado = this.notificacionService.guardar(notificacion);
+      const datosNotificacion = this.extraerYValidarBodyNotificacion(req.body);
+      const resultado = this.notificacionService.guardar(datosNotificacion);
       return res.status(201).json({
         status: "created",
         data: resultado,

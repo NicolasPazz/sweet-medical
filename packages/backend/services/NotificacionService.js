@@ -1,5 +1,5 @@
 import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
-
+import { Notificacion } from "../domain/notificacion/Notificacion.js";
 export class NotificacionService {
   constructor({ notificacionRepository = new NotificacionRepository() } = {}) {
     this.notificacionRepository = notificacionRepository;
@@ -18,7 +18,12 @@ export class NotificacionService {
     return this.notificacionRepository.marcarComoLeida(id);
   }
 
-  guardar(notificacion) {
+  guardar(datosNotificacion) {
+    const notificacion = new Notificacion(
+      datosNotificacion.destinatario,
+      datosNotificacion.remitente,
+      datosNotificacion.mensaje
+    );
     return this.notificacionRepository.guardar(notificacion);
   }
 }
