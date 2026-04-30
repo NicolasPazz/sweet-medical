@@ -22,7 +22,7 @@ export class Turno {
     this.sede = sede;
 
     this.practica = servicio.costo ? servicio : null;
-    this.especialidad = servicio.costoConsulta ? servicio : null;
+    this.especialidad = servicio.costo ? servicio : null;
 
     this.estado = EstadoTurno.DISPONIBLE;
     this.historialEstados = [];
