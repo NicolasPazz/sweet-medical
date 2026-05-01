@@ -1,5 +1,5 @@
 import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
-import { EstadoTurno } from "./EstadoTurno.js";
+import { Disponible } from "./notificacion/estado-turno/Disponible.js";
 import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
 import { logger } from "../../utils/logger.js";
 
@@ -9,8 +9,7 @@ export class Turno {
   paciente;
   fechaHora;
   sede;
-  practica;
-  especialidad;
+  servicio;
   estado;
   historialEstados;
   costo;
@@ -21,10 +20,9 @@ export class Turno {
     this.fechaHora = fechaHora;
     this.sede = sede;
 
-    this.practica = servicio.costo ? servicio : null;
-    this.especialidad = servicio.costoConsulta ? servicio : null;
+    this.servicio = servicio.costo ? servicio : null;
 
-    this.estado = EstadoTurno.DISPONIBLE;
+    this.estado = new Disponible();
     this.historialEstados = [];
     this.costo = costo;
   }
