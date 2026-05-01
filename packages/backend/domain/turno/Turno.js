@@ -19,9 +19,7 @@ export class Turno {
     this.paciente = paciente;
     this.fechaHora = fechaHora;
     this.sede = sede;
-
     this.servicio = servicio.costo ? servicio : null;
-
     this.estado = new Disponible();
     this.historialEstados = [];
     this.costo = costo;

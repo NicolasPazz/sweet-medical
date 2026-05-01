@@ -4,9 +4,9 @@ export class Especialidad {
   duracionTurnoEnMins;
   costo;
 
-  constructor(nombre, duracionTurnoEnMins, costoConsulta) {
+  constructor(nombre, duracionTurnoEnMins, costo) {
     this.nombre = nombre;
     this.duracionTurnoEnMins = duracionTurnoEnMins;
-    this.costoConsulta = costoConsulta;
+    this.costo = costo;
   }
 }
