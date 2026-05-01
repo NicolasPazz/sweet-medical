@@ -5,7 +5,8 @@ export {
     horaAMinutos, 
     sumarMinutosADate, 
     obtenerDisponibilidadesLibres,
-    estaEnDisponibilidad
+    estaEnDisponibilidad,
+    configurarFecha
 };
 
 /**
@@ -157,3 +158,40 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosDisponibles) => {
 
     return todosLosHuecos;
 };
+
+/**
+ * Configura la fecha exacta de un turno buscando la próxima ocurrencia 
+ * del día de la semana en el que debe situarse.
+ * * @param {Object} turno - Objeto Turno que contiene la fechaHora base.
+ * @returns {Date} - Nueva fecha configurada para el día de la semana más cercano.
+ */
+function configurarFecha(turno) {
+    const fechaReferencia = turno.fechaHora;
+    const ahora = new Date(); // Fecha de ejecución de la función
+    
+    // 1. Obtener el día de la semana (0-6) y el horario del turno original [cite: 121]
+    const diaSemanaObjetivo = fechaReferencia.getDay(); 
+    const horas = fechaReferencia.getHours();
+    const minutos = fechaReferencia.getMinutes();
+
+    // 2. Crear una copia de "ahora" para empezar a calcular
+    let proximaFecha = new Date(ahora);
+    
+    // 3. Calcular cuántos días faltan para el próximo (día de semana)
+    // Si hoy es el día objetivo, pero la hora ya pasó, buscará el de la semana que viene.
+    let diasDeDiferencia = (diaSemanaObjetivo + 7 - ahora.getDay()) % 7;
+
+    // Si es hoy pero el horario ya pasó, sumamos 7 días para que sea el "próximo"
+    const minutosAhora = (ahora.getHours() * 60) + ahora.getMinutes();
+    const minutosTurno = (horas * 60) + minutos;
+    
+    if (diasDeDiferencia === 0 && minutosTurno <= minutosAhora) {
+        diasDeDiferencia = 7;
+    }
+
+    // 4. Ajustar la fecha sumando los días y seteando la hora exacta
+    proximaFecha.setDate(ahora.getDate() + diasDeDiferencia);
+    proximaFecha.setHours(horas, minutos, 0, 0);
+
+    return proximaFecha;
+}
