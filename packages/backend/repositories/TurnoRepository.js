@@ -17,7 +17,7 @@ export class TurnoRepository {
     return this.turnos[id];
   }
 
-  async ObtenerPorPacienteId(pacienteId) {
+  async obtenerPorPacienteId(pacienteId) {
     // Buscamos en el objeto de turnos aquellos que pertenezcan al paciente
     return Object.values(this.turnos).filter(
       (turno) => turno.paciente && turno.paciente.id === pacienteId

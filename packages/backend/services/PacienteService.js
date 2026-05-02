@@ -6,8 +6,7 @@ export class PacienteService {
   }
 
   async getHistorialTurnos(pacienteId) {
-    // Aquí podrías agregar lógica adicional, como filtrar por fecha
-    // o validar que el paciente existe.
-    return await this.turnoRepository.findByPacienteId(pacienteId);
+    //TODO VALIDACIONES, no se si acá on en el controller, si el paciente existe, etc
+    return await this.turnoRepository.obtenerPorPacienteId(pacienteId);
   }
 }
