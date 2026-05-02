@@ -6,7 +6,9 @@ export {
     sumarMinutosADate, 
     obtenerDisponibilidadesLibres,
     estaEnDisponibilidad,
-    configurarFecha
+    configurarFecha,
+    calcularHoraDesdeMinutos,
+    horarioIncluido
 };
 
 /**
@@ -48,6 +50,26 @@ const horaAMinutos = (horaDecimal) => {
     const minutos = Math.round((horaDecimal - horas) * 100); 
     return (horas * 60) + minutos;
 };
+
+/**
+ * Convierte minutos totales en un formato de hora legible (HH:mm).
+ * Útil para calcular el fin de un turno basado en duracionTurnoEnMins.
+ * * @param {number} minutosTotales - Cantidad de minutos (ej: 135)
+ * @returns {string} - Hora formateada (ej: "02:15")
+ */
+function calcularHoraDesdeMinutos(minutosTotales) {
+    // Calculamos las horas enteras dividiendo por 60
+    const horas = Math.floor(minutosTotales / 60);
+    
+    // Obtenemos los minutos restantes usando el operador módulo (%)
+    const minutosRestantes = minutosTotales % 60;
+
+    // Formateamos para que siempre tengan dos dígitos (ej: "08" en vez de "8")
+    const horasFormateadas = String(horas).padStart(2, '0');
+    const minutosFormateados = String(minutosRestantes).padStart(2, '0');
+
+    return `${horasFormateadas}:${minutosFormateados}`;
+}
 
 // Convierte minutos totales de vuelta a un formato útil o Date
 const sumarMinutosADate = (fechaBase, minutosTotales) => {
@@ -194,4 +216,12 @@ function configurarFecha(turno) {
     proximaFecha.setHours(horas, minutos, 0, 0);
 
     return proximaFecha;
+}
+
+function horarioIncluido(turno1, turno2){
+
+    const minutosTurno1 = horaAMinutos(turno1.hora);
+    const minutosTurno2 = horaAMinutos(turno2.hora);
+
+    return (minutosTurno1 < (minutosTurno2 + turno2.servicio.duracionTurnoEnMins)) && (minutosTurno2 < (minutosTurno1 + turno1.servicio.duracionTurnoEnMins));
 }

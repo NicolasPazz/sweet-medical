@@ -4,6 +4,7 @@ import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
 import { logger } from "../../utils/logger.js";
 
 export class Turno {
+  
   id;
   medico;
   paciente;
@@ -13,11 +14,14 @@ export class Turno {
   estado;
   historialEstados;
   costo;
+  diaSemana;
+  hora;
 
-  constructor(medico, paciente, fechaHora, sede, servicio, costo) {
+  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo) {
     this.medico = medico;
     this.paciente = paciente;
-    this.fechaHora = fechaHora;
+    this.diaSemana = diaSemana;
+    this.hora = hora;
     this.sede = sede;
     this.servicio = servicio.costo ? servicio : null;
     this.estado = new Disponible();
