@@ -16,3 +16,9 @@ router.route('/medico/cancelacion')
 
 router.route("/paciente/historial")
         .get((req, res) => turnoController.obtenerHistorial(req, res));
+
+router.route("/realizado")
+        .patch((req, res) => turnoController.finalizarTurno(req, res));
+
+router.route("/disponibilidad")
+        .get((req, res) => turnoController.obtenerDisponibilidad(req, res));

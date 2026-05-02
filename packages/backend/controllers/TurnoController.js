@@ -101,7 +101,7 @@ export class TurnoController{
             const idUsuarioNum = Number(idUsuario);
 
             if(!Number.isFinite(idPacienteNum) || !Number.isFinite(idUsuarioNum)){
-                throw new BadRequestError("id_usuario y/o id_turno debe/n ser un número válido");
+                throw new BadRequestError("idPaciente y/o idUsuario debe/n ser un número válido");
             }
             
             const respuesta = await this.turnoService.obtenerHistorial(idPacienteNum, idUsuarioNum);
@@ -116,6 +116,72 @@ export class TurnoController{
             error: error.message || "Error interno del servidor"
         });
     } 
+
+    }
+
+    finalizarTurno = async(req, res) => {
+        try{
+
+            const id_usuario = req.params.id_usuario;
+            const id_turno = req.params.id_turno;
+
+            if (id_usuario === undefined || id_turno === undefined) {
+                throw new BadRequestError("Parámetros incorrectos: id_usuario / id_turno es requerido");
+            }
+
+            const idUsuarioNum = Number(id_usuario);
+            const idTurnoNum = Number(id_turno);
+
+            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idTurnoNum)){
+                throw new BadRequestError("id_usuario y/o id_turno debe/n ser un número válido");
+            }
+
+            const respuesta = await this.turnoService.finalizarTurno(idUsuarioNum, idTurnoNum);
+
+            return res.status(respuesta.status || 200).json(respuesta.data || {});
+        }
+        catch(error){
+            logger.error(error);
+            
+            return res.status(error.statusCode || 400).json({
+            error: error.message || "Error interno del servidor"
+        });
+        }
+
+
+
+    }
+
+    obtenerDisponibilidad = async(req, res) => {
+
+        try{
+
+            const id_usuario = req.params.id_usuario;
+            const id_servicio = req.params.id_servicio;
+
+            if (id_usuario === undefined || id_servicio === undefined) {
+                throw new BadRequestError("Parámetros incorrectos: id_usuario / id_servicio es requerido");
+            }
+
+            const idUsuarioNum = Number(id_usuario);
+            const idServicioNum = Number(id_servicio);
+
+            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idServicioNum)){
+                throw new BadRequestError("id_usuario y/o id_servicio debe/n ser un número válido");
+            }
+
+            const respuesta = await this.turnoService.obtenerDisponibilidad(idUsuarioNum, idServicioNum);
+
+            return res.status(respuesta.status || 200).json(respuesta.data || {});
+        }
+        catch(error){
+            logger.error(error);
+            
+            return res.status(error.statusCode || 400).json({
+            error: error.message || "Error interno del servidor"
+        });
+        }
+
 
     }
 
