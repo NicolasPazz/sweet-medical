@@ -24,16 +24,19 @@ export class TurnoBusquedaService {
     let resultadosDomain = [];
     let totalItems = 0;
 
-    // Estrategia híbrida
+    // ESTRATEGIA HÍBRIDA
     if (sortBy !== 'costo') {
-      // Orden por fecha u otro campo persistente, delegar totalmente a DB
+      // CASO A: Orden normal (fecha, médico). 
+      // Delegamos a la DB (Repository) porque es mucho más rápido y eficiente.
       const queryResult = await this.repository.buscar(spec, { sortBy, sortOrder }, { page, limit });
       resultadosDomain = queryResult.data;
       totalItems = queryResult.total;
     } else {
-      // Orden por costo, no podemos delegar a DB porque el costo se calcula en memoria per-paciente.
-      // Traemos TODO lo que cumple el filtro. Cuidado con límites de sistema real.
-      logger.info('Ordenamiento por costo interactuando con MotorCostos. Traemos todas las coincidencias previo a la paginación.');
+      // CASO B: Orden por COSTO.
+      // ¡Problema! MongoDB no sabe cuánto le sale el turno a "Juan" vs "Pedro" (depende de su obra social).
+      // El costo se calcula por código, no está en la tabla.
+      
+      // Traemos todos los turnos disponibles (hasta un tope de 500 para no saturar la memoria).
       const allMatches = await this.repository.buscar(spec, null, null); 
       
       if (allMatches.total > MAX_RESULTADOS_COSTO) {
@@ -44,11 +47,10 @@ export class TurnoBusquedaService {
       totalItems = allMatches.total;
     }
 
-    // Calcular costos para la página actual o todos (si hay que ordenar por costo)
+    // MAPEO Y CÁLCULO DE COSTOS
+    // Convertimos los modelos de DB a DTOs usando el Mapper.
     const dtosMapeados = resultadosDomain.map(turno => {
-      if (!turno.practica && !turno.especialidad) {
-        throw new Error('Inconsistencia: turno sin prestación');
-      }
+      // Calculamos el costo "en el aire" usando el Motor de Costos.
       const calculoCosto = this.motorCostos.calcularPara(turno, paciente);
       return TurnoMapper.toResponseDTO(turno, calculoCosto);
     });

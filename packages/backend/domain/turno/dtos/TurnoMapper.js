@@ -19,7 +19,7 @@ export class TurnoMapper {
       practica: turno.practica?.nombre || null,
       especialidad: turno.especialidad?.nombre || null,
       estado: turno.estado,
-      cobertura: costoCalculado?.tipoCobertura,
+      cobertura: costoCalculado?.tipoCobertura, //mostrar si está cubierta y cuánto paga el paciente (el costo calculado en tiempo real)
       costoEstimado: costoCalculado?.costoEstimado,
     };
   }
