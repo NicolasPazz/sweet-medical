@@ -2,33 +2,56 @@ import { logger } from "../../utils/logger.js";
 import { Notificacion } from "../Notificacion.js";
 import { Usuario } from "../usuarios/Usuario.js";
 import { Turno } from "../../turno/Turno.js";
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 
 export class Cancelado {
   id;
   constructor(turno) {
     this.turno = turno;
   }
+
   notificar(remitente) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
-    // Ante cancelaciones de turnos, se notifica a la contraparte correspondiente.
-    if (actor && actor.id === this.turno.paciente.usuario.id) {
+    
+    // Verificamos si quien canceló fue el paciente
+    const esCanceladoPorPaciente = actor && actor.id === this.turno.paciente.usuario.id;
+
+    if (esCanceladoPorPaciente) {
       logger.debug(
-        `Creando notificación para turno ${this.turno.id} en estado CANCELADO por paciente ${this.turno.paciente.nombre} para servicio ${servicio}.`
+        tLog('LOG_CANCELACION_PACIENTE', { 
+          id: this.turno.id, 
+          nombre: this.turno.paciente.nombre, 
+          servicio 
+        })
       );
+
       return new Notificacion(
         this.turno.medico.usuario,
         remitente,
-        `El paciente ${this.turno.paciente.nombre} ha cancelado su turno para ${servicio}.`
+        tNegocio('CANCELACION_A_MEDICO', { 
+          nombre: this.turno.paciente.nombre, 
+          servicio 
+        })
       );
+
     } else {
       logger.debug(
-        `Creando notificación para turno ${this.turno.id} en estado CANCELADO por profesional ${this.turno.medico.nombre} para servicio ${servicio}.`
+        tLog('LOG_CANCELACION_PROFESIONAL', { 
+          id: this.turno.id, 
+          nombre: this.turno.medico.nombre, 
+          servicio 
+        })
       );
+
       return new Notificacion(
         this.turno.paciente.usuario,
         remitente,
-        `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} en ${this.turno.sede.nombre} para ${servicio}.`
+        tNegocio('CANCELACION_A_PACIENTE', { 
+          fecha: this.turno.fechaHora.toLocaleDateString(), 
+          sede: this.turno.sede.nombre, 
+          servicio 
+        })
       );
     }
   }

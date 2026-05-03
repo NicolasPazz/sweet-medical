@@ -1,4 +1,5 @@
 import { logger } from "../../utils/logger.js";
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 
 export class ObraSocial {
   id;
@@ -12,7 +13,7 @@ export class ObraSocial {
 
   agregarPlan(plan) {
     this.planes.push(plan);
-    logger.debug(i18n.t('LOG_PLAN_AGREGADO', { 
+    logger.debug(tLog('LOG_PLAN_AGREGADO', { 
     plan: plan.nombre, 
     obraSocial: this.nombre 
 }));

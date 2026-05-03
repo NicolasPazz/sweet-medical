@@ -1,5 +1,6 @@
 import { logger } from "../../utils/logger.js";
-import { Notificacion } from "..Notificacion.js";
+import { Notificacion } from "../Notificacion.js";
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Disponible {
   id;
@@ -8,10 +9,14 @@ export class Disponible {
   }
 
   notificar(_remitente) {
-    // Si el estado es DISPONIBLE o REALIZADO, no hay notificación
+    // Se generará en el idioma configurado en IDIOMA_PARA_LOGS
     logger.debug(
-      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado}.`
+      tLog('LOG_SIN_NOTIFICACION', { 
+        id: this.turno.id, 
+        estado: this.turno.estado 
+      })
     );
+    
     return null;
   }
 }

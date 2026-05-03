@@ -1,6 +1,7 @@
 import { logger } from "../../utils/logger.js";
 import { Agenda } from "../agenda/Agenda.js";
 import { GeneradorDisponibilidad } from "../agenda/GeneradorDisponibilidad.js";
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Medico {
   id;
@@ -26,12 +27,23 @@ export class Medico {
 
   definirDisponibilidad(disponibilidad) {
     GeneradorDisponibilidad.actualizarDisponibilidad(disponibilidad, this.disponibilidades);
-    logger.debug(`Disponibilidad definida para el médico ${this.nombre} el día 
-      ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`);
+    
+    logger.debug(
+      tLog('LOG_DISPONIBILIDAD_DEFINIDA', {
+        nombre: this.nombre,
+        dia: disponibilidad.dia,
+        inicio: disponibilidad.horaInicio,
+        fin: disponibilidad.horaFin
+      })
+    );
   }
 
-  refrescarTurnos(){
+  refrescarTurnos() {
+    logger.debug(
+      tLog('LOG_REFRESCANDO_TURNOS', { 
+        medico: this.nombre 
+      })
+    );
     this.turnosActualesYFuturos = Agenda.refrescarTurnosSegunDisponibilidadDe(this);
   }
-
 }

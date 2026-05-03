@@ -2,6 +2,7 @@ import { EstadoTurno } from "../turno/EstadoTurno.js";
 import { Notificacion } from "./Notificacion.js";
 import { Usuario } from "../usuarios/Usuario.js";
 import { logger } from "../../utils/logger.js";
+import { tNegocio } from "../../utils/i18n/i18n.js";
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(turno) {
@@ -15,12 +16,16 @@ export class FactoryNotificacion {
       new Notificacion(
         turno.medico.usuario,
         remitente,
-        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`
+        tNegocio('RECORDATORIO_MEDICO', { 
+          nombre: turno.paciente.nombre 
+        })
       ),
       new Notificacion(
         turno.paciente.usuario,
         remitente,
-        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`
+        tNegocio('RECORDATORIO_PACIENTE', { 
+          nombre: turno.medico.nombre 
+        })
       ),
     ];
   }

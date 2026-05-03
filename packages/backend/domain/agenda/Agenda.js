@@ -2,15 +2,12 @@ import { logger } from "../../utils/logger.js";
 import { Turno } from "../backend/domain/turno/Turno.js";
 import { horaAMinutos, estaEnDisponibilidad, obtenerDisponibilidadesLibres, calcularHoraDesdeMinutos, horarioIncluido} from '../utils/functions.js';
 import { Disponible } from './notificacion/estado-turno/Reservado.js';
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 
 export class Agenda {
   generarTurno(servicio, medico, disponibilidadesLibres) {
     
-    logger.debug(i18n.t('LOG_GENERANDO_TURNOS', { 
-    servicio: servicio.nombre, 
-    medico: medico 
-}));
-
+    logger.debug(tLog('LOG_GENERANDO_TURNOS', { servicio: servicio.nombre, medico }));
     const turnos = [];
 
     const offset = servicio.duracionTurnoEnMins;
@@ -37,7 +34,7 @@ export class Agenda {
   //Genera todos los turnos segun la disponibilidad actual de un medico
   refrescarTurnosSegunDisponibilidadDe(medico) {
     // TODO
-    logger.debug(i18n.t('LOG_REFRESCANDO_TURNOS', { 
+    logger.debug(tLog('LOG_REFRESCANDO_TURNOS', { 
     medico: medico 
 }));
 

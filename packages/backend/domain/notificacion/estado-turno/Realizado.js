@@ -1,5 +1,6 @@
 import { logger } from "../../utils/logger.js";
-import { Notificacion } from "../Notificacion";
+import { Notificacion } from "../Notificacion.js";
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Realizado {
   id;
@@ -7,9 +8,11 @@ export class Realizado {
     this.turno = turno;
   }
   notificar(_remitente) {
-    // Si el estado es DISPONIBLE o REALIZADO, no hay notificación
     logger.debug(
-      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado}.`
+      tLog('LOG_SIN_NOTIFICACION', { 
+        id: this.turno.id, 
+        estado: this.turno.estado 
+      })
     );
     return null;
   }

@@ -1,4 +1,5 @@
 import { logger } from "../../utils/logger.js";
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 
 export class Plan {
   id;
@@ -17,15 +18,20 @@ export class Plan {
       (c) => c.especialidad.id === especialidad.id
     );
     logger.debug(
-      `Nivel Cobertura encontrada para la especialidad ${especialidad.nombre}:`,
-      cobertura?.nivel
+      tLog('LOG_COBERTURA_ENCONTRADA', { 
+        especialidad: especialidad.nombre, 
+        nivel: cobertura?.nivel 
+      })
     );
     return cobertura?.nivel;
   }
 
   obtenerCoberturaPorPractica(practica) {
     const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
-    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura?.nivel);
+    logger.debug(tLog('LOG_COBERTURA_ENCONTRADA', { 
+      practica: practica.nombre, 
+      nivel: cobertura?.nivel 
+    }));
     return cobertura?.nivel;
   }
 }

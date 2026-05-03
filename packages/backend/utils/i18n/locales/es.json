@@ -1,6 +1,0 @@
-{
-  "LOG_GENERANDO_TURNOS": "Generando turnos para especialidad {{servicio}} y médico {{medico}}",
-  "LOG_REFRESCANDO_TURNOS": "Refrescando turnos para médico {{medico}}",
-  "LOG_PLAN_AGREGADO": "Plan {{plan}} agregado a obra social {{obraSocial}}",
-  "CONFIRMACION_TURNO": "Hola {{paciente}}, tu turno con el Dr/a {{medico}} para {{especialidad}} ha sido confirmado para el día {{fecha}}."
-}

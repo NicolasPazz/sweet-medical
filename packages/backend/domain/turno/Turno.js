@@ -2,6 +2,7 @@ import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
 import { Disponible } from "./notificacion/estado-turno/Disponible.js";
 import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
 import { logger } from "../../utils/logger.js";
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Turno {
   
@@ -33,8 +34,14 @@ export class Turno {
     const nuevoCambio = new CambioEstadoTurno(nuevoEstado, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
+
     logger.debug(
-      `Turno ${this.id} actualizado a estado ${nuevoEstado} por ${quien.nombre} con motivo: ${motivo}`
+      tLog('LOG_TURNO_ACTUALIZADO', {
+        id: this.id,
+        estado: nuevoEstado.constructor.name,
+        quien: quien.nombre,
+        motivo: motivo || 'N/A'
+      })
     );
 
     // Esta funcion debe devolver void, esto se hará en un service mas adelante
@@ -48,7 +55,9 @@ export class Turno {
 
   obtenerUltimoActor() {
     if (this.historialEstados.length === 0) {
-      logger.warn(`Turno ${this.id} no tiene historial de estados para obtener el último actor.`);
+      logger.warn(
+        tLog('LOG_TURNO_SIN_HISTORIAL', { id: this.id })
+      );
       return null;
     }
     return this.historialEstados[this.historialEstados.length - 1].usuario;

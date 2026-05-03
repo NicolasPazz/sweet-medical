@@ -1,0 +1,9 @@
+{
+  "CONFIRMACION_TURNO": "Hola {{paciente}}, tu turno con el Dr/a {{medico}} para {{especialidad}} ha sido confirmado para el día {{fecha}}.",
+  "CONFIRMACION_TURNO_DETALLADA": "Su turno para {{servicio}} el día {{fecha}} en {{sede}} con el Dr/a. {{medico}} ha sido confirmado.",
+  "RECORDATORIO_MEDICO": "Recordatorio: Mañana tiene un turno con {{nombre}}.",
+  "RECORDATORIO_PACIENTE": "Recordatorio: Mañana es su turno con el Dr/a. {{nombre}}.",
+  "CANCELACION_A_MEDICO": "El paciente {{nombre}} ha cancelado su turno para {{servicio}}.",
+  "CANCELACION_A_PACIENTE": "El profesional ha cancelado su turno del día {{fecha}} en {{sede}} para {{servicio}}.",
+  "RESERVA_A_MEDICO": "Nuevo turno reservado por paciente {{nombre}} para {{servicio}}."
+}
