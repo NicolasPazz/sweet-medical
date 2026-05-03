@@ -1,0 +1,6 @@
+{
+  "LOG_GENERANDO_TURNOS": "Generating appointments for specialty {{servicio}} and doctor {{medico}}",
+  "LOG_REFRESCANDO_TURNOS": "Refreshing appointments for doctor {{medico}}",
+  "LOG_PLAN_AGREGADO": "Plan {{plan}} added to health insurance {{obraSocial}}",
+  "CONFIRMACION_TURNO": "Hello {{paciente}}, your appointment with Dr. {{medico}} for {{especialidad}} has been confirmed for {{fecha}}."
+}

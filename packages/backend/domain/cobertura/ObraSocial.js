@@ -12,6 +12,9 @@ export class ObraSocial {
 
   agregarPlan(plan) {
     this.planes.push(plan);
-    logger.debug(`Plan ${plan.nombre} agregado a obra social ${this.nombre}`);
+    logger.debug(i18n.t('LOG_PLAN_AGREGADO', { 
+    plan: plan.nombre, 
+    obraSocial: this.nombre 
+}));
   }
 }

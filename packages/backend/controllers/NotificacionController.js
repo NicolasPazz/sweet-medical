@@ -54,7 +54,7 @@ export class NotificacionController {
         data: resultado,
       });
     } catch (error) {
-      logger.error("SOY EL ERROR: " + error);
+      logger.error(error);
     }
   };
 

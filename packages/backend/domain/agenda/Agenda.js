@@ -6,7 +6,10 @@ import { Disponible } from './notificacion/estado-turno/Reservado.js';
 export class Agenda {
   generarTurno(servicio, medico, disponibilidadesLibres) {
     
-    logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico}`);
+    logger.debug(i18n.t('LOG_GENERANDO_TURNOS', { 
+    servicio: servicio.nombre, 
+    medico: medico 
+}));
 
     const turnos = [];
 
@@ -34,7 +37,9 @@ export class Agenda {
   //Genera todos los turnos segun la disponibilidad actual de un medico
   refrescarTurnosSegunDisponibilidadDe(medico) {
     // TODO
-    logger.debug(`Refrescando turnos para médico ${medico}`);
+    logger.debug(i18n.t('LOG_REFRESCANDO_TURNOS', { 
+    medico: medico 
+}));
 
     this.eliminarTurnosDesactualizados(medico);
     
