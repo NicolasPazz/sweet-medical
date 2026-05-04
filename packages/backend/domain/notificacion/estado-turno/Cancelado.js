@@ -1,7 +1,5 @@
 import { logger } from "../../utils/logger.js";
 import { Notificacion } from "../Notificacion.js";
-import { Usuario } from "../usuarios/Usuario.js";
-import { Turno } from "../../turno/Turno.js";
 
 export class Cancelado {
   id;

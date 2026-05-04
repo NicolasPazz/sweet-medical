@@ -1,6 +1,7 @@
 import { TurnoRepository } from "../repositories/TurnoRepository.js";
 import { UsuarioRepository } from "../repositories/UsuarioRepository.js";
 import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
+import { MedicoRepository } from "../repositories/MedicoRepository.js";
 import { Paciente } from "../domain/usuario/Paciente.js";
 import { Medico } from "../domain/usuario/Medico.js";
 import { Reservado } from "../domain/notificacion/estado-turno/Reservado.js";
@@ -15,10 +16,11 @@ export class TurnoService {
     turnoRepository;
     pacienteRepository;
 
-    constructor({ turnoRepository = new TurnoRepository() } = {}, { notificacionRepository = new NotificacionRepository() } = {}, { usuarioRepository = new UsuarioRepository() } = {}) {
+    constructor({ turnoRepository = new TurnoRepository() } = {}, { notificacionRepository = new NotificacionRepository() } = {}, { usuarioRepository = new UsuarioRepository() } = {}, { medicoRepository = new MedicoRepository() } = {}) {
         this.turnoRepository = turnoRepository;
         this.usuarioRepository = usuarioRepository;
         this.notificacionRepository = notificacionRepository;
+        this.medicoRepository = medicoRepository;
     }
 
     reservarTurno(id_usuario, id_turno) {
@@ -201,6 +203,7 @@ export class TurnoService {
         try {
             // 1. Obtener todos los médicos (si el volumen es masivo, aquí usaríamos paginación)
             const medicos = await this.medicoRepository.findAll();
+
             metricas.total = medicos?.length || 0;
 
             if (metricas.total === 0) {

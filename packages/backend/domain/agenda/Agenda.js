@@ -1,7 +1,7 @@
-import { logger } from "../../utils/logger.js";
-import { Turno } from "../backend/domain/turno/Turno.js";
+import { logger } from "../utils/logger.js";
+import { Turno } from "../turno/Turno.js";
 import { horaAMinutos, estaEnDisponibilidad, obtenerDisponibilidadesLibres, calcularHoraDesdeMinutos, horarioIncluido} from '../utils/functions.js';
-import { Disponible } from './notificacion/estado-turno/Reservado.js';
+import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 
 export class Agenda {
   generarTurno(servicio, medico, disponibilidadesLibres) {

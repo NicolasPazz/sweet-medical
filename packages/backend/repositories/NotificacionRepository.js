@@ -10,7 +10,7 @@ export class NotificacionRepository {
     return this.notificaciones[id] ?? null;
   }
 
-  guardar(notificacion) {
+  save(notificacion) {
     const id = notificacion.id ?? this.nextId++;
     notificacion.id = id;
     this.notificaciones[id] = notificacion;

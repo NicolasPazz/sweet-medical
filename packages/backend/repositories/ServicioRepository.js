@@ -7,7 +7,7 @@ export class ServicioRepository {
   }
 
   // eslint-disable-next-line no-unused-vars
-  guardar(servicio, _tipoServicio) {
+  save(servicio, _tipoServicio) {
     const id = this.nextId++;
     servicio.id = id;
     this.servicios[id] = servicio;
@@ -15,7 +15,7 @@ export class ServicioRepository {
     return servicio;
   }
 
-  obtenerPorId(id) {
+  findById(id) {
     return this.servicios[id];
   }
 

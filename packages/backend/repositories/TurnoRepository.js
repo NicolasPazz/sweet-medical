@@ -1,4 +1,3 @@
-import { Turno } from "../domain/Turno.js";
 
 export class TurnoRepository {
   constructor() {
@@ -6,7 +5,7 @@ export class TurnoRepository {
     this.nextId = 1;
   }
 
-  async guardar(turno) {
+  async save(turno) {
     const id = this.nextId++;
     turno.id = id;
     this.turnos[id] = turno;

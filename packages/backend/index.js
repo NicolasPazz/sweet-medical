@@ -34,4 +34,6 @@ app.listen(PORT, () => {
   console.log(`Backend de Sweet Medical escuchando en puerto ${PORT}`);
 });
 
+
+
 export default app;
