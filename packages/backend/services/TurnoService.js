@@ -44,15 +44,13 @@ export class TurnoService {
             return { status: 404, data: "Paciente no encontrado" };
         }
 
-        const turno = this.turnoRepository.findById(id_turno);
+        const turno = await this.turnoRepository.findById(id_turno);
 
         if (turno == null) {
             return { status: 404, data: "Turno no encontrado" };
         }
 
-        if (!(turno.paciente == paciente)) {
-            return { status: 409, data: "El paciente no tiene el turno asignado" };
-        }
+        console.log(turno.estado);
 
         if (!(turno.estado instanceof Disponible)) {
             return { status: 409, data: "Turno en estado no disponible" };
@@ -60,9 +58,11 @@ export class TurnoService {
 
         turno.paciente = paciente;
 
-        turno.fechaHora = Agenda.generarFechaHora(turno.fechaHora);
+        const turnosReservados = this.turnoRepository.findAllByMedicId(turno.medico.id).filter(t => t.estado instanceof Reservado);
 
-        const notificacion = turno.actualizarEstado(new Reservado, paciente, "Reserva de turno");
+        turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
+
+        const notificacion = turno.actualizarEstado(new Reservado(turno), usuario, "Reserva de turno");
 
         this.notificacionRepository.save(notificacion);
         this.turnoRepository.save(turno);
@@ -70,18 +70,22 @@ export class TurnoService {
         return { status: 201 };
     }
 
-    cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
-        const usuario = this.usuarioRepository.findById(id_usuario);
+    async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
+        const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
             return { status: 404, data: "Usuario no encontrado" };
         }
 
-        const turno = this.turnoRepository.findById(id_turno);
+        const turno = await this.turnoRepository.findById(id_turno);
+
+        console.log(turno);
 
         if (turno == null) {
             return { status: 404, data: "Turno no encontrado" };
         }
+
+        console.log("estado:" + turno.estado.constructor.name);
 
         if (!(turno.estado instanceof Reservado)) {
             return { status: 409, data: "No se puede cancelar el turno en este estado" };
@@ -117,7 +121,9 @@ export class TurnoService {
             return { status: 409, data: "Un turno no puede cancelarse con menos de 1 hora de antelación" };
         }
 
-        const notificacion = turno.actualizarEstado(new Cancelado(), usuario, motivo);
+        console.log(turno.usuario);
+
+        const notificacion = turno.actualizarEstado(new Cancelado(turno), usuario, motivo);
 
         this.notificacionRepository.save(notificacion);
         this.turnoRepository.save(turno);
@@ -175,7 +181,7 @@ export class TurnoService {
             throw new ConflictError("El turno ya esta realizado");
         }
 
-        turno.actualizarEstado(new Realizado(), usuario, "Turno finalizado");
+        turno.actualizarEstado(new Realizado(turno), usuario, "Turno finalizado");
 
         this.turnoRepository.save(turno);
 

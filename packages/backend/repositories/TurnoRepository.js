@@ -12,8 +12,13 @@ export class TurnoRepository {
     return turno;
   }
 
-  async obtenerPorId(id) {
+  async findById(id) {
     return this.turnos[id];
+  }
+  findAllByMedicId(medicId){
+    return Object.values(this.turnos).filter(
+      (turno) => turno.medico && turno.medico.id === medicId
+    );
   }
 
   async obtenerPorPacienteId(pacienteId) {

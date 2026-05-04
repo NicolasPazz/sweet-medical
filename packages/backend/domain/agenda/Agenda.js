@@ -86,7 +86,7 @@ export class Agenda {
   }
 }
 
-  generarFechaHora(turnosReservados, turnoActual){
+  static generarFechaHora(turnosReservados, turnoActual){
 
     let fechaCandidata = this.configurarFechaCercana(turnoActual.diaSemana, turnoActual.hora);
 
@@ -120,11 +120,14 @@ export class Agenda {
  * Genera la fecha y hora más cercana hacia el futuro para un turno,
  * basándose en el día de la semana y la hora de inicio.
  */
-  configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
+  static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
+    // 1. Validación de entrada (Fundamental para el Médico 17)
+    if (!diaSemanaDeseado || !horaInicioStr) {
+        console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
+        return new Date(); // Retornamos hoy para evitar el undefined.getTime()
+    }
+
     const hoy = new Date();
-    const resultado = new Date(hoy);
-    
-    // Mapeo de días (0=Domingo, 1=Lunes, ..., 6=Sábado)
     const dias = {
         "DOMINGO": 0, "LUNES": 1, "MARTES": 2, 
         "MIERCOLES": 3, "JUEVES": 4, "VIERNES": 5, "SABADO": 6
@@ -133,15 +136,18 @@ export class Agenda {
     const objetivo = dias[diaSemanaDeseado.toUpperCase()];
     const diaActual = hoy.getDay();
 
-    // Calcular cuántos días faltan para el próximo día deseado
+    // 2. Si el día no existe en el mapa, evitamos el NaN
+    if (objetivo === undefined) return hoy;
+
     let diferencia = objetivo - diaActual;
     if (diferencia <= 0) {
-        diferencia += 7; // Si ya pasó o es hoy, saltamos a la semana que viene
+        diferencia += 7; 
     }
 
+    // 3. Crear el nuevo objeto sin mutar el original
+    const resultado = new Date(hoy.getTime());
     resultado.setDate(hoy.getDate() + diferencia);
 
-    // Configurar la hora y minutos (ej: "08:30")
     const [horas, minutos] = horaInicioStr.split(':').map(Number);
     resultado.setHours(horas, minutos, 0, 0);
 

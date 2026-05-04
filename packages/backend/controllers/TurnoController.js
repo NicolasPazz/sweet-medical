@@ -33,8 +33,7 @@ export class TurnoController{
 
             const respuesta = await this.turnoService.reservarTurno(idUsuarioNum, idTurnoNum);
 
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-
+            return res.status(respuesta.status || 200).send();
         }
         catch(error){
             logger.error(error);
@@ -45,7 +44,6 @@ export class TurnoController{
         }
 
     }
-
 
     cancelarTurnoPaciente = async (req, res) => {
         return this.cancelarTurno(req, res, false);

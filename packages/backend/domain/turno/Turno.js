@@ -24,7 +24,7 @@ export class Turno {
     this.hora = hora;
     this.sede = sede;
     this.servicio = servicio.costo ? servicio : null;
-    this.estado = new Disponible();
+    this.estado = new Disponible(this);
     this.historialEstados = [];
     this.costo = costo;
   }
@@ -33,17 +33,18 @@ export class Turno {
     const nuevoCambio = new CambioEstadoTurno(nuevoEstado, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
-    logger.debug(
-      `Turno ${this.id} actualizado a estado ${nuevoEstado} por ${quien.nombre} con motivo: ${motivo}`
-    );
 
+    logger.debug(
+    `Turno ${this.id} actualizado a estado ${nuevoEstado.constructor.name} por ${quien.nombreUsuario} con motivo: ${motivo}`
+    );
+    
     // Esta funcion debe devolver void, esto se hará en un service mas adelante
     const notificacion = FactoryNotificacion.crearSegunEstadoTurno(this);
     return notificacion;
   }
 
   obtenerNombreServicio() {
-    return this.practica ? this.practica.nombre : this.especialidad.nombre;
+    return this.servicio ? this.servicio.nombre : null;
   }
 
   obtenerUltimoActor() {
