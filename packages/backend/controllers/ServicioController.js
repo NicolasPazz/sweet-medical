@@ -10,7 +10,7 @@ export class ServicioController {
   agregar = async (req, res) => {
     try {
       const datosServicio = this.extraerYValidarBodyServicio(req.body);
-      const servicioAgregado = this.servicioService.agregar(datosServicio);
+      const servicioAgregado = await this.servicioService.agregar(datosServicio);
       return res.status(201).json({ status: "success", data: servicioAgregado });
     } catch (error) {
       logger.error(error);
@@ -21,7 +21,7 @@ export class ServicioController {
     try {
       const { id } = req.params;
       const datosActualizados = this.extraerYValidarBodyServicio(req.body);
-      const servicioModificado = this.servicioService.modificar(id, datosActualizados);
+      const servicioModificado = await this.servicioService.modificar(id, datosActualizados);
       return res.status(200).json({ status: "success", data: servicioModificado });
     } catch (error) {
       logger.error(error);
@@ -31,7 +31,7 @@ export class ServicioController {
   eliminar = async (req, res) => {
     try {
       const { id } = req.params;
-      this.servicioService.eliminar(id);
+      await this.servicioService.eliminar(id);
       return res.status(200).send();
     } catch (error) {
       logger.error(error);
