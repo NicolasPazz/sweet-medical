@@ -18,12 +18,12 @@ export class NotificacionService {
     return this.notificacionRepository.marcarComoLeida(id);
   }
 
-  guardar(datosNotificacion) {
+  save(datosNotificacion) {
     const notificacion = new Notificacion(
       datosNotificacion.destinatario,
       datosNotificacion.remitente,
       datosNotificacion.mensaje
     );
-    return this.notificacionRepository.guardar(notificacion);
+    return this.notificacionRepository.save(notificacion);
   }
 }

@@ -9,7 +9,7 @@ export class NotificacionController {
   obtenerLeidas = async (req, res) => {
     try {
       const idUsuario = Number(req.params.idUsuario);
-      const resultado = this.notificacionService.obtenerLeidas(idUsuario);
+      const resultado = await this.notificacionService.obtenerLeidas(idUsuario);
       return res.status(200).json({
         status: "success",
         data: resultado,
@@ -22,7 +22,7 @@ export class NotificacionController {
   obtenerNoLeidas = async (req, res) => {
     try {
       const idUsuario = Number(req.params.idUsuario);
-      const resultado = this.notificacionService.obtenerNoLeidas(idUsuario);
+      const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);
       return res.status(200).json({
         status: "success",
         data: resultado,
@@ -35,7 +35,7 @@ export class NotificacionController {
   marcarComoLeida = async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const resultado = this.notificacionService.marcarComoLeida(id);
+      const resultado = await this.notificacionService.marcarComoLeida(id);
       return res.status(200).json({
         status: "success",
         data: resultado,
@@ -45,10 +45,10 @@ export class NotificacionController {
     }
   };
 
-  guardar = async (req, res) => {
+  save = async (req, res) => {
     try {
       const datosNotificacion = this.extraerYValidarBodyNotificacion(req.body);
-      const resultado = this.notificacionService.guardar(datosNotificacion);
+      const resultado = await this.notificacionService.save(datosNotificacion);
       return res.status(201).json({
         status: "created",
         data: resultado,

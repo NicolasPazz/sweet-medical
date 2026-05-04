@@ -16,6 +16,6 @@ router
 // En un futuro cuando haya login se va a chequear que el único usuario que pueda leer la notificación sea el destinatario
 router.route("/:id").patch((req, res) => notificacionController.marcarComoLeida(req, res));
 
-router.route("/").post((req, res) => notificacionController.guardar(req, res));
+router.route("/").post((req, res) => notificacionController.save(req, res));
 
 export default router;
