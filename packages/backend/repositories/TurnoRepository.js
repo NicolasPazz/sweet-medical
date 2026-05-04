@@ -43,3 +43,5 @@ export class TurnoRepository {
     return false;
   }
 }
+
+export const turnoRepository = new TurnoRepository();

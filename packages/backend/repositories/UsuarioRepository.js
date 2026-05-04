@@ -6,25 +6,26 @@ export class UsuarioRepository {
   }
 
   async save(usuario) {
-    const id = this.nextId++;
-    usuario.id = id;
-    this.usuarios[id] = usuario;
+    if (!usuario.id) {
+      usuario.id = this.nextId++;
+    }
+    this.usuarios[usuario.id] = usuario;
     return usuario;
   }
 
   async findById(id) {
-    return this.usuario[id];
+    return this.usuarios[id];
   }
 
   async modificar(id, datosActualizados) {
-    const usuario = await this.obtenerPorId(id);
+    const usuario = await this.findById(id);
     if (usuario) {
       Object.assign(usuario, datosActualizados);
     }
     return usuario;
   }
 
-  async obtenerTodos() {
+  async findAll() {
     return Object.values(this.usuarios);
   }
 
@@ -36,3 +37,5 @@ export class UsuarioRepository {
     return false;
   }
 }
+
+export const usuarioRepository = new UsuarioRepository();

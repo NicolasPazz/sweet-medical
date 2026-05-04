@@ -45,9 +45,13 @@ const crearFechaDesdeAtributos = (diaString, minutosTotales) => {
 };
 
 // Convierte un horario (ej: 8.5 para 8:30) a minutos totales (510)
-const horaAMinutos = (horaDecimal) => {
-    const horas = Math.floor(horaDecimal);
-    const minutos = Math.round((horaDecimal - horas) * 100); 
+const horaAMinutos = (horaString) => {
+    // Dividimos el string en dos partes: horas y minutos
+    const [horas, minutos] = horaString.split(':').map(Number);
+    
+    // Validamos que sean números válidos (opcional pero recomendado)
+    if (isNaN(horas) || isNaN(minutos)) return 0;
+
     return (horas * 60) + minutos;
 };
 

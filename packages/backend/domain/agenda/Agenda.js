@@ -6,7 +6,7 @@ import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 export class Agenda {
   generarTurno(servicio, medico, disponibilidadesLibres) {
     
-    logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico}`);
+    logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico.nombre}`);
 
     const turnos = [];
 
@@ -14,12 +14,20 @@ export class Agenda {
 
     for(const disponibilidad of disponibilidadesLibres){
 
+      console.log("Hola");
+
       let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
       const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
+
+      console.log("actualMinutos: " + actualMinutos);
+      console.log("offset: " + offset);
+      console.log("tiempoLimite: " + tiempoLimite);
 
       while(actualMinutos + offset <= tiempoLimite){
 
       const turno = new Turno(medico, null, disponibilidad.diaSemana, calcularHoraDesdeMinutos(actualMinutos), null, servicio, servicio.costo);
+
+      console.log("Turno generado:", turno);
 
       turnos.push(turno);
 
@@ -34,7 +42,7 @@ export class Agenda {
   //Genera todos los turnos segun la disponibilidad actual de un medico
   refrescarTurnosSegunDisponibilidadDe(medico) {
     // TODO
-    logger.debug(`Refrescando turnos para médico ${medico}`);
+    logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
 
     this.eliminarTurnosDesactualizados(medico);
     

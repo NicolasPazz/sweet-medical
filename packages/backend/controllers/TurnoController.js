@@ -19,7 +19,7 @@ export class TurnoController{
         try {
             
             const { id_usuario, id_turno } = req.params;
-
+            
             if (id_usuario === undefined || id_turno === undefined) {
             throw new BadRequestError("Parámetros incorrectos: id_usuario y/o id_turno es requerido");
             }
@@ -59,7 +59,7 @@ export class TurnoController{
 
         try{
 
-            const {id_usuario, id_turno} = req.query;
+            const {id_usuario, id_turno} = req.params;
             const motivo = req.body.motivo;
             if (id_usuario === undefined || id_turno === undefined) {
             throw new BadRequestError("Parámetros incorrectos: id_usuario y/o id_turno es requerido");

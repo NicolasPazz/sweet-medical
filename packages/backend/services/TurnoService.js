@@ -1,7 +1,7 @@
-import { TurnoRepository } from "../repositories/TurnoRepository.js";
-import { UsuarioRepository } from "../repositories/UsuarioRepository.js";
-import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
-import { MedicoRepository } from "../repositories/MedicoRepository.js";
+import { turnoRepository } from "../repositories/TurnoRepository.js";
+import { usuarioRepository } from "../repositories/UsuarioRepository.js";
+import { notificacionRepository } from "../repositories/NotificacionRepository.js";
+import { medicoRepository } from "../repositories/MedicoRepository.js";
 import { Paciente } from "../domain/usuario/Paciente.js";
 import { Medico } from "../domain/usuario/Medico.js";
 import { Reservado } from "../domain/notificacion/estado-turno/Reservado.js";
@@ -16,21 +16,28 @@ export class TurnoService {
     turnoRepository;
     pacienteRepository;
 
-    constructor({ turnoRepository = new TurnoRepository() } = {}, { notificacionRepository = new NotificacionRepository() } = {}, { usuarioRepository = new UsuarioRepository() } = {}, { medicoRepository = new MedicoRepository() } = {}) {
+    constructor() {
         this.turnoRepository = turnoRepository;
         this.usuarioRepository = usuarioRepository;
         this.notificacionRepository = notificacionRepository;
         this.medicoRepository = medicoRepository;
     }
 
-    reservarTurno(id_usuario, id_turno) {
+    async reservarTurno(id_usuario, id_turno) {
 
-        const usuario = this.usuarioRepository.findById(id_usuario); // cambiar por usuarioRepository
+        console.log("id_usuario: " + id_usuario);
+
+        console.log(this.usuarioRepository.findAll());
+
+        const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
             return { status: 404, data: "Usuario no encontrado" };
         }
 
+        console.log("Usuario: " + usuario.name);
+        console.log("ROLES DE MIERCHI: ", usuario.roles);
+        
         const paciente = usuario.roles.find(r => r instanceof Paciente);
 
         if (paciente == null) {
@@ -175,23 +182,50 @@ export class TurnoService {
         return { status: 201 };
     }
 
-    obtenerDisponibilidad(id_usuario, id_servicio) {
+    async obtenerDisponibilidad(id_usuario, id_servicio) {
 
-        const usuario = this.usuarioRepository.findById(id_usuario);
+        console.log("Obteniendo disponibilidad del usuario: " + id_usuario);
+
+        const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
             return { status: 404, data: "Usuario no encontrado" };
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length() == 0) {
+        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
             return { status: 403, data: "No tiene permiso para realizar esta accion, no es medico" };
         }
 
         const medico = usuario.roles.find(r => r instanceof Medico);
 
+        for (const turno of medico.turnosActualesYFuturos) {
+            console.log(turno.servicio.id);
+            console.log(turno.servicio.nombre);
+            console.log(turno.servicio);
+        }
+
+        console.log(medico);
+
         const turnosDelServicio = medico.turnosActualesYFuturos.filter(t => t.servicio.id == id_servicio && t.estado instanceof Disponible);
 
-        return { status: 200, data: turnosDelServicio };
+        const dataParaEnviar = turnosDelServicio.map(t => {
+            return {
+                id: t.id,
+                fechaHora: t.fechaHora,
+                diaSemana: t.diaSemana,
+                hora: t.hora,
+                sede: t.sede,
+                costo: t.costo,
+                // Usamos el nombre de la clase del estado para evitar el objeto complejo
+                estado: t.estado.constructor.name,
+                nombreUsuario: usuario.nombreUsuario,
+                // Si necesitas el servicio, traé solo lo básico
+                servicio: t.servicio ? { id: t.servicio.id, nombre: t.servicio.nombre } : null
+            };
+        });
+
+        console.log(dataParaEnviar);
+        return { status: 200, data: dataParaEnviar };
     }
 
     async refrescarTurnos() {
@@ -219,7 +253,14 @@ export class TurnoService {
                 await Promise.all(loteActual.map(async (medico) => {
                     try {
                         const agenda = new Agenda();
-                        await agenda.refrescarTurnos(medico);
+                        await agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+                        console.log(medico.turnosActualesYFuturos);
+                        this.medicoRepository.save(medico);
+
+                        for(const turno of medico.turnosActualesYFuturos){
+                            this.turnoRepository.save(turno);
+                        }
+
                         metricas.procesados++;
                     } catch (errorMedico) {
                         metricas.fallidos++;

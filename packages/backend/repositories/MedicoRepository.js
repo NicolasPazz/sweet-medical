@@ -39,3 +39,5 @@ export class MedicoRepository {
     return false;
   }
 }
+
+export const medicoRepository = new MedicoRepository();

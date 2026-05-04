@@ -1,18 +1,10 @@
 import express from "express";
 import { MedicoController } from "../controllers/MedicoController.js";
-import { MedicoRepository } from '../repositories/MedicoRepository.js';
-import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
 
 const medicoRouter = express.Router();
 
-const usuarioRepo = new UsuarioRepository();
-const medicoRepo = new MedicoRepository();
-
 // Se las pasamos al controlador
-const medicoController = new MedicoController(
-    { usuarioRepository: usuarioRepo }, 
-    { medicoRepository: medicoRepo }
-);
+const medicoController = new MedicoController();
 
 // El endpoint REST solicitado para el historial
 medicoRouter.route("/datosIniciales")

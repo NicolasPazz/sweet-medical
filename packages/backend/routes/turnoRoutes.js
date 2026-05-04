@@ -5,22 +5,22 @@ const turnoController = new TurnoController();
 
 const turnoRouter = express.Router()
 
-turnoRouter.route('/paciente/reserva')
+turnoRouter.route('/paciente/:id_usuario/reserva/:id_turno')
         .patch((req,res) => turnoController.reservarTurno(req, res));
 
-turnoRouter.route('/paciente/cancelacion')
+turnoRouter.route('/paciente/:id_usuario/cancelacion/:id_turno')
         .patch((req, res) => turnoController.cancelarTurnoPaciente(req, res));
 
-turnoRouter.route('/medico/cancelacion')
+turnoRouter.route('/medico/:id_usuario/cancelacion/:id_turno')
         .patch((req, res) => turnoController.cancelarTurnoMedico(req, res));
 
-turnoRouter.route("/paciente/historial")
+turnoRouter.route("/medico/:id_usuario/historial/:id_paciente")
         .get((req, res) => turnoController.obtenerHistorial(req, res));
 
-turnoRouter.route("/realizado")
+turnoRouter.route("/:id_usuario/realizado/:id_turno")
         .patch((req, res) => turnoController.finalizarTurno(req, res));
 
-turnoRouter.route("/disponibilidad")
+turnoRouter.route("/:id_usuario/disponibilidad/:id_servicio")
         .get((req, res) => turnoController.obtenerDisponibilidad(req, res));
 
 export default turnoRouter;

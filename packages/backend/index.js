@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import router from "./routes/router.js";
+import "../backend/cronjobs/generadorTurnos.js";
 
 const app = express();
 app.use(express.json());

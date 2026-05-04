@@ -31,3 +31,5 @@ export class ServicioRepository {
     return true;
   }
 }
+
+export const servicioRepository = new ServicioRepository();
