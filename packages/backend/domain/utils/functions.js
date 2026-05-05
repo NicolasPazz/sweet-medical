@@ -146,7 +146,7 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
         turnosQueObstruyen.forEach(turno => {
             const tInicio = stringAMinutos(turno.hora);
             // Si el turno no tiene práctica/servicio, asumimos una duración estándar (ej: 30 min)
-            const duracion = turno.practica?.duracion || 30; 
+            const duracion = turno.servicio?.duracionTurnoEnMins; 
             const tFin = tInicio + duracion;
 
             let nuevosFragmentos = [];
@@ -166,6 +166,9 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
             });
             fragmentosLibres = nuevosFragmentos;
         });
+
+        console.log("FRAGMENTOS LIBRES: ");
+        console.log(fragmentosLibres);
 
         // 4. Transformamos los minutos de nuevo a formato horario para devolver
         fragmentosLibres.forEach(f => {

@@ -8,13 +8,16 @@ import { pacienteRepository } from "../repositories/PacienteRepository.js";
 import { DisponibilidadHoraria } from "../domain/agenda/DisponibilidadHoraria.js";
 import { DiaSemana } from "../domain/utils/enum/DiaSemana.js";
 import { Especialidad } from "../domain/servicios/Especialidad.js";
+import { BadRequestError } from "../errors/AppError.js";
+import { MedicoService } from "../services/MedicoService.js";
 
 export class MedicoController {
 
-    constructor() {
+    constructor({medicoService = new MedicoService()} = {}) {
         this.usuarioRepository = usuarioRepository;
         this.medicoRepository = medicoRepository;
         this.pacienteRepository = pacienteRepository;
+        this.medicoService = medicoService;
     }
 
     cargarDatosIniciales = async (req, res) => {
@@ -104,7 +107,7 @@ export class MedicoController {
                 disponibilidades: m.disponibilidades,
                 turnos: m.turnosActualesYFuturos.map(turno => ({
                     id: turno.id,
-                    fecha: turno.fechaHora ? turno.fechaHora: "N/A", // El objeto Date completo [cite: 1145]
+                    fecha: turno.fechaHora ? turno.fechaHora : "N/A", // El objeto Date completo [cite: 1145]
                     medico: turno.medico.nombre,
                     servicio: turno.servicio ? turno.servicio.nombre : "Consulta General",
                     sede: turno.sede ? turno.sede.nombre : "N/A", // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
@@ -121,6 +124,60 @@ export class MedicoController {
             })
         } catch (error) {
             logger.error(error);
+        }
+
+
+    }
+
+    actualizarDisponibilidad = async (req, res) => {
+        try {
+
+            const { disponibilidades, id_medico } = req.body;
+
+            if (!Array.isArray(disponibilidades)) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "Se esperaba una lista de disponibilidades"
+                });
+            }
+
+            if (id_medico === undefined) {
+                throw new BadRequestError("Se espera id_medico");
+            }
+
+            const idMedicoNum = Number(id_medico);
+
+            if (!Number.isFinite(id_medico)) {
+                throw new BadRequestError("Se espera id_medico como un numero valido");
+            }
+
+            const formatoValido = disponibilidades.every(item =>
+                item.diaSemana &&
+                typeof item.horaDesde === 'string' &&
+                typeof item.horaHasta === 'string'
+            );
+
+            if (!formatoValido) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "Uno o más elementos no cumplen con el formato requerido"
+                });
+            }
+
+            if(!disponibilidades.every(d => Object.values(DiaSemana).includes(d.diaSemana.trim().toUpperCase()))){
+                throw new BadRequestError("Dias de semana no validos recibidos");
+            }
+
+            const respuesta = await this.medicoService.actualizarDisponibilidad(idMedicoNum, disponibilidades);
+
+            return res.status(respuesta.status).send();
+
+        } catch (error) {
+            logger.error(error);
+
+            return res.status(error.statusCode || 400).json({
+                error: error.message || "Error interno del servidor"
+            });
         }
 
 

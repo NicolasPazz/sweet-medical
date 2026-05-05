@@ -12,6 +12,9 @@ medicoRouter.route("/datosIniciales")
 
 medicoRouter.route("/all")
     .get((req,res) => medicoController.leerMedicos(req, res));
+  
+medicoRouter.route("/disponibilidad")
+    .patch((req, res) => medicoController.actualizarDisponibilidad(req, res));
 
 
 export default medicoRouter;

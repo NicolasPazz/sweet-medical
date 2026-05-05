@@ -50,6 +50,9 @@ export class Agenda {
 
     const turnos = [];
 
+    console.log("DISPONIBILIDADES LIBRES para el medico de id: " + medico.id);
+    console.log(disponibilidadesLibres);
+
     for(const especialidad of medico.especialidades){
 
       turnos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
