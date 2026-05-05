@@ -2,6 +2,9 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import router from "./routes/router.js";
+import { notFoundHandler } from "./middlewares/notFoundHandler.js";
+import { errorLogger } from "./middlewares/errorLogger.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 app.use(express.json());
@@ -12,8 +15,6 @@ app.use(
       : true,
   })
 );
-app.use(router);
-
 app.use(router);
 
 app.get("/", (req, res) => {
@@ -27,6 +28,10 @@ app.get("/health", (req, res) => {
     service: "sweet-medical-backend",
   });
 });
+
+app.use(notFoundHandler);
+app.use(errorLogger);
+app.use(errorHandler);
 
 const PORT = process.env.SERVER_PORT || 3001;
 
