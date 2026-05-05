@@ -1,9 +1,10 @@
 import { Especialidad } from "../domain/servicios/Especialidad.js";
 import { Practica } from "../domain/servicios/Practica.js";
-import { ServicioRepository } from "../repositories/ServicioRepository.js";
+import { servicioRepository } from "../repositories/ServicioRepository.js";
 
 export class ServicioService {
-  constructor({ servicioRepository = new ServicioRepository() } = {}) {
+
+  constructor() {
     this.servicioRepository = servicioRepository;
   }
 
