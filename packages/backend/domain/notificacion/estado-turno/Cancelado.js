@@ -26,7 +26,7 @@ export class Cancelado {
       return new Notificacion(
         this.turno.paciente.usuario,
         remitente,
-        `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} en ${this.turno.sede.nombre} para ${servicio}.`
+        `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} en ${this.turno.sede?.nombre ?? 'N/A'} para ${servicio}.`
       );
     }
   }

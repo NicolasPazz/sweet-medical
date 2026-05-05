@@ -7,11 +7,12 @@ export class MedicoRepository {
 
   async save(medico) {
     console.log("Cargando medico de nombre: " + medico.nombre);
-    const id = this.nextId++;
-    medico.id = id;
-    this.medicos[id] = medico;
+    if (!medico.id) {
+      medico.id = this.nextId++;
+    }
+    this.medicos[medico.id] = medico;
 
-    console.log("Medico cargado de nombre: " + this.medicos[id].nombre);
+    console.log("Medico cargado de nombre: " + this.medicos[medico.id].nombre);
     return medico;
   }
 

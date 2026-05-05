@@ -76,7 +76,7 @@ export class Agenda {
     if (turno.estado instanceof Disponible) {
       
       const estaEnRango = medico.disponibilidades.some(disp => 
-        estaEnDisponibilidad(turno.fechaHora, disp)
+        estaEnDisponibilidad(turno.diaSemana, turno.hora, disp)
       );
 
       if (!estaEnRango) {

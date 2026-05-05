@@ -11,6 +11,7 @@ medicoRouter.route("/datosIniciales")
   .post((req, res) => medicoController.cargarDatosIniciales(req, res));
 
 medicoRouter.route("/all")
-    .get((req,res) => medicoController.leerDatosIniciales(req, res));
+    .get((req,res) => medicoController.leerMedicos(req, res));
+
 
 export default medicoRouter;

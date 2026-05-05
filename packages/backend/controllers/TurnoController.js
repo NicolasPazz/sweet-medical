@@ -89,8 +89,8 @@ export class TurnoController{
 
     obtenerHistorial = async(req, res) => {
         try{
-            const idPaciente = req.params.idPaciente;
-            const idUsuario = req.params.idUsuario;
+            const idPaciente = req.params.id_paciente;
+            const idUsuario = req.params.id_usuario;
             if (idPaciente === undefined || idUsuario === undefined) {
                 throw new BadRequestError("Parámetros incorrectos: idPaciente / idMedico es requerido");
             }
@@ -180,6 +180,36 @@ export class TurnoController{
         });
         }
 
+
+    }
+
+    getAllOfMedic = async(req, res) => {
+
+        try{
+
+        const id_medico = req.params.id_medico;
+
+        if (id_medico === undefined) {
+                throw new BadRequestError("Parámetros incorrectos: id_medico es requerido");
+            }
+
+            const idMedicoNum = Number(id_medico);
+        
+            if(!Number.isFinite(idMedicoNum)){
+                throw new BadRequestError("id_medico debe ser un número válido");
+            }
+
+            const respuesta = await this.turnoService.getAllOfMedic(idMedicoNum);
+
+            return res.status(respuesta.status || 200).json(respuesta.data || {});
+
+        } catch(error){
+            logger.error(error);
+            
+            return res.status(error.statusCode || 400).json({
+            error: error.message || "Error interno del servidor"
+        });
+        }
 
     }
 

@@ -11,9 +11,10 @@ export class NotificacionRepository {
   }
 
   save(notificacion) {
-    const id = notificacion.id ?? this.nextId++;
-    notificacion.id = id;
-    this.notificaciones[id] = notificacion;
+    if (!notificacion.id) {
+      notificacion.id = this.nextId++;
+    }
+    this.notificaciones[notificacion.id] = notificacion;
     return notificacion;
   }
 

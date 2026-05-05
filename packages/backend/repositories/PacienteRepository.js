@@ -7,11 +7,12 @@ export class PacienteRepository {
 
   async save(paciente) {
     console.log("Cargando paciente de nombre: " + paciente.nombre);
-    const id = this.nextId++;
-    paciente.id = id;
-    this.pacientes[id] = paciente;
+    if (!paciente.id) {
+      paciente.id = this.nextId++;
+    }
+    this.pacientes[paciente.id] = paciente;
 
-    console.log("paciente cargado de nombre: " + this.pacientes[id].nombre);
+    console.log("paciente cargado de nombre: " + this.pacientes[paciente.id].nombre);
     return paciente;
   }
 

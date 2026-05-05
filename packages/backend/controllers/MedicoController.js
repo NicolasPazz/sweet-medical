@@ -11,7 +11,7 @@ import { Especialidad } from "../domain/servicios/Especialidad.js";
 
 export class MedicoController {
 
-    constructor(){
+    constructor() {
         this.usuarioRepository = usuarioRepository;
         this.medicoRepository = medicoRepository;
         this.pacienteRepository = pacienteRepository;
@@ -21,14 +21,14 @@ export class MedicoController {
         try {
 
             const catalogoEspecialidades = [
-            new Especialidad("Pediatría", 30, 5000),
-            new Especialidad("Kinesiología", 45, 4500),
-            new Especialidad("Cardiología", 20, 7000),
-            new Especialidad("General", 15, 3500)
+                new Especialidad("Pediatría", 30, 5000),
+                new Especialidad("Kinesiología", 45, 4500),
+                new Especialidad("Cardiología", 20, 7000),
+                new Especialidad("General", 15, 3500)
             ];
 
             catalogoEspecialidades.forEach((especialidad, i) => {
-            especialidad.id = i + 1; // i arranca en 0, le sumamos 1 si querés que el ID empiece en 1
+                especialidad.id = i + 1; // i arranca en 0, le sumamos 1 si querés que el ID empiece en 1
             });
 
             for (let i = 1; i <= 10; i++) {
@@ -50,7 +50,7 @@ export class MedicoController {
                 const disponibilidades = [
                     new DisponibilidadHoraria(primerDia, "08:00", "12:00"),
                     new DisponibilidadHoraria(segundoDia, "14:00", "18:00")
-                    ];
+                ];
 
                 nuevoMedico.disponibilidades = disponibilidades;
                 nuevoMedico.especialidades.push(especialidadAsignada);
@@ -60,7 +60,7 @@ export class MedicoController {
                 this.usuarioRepository.save(nuevoUsuario);
                 this.medicoRepository.save(nuevoMedico);
             }
-            
+
             for (let i = 1; i <= 5; i++) {
                 // 1. Creamos el objeto Usuario (Credenciales)
                 const nombreUsuario = `paciente${i}`;
@@ -90,22 +90,36 @@ export class MedicoController {
         }
     };
 
-    leerDatosIniciales = async(req, res) => {
+    leerMedicos = async (req, res) => {
 
-        try{
+        try {
 
             const medicos = await this.medicoRepository.findAll();
 
-            const dataParaEnviar = Object.values(medicos).map(m => {
-            const { usuario, ...resto } = m; 
-            return { ...resto, nombreUsuario: usuario.nombreUsuario };
-            });
+            const dataParaEnviar = medicos.map(m => ({
+                id_usuario: m.usuario.id,
+                id_medico: m.id,
+                nombre: m.nombre,
+                especialidades: m.especialidades,
+                disponibilidades: m.disponibilidades,
+                turnos: m.turnosActualesYFuturos.map(turno => ({
+                    id: turno.id,
+                    fecha: turno.fechaHora ? turno.fechaHora: "N/A", // El objeto Date completo [cite: 1145]
+                    medico: turno.medico.nombre,
+                    servicio: turno.servicio ? turno.servicio.nombre : "Consulta General",
+                    sede: turno.sede ? turno.sede.nombre : "N/A", // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
+                    estado: turno.estado ? turno.estado.constructor.name : "N/A",
+                    costoPaciente: turno.costo, // Monto ya calculado según el plan [cite: 2337]
+                    horario: turno.hora,
+                    diaSemana: turno.diaSemana
+                }))
+            }))
 
             return res.status(200).json({
                 status: "success",
                 data: dataParaEnviar
             })
-        } catch(error){
+        } catch (error) {
             logger.error(error);
         }
 

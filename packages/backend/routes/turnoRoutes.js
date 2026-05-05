@@ -22,5 +22,7 @@ turnoRouter.route("/:id_usuario/realizado/:id_turno")
 
 turnoRouter.route("/:id_usuario/disponibilidad/:id_servicio")
         .get((req, res) => turnoController.obtenerDisponibilidad(req, res));
+turnoRouter.route("/:id_medico/all")
+        .get((req, res) => turnoController.getAllOfMedic(req,res));
 
 export default turnoRouter;

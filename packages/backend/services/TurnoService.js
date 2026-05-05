@@ -2,6 +2,7 @@ import { turnoRepository } from "../repositories/TurnoRepository.js";
 import { usuarioRepository } from "../repositories/UsuarioRepository.js";
 import { notificacionRepository } from "../repositories/NotificacionRepository.js";
 import { medicoRepository } from "../repositories/MedicoRepository.js";
+import { pacienteRepository } from "../repositories/PacienteRepository.js";
 import { Paciente } from "../domain/usuario/Paciente.js";
 import { Medico } from "../domain/usuario/Medico.js";
 import { Reservado } from "../domain/notificacion/estado-turno/Reservado.js";
@@ -21,6 +22,7 @@ export class TurnoService {
         this.usuarioRepository = usuarioRepository;
         this.notificacionRepository = notificacionRepository;
         this.medicoRepository = medicoRepository;
+        this.pacienteRepository = pacienteRepository;
     }
 
     async reservarTurno(id_usuario, id_turno) {
@@ -37,7 +39,7 @@ export class TurnoService {
 
         console.log("Usuario: " + usuario.name);
         console.log("ROLES DE MIERCHI: ", usuario.roles);
-        
+
         const paciente = usuario.roles.find(r => r instanceof Paciente);
 
         if (paciente == null) {
@@ -131,41 +133,66 @@ export class TurnoService {
         return { status: 201 };
     }
 
-    obtenerHistorial(idPaciente, idUsuarioNum) {
-        const usuario = this.usuarioRepository.findById(idUsuarioNum);
+    async obtenerHistorial(idPaciente, idUsuarioNum) {
+        const usuario = await this.usuarioRepository.findById(idUsuarioNum);
 
         if (usuario == null) {
             return { status: 404, data: "Recurso no encontrado" };
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length() == 0) {
+        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
             return { status: 403, data: "No sos medico no tenes permiso!!!" };
         }
 
-        const paciente = this.pacienteRepository.findById(idPaciente);
+        const paciente = await this.pacienteRepository.findById(idPaciente);
 
         if (paciente == null) {
             return { status: 404, data: "Recurso no encontrado" };
         }
 
-        const historial = this.turnoRepository.findAllByPatientId(idPaciente);
+        const historial = await this.turnoRepository.findAllByPatientId(idPaciente);
 
-        return { status: 201, data: historial };
+        for(const turno of historial){
+
+        console.log(
+            "Id: " + turno.id +
+            "medico: " + turno.medico.nombre + 
+            "paciente: " + turno.paciente.nombre +
+            "fechaHora: " + turno.fechaHora
+         );
+
+        }
+
+        const cleanedHistorial = historial.map(turno => ({
+        id: turno.id,
+        fecha: turno.fecha,
+        medico: {
+            id: turno.medico?.id,
+            nombre: turno.medico?.nombre
+        },
+        paciente: {
+            id: turno.paciente?.id,
+            nombre: turno.paciente?.nombre,
+            // NO incluyas turno.paciente.usuario aquí
+        }
+        }));
+
+        return { status: 201, data: cleanedHistorial };
     }
 
-    finalizarTurno(id_usuario, id_turno) {
+    async finalizarTurno(id_usuario, id_turno) {
 
-        const usuario = this.usuarioRepository.findById(id_usuario);
+        const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
             return { status: 404, data: "Usuario no encontrado" };
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length() == 0) {
+        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
             return { status: 403, data: "No tiene permiso para realizar esta accion, no es medico" };
         }
 
-        const turno = this.turnoRepository.findById(id_turno);
+        const turno = await this.turnoRepository.findById(id_turno);
 
         if (turno == null) {
             throw new NotFoundError("Turno no encontrado");
@@ -263,7 +290,7 @@ export class TurnoService {
                         console.log(medico.turnosActualesYFuturos);
                         this.medicoRepository.save(medico);
 
-                        for(const turno of medico.turnosActualesYFuturos){
+                        for (const turno of medico.turnosActualesYFuturos) {
                             this.turnoRepository.save(turno);
                         }
 
@@ -290,6 +317,31 @@ export class TurnoService {
             console.error("[BATCH CRITICAL ERROR] Fallo general del proceso:", error);
             throw error; // Relanzamos para que el CronJob pueda loguear el fallo fatal
         }
+    }
+
+    async getAllOfMedic(id_medico){
+
+        const medico = await this.medicoRepository.findById(id_medico);
+
+        if(medico == null){
+            throw new NotFoundError("Medico no encontrado");
+        }
+
+        const turnos = await this.turnoRepository.findAllByMedicId(id_medico);
+
+        const turnosDTO = turnos.map(turno => ({
+        id: turno.id,
+        fecha: turno.fechaHora ? turno.fechaHora: "N/A", // El objeto Date completo [cite: 1145]
+        medico: turno.medico.nombre,
+        servicio: turno.servicio ? turno.servicio.nombre : "Consulta General",
+        sede: turno.sede ? turno.sede.nombre : "N/A", // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
+        estado: turno.estado ? turno.estado.constructor.name : "N/A",
+        costoPaciente: turno.costo, // Aquí ya debería estar calculado el costo final [cite: 1834]
+        horario: turno.hora,
+        diaSemana: turno.diaSemana
+        }));
+
+        return { status: 200, data: turnosDTO};
     }
 
 }

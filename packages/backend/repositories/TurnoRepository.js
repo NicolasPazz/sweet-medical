@@ -6,9 +6,10 @@ export class TurnoRepository {
   }
 
   async save(turno) {
-    const id = this.nextId++;
-    turno.id = id;
-    this.turnos[id] = turno;
+    if (!turno.id) {
+      turno.id = this.nextId++;
+    }
+    this.turnos[turno.id] = turno;
     return turno;
   }
 
@@ -47,6 +48,14 @@ export class TurnoRepository {
     }
     return false;
   }
+
+  async findAllByPatientId(id_paciente) {
+  // Convert the object values into an array before filtering
+  return Object.values(this.turnos).filter(
+    (t) => t.paciente && t.paciente.id == id_paciente
+  );
+}
+
 }
 
 export const turnoRepository = new TurnoRepository();

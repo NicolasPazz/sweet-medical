@@ -1,9 +1,11 @@
 import { logger } from "../domain/utils/logger.js";
 import { PacienteService } from "../services/PacienteService.js";
+import { pacienteRepository } from "../repositories/PacienteRepository.js";
 
 export class PacienteController {
   constructor({ pacienteService = new PacienteService() } = {}) {
     this.pacienteService = pacienteService;
+    this.pacienteRepository = pacienteRepository;
   }
 
   obtenerHistorial = async (req, res) => {
@@ -25,5 +27,28 @@ export class PacienteController {
       });
     }
   };
+
+  leerPacientes = async (req, res) => {
+
+        try {
+
+            const pacientes = await this.pacienteRepository.findAll();
+
+            const dataParaEnviar = pacientes.map(m => ({
+                id_usuario: m.usuario.id,
+                id_paciente: m.id,
+                nombre: m.nombre,
+            }))
+
+            return res.status(200).json({
+                status: "success",
+                data: dataParaEnviar
+            })
+        } catch (error) {
+            logger.error(error);
+        }
+
+
+    }
 
 }

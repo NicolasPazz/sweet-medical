@@ -8,10 +8,11 @@ export class ServicioRepository {
 
   // eslint-disable-next-line no-unused-vars
   save(servicio, _tipoServicio) {
-    const id = this.nextId++;
-    servicio.id = id;
-    this.servicios[id] = servicio;
-    this.activos[id] = true;
+    if (!servicio.id) {
+      servicio.id = this.nextId++;
+    }
+    this.servicios[servicio.id] = servicio;
+    this.activos[servicio.id] = true;
     return servicio;
   }
 
