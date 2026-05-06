@@ -37,7 +37,7 @@ export class TurnoRepository {
     return turno;
   }
 
-  async obtenerTodos() {
+  async findAll() {
     return Object.values(this.turnos);
   }
 

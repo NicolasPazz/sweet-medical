@@ -127,6 +127,13 @@ export class TurnoService {
 
         const notificacion = turno.actualizarEstado(new Cancelado(turno), usuario, motivo);
 
+        const indice = turno.medico.turnosActualesYFuturos.indexOf(turno);
+
+        if (indice !== -1) {
+            turno.medico.turnosActualesYFuturos.splice(indice, 1);
+            this.medicoRepository.save(turno.medico);
+        }
+
         this.notificacionRepository.save(notificacion);
         this.turnoRepository.save(turno);
 
@@ -210,6 +217,13 @@ export class TurnoService {
 
         turno.actualizarEstado(new Realizado(turno), usuario, "Turno finalizado");
 
+        const indice = medico.turnosActualesYFuturos.indexOf(turno);
+
+        if (indice !== -1) {
+            medico.turnosActualesYFuturos.splice(indice, 1);
+            this.medicoRepository.save(medico);
+        }
+
         this.turnoRepository.save(turno);
 
         return { status: 201 };
@@ -286,14 +300,14 @@ export class TurnoService {
                 await Promise.all(loteActual.map(async (medico) => {
                     try {
                         const agenda = new Agenda();
-                        await agenda.refrescarTurnosSegunDisponibilidadDe(medico);
-                        console.log(medico.turnosActualesYFuturos);
+                        const turnosCancelados = await agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+
                         this.medicoRepository.save(medico);
 
-                        for (const turno of medico.turnosActualesYFuturos) {
-                            this.turnoRepository.save(turno);
-                        }
+                        turnosCancelados.forEach(t => this.turnoRepository.save(t));
 
+                        medico.turnosActualesYFuturos.forEach(t => this.turnoRepository.save(t));
+                        
                         metricas.procesados++;
                     } catch (errorMedico) {
                         metricas.fallidos++;
@@ -342,6 +356,32 @@ export class TurnoService {
         }));
 
         return { status: 200, data: turnosDTO};
+    }
+
+    async getAll(){
+
+        const turnos = await this.turnoRepository.findAll();
+
+        const dataParaEnviar = turnos.map(t => ({
+            id_turno: t.id,
+            id_medico: t.medico.id,
+            id_paciente: t.paciente ? t.paciente.id : "N/A",
+            fechaHora: t.fechaHora ? t.fechaHora : "N/A",
+            sede: t.sede ? t.sede : "N/A",
+            servicio: t.servicio ? t.servicio.nombre : "N/A",
+            estado: t.estado ? t.estado.constructor.name : "N/A",
+            historialEstados: t.historialEstados.map(historialEstado => ({
+                fechaHoraCambio: historialEstado.fechaHoraIngreso,
+                estado: historialEstado.estado.constructor.name,
+                motivo: historialEstado.motivo,
+                actor:  historialEstado.usuario.nombreUsuario
+            })),
+            costo: t.costo,
+            diaSemana: t.diaSemana,
+            hora: t.hora
+        }))
+
+        return { status: 200, data: dataParaEnviar};
     }
 
 }

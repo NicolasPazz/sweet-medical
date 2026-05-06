@@ -213,4 +213,21 @@ export class TurnoController{
 
     }
 
+    getAll = async(req, res) => {
+
+        try{
+            const respuesta = await this.turnoService.getAll();
+
+            return res.status(respuesta.status || 200).json(respuesta.data || {});            
+        }
+        catch(error){
+            logger.error(error);
+            
+            return res.status(error.statusCode || 400).json({
+            error: error.message || "Error interno del servidor"
+        });
+        }
+
+    }
+
 }

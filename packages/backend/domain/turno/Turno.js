@@ -2,6 +2,7 @@ import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
 import { Disponible } from "../notificacion/estado-turno/Disponible.js";
 import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
 import { logger } from "../utils/logger.js";
+import { Usuario } from "../usuario/Usuario.js";
 
 export class Turno {
   
@@ -24,9 +25,10 @@ export class Turno {
     this.hora = hora;
     this.sede = sede;
     this.servicio = servicio.costo ? servicio : null;
-    this.estado = new Disponible(this);
     this.historialEstados = [];
     this.costo = costo;
+
+    this.actualizarEstado(new Disponible(this), Usuario.USUARIO_SISTEMA, "Turno generado");
   }
 
   actualizarEstado(nuevoEstado, quien, motivo) {
