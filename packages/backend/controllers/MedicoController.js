@@ -10,6 +10,7 @@ import { DiaSemana } from "../domain/utils/enum/DiaSemana.js";
 import { Especialidad } from "../domain/servicios/Especialidad.js";
 import { BadRequestError } from "../errors/AppError.js";
 import { MedicoService } from "../services/MedicoService.js";
+import { Practica } from "../domain/servicios/Practica.js";
 
 export class MedicoController {
 
@@ -29,6 +30,8 @@ export class MedicoController {
                 new Especialidad("Cardiología", 20, 7000),
                 new Especialidad("General", 15, 3500)
             ];
+
+            const practica = new Practica("Codigo-1", "Radiografía", 30, 4500);
 
             catalogoEspecialidades.forEach((especialidad, i) => {
                 especialidad.id = i + 1; // i arranca en 0, le sumamos 1 si querés que el ID empiece en 1
@@ -57,6 +60,11 @@ export class MedicoController {
 
                 nuevoMedico.disponibilidades = disponibilidades;
                 nuevoMedico.especialidades.push(especialidadAsignada);
+
+                if(i == 1){
+                nuevoMedico.especialidades.push(catalogoEspecialidades[2])
+                nuevoMedico.practicas.push(practica);
+                }
 
                 nuevoUsuario.roles.push(nuevoMedico);
                 // Agregamos a la lista de resultados
@@ -104,6 +112,7 @@ export class MedicoController {
                 id_medico: m.id,
                 nombre: m.nombre,
                 especialidades: m.especialidades,
+                practicas: m.practicas,
                 disponibilidades: m.disponibilidades,
                 turnos: m.turnosActualesYFuturos.map(turno => ({
                     id: turno.id,
