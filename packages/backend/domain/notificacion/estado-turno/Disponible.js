@@ -1,5 +1,4 @@
 import { logger } from "../../utils/logger.js";
-import { Notificacion } from "..Notificacion.js";
 
 export class Disponible {
   id;
