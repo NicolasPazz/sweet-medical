@@ -7,8 +7,10 @@
     "dev": "node --watch index.js",
     "test": "jest --runInBand",
     "test:notificaciones": "jest --runInBand tests/notificaciones.test.js",
-    "test:servicios": "jest --runInBand tests/servicios.test.js"
-  },
+    "test:servicios": "jest --runInBand tests/servicios.test.js",
+    "test:datosIniciales": "jest --runInBand tests/datosIniciales.test.js",
+    "test:turnosMedicosPacientes": "jest --runInBand tests/turnosMedicosPacientes.test.js"
+    },
   "keywords": [],
   "author": "",
   "license": "ISC",
