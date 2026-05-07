@@ -1,3 +1,5 @@
+import { NotFoundError } from "../errors/AppError.js";
+
 export class ServicioRepository {
   constructor() {
     this.servicios = {};
@@ -16,11 +18,22 @@ export class ServicioRepository {
   }
 
   obtenerPorId(id) {
-    return this.servicios[id];
+    const servicio = this.servicios[id];
+    if (!servicio || !this.activos[id]) return null;
+    return servicio;
+  }
+
+  obtenerTodos() {
+    return Object.entries(this.servicios)
+      .filter(([id]) => this.activos[id])
+      .map(([, servicio]) => servicio);
   }
 
   modificar(id, datosActualizados) {
     const servicio = this.obtenerPorId(id);
+    if (!servicio) {
+      throw new NotFoundError("Servicio no encontrado");
+    }
     Object.assign(servicio, datosActualizados);
     return servicio;
   }
