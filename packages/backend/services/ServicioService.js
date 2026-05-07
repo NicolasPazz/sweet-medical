@@ -1,13 +1,14 @@
 import { Especialidad } from "../domain/servicios/Especialidad.js";
 import { Practica } from "../domain/servicios/Practica.js";
-import { ServicioRepository } from "../repositories/ServicioRepository.js";
+import { servicioRepository } from "../repositories/ServicioRepository.js";
 import { usuarioRepository } from "../repositories/UsuarioRepository.js";
 import { Usuario } from "../domain/usuario/Usuario.js";
 import { BadRequestError, NotFoundError, ForbiddenError } from "../errors/AppError.js";
 import { ValidadorId } from "../domain/utils/ValidadorId.js";
 
 export class ServicioService {
-  constructor({ servicioRepository = new ServicioRepository() } = {}) {
+
+  constructor() {
     this.servicioRepository = servicioRepository;
     this.usuarioRepository = usuarioRepository;
   }

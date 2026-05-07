@@ -9,25 +9,32 @@ export class Cancelado {
   notificar(remitente) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
-    // Ante cancelaciones de turnos, se notifica a la contraparte correspondiente.
-    if (actor && actor.id === this.turno.paciente.usuario.id) {
-      logger.debug(
-        `Creando notificación para turno ${this.turno.id} en estado CANCELADO por paciente ${this.turno.paciente.nombre} para servicio ${servicio}.`
-      );
-      return new Notificacion(
-        this.turno.medico.usuario,
-        remitente,
-        `El paciente ${this.turno.paciente.nombre} ha cancelado su turno para ${servicio}.`
-      );
-    } else {
-      logger.debug(
-        `Creando notificación para turno ${this.turno.id} en estado CANCELADO por profesional ${this.turno.medico.nombre} para servicio ${servicio}.`
-      );
-      return new Notificacion(
-        this.turno.paciente.usuario,
-        remitente,
-        `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} en ${this.turno.sede.nombre} para ${servicio}.`
-      );
+    
+    // 1. Caso: El paciente cancela (requiere que exista paciente)
+    if (this.turno.paciente && actor && actor.id === this.turno.paciente.usuario?.id) {
+        logger.debug(`Notificando al médico por cancelación del paciente.`);
+        return new Notificacion(
+            this.turno.medico.usuario,
+            remitente,
+            `El paciente ${this.turno.paciente.nombre} ha cancelado su turno para ${servicio}.`
+        );
+    } 
+    
+    // 2. Caso: El profesional o el sistema cancelan
+    else {
+        // IMPORTANTE: Solo intentamos notificar al paciente SI EXISTE uno
+        if (this.turno.paciente) {
+            logger.debug(`Notificando al paciente por cancelación del profesional/sistema.`);
+            return new Notificacion(
+                this.turno.paciente.usuario,
+                remitente,
+                `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} para ${servicio}.`
+            );
+        } else {
+            // Si no hay paciente, es un turno libre que se eliminó
+            logger.debug(`Turno disponible cancelado (ID: ${this.turno.id}). No se requiere notificar paciente.`);
+            return null; 
+        }
     }
-  }
+}
 }

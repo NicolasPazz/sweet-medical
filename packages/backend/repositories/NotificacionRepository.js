@@ -45,3 +45,5 @@ export class NotificacionRepository {
     return notificacion;
   }
 }
+
+export const notificacionRepository = new NotificacionRepository();

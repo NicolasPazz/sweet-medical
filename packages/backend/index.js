@@ -1,5 +1,22 @@
 import "dotenv/config";
 import app from "./app.js";
+import express from "express";
+import cors from "cors";
+import router from "./routes/router.js";
+import "../backend/cronjobs/generadorTurnos.js";
+
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+      : true,
+  })
+);
+app.use(router);
+
+app.use(router);
 
 app.get("/", (req, res) => {
   res.send("API Sweet Medical funcionando correctamente.");
