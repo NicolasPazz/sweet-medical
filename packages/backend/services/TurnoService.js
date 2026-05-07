@@ -10,7 +10,7 @@ import { Cancelado } from "../domain/notificacion/estado-turno/Cancelado.js";
 import { Realizado } from "../domain/notificacion/estado-turno/Realizado.js";
 import { Agenda } from "../domain/agenda/Agenda.js";
 import { Disponible } from "../domain/notificacion/estado-turno/Disponible.js";
-import { ConflictError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../errors/AppError.js";
 
 export class TurnoService {
 
@@ -26,36 +26,26 @@ export class TurnoService {
     }
 
     async reservarTurno(id_usuario, id_turno) {
-
-        console.log("id_usuario: " + id_usuario);
-
-        console.log(this.usuarioRepository.findAll());
-
         const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
-            return { status: 404, data: "Usuario no encontrado" };
+            throw new NotFoundError("Usuario no encontrado");
         }
-
-        console.log("Usuario: " + usuario.name);
-        console.log("ROLES DE MIERCHI: ", usuario.roles);
 
         const paciente = usuario.roles.find(r => r instanceof Paciente);
 
         if (paciente == null) {
-            return { status: 404, data: "Paciente no encontrado" };
+            throw new NotFoundError("Paciente no encontrado");
         }
 
         const turno = await this.turnoRepository.findById(id_turno);
 
         if (turno == null) {
-            return { status: 404, data: "Turno no encontrado" };
+            throw new NotFoundError("Turno no encontrado");
         }
 
-        console.log(turno.estado);
-
         if (!(turno.estado instanceof Disponible)) {
-            return { status: 409, data: "Turno en estado no disponible" };
+            throw new ConflictError("El turno no está disponible");
         }
 
         turno.paciente = paciente;
@@ -69,61 +59,52 @@ export class TurnoService {
         this.notificacionRepository.save(notificacion);
         this.turnoRepository.save(turno);
 
-        return { status: 201 };
+        return turno;
     }
 
     async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
         const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
-            return { status: 404, data: "Usuario no encontrado" };
+            throw new NotFoundError("Usuario no encontrado");
         }
 
         const turno = await this.turnoRepository.findById(id_turno);
 
-        console.log(turno);
-
         if (turno == null) {
-            return { status: 404, data: "Turno no encontrado" };
+            throw new NotFoundError("Turno no encontrado");
         }
 
-        console.log("estado:" + turno.estado.constructor.name);
-
         if (!(turno.estado instanceof Reservado)) {
-            return { status: 409, data: "No se puede cancelar el turno en este estado" };
+            throw new ConflictError("No se puede cancelar el turno en este estado");
         }
 
         if (!esMedico) {
             const paciente = usuario.roles.find(r => r instanceof Paciente);
 
             if (paciente == null) {
-                return { status: 404, data: "Paciente no encontrado" };
+                throw new NotFoundError("Paciente no encontrado");
             }
 
-            if (!(turno.paciente == paciente)) {
-                return { status: 409, data: "El paciente no tiene el turno asignado" };
+            if (turno.paciente !== paciente) {
+                throw new ConflictError("El paciente no tiene el turno asignado");
             }
-
         } else {
-
             const medico = usuario.roles.find(r => r instanceof Medico);
 
             if (medico == null) {
-                return { status: 404, data: "Medico no encontrado" };
+                throw new NotFoundError("Médico no encontrado");
             }
 
-            if (!(turno.medico == medico)) {
-                return { status: 409, data: "El medico no tiene el turno asignado" };
+            if (turno.medico !== medico) {
+                throw new ConflictError("El médico no tiene el turno asignado");
             }
-
         }
 
         const unaHoraEnMs = 1000 * 60 * 60;
         if (turno.fechaHora - Date.now() < unaHoraEnMs) {
-            return { status: 409, data: "Un turno no puede cancelarse con menos de 1 hora de antelación" };
+            throw new ConflictError("Un turno no puede cancelarse con menos de 1 hora de antelación");
         }
-
-        console.log(turno.usuario);
 
         const notificacion = turno.actualizarEstado(new Cancelado(turno), usuario, motivo);
 
@@ -137,54 +118,42 @@ export class TurnoService {
         this.notificacionRepository.save(notificacion);
         this.turnoRepository.save(turno);
 
-        return { status: 201 };
+        return turno;
     }
 
     async obtenerHistorial(idPaciente, idUsuarioNum) {
         const usuario = await this.usuarioRepository.findById(idUsuarioNum);
 
         if (usuario == null) {
-            return { status: 404, data: "Recurso no encontrado" };
+            throw new NotFoundError("Usuario no encontrado");
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
-            return { status: 403, data: "No sos medico no tenes permiso!!!" };
+        if (usuario.roles.filter(u => u instanceof Medico).length === 0) {
+            throw new ForbiddenError("No tiene permiso para realizar esta acción, no es médico");
         }
 
         const paciente = await this.pacienteRepository.findById(idPaciente);
 
         if (paciente == null) {
-            return { status: 404, data: "Recurso no encontrado" };
+            throw new NotFoundError("Paciente no encontrado");
         }
 
         const historial = await this.turnoRepository.findAllByPatientId(idPaciente);
 
-        for(const turno of historial){
-
-        console.log(
-            "Id: " + turno.id +
-            "medico: " + turno.medico.nombre + 
-            "paciente: " + turno.paciente.nombre +
-            "fechaHora: " + turno.fechaHora
-         );
-
-        }
-
         const cleanedHistorial = historial.map(turno => ({
-        id: turno.id,
-        fecha: turno.fecha,
-        medico: {
-            id: turno.medico?.id,
-            nombre: turno.medico?.nombre
-        },
-        paciente: {
-            id: turno.paciente?.id,
-            nombre: turno.paciente?.nombre,
-            // NO incluyas turno.paciente.usuario aquí
-        }
+            id: turno.id,
+            fecha: turno.fecha,
+            medico: {
+                id: turno.medico?.id,
+                nombre: turno.medico?.nombre,
+            },
+            paciente: {
+                id: turno.paciente?.id,
+                nombre: turno.paciente?.nombre,
+            },
         }));
 
-        return { status: 201, data: cleanedHistorial };
+        return cleanedHistorial;
     }
 
     async finalizarTurno(id_usuario, id_turno) {
@@ -192,11 +161,11 @@ export class TurnoService {
         const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
-            return { status: 404, data: "Usuario no encontrado" };
+            throw new NotFoundError("Usuario no encontrado");
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
-            return { status: 403, data: "No tiene permiso para realizar esta accion, no es medico" };
+        if (usuario.roles.filter(u => u instanceof Medico).length === 0) {
+            throw new ForbiddenError("No tiene permiso para realizar esta acción, no es médico");
         }
 
         const turno = await this.turnoRepository.findById(id_turno);
@@ -226,53 +195,37 @@ export class TurnoService {
 
         this.turnoRepository.save(turno);
 
-        return { status: 201 };
+        return turno;
     }
 
     async obtenerDisponibilidad(id_usuario, id_servicio) {
-
-        console.log("Obteniendo disponibilidad del usuario: " + id_usuario);
-
         const usuario = await this.usuarioRepository.findById(id_usuario);
 
         if (usuario == null) {
-            return { status: 404, data: "Usuario no encontrado" };
+            throw new NotFoundError("Usuario no encontrado");
         }
 
-        if (usuario.roles.filter(u => u instanceof Medico).length == 0) {
-            return { status: 403, data: "No tiene permiso para realizar esta accion, no es medico" };
+        if (usuario.roles.filter(u => u instanceof Medico).length === 0) {
+            throw new ForbiddenError("No tiene permiso para realizar esta acción, no es médico");
         }
 
         const medico = usuario.roles.find(r => r instanceof Medico);
 
-        for (const turno of medico.turnosActualesYFuturos) {
-            console.log(turno.servicio.id);
-            console.log(turno.servicio.nombre);
-            console.log(turno.servicio);
-        }
-
-        console.log(medico);
-
         const turnosDelServicio = medico.turnosActualesYFuturos.filter(t => t.servicio.id == id_servicio && t.estado instanceof Disponible);
 
-        const dataParaEnviar = turnosDelServicio.map(t => {
-            return {
-                id: t.id,
-                fechaHora: t.fechaHora,
-                diaSemana: t.diaSemana,
-                hora: t.hora,
-                sede: t.sede,
-                costo: t.costo,
-                // Usamos el nombre de la clase del estado para evitar el objeto complejo
-                estado: t.estado.constructor.name,
-                nombreUsuario: usuario.nombreUsuario,
-                // Si necesitas el servicio, traé solo lo básico
-                servicio: t.servicio ? { id: t.servicio.id, nombre: t.servicio.nombre } : null
-            };
-        });
+        const dataParaEnviar = turnosDelServicio.map(t => ({
+            id: t.id,
+            fechaHora: t.fechaHora,
+            diaSemana: t.diaSemana,
+            hora: t.hora,
+            sede: t.sede,
+            costo: t.costo,
+            estado: t.estado.constructor.name,
+            nombreUsuario: usuario.nombreUsuario,
+            servicio: t.servicio ? { id: t.servicio.id, nombre: t.servicio.nombre } : null,
+        }));
 
-        console.log(dataParaEnviar);
-        return { status: 200, data: dataParaEnviar };
+        return dataParaEnviar;
     }
 
     async refrescarTurnos() {
@@ -333,36 +286,32 @@ export class TurnoService {
         }
     }
 
-    async getAllOfMedic(id_medico){
-
+    async getAllOfMedic(id_medico) {
         const medico = await this.medicoRepository.findById(id_medico);
 
-        if(medico == null){
-            throw new NotFoundError("Medico no encontrado");
+        if (medico == null) {
+            throw new NotFoundError("Médico no encontrado");
         }
 
         const turnos = await this.turnoRepository.findAllByMedicId(id_medico);
 
-        const turnosDTO = turnos.map(turno => ({
-        id: turno.id,
-        fecha: turno.fechaHora ? turno.fechaHora: "N/A", // El objeto Date completo [cite: 1145]
-        medico: turno.medico.nombre,
-        servicio: turno.servicio ? turno.servicio.nombre : "Consulta General",
-        sede: turno.sede ? turno.sede.nombre : "N/A", // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
-        estado: turno.estado ? turno.estado.constructor.name : "N/A",
-        costoPaciente: turno.costo, // Aquí ya debería estar calculado el costo final [cite: 1834]
-        horario: turno.hora,
-        diaSemana: turno.diaSemana
+        return turnos.map(turno => ({
+            id: turno.id,
+            fecha: turno.fechaHora ? turno.fechaHora : "N/A",
+            medico: turno.medico.nombre,
+            servicio: turno.servicio ? turno.servicio.nombre : "Consulta General",
+            sede: turno.sede ? turno.sede.nombre : "N/A",
+            estado: turno.estado ? turno.estado.constructor.name : "N/A",
+            costoPaciente: turno.costo,
+            horario: turno.hora,
+            diaSemana: turno.diaSemana,
         }));
-
-        return { status: 200, data: turnosDTO};
     }
 
-    async getAll(){
-
+    async getAll() {
         const turnos = await this.turnoRepository.findAll();
 
-        const dataParaEnviar = turnos.map(t => ({
+        return turnos.map(t => ({
             id_turno: t.id,
             id_medico: t.medico.id,
             id_paciente: t.paciente ? t.paciente.id : "N/A",
@@ -374,14 +323,12 @@ export class TurnoService {
                 fechaHoraCambio: historialEstado.fechaHoraIngreso,
                 estado: historialEstado.estado.constructor.name,
                 motivo: historialEstado.motivo,
-                actor:  historialEstado.usuario.nombreUsuario
+                actor: historialEstado.usuario.nombreUsuario,
             })),
             costo: t.costo,
             diaSemana: t.diaSemana,
-            hora: t.hora
-        }))
-
-        return { status: 200, data: dataParaEnviar};
+            hora: t.hora,
+        }));
     }
 
 }

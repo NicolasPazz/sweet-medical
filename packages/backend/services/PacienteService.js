@@ -1,12 +1,26 @@
 import { TurnoRepository } from "../repositories/TurnoRepository.js";
+import { PacienteRepository } from "../repositories/PacienteRepository.js";
+import { NotFoundError } from "../errors/AppError.js";
+import { ValidadorId } from "../domain/utils/ValidadorId.js";
 
 export class PacienteService {
-  constructor() {
-    this.turnoRepository = new TurnoRepository();
+  constructor({
+    turnoRepository = new TurnoRepository(),
+    pacienteRepository = new PacienteRepository(),
+  } = {}) {
+    this.turnoRepository = turnoRepository;
+    this.pacienteRepository = pacienteRepository;
   }
 
-  async getHistorialTurnos(pacienteId) {
-    //TODO VALIDACIONES, no se si acá on en el controller, si el paciente existe, etc
-    return await this.turnoRepository.obtenerPorPacienteId(pacienteId);
+  async obtenerHistorialTurnos(pacienteId) {
+    const id = Number(pacienteId);
+    ValidadorId.validarIds(id);
+
+    const paciente = await this.pacienteRepository.findById(id);
+    if (!paciente) {
+      throw new NotFoundError("Paciente no encontrado");
+    }
+
+    return this.turnoRepository.obtenerPorPacienteId(id);
   }
 }

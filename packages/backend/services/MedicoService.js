@@ -20,7 +20,7 @@ export class MedicoService{
 
         medicoRepository.save(medico);
 
-        return { status: 201 };
+        return medico;
     }
 
 

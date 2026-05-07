@@ -1,233 +1,137 @@
-import { logger } from "../domain/utils/logger.js";
 import { BadRequestError } from "../errors/AppError.js";
 import { TurnoService } from "../services/TurnoService.js";
+import { ValidadorId } from "../domain/utils/ValidadorId.js";
 
-export class TurnoController{
+export class TurnoController {
 
-    turnoService;
-
-    constructor({turnoService = new TurnoService()} = {}){
+    constructor({ turnoService = new TurnoService() } = {}) {
         this.turnoService = turnoService;
     }
 
-
-    /*
-    Recibo: id_paciente, id_turno
-    */
-    reservarTurno = async (req, res) => {
-
+    reservarTurno = async (req, res, next) => {
         try {
-            
-            const { id_usuario, id_turno } = req.params;
-            
-            if (id_usuario === undefined || id_turno === undefined) {
-            throw new BadRequestError("Parámetros incorrectos: id_usuario y/o id_turno es requerido");
+            const idUsuario = this.parsearId(req.params.id_usuario);
+            const idTurno = this.parsearId(req.params.id_turno);
+
+            const turno = await this.turnoService.reservarTurno(idUsuario, idTurno);
+
+            return res.status(201).json({
+                status: "created",
+                data: turno,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    cancelarTurnoPaciente = async (req, res, next) => {
+        return this.cancelarTurno(req, res, next, false);
+    };
+
+    cancelarTurnoMedico = async (req, res, next) => {
+        return this.cancelarTurno(req, res, next, true);
+    };
+
+    cancelarTurno = async (req, res, next, esMedico) => {
+        try {
+            const idUsuario = this.parsearId(req.params.id_usuario);
+            const idTurno = this.parsearId(req.params.id_turno);
+            const { motivo } = req.body;
+
+            if (motivo == null) {
+                throw new BadRequestError("Debe escribir algún motivo");
             }
 
-            const idUsuarioNum = Number(id_usuario);
-            const idTurnoNum = Number(id_turno);
+            const turno = await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
 
-            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idTurnoNum)){
-                throw new BadRequestError("id_usuario y/o id_turno debe/n ser un número válido");
-            }
-
-            const respuesta = await this.turnoService.reservarTurno(idUsuarioNum, idTurnoNum);
-
-            return res.status(respuesta.status || 200).send();
+            return res.status(200).json({
+                status: "success",
+                data: turno,
+            });
+        } catch (error) {
+            return next(error);
         }
-        catch(error){
-            logger.error(error);
+    };
 
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
+    obtenerHistorial = async (req, res, next) => {
+        try {
+            const idPaciente = this.parsearId(req.params.id_paciente);
+            const idUsuario = this.parsearId(req.params.id_usuario);
+
+            const historial = await this.turnoService.obtenerHistorial(idPaciente, idUsuario);
+
+            return res.status(200).json({
+                status: "success",
+                data: historial,
+            });
+        } catch (error) {
+            return next(error);
         }
+    };
 
+    finalizarTurno = async (req, res, next) => {
+        try {
+            const idUsuario = this.parsearId(req.params.id_usuario);
+            const idTurno = this.parsearId(req.params.id_turno);
+
+            const turno = await this.turnoService.finalizarTurno(idUsuario, idTurno);
+
+            return res.status(200).json({
+                status: "success",
+                data: turno,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    obtenerDisponibilidad = async (req, res, next) => {
+        try {
+            const idUsuario = this.parsearId(req.params.id_usuario);
+            const idServicio = this.parsearId(req.params.id_servicio);
+
+            const disponibilidad = await this.turnoService.obtenerDisponibilidad(idUsuario, idServicio);
+
+            return res.status(200).json({
+                status: "success",
+                data: disponibilidad,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    getAllOfMedic = async (req, res, next) => {
+        try {
+            const idMedico = this.parsearId(req.params.id_medico);
+
+            const turnos = await this.turnoService.getAllOfMedic(idMedico);
+
+            return res.status(200).json({
+                status: "success",
+                data: turnos,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    getAll = async (req, res, next) => {
+        try {
+            const turnos = await this.turnoService.getAll();
+
+            return res.status(200).json({
+                status: "success",
+                data: turnos,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    parsearId(valor) {
+        const id = Number(valor);
+        ValidadorId.validarIds(id);
+        return id;
     }
-
-    cancelarTurnoPaciente = async (req, res) => {
-        return this.cancelarTurno(req, res, false);
-    }
-
-    cancelarTurnoMedico = async (req, res) => {
-        return this.cancelarTurno(req, res, true);
-    }
-
-    cancelarTurno = async (req, res, esMedico) => {
-
-        try{
-
-            const {id_usuario, id_turno} = req.params;
-            const motivo = req.body.motivo;
-            if (id_usuario === undefined || id_turno === undefined) {
-            throw new BadRequestError("Parámetros incorrectos: id_usuario y/o id_turno es requerido");
-            }
-
-            const idUsuarioNum = Number(id_usuario);
-            const idTurnoNum = Number(id_turno);
-
-            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idTurnoNum)){
-                throw new BadRequestError("id_usuario y/o id_turno debe/n ser un número válido");
-            }
-            
-            if (motivo == null){
-                throw new BadRequestError("Debe escribir algún motivo")
-            }
-
-            const respuesta = await this.turnoService.cancelarTurno(idUsuarioNum, idTurnoNum, esMedico, motivo);
-
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-        }
-        catch(error){
-            logger.error(error);
-
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-        }
-    }
-
-    obtenerHistorial = async(req, res) => {
-        try{
-            const idPaciente = req.params.id_paciente;
-            const idUsuario = req.params.id_usuario;
-            if (idPaciente === undefined || idUsuario === undefined) {
-                throw new BadRequestError("Parámetros incorrectos: idPaciente / idMedico es requerido");
-            }
-
-            const idPacienteNum = Number(idPaciente);
-            const idUsuarioNum = Number(idUsuario);
-
-            if(!Number.isFinite(idPacienteNum) || !Number.isFinite(idUsuarioNum)){
-                throw new BadRequestError("idPaciente y/o idUsuario debe/n ser un número válido");
-            }
-            
-            const respuesta = await this.turnoService.obtenerHistorial(idPacienteNum, idUsuarioNum);
-            
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-            
-        }
-        catch(error){
-            logger.error(error);
-
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-    } 
-
-    }
-
-    finalizarTurno = async(req, res) => {
-        try{
-
-            const id_usuario = req.params.id_usuario;
-            const id_turno = req.params.id_turno;
-
-            if (id_usuario === undefined || id_turno === undefined) {
-                throw new BadRequestError("Parámetros incorrectos: id_usuario / id_turno es requerido");
-            }
-
-            const idUsuarioNum = Number(id_usuario);
-            const idTurnoNum = Number(id_turno);
-
-            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idTurnoNum)){
-                throw new BadRequestError("id_usuario y/o id_turno debe/n ser un número válido");
-            }
-
-            const respuesta = await this.turnoService.finalizarTurno(idUsuarioNum, idTurnoNum);
-
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-        }
-        catch(error){
-            logger.error(error);
-            
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-        }
-
-
-
-    }
-
-    obtenerDisponibilidad = async(req, res) => {
-
-        try{
-
-            const id_usuario = req.params.id_usuario;
-            const id_servicio = req.params.id_servicio;
-
-            if (id_usuario === undefined || id_servicio === undefined) {
-                throw new BadRequestError("Parámetros incorrectos: id_usuario / id_servicio es requerido");
-            }
-
-            const idUsuarioNum = Number(id_usuario);
-            const idServicioNum = Number(id_servicio);
-
-            if(!Number.isFinite(idUsuarioNum) || !Number.isFinite(idServicioNum)){
-                throw new BadRequestError("id_usuario y/o id_servicio debe/n ser un número válido");
-            }
-
-            const respuesta = await this.turnoService.obtenerDisponibilidad(idUsuarioNum, idServicioNum);
-
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-        }
-        catch(error){
-            logger.error(error);
-            
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-        }
-
-
-    }
-
-    getAllOfMedic = async(req, res) => {
-
-        try{
-
-        const id_medico = req.params.id_medico;
-
-        if (id_medico === undefined) {
-                throw new BadRequestError("Parámetros incorrectos: id_medico es requerido");
-            }
-
-            const idMedicoNum = Number(id_medico);
-        
-            if(!Number.isFinite(idMedicoNum)){
-                throw new BadRequestError("id_medico debe ser un número válido");
-            }
-
-            const respuesta = await this.turnoService.getAllOfMedic(idMedicoNum);
-
-            return res.status(respuesta.status || 200).json(respuesta.data || {});
-
-        } catch(error){
-            logger.error(error);
-            
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-        }
-
-    }
-
-    getAll = async(req, res) => {
-
-        try{
-            const respuesta = await this.turnoService.getAll();
-
-            return res.status(respuesta.status || 200).json(respuesta.data || {});            
-        }
-        catch(error){
-            logger.error(error);
-            
-            return res.status(error.statusCode || 400).json({
-            error: error.message || "Error interno del servidor"
-        });
-        }
-
-    }
-
 }

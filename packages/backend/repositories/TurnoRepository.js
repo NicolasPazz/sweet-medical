@@ -1,3 +1,4 @@
+import { BadRequestError, NotFoundError } from "../errors/AppError.js";
 
 export class TurnoRepository {
   constructor() {
@@ -6,6 +7,9 @@ export class TurnoRepository {
   }
 
   async save(turno) {
+    if (!turno || typeof turno !== "object") {
+      throw new BadRequestError("El turno es inválido");
+    }
     if (!turno.id) {
       turno.id = this.nextId++;
     }
@@ -14,26 +18,27 @@ export class TurnoRepository {
   }
 
   async findById(id) {
-    return this.turnos[id];
+    return this.turnos[id] ?? null;
   }
-  findAllByMedicId(medicId){
+
+  findAllByMedicId(medicId) {
     return Object.values(this.turnos).filter(
       (turno) => turno.medico && turno.medico.id === medicId
     );
   }
 
   async obtenerPorPacienteId(pacienteId) {
-    // Buscamos en el objeto de turnos aquellos que pertenezcan al paciente
     return Object.values(this.turnos).filter(
       (turno) => turno.paciente && turno.paciente.id === pacienteId
     );
   }
 
   async modificar(id, datosActualizados) {
-    const turno = await this.obtenerPorId(id);
-    if (turno) {
-      Object.assign(turno, datosActualizados);
+    const turno = this.turnos[id];
+    if (!turno) {
+      throw new NotFoundError("Turno no encontrado");
     }
+    Object.assign(turno, datosActualizados);
     return turno;
   }
 
@@ -42,20 +47,18 @@ export class TurnoRepository {
   }
 
   async eliminar(id) {
-    if (this.turnos[id]) {
-      delete this.turnos[id];
-      return true;
+    if (!this.turnos[id]) {
+      throw new NotFoundError("Turno no encontrado");
     }
-    return false;
+    delete this.turnos[id];
+    return true;
   }
 
   async findAllByPatientId(id_paciente) {
-  // Convert the object values into an array before filtering
-  return Object.values(this.turnos).filter(
-    (t) => t.paciente && t.paciente.id == id_paciente
-  );
-}
-
+    return Object.values(this.turnos).filter(
+      (t) => t.paciente && t.paciente.id == id_paciente
+    );
+  }
 }
 
 export const turnoRepository = new TurnoRepository();

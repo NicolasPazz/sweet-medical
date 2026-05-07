@@ -1,3 +1,5 @@
+import { BadRequestError, NotFoundError } from "../errors/AppError.js";
+
 export class UsuarioRepository {
   constructor() {
     this.usuarios = {};
@@ -5,6 +7,9 @@ export class UsuarioRepository {
   }
 
   async save(usuario) {
+    if (!usuario || typeof usuario !== "object") {
+      throw new BadRequestError("El usuario es inválido");
+    }
     if (!usuario.id) {
       usuario.id = this.nextId++;
     }
@@ -13,14 +18,15 @@ export class UsuarioRepository {
   }
 
   async findById(id) {
-    return this.usuarios[id];
+    return this.usuarios[id] ?? null;
   }
 
   async modificar(id, datosActualizados) {
-    const usuario = await this.findById(id);
-    if (usuario) {
-      Object.assign(usuario, datosActualizados);
+    const usuario = this.usuarios[id];
+    if (!usuario) {
+      throw new NotFoundError("Usuario no encontrado");
     }
+    Object.assign(usuario, datosActualizados);
     return usuario;
   }
 
@@ -29,11 +35,11 @@ export class UsuarioRepository {
   }
 
   async eliminar(id) {
-    if (this.usuarios[id]) {
-      delete this.usuarios[id];
-      return true;
+    if (!this.usuarios[id]) {
+      throw new NotFoundError("Usuario no encontrado");
     }
-    return false;
+    delete this.usuarios[id];
+    return true;
   }
 }
 

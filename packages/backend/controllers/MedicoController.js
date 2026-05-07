@@ -1,4 +1,3 @@
-import { logger } from "../domain/utils/logger.js";
 import { Usuario } from "../domain/usuario/Usuario.js";
 import { Medico } from "../domain/usuario/Medico.js";
 import { Paciente } from "../domain/usuario/Paciente.js";
@@ -11,6 +10,7 @@ import { Especialidad } from "../domain/servicios/Especialidad.js";
 import { BadRequestError } from "../errors/AppError.js";
 import { MedicoService } from "../services/MedicoService.js";
 import { Practica } from "../domain/servicios/Practica.js";
+import { ValidadorId } from "../domain/utils/ValidadorId.js";
 
 export class MedicoController {
 
@@ -21,7 +21,7 @@ export class MedicoController {
         this.medicoService = medicoService;
     }
 
-    cargarDatosIniciales = async (req, res) => {
+    cargarDatosIniciales = async (req, res, next) => {
         try {
 
             const catalogoEspecialidades = [
@@ -97,12 +97,11 @@ export class MedicoController {
                 data: "Carga completada",
             });
         } catch (error) {
-            logger.error(error);
+            return next(error);
         }
     };
 
-    leerMedicos = async (req, res) => {
-
+    leerMedicos = async (req, res, next) => {
         try {
 
             const medicos = await this.medicoRepository.findAll();
@@ -129,68 +128,51 @@ export class MedicoController {
 
             return res.status(200).json({
                 status: "success",
-                data: dataParaEnviar
-            })
+                data: dataParaEnviar,
+            });
         } catch (error) {
-            logger.error(error);
+            return next(error);
         }
+    };
 
-
-    }
-
-    actualizarDisponibilidad = async (req, res) => {
+    actualizarDisponibilidad = async (req, res, next) => {
         try {
-
-            const { disponibilidades, id_medico } = req.body;
+            const { disponibilidades } = req.body;
+            const idMedico = this.parsearId(req.body.id_medico);
 
             if (!Array.isArray(disponibilidades)) {
-                return res.status(400).json({
-                    status: "error",
-                    message: "Se esperaba una lista de disponibilidades"
-                });
+                throw new BadRequestError("Se esperaba una lista de disponibilidades");
             }
 
-            if (id_medico === undefined) {
-                throw new BadRequestError("Se espera id_medico");
-            }
-
-            const idMedicoNum = Number(id_medico);
-
-            if (!Number.isFinite(id_medico)) {
-                throw new BadRequestError("Se espera id_medico como un numero valido");
-            }
-
-            const formatoValido = disponibilidades.every(item =>
-                item.diaSemana &&
-                typeof item.horaDesde === 'string' &&
-                typeof item.horaHasta === 'string'
+            const formatoValido = disponibilidades.every(
+                (item) =>
+                    item.diaSemana &&
+                    typeof item.horaDesde === "string" &&
+                    typeof item.horaHasta === "string"
             );
 
             if (!formatoValido) {
-                return res.status(400).json({
-                    status: "error",
-                    message: "Uno o más elementos no cumplen con el formato requerido"
-                });
+                throw new BadRequestError("Uno o más elementos no cumplen con el formato requerido");
             }
 
-            if(!disponibilidades.every(d => Object.values(DiaSemana).includes(d.diaSemana.trim().toUpperCase()))){
-                throw new BadRequestError("Dias de semana no validos recibidos");
+            if (!disponibilidades.every((d) => Object.values(DiaSemana).includes(d.diaSemana.trim().toUpperCase()))) {
+                throw new BadRequestError("Días de semana no válidos recibidos");
             }
 
-            const respuesta = await this.medicoService.actualizarDisponibilidad(idMedicoNum, disponibilidades);
+            const medico = await this.medicoService.actualizarDisponibilidad(idMedico, disponibilidades);
 
-            return res.status(respuesta.status).send();
-
-        } catch (error) {
-            logger.error(error);
-
-            return res.status(error.statusCode || 400).json({
-                error: error.message || "Error interno del servidor"
+            return res.status(200).json({
+                status: "success",
+                data: medico,
             });
+        } catch (error) {
+            return next(error);
         }
+    };
 
-
+    parsearId(valor) {
+        const id = Number(valor);
+        ValidadorId.validarIds(id);
+        return id;
     }
-
-
 }
