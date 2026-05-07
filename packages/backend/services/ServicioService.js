@@ -58,7 +58,7 @@ export class ServicioService {
       throw new BadRequestError("Tipo de servicio inválido");
     }
 
-    return this.servicioRepository.guardar(servicio, datosServicio.tipo);
+    return this.servicioRepository.save(servicio, datosServicio.tipo);
   }
 
   async modificar(idUsuario, id, datosActualizados) {
