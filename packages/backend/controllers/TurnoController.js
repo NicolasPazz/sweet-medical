@@ -13,12 +13,9 @@ export class TurnoController {
             const idUsuario = this.parsearId(req.params.id_usuario);
             const idTurno = this.parsearId(req.params.id_turno);
 
-            const turno = await this.turnoService.reservarTurno(idUsuario, idTurno);
+            await this.turnoService.reservarTurno(idUsuario, idTurno);
 
-            return res.status(201).json({
-                status: "created",
-                data: turno,
-            });
+            return res.status(200).json({ status: "success" });
         } catch (error) {
             return next(error);
         }
@@ -42,12 +39,9 @@ export class TurnoController {
                 throw new BadRequestError("Debe escribir algún motivo");
             }
 
-            const turno = await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
+            await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
 
-            return res.status(200).json({
-                status: "success",
-                data: turno,
-            });
+            return res.status(200).json({ status: "success" });
         } catch (error) {
             return next(error);
         }
@@ -74,12 +68,9 @@ export class TurnoController {
             const idUsuario = this.parsearId(req.params.id_usuario);
             const idTurno = this.parsearId(req.params.id_turno);
 
-            const turno = await this.turnoService.finalizarTurno(idUsuario, idTurno);
+            await this.turnoService.finalizarTurno(idUsuario, idTurno);
 
-            return res.status(200).json({
-                status: "success",
-                data: turno,
-            });
+            return res.status(200).json({ status: "success" });
         } catch (error) {
             return next(error);
         }

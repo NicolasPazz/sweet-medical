@@ -159,12 +159,9 @@ export class MedicoController {
                 throw new BadRequestError("Días de semana no válidos recibidos");
             }
 
-            const medico = await this.medicoService.actualizarDisponibilidad(idMedico, disponibilidades);
+            await this.medicoService.actualizarDisponibilidad(idMedico, disponibilidades);
 
-            return res.status(200).json({
-                status: "success",
-                data: medico,
-            });
+            return res.status(200).json({ status: "success" });
         } catch (error) {
             return next(error);
         }

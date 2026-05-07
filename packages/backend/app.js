@@ -10,6 +10,18 @@ app.use(express.json());
 app.use(cors());
 app.use(router);
 
+app.get("/", (req, res) => {
+  res.send("API Sweet Medical funcionando correctamente.");
+});
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    service: "sweet-medical-backend",
+  });
+});
+
 app.use(notFoundHandler);
 app.use(errorLogger);
 app.use(errorHandler);

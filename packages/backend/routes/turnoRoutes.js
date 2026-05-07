@@ -6,25 +6,27 @@ const turnoController = new TurnoController();
 const turnoRouter = express.Router()
 
 turnoRouter.route('/paciente/:id_usuario/reserva/:id_turno')
-        .patch((req,res) => turnoController.reservarTurno(req, res));
+        .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
 
 turnoRouter.route('/paciente/:id_usuario/cancelacion/:id_turno')
-        .patch((req, res) => turnoController.cancelarTurnoPaciente(req, res));
+        .patch((req, res, next) => turnoController.cancelarTurnoPaciente(req, res, next));
 
 turnoRouter.route('/medico/:id_usuario/cancelacion/:id_turno')
-        .patch((req, res) => turnoController.cancelarTurnoMedico(req, res));
+        .patch((req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
 
 turnoRouter.route("/medico/:id_usuario/historial/:id_paciente")
-        .get((req, res) => turnoController.obtenerHistorial(req, res));
+        .get((req, res, next) => turnoController.obtenerHistorial(req, res, next));
 
 turnoRouter.route("/:id_usuario/realizado/:id_turno")
-        .patch((req, res) => turnoController.finalizarTurno(req, res));
+        .patch((req, res, next) => turnoController.finalizarTurno(req, res, next));
 
 turnoRouter.route("/:id_usuario/disponibilidad/:id_servicio")
-        .get((req, res) => turnoController.obtenerDisponibilidad(req, res));
+        .get((req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
+
 turnoRouter.route("/:id_medico/all")
-        .get((req, res) => turnoController.getAllOfMedic(req,res));
+        .get((req, res, next) => turnoController.getAllOfMedic(req, res, next));
+
 turnoRouter.route("/all")
-        .get((req, res) => turnoController.getAll(req, res));
+        .get((req, res, next) => turnoController.getAll(req, res, next));
 
 export default turnoRouter;

@@ -8,13 +8,13 @@ const medicoController = new MedicoController();
 
 // El endpoint REST solicitado para el historial
 medicoRouter.route("/datosIniciales")
-  .post((req, res) => medicoController.cargarDatosIniciales(req, res));
+  .post((req, res, next) => medicoController.cargarDatosIniciales(req, res, next));
 
 medicoRouter.route("/all")
-    .get((req,res) => medicoController.leerMedicos(req, res));
+    .get((req, res, next) => medicoController.leerMedicos(req, res, next));
   
 medicoRouter.route("/disponibilidad")
-    .patch((req, res) => medicoController.actualizarDisponibilidad(req, res));
+    .patch((req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
 
 
 export default medicoRouter;

@@ -6,9 +6,9 @@ const pacienteController = new PacienteController();
 
 // El endpoint REST solicitado para el historial
 pacienteRouter.route("/:id/turnos")
-  .get((req, res) => pacienteController.obtenerHistorial(req, res));
+  .get((req, res, next) => pacienteController.obtenerHistorial(req, res, next));
 pacienteRouter.route("/all")
-    .get((req,res) => pacienteController.leerPacientes(req, res));
+    .get((req, res, next) => pacienteController.leerPacientes(req, res, next));
 
 
 export default pacienteRouter;
