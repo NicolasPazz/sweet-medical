@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test:notificaciones": "jest --runInBand tests/notificaciones.test.js",
+    "test:servicios": "jest --runInBand tests/servicios.test.js"
   },
   "keywords": [],
   "author": "",
