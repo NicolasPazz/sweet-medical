@@ -1,6 +1,5 @@
 import { logger } from "../../utils/logger.js";
 import { Notificacion } from "../Notificacion";
-import { Usuario } from "../usuarios/Usuario.js";
 
 export class Confirmado {
   id;

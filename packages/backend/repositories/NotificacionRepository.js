@@ -1,4 +1,5 @@
-import "../domain/notificacion/Notificacion.js";
+import { Notificacion } from "../domain/notificacion/Notificacion.js";
+import { NotFoundError, BadRequestError } from "../errors/AppError.js";
 
 export class NotificacionRepository {
   constructor() {
@@ -10,7 +11,11 @@ export class NotificacionRepository {
     return this.notificaciones[id] ?? null;
   }
 
-  guardar(notificacion) {
+  save(notificacion) {
+    if (!(notificacion instanceof Notificacion)) {
+      throw new BadRequestError("La notificación es inválida");
+    }
+
     const id = notificacion.id ?? this.nextId++;
     notificacion.id = id;
     this.notificaciones[id] = notificacion;
@@ -18,24 +23,27 @@ export class NotificacionRepository {
   }
 
   obtenerLeidas(idUsuario) {
-    const leidas = Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === true
+    return Object.values(this.notificaciones).filter(
+      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === true
     );
-
-    return leidas;
   }
 
   obtenerNoLeidas(idUsuario) {
-    const noLeidas = Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario.id === idUsuario && notificacion.leida === false
+    return Object.values(this.notificaciones).filter(
+      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false
     );
-
-    return noLeidas;
   }
 
   marcarComoLeida(id) {
     const notificacion = this.notificaciones[id];
+
+    if (!notificacion) {
+      throw new NotFoundError("Notificación no encontrada");
+    }
+
     notificacion.marcarComoLeida();
     return notificacion;
   }
 }
+
+export const notificacionRepository = new NotificacionRepository();

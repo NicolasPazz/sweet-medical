@@ -1,14 +1,16 @@
 import express from "express"
-import medicoRoutes from "./medicoRoutes";
-import pacienteRoutes from "./pacienteRoutes";
-import turnoRoutes from "./turnoRoutes";
-import notificacionRoutes from "./notificacionRoutes";
-import servicioRoutes from "./servicioRoutes";
+import medicoRouter from "./medicoRoutes.js";
+import pacienteRouter from "./pacienteRoutes.js";
+import turnoRouter from "./turnoRoutes.js";
+import servicioRouter from "./servicioRoutes.js";
+import notificacionRouter from "./notificacionRoutes.js";
 
 const router = express.Router();
 
-router.use('/medicos', medicoRoutes);
-router.use('/pacientes', pacienteRoutes);
-router.use('/turnos', turnoRoutes);
-router.use('/servicios', servicioRoutes);
-router.use('/notificaciones', notificacionRoutes);
+router.use('/medicos', medicoRouter);
+router.use('/pacientes', pacienteRouter);
+router.use('/turnos', turnoRouter);
+router.use('/servicios', servicioRouter);
+router.use('/notificaciones', notificacionRouter);
+
+export default router;

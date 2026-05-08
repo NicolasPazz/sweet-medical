@@ -1,7 +1,5 @@
-import { EstadoTurno } from "../turno/EstadoTurno.js";
 import { Notificacion } from "./Notificacion.js";
-import { Usuario } from "../usuarios/Usuario.js";
-import { logger } from "../../utils/logger.js";
+import { Usuario } from "../usuario/Usuario.js";
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(turno) {
