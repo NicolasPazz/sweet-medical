@@ -1,4 +1,4 @@
-import { logger } from "../../utils/logger.js";
+import { logger } from '../utils/logger.js';
 
 export class Plan {
   id;
@@ -27,5 +27,15 @@ export class Plan {
     const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
     logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura?.nivel);
     return cobertura?.nivel;
+  }
+
+  /**
+   * Método polimórfico - delegará el cálculo final dependiendo de la naturaleza del plan.
+   * @param {Object} prestacion - Especialidad o Práctica
+   * @param {String} tipo - 'especialidad' o 'practica'
+   * @returns {Object} { nivel: String, costo: Number }
+   */
+  calcularCosto(prestacion, tipo) {
+    throw new Error('calcularCosto debe ser implementado por subclases');
   }
 }
