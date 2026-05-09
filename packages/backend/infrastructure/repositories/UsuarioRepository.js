@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, NotFoundError } from "../../errors/AppError.js";
 
 export class UsuarioRepository {
   constructor() {

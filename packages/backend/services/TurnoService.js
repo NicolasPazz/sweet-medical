@@ -1,8 +1,8 @@
-import { turnoRepository } from "../repositories/TurnoRepository.js";
-import { usuarioRepository } from "../repositories/UsuarioRepository.js";
-import { notificacionRepository } from "../repositories/NotificacionRepository.js";
-import { medicoRepository } from "../repositories/MedicoRepository.js";
-import { pacienteRepository } from "../repositories/PacienteRepository.js";
+import { turnoRepository } from "../infrastructure/repositories/TurnoRepository.js";
+import { usuarioRepository } from "../infrastructure/repositories/UsuarioRepository.js";
+import { notificacionRepository } from "../infrastructure/repositories/NotificacionRepository.js";
+import { medicoRepository } from "../infrastructure/repositories/MedicoRepository.js";
+import { pacienteRepository } from "../infrastructure/repositories/PacienteRepository.js";
 import { Paciente } from "../domain/usuario/Paciente.js";
 import { Medico } from "../domain/usuario/Medico.js";
 import { Reservado } from "../domain/notificacion/estado-turno/Reservado.js";
@@ -260,7 +260,7 @@ export class TurnoService {
                         turnosCancelados.forEach(t => this.turnoRepository.save(t));
 
                         medico.turnosActualesYFuturos.forEach(t => this.turnoRepository.save(t));
-                        
+
                         metricas.procesados++;
                     } catch (errorMedico) {
                         metricas.fallidos++;
