@@ -120,8 +120,7 @@ export class TurnoController {
   };
 
   parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
+    ValidadorId.validarIds(valor);
+    return valor;
   }
 }

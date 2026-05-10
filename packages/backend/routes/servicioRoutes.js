@@ -2,7 +2,6 @@ import express from 'express';
 import { ServicioController } from '../controllers/ServicioController.js';
 
 const servicioController = new ServicioController();
-
 const router = express.Router();
 
 router

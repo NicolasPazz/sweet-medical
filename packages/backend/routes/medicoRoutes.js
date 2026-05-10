@@ -2,8 +2,6 @@ import express from 'express';
 import { MedicoController } from '../controllers/MedicoController.js';
 
 const medicoRouter = express.Router();
-
-// Se las pasamos al controlador
 const medicoController = new MedicoController();
 
 // El endpoint REST solicitado para el historial

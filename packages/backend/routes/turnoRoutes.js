@@ -1,21 +1,14 @@
 import express from 'express';
-
 import { TurnoController } from '../controllers/TurnoController.js';
 import { TurnoBusquedaController } from '../controllers/TurnoBusquedaController.js';
-
 import { TurnoBusquedaService } from '../application/services/TurnoBusquedaService.js';
-
 import { BusquedaTurnosRepository } from '../infrastructure/repositories/BusquedaTurnosRepository.js';
-
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 const turnoController = new TurnoController();
-
 const repository = new BusquedaTurnosRepository();
 const motorCostos = new MotorCostos();
-
 const turnoBusquedaService = new TurnoBusquedaService(repository, motorCostos);
-
 const turnoRouter = express.Router();
 
 turnoRouter

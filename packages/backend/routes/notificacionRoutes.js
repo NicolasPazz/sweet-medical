@@ -2,7 +2,6 @@ import express from 'express';
 import { NotificacionController } from '../controllers/NotificacionController.js';
 
 const notificacionController = new NotificacionController();
-
 const router = express.Router();
 
 router
