@@ -1,6 +1,6 @@
-import { NotificacionService } from "../services/NotificacionService.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
-import { BadRequestError } from "../errors/AppError.js";
+import { NotificacionService } from '../services/NotificacionService.js';
+import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { BadRequestError } from '../errors/AppError.js';
 
 export class NotificacionController {
   constructor({ notificacionService = new NotificacionService() } = {}) {
@@ -12,7 +12,7 @@ export class NotificacionController {
       const idUsuario = this.parsearId(req.params.idUsuario);
       const resultado = await this.notificacionService.obtenerLeidas(idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -25,7 +25,7 @@ export class NotificacionController {
       const idUsuario = this.parsearId(req.params.idUsuario);
       const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -39,7 +39,7 @@ export class NotificacionController {
       const idUsuario = this.parsearId(req.body.idUsuario);
       const resultado = await this.notificacionService.marcarComoLeida(id, idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -52,7 +52,7 @@ export class NotificacionController {
       const datosNotificacion = this.extraerYValidarBodyNotificacion(req.body);
       const resultado = await this.notificacionService.save(datosNotificacion);
       return res.status(201).json({
-        status: "created",
+        status: 'created',
         data: resultado,
       });
     } catch (error) {
@@ -64,8 +64,8 @@ export class NotificacionController {
     const destinatario = this.parsearId(body.destinatario);
     const remitente = this.parsearId(body.remitente);
 
-    if (typeof body.mensaje !== "string" || body.mensaje.trim().length === 0) {
-      throw new BadRequestError("El mensaje no puede estar vacío");
+    if (typeof body.mensaje !== 'string' || body.mensaje.trim().length === 0) {
+      throw new BadRequestError('El mensaje no puede estar vacío');
     }
 
     return {

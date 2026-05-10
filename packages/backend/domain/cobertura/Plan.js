@@ -14,11 +14,11 @@ export class Plan {
 
   obtenerCoberturaPorEspecialidad(especialidad) {
     const cobertura = this.coberturasEspecialidad.find(
-      (c) => c.especialidad.id === especialidad.id
+      (c) => c.especialidad.id === especialidad.id,
     );
     logger.debug(
       `Nivel Cobertura encontrada para la especialidad ${especialidad.nombre}:`,
-      cobertura?.nivel
+      cobertura?.nivel,
     );
     return cobertura?.nivel;
   }

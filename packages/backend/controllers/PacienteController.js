@@ -1,6 +1,6 @@
-import { PacienteService } from "../services/PacienteService.js";
-import { pacienteRepository } from "../repositories/PacienteRepository.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
+import { PacienteService } from '../services/PacienteService.js';
+import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { ValidadorId } from '../domain/utils/ValidadorId.js';
 
 export class PacienteController {
   constructor({ pacienteService = new PacienteService() } = {}) {
@@ -15,7 +15,7 @@ export class PacienteController {
       const resultado = await this.pacienteService.obtenerHistorialTurnos(idPaciente);
 
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -34,7 +34,7 @@ export class PacienteController {
       }));
 
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: dataParaEnviar,
       });
     } catch (error) {

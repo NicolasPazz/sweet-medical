@@ -1,5 +1,5 @@
-import { Notificacion } from "./Notificacion.js";
-import { Usuario } from "../usuario/Usuario.js";
+import { Notificacion } from './Notificacion.js';
+import { Usuario } from '../usuario/Usuario.js';
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(turno) {
@@ -13,12 +13,12 @@ export class FactoryNotificacion {
       new Notificacion(
         turno.medico.usuario,
         remitente,
-        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`
+        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`,
       ),
       new Notificacion(
         turno.paciente.usuario,
         remitente,
-        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`
+        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`,
       ),
     ];
   }

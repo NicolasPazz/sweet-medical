@@ -1,27 +1,25 @@
-import { NotFoundError } from "../errors/AppError.js";
-import { medicoRepository } from "../repositories/MedicoRepository.js";
+import { NotFoundError } from '../errors/AppError.js';
+import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 
+export class MedicoService {
+  constructor() {
+    this.medicoRepository = medicoRepository;
+  }
 
-export class MedicoService{
+  async actualizarDisponibilidad(id_medico, disponibilidades) {
+    const medico = await this.medicoRepository.findById(id_medico);
 
-    constructor(){
-        this.medicoRepository = medicoRepository;
+    if (medico == null) {
+      throw new NotFoundError('Medico no encontrado');
     }
 
-    async actualizarDisponibilidad(id_medico, disponibilidades){
+    medico.disponibilidades = medico.disponibilidades = disponibilidades.map((d) => ({
+      ...d,
+      diaSemana: d.diaSemana.trim().toUpperCase(),
+    }));
 
-        const medico = await this.medicoRepository.findById(id_medico);
+    medicoRepository.save(medico);
 
-        if(medico == null){
-            throw new NotFoundError("Medico no encontrado");
-        }
-
-        medico.disponibilidades = medico.disponibilidades = disponibilidades.map(d => ({...d, diaSemana: d.diaSemana.trim().toUpperCase()}));
-
-        medicoRepository.save(medico);
-
-        return medico;
-    }
-
-
+    return medico;
+  }
 }

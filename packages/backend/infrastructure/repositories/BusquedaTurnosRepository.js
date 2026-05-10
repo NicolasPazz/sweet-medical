@@ -4,14 +4,12 @@ import { logger } from '../../domain/utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
-
   async buscar(specification, sortParams, paginationParams) {
     try {
-
       const criteria = specification.toCriteria();
 
       const query = {
-        estado: EstadoTurno.DISPONIBLE
+        estado: EstadoTurno.DISPONIBLE,
       };
 
       if (criteria.profesionalId) {
@@ -21,27 +19,26 @@ export class BusquedaTurnosRepository {
       if (criteria.especialidad) {
         query['especialidad.nombre'] = {
           $regex: criteria.especialidad,
-          $options: 'i'
+          $options: 'i',
         };
       }
 
       if (criteria.practica) {
         query['practica.nombre'] = {
           $regex: criteria.practica,
-          $options: 'i'
+          $options: 'i',
         };
       }
 
       if (criteria.sede) {
         query['sede.nombre'] = {
           $regex: criteria.sede,
-          $options: 'i'
+          $options: 'i',
         };
       }
 
       if (criteria.fechaDesde || criteria.fechaHasta) {
         query.fechaHora = {};
-
 
         if (criteria.fechaDesde) {
           query.fechaHora.$gte = new Date(criteria.fechaDesde);
@@ -51,7 +48,6 @@ export class BusquedaTurnosRepository {
           query.fechaHora.$lte = new Date(criteria.fechaHasta);
         }
       } else {
-
         query.fechaHora = { $gte: new Date() };
       }
 
@@ -65,9 +61,8 @@ export class BusquedaTurnosRepository {
 
         const campo = sortBy === 'fecha' ? 'fechaHora' : sortBy;
 
-
         mongoQuery = mongoQuery.sort({
-          [campo]: sortOrder === 'desc' ? -1 : 1
+          [campo]: sortOrder === 'desc' ? -1 : 1,
         });
       }
 
@@ -77,9 +72,7 @@ export class BusquedaTurnosRepository {
 
         const skip = (page - 1) * limit;
 
-        mongoQuery = mongoQuery
-          .skip(skip)
-          .limit(limit);
+        mongoQuery = mongoQuery.skip(skip).limit(limit);
       }
 
       // EJECUCIÓN FINAL
@@ -90,7 +83,7 @@ export class BusquedaTurnosRepository {
 
       return {
         data,
-        total
+        total,
       };
     } catch (error) {
       logger.error('Error en BusquedaTurnosRepository.buscar:', error);

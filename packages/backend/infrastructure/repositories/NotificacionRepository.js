@@ -1,5 +1,5 @@
-import { Notificacion } from "../domain/notificacion/Notificacion.js";
-import { NotFoundError, BadRequestError } from "../errors/AppError.js";
+import { Notificacion } from '../../domain/notificacion/Notificacion.js';
+import { NotFoundError, BadRequestError } from '../../errors/AppError.js';
 
 export class NotificacionRepository {
   constructor() {
@@ -13,7 +13,7 @@ export class NotificacionRepository {
 
   save(notificacion) {
     if (!(notificacion instanceof Notificacion)) {
-      throw new BadRequestError("La notificación es inválida");
+      throw new BadRequestError('La notificación es inválida');
     }
 
     const id = notificacion.id ?? this.nextId++;
@@ -24,13 +24,13 @@ export class NotificacionRepository {
 
   obtenerLeidas(idUsuario) {
     return Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === true
+      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === true,
     );
   }
 
   obtenerNoLeidas(idUsuario) {
     return Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false
+      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false,
     );
   }
 
@@ -38,7 +38,7 @@ export class NotificacionRepository {
     const notificacion = this.notificaciones[id];
 
     if (!notificacion) {
-      throw new NotFoundError("Notificación no encontrada");
+      throw new NotFoundError('Notificación no encontrada');
     }
 
     notificacion.marcarComoLeida();

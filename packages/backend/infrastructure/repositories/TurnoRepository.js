@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
 
 export class TurnoRepository {
   constructor() {
@@ -7,8 +7,8 @@ export class TurnoRepository {
   }
 
   async save(turno) {
-    if (!turno || typeof turno !== "object") {
-      throw new BadRequestError("El turno es inválido");
+    if (!turno || typeof turno !== 'object') {
+      throw new BadRequestError('El turno es inválido');
     }
     if (!turno.id) {
       turno.id = this.nextId++;
@@ -23,20 +23,20 @@ export class TurnoRepository {
 
   findAllByMedicId(medicId) {
     return Object.values(this.turnos).filter(
-      (turno) => turno.medico && turno.medico.id === medicId
+      (turno) => turno.medico && turno.medico.id === medicId,
     );
   }
 
   async obtenerPorPacienteId(pacienteId) {
     return Object.values(this.turnos).filter(
-      (turno) => turno.paciente && turno.paciente.id === pacienteId
+      (turno) => turno.paciente && turno.paciente.id === pacienteId,
     );
   }
 
   async modificar(id, datosActualizados) {
     const turno = this.turnos[id];
     if (!turno) {
-      throw new NotFoundError("Turno no encontrado");
+      throw new NotFoundError('Turno no encontrado');
     }
     Object.assign(turno, datosActualizados);
     return turno;
@@ -48,16 +48,14 @@ export class TurnoRepository {
 
   async eliminar(id) {
     if (!this.turnos[id]) {
-      throw new NotFoundError("Turno no encontrado");
+      throw new NotFoundError('Turno no encontrado');
     }
     delete this.turnos[id];
     return true;
   }
 
   async findAllByPatientId(id_paciente) {
-    return Object.values(this.turnos).filter(
-      (t) => t.paciente && t.paciente.id == id_paciente
-    );
+    return Object.values(this.turnos).filter((t) => t.paciente && t.paciente.id == id_paciente);
   }
 }
 

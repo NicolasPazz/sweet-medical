@@ -1,4 +1,4 @@
-import { NotFoundError } from "../errors/AppError.js";
+import { NotFoundError } from '../../errors/AppError.js';
 
 export class ServicioRepository {
   constructor() {
@@ -33,7 +33,7 @@ export class ServicioRepository {
   modificar(id, datosActualizados) {
     const servicio = this.obtenerPorId(id);
     if (!servicio) {
-      throw new NotFoundError("Servicio no encontrado");
+      throw new NotFoundError('Servicio no encontrado');
     }
     Object.assign(servicio, datosActualizados);
     return servicio;

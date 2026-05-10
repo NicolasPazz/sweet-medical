@@ -11,6 +11,6 @@ export class Usuario {
   }
 
   static get USUARIO_SISTEMA() {
-    return new Usuario("SISTEMA", null);
+    return new Usuario('SISTEMA', null);
   }
 }

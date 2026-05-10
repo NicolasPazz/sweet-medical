@@ -1,6 +1,6 @@
-import { logger } from "../utils/logger.js";
-import { Agenda } from "../agenda/Agenda.js";
-import { GeneradorDisponibilidad } from "../agenda/GeneradorDisponibilidad.js";
+import { logger } from '../utils/logger.js';
+import { Agenda } from '../agenda/Agenda.js';
+import { GeneradorDisponibilidad } from '../agenda/GeneradorDisponibilidad.js';
 
 export class Medico {
   id;
@@ -30,8 +30,7 @@ export class Medico {
       ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`);
   }
 
-  refrescarTurnos(){
+  refrescarTurnos() {
     this.turnosActualesYFuturos = Agenda.refrescarTurnosSegunDisponibilidadDe(this);
   }
-
 }

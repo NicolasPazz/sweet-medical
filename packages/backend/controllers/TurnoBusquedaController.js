@@ -1,7 +1,6 @@
 import { logger } from '../domain/utils/logger.js';
 
 export class TurnoBusquedaController {
-
   static crear(turnoBusquedaService) {
     return async (req, res, next) => {
       try {
@@ -15,7 +14,7 @@ export class TurnoBusquedaController {
           page = '1',
           limit = '10',
           sortBy = 'fecha',
-          sortOrder = 'asc'
+          sortOrder = 'asc',
         } = req.query;
 
         // Parseo
@@ -60,38 +59,33 @@ export class TurnoBusquedaController {
           practica,
           sede,
           fechaDesde,
-          fechaHasta
+          fechaHasta,
         };
 
         const paginacion = {
           page: pageInt,
           limit: limitInt,
           sortBy: sortByNormalized,
-          sortOrder: sortOrderNormalized
+          sortOrder: sortOrderNormalized,
         };
 
         // Si existe un usuario autenticado, obtenemos el paciente. Caso contrario, null.
         const paciente = req.user?.paciente ?? null;
 
         // Llamada al service
-        const resultado = await turnoBusquedaService.buscarTurnos(
-          filtros,
-          paciente,
-          paginacion
-        );
+        const resultado = await turnoBusquedaService.buscarTurnos(filtros, paciente, paginacion);
 
         // Response OK
         return res.status(200).json({
           status: 'success',
-          ...resultado
+          ...resultado,
         });
-
       } catch (error) {
         logger.error(error);
 
         return res.status(400).json({
           status: 'error',
-          message: error.message
+          message: error.message,
         });
       }
     };

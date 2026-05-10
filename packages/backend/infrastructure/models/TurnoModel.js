@@ -3,17 +3,17 @@ import mongoose from 'mongoose';
 const turnoSchema = new mongoose.Schema({
   medico: { type: mongoose.Schema.Types.ObjectId, ref: 'Medico' },
   especialidad: {
-    nombre: String
+    nombre: String,
   },
   practica: {
     nombre: String,
-    costoBase: Number
+    costoBase: Number,
   },
   sede: {
-    nombre: String
+    nombre: String,
   },
   fechaHora: Date,
-  estado: String
+  estado: String,
 });
 
 export const TurnoModel = mongoose.model('Turno', turnoSchema);

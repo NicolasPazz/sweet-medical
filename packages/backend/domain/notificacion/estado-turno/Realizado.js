@@ -1,4 +1,4 @@
-import { logger } from "../../utils/logger.js";
+import { logger } from '../../utils/logger.js';
 
 export class Realizado {
   id;
@@ -8,7 +8,7 @@ export class Realizado {
   notificar(_remitente) {
     // Si el estado es DISPONIBLE o REALIZADO, no hay notificación
     logger.debug(
-      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado.constructor.name}.`
+      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado.constructor.name}.`,
     );
     return null;
   }

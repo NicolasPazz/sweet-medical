@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
 
 export class MedicoRepository {
   constructor() {
@@ -7,8 +7,8 @@ export class MedicoRepository {
   }
 
   async save(medico) {
-    if (!medico || typeof medico !== "object") {
-      throw new BadRequestError("El médico es inválido");
+    if (!medico || typeof medico !== 'object') {
+      throw new BadRequestError('El médico es inválido');
     }
     if (!medico.id) {
       medico.id = this.nextId++;
@@ -24,7 +24,7 @@ export class MedicoRepository {
   async modificar(id, datosActualizados) {
     const medico = this.medicos[id];
     if (!medico) {
-      throw new NotFoundError("Médico no encontrado");
+      throw new NotFoundError('Médico no encontrado');
     }
     Object.assign(medico, datosActualizados);
     return medico;
@@ -36,7 +36,7 @@ export class MedicoRepository {
 
   async eliminar(id) {
     if (!this.medicos[id]) {
-      throw new NotFoundError("Médico no encontrado");
+      throw new NotFoundError('Médico no encontrado');
     }
     delete this.medicos[id];
     return true;

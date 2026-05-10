@@ -27,12 +27,12 @@ export class MotorCostos {
 
     // El objeto plan en BD debería estar instanciado como PlanPrepaga, PlanParticular, etc.
     // Si no hay paciente o este no tiene plan, instanciamos un particular como fallback.
-    const planEfectivo = (paciente && paciente.plan) ? paciente.plan : new PlanParticular();
+    const planEfectivo = paciente && paciente.plan ? paciente.plan : new PlanParticular();
 
     const resultado = planEfectivo.calcularCosto(prestacion, tipo);
     return {
       tipoCobertura: resultado.nivel,
-      costoEstimado: resultado.costo
+      costoEstimado: resultado.costo,
     };
   }
 }
