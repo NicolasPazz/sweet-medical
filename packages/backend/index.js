@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import server from './app.js';
-import { MongoDBClient } from './config/database.js';
+import { MongoDBClient } from './infrastructure/config/database.js';
 import { logger } from './domain/utils/logger.js';
 
 const PORT = process.env.PORT || 3001;
