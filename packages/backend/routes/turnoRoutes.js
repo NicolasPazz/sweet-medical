@@ -41,7 +41,6 @@ turnoRouter
 
 turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, res, next));
 
-// Búsqueda de turnos disponibles
 turnoRouter.route('/disponibles').get(TurnoBusquedaController.crear(turnoBusquedaService));
 
 export default turnoRouter;
