@@ -1,43 +1,41 @@
 import mongoose from 'mongoose';
 import { Turno } from '../../domain/turno/Turno.js';
+import { CambioEstadoTurno } from '../../domain/turno/CambioEstadoTurno.js';
+
+const cambioEstadoTurnoSchema = new mongoose.Schema(
+  {
+    fechaHoraIngreso: { type: Date, default: Date.now },
+    estado: { type: mongoose.Schema.Types.Mixed, required: true },
+    turno: { type: mongoose.Schema.Types.ObjectId, ref: 'Turno' },
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    motivo: { type: String, required: true, trim: true, maxlength: 500 },
+  },
+  { _id: true },
+);
+
+cambioEstadoTurnoSchema.loadClass(CambioEstadoTurno);
 
 const turnoSchema = new mongoose.Schema(
   {
     medico: { type: mongoose.Schema.Types.ObjectId, ref: 'Medico', required: true },
-    paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente' },
-    especialidad: {
-      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Especialidad' },
+    paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente', default: null },
+    servicio: {
+      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
       nombre: { type: String, required: true, trim: true, maxlength: 100 },
-    },
-    practica: {
-      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Practica' },
-      nombre: { type: String, required: true, trim: true, maxlength: 100 },
-      costoBase: { type: Number, required: true, min: 0 },
+      costo: { type: Number, required: true, min: 0 },
     },
     sede: {
-      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede' },
+      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', required: true },
       nombre: { type: String, required: true, trim: true, maxlength: 100 },
     },
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
-    fechaHora: { type: Date },
-    estado: {
-      type: String,
-      required: true,
-      enum: ['DISPONIBLE', 'RESERVADO', 'CANCELADO', 'REALIZADO'],
-      trim: true,
-    },
+    fechaHora: { type: Date, default: null },
+    estado: { type: mongoose.Schema.Types.Mixed, required: true },
     costo: { type: Number, required: true, min: 0 },
-    historialEstados: [
-      {
-        estado: { type: String, trim: true, maxlength: 50 },
-        quien: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
-        motivo: { type: String, trim: true, maxlength: 500 },
-        fecha: { type: Date, default: Date.now },
-      },
-    ],
+    historialEstados: [cambioEstadoTurnoSchema],
   },
-  { timestamps: true, collection: 'turnos' },
+  { collection: 'turnos' },
 );
 
 turnoSchema.loadClass(Turno);

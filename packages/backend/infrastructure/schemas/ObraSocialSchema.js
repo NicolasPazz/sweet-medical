@@ -11,10 +11,7 @@ const obraSocialSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 100,
     },
-    codigo: { type: String, required: true, unique: true, trim: true, minlength: 1, maxlength: 30 },
-    contacto: { type: String, trim: true, maxlength: 100 },
-    telefono: { type: String, trim: true, maxlength: 30 },
-    email: { type: String, trim: true, lowercase: true, maxlength: 100 },
+    planes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Plan' }],
   },
   { timestamps: true, collection: 'obras_sociales' },
 );

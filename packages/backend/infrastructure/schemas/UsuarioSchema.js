@@ -11,18 +11,22 @@ const usuarioSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 50,
     },
-    contrasena: { type: String, required: true, trim: true, minlength: 6, maxlength: 128 },
-    email: {
+    password: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
-      lowercase: true,
-      maxlength: 100,
+      minlength: 6,
+      maxlength: 128,
     },
-    roles: [{ type: String, enum: ['MEDICO', 'PACIENTE', 'ADMIN'], trim: true }],
+    roles: [
+      {
+        type: String,
+        enum: ['MEDICO', 'PACIENTE', 'ADMIN'],
+        trim: true,
+      },
+    ],
   },
-  { timestamps: true, collection: 'usuarios' },
+  { collection: 'usuarios' },
 );
 
 usuarioSchema.loadClass(Usuario);

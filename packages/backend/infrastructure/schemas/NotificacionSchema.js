@@ -3,15 +3,14 @@ import { Notificacion } from '../../domain/notificacion/Notificacion.js';
 
 const notificacionSchema = new mongoose.Schema(
   {
-    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-    turno: { type: mongoose.Schema.Types.ObjectId, ref: 'Turno' },
-    tipo: { type: String, required: true, trim: true, minlength: 3, maxlength: 50 },
+    destinatario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    remitente: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     mensaje: { type: String, required: true, trim: true, minlength: 5, maxlength: 1000 },
+    fechaHoraCreacion: { type: Date, default: Date.now },
+    fechaHoraLeida: { type: Date, default: null },
     leida: { type: Boolean, default: false },
-    fechaCreacion: { type: Date, default: Date.now },
-    fechaLectura: { type: Date },
   },
-  { timestamps: true, collection: 'notificaciones' },
+  { collection: 'notificaciones' },
 );
 
 notificacionSchema.loadClass(Notificacion);
