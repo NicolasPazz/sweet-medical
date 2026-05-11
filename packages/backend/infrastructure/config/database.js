@@ -5,7 +5,7 @@ export class MongoDBClient {
   static async connect() {
     try {
       const conn = await mongoose.connect(
-        `${process.env.MONGODB_URI}/${process.env.MONGODB_DB_NAME}?authSource=admin`,
+        `${process.env.MONGO_DB_URI}/${process.env.MONGO_DB_NAME}?authSource=admin`,
       );
 
       logger.info(`MongoDB connected: ${conn.connection.host}`);

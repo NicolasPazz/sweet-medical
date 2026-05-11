@@ -1,46 +1,60 @@
-import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
+import { MedicoModel } from '../models/MedicoModel.js';
+import { ConflictError, NotFoundError } from '../../errors/AppError.js';
 
 export class MedicoRepository {
-  constructor() {
-    this.medicos = {};
-    this.nextId = 1;
-  }
-
-  async save(medico) {
-    if (!medico || typeof medico !== 'object') {
-      throw new BadRequestError('El médico es inválido');
-    }
-    if (!medico.id) {
-      medico.id = this.nextId++;
-    }
-    this.medicos[medico.id] = medico;
-    return medico;
+  async crear(data) {
+      const medico = await MedicoModel.create(data);
+      return medico;
   }
 
   async findById(id) {
-    return this.medicos[id] ?? null;
-  }
+    const medico = await MedicoModel.findById(id)
+      .populate("usuario")
+      .populate("especialidades")
+      .populate("practicas")
+      .populate("sedes")
+      .populate("turnosActualesYFuturos");
 
-  async modificar(id, datosActualizados) {
-    const medico = this.medicos[id];
     if (!medico) {
-      throw new NotFoundError('Médico no encontrado');
+      throw new NotFoundError("Médico no encontrado");
     }
-    Object.assign(medico, datosActualizados);
+
     return medico;
   }
 
+  async findByMatricula(matricula) {
+    return await MedicoModel.findOne({ matricula });
+  }
+
   async findAll() {
-    return Object.values(this.medicos);
+    return await MedicoModel.find()
+      .populate("usuario")
+      .populate("especialidades")
+      .populate("practicas")
+      .populate("sedes")
+      .populate("turnosActualesYFuturos");
+  }
+
+  async modificar(id, data) {
+    const medico = await MedicoModel.findByIdAndUpdate(id, data, {
+      new: true,
+    });
+
+    if (!medico) {
+      throw new NotFoundError("Médico no encontrado");
+    }
+
+    return medico;
   }
 
   async eliminar(id) {
-    if (!this.medicos[id]) {
-      throw new NotFoundError('Médico no encontrado');
+    const medico = await MedicoModel.findByIdAndDelete(id);
+
+    if (!medico) {
+      throw new NotFoundError("Médico no encontrado");
     }
-    delete this.medicos[id];
+
     return true;
   }
 }
-
 export const medicoRepository = new MedicoRepository();

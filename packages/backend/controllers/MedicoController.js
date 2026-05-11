@@ -168,6 +168,19 @@ export class MedicoController {
     }
   };
 
+  crearMedico = async (req, res, next) => {
+    try {
+      const medico = await this.medicoService.crearMedico(req.body);
+  
+      return res.status(201).json({
+        status: 'success',
+        data: medico,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   parsearId(valor) {
     const id = Number(valor);
     ValidadorId.validarIds(id);

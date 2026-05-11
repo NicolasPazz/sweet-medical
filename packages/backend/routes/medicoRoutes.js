@@ -17,4 +17,8 @@ medicoRouter
   .route('/disponibilidad')
   .patch((req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
 
+medicoRouter
+  .route('/')
+  .post((req, res, next) => medicoController.crearMedico(req, res, next));
+
 export default medicoRouter;
