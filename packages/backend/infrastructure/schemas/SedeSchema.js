@@ -13,7 +13,7 @@ const sedeSchema = new mongoose.Schema(
     },
     direccion: { type: String, required: true, trim: true, maxlength: 200 },
   },
-  { timestamps: true, collection: 'sedes' },
+  { collection: 'sedes' },
 );
 
 sedeSchema.loadClass(Sede);

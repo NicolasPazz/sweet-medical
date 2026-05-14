@@ -1,0 +1,290 @@
+{
+  "info": {
+    "_postman_id": "680649eb-35f9-4712-b0b1-765be62cc970",
+    "name": "API TP DDS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48272706",
+    "_collection_link": "https://go.postman.co/collection/48272706-680649eb-35f9-4712-b0b1-765be62cc970?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "http://localhost:3001/pacientes/all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/pacientes/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "pacientes",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/medicos/all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/medicos/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "medicos",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/medicos/datosIniciales",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/medicos/datosIniciales",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "medicos",
+            "datosIniciales"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/1/disponibilidad/2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/turnos/1/disponibilidad/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "1",
+            "disponibilidad",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/paciente/11/reserva/2",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/turnos/paciente/11/reserva/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "paciente",
+            "11",
+            "reserva",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/medico/1/cancelacion/1",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"motivo\": \"Cancelado por el paciente\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/turnos/medico/1/cancelacion/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "medico",
+            "1",
+            "cancelacion",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/1/all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/turnos/1/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "1",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/medico/1/historial/1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/turnos/medico/1/historial/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "medico",
+            "1",
+            "historial",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/1/realizado/2",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/turnos/1/realizado/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "1",
+            "realizado",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/medicos/disponibilidad",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id_medico\": 1,\r\n    \"disponibilidades\": [\r\n        {\r\n            \"diaSemana\": \"Martes\",\r\n            \"horaDesde\": \"7:00\",\r\n            \"horaHasta\": \"9:00\"\r\n        }\r\n    ]\r\n\r\n\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/medicos/disponibilidad",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "medicos",
+            "disponibilidad"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3001/turnos/all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/turnos/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "turnos",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

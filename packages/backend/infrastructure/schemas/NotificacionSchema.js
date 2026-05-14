@@ -13,6 +13,8 @@ const notificacionSchema = new mongoose.Schema(
   { collection: 'notificaciones' },
 );
 
+notificacionSchema.index({ destinatario: 1, leida: 1, fechaHoraCreacion: -1 });
+
 notificacionSchema.loadClass(Notificacion);
 
 export const NotificacionModel = mongoose.model('Notificacion', notificacionSchema);

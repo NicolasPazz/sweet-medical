@@ -25,7 +25,7 @@ const turnoSchema = new mongoose.Schema(
       costo: { type: Number, required: true, min: 0 },
     },
     sede: {
-      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', required: true },
+      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
       nombre: { type: String, required: true, trim: true, maxlength: 100 },
     },
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
@@ -37,6 +37,11 @@ const turnoSchema = new mongoose.Schema(
   },
   { collection: 'turnos' },
 );
+
+turnoSchema.index({ estado: 1, fechaHora: 1 });
+turnoSchema.index({ medico: 1, estado: 1, fechaHora: 1 });
+turnoSchema.index({ 'servicio.nombre': 1 });
+turnoSchema.index({ 'sede.nombre': 1 });
 
 turnoSchema.loadClass(Turno);
 

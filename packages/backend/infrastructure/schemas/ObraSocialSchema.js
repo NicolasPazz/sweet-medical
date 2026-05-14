@@ -13,7 +13,7 @@ const obraSocialSchema = new mongoose.Schema(
     },
     planes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Plan' }],
   },
-  { timestamps: true, collection: 'obras_sociales' },
+  { collection: 'obras_sociales' },
 );
 
 obraSocialSchema.loadClass(ObraSocial);

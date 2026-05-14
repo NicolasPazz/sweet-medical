@@ -14,7 +14,7 @@ const especialidadSchema = new mongoose.Schema(
     duracionTurnoEnMins: { type: Number, default: 30, min: 1, max: 480 },
     costo: { type: Number, required: true, min: 0 },
   },
-  { timestamps: true, collection: 'especialidades' },
+  { collection: 'especialidades' },
 );
 
 especialidadSchema.loadClass(Especialidad);

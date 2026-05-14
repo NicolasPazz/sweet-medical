@@ -26,7 +26,7 @@ const usuarioSchema = new mongoose.Schema(
       },
     ],
   },
-  { collection: 'usuarios' },
+  { timestamps: true, collection: 'usuarios' },
 );
 
 usuarioSchema.loadClass(Usuario);
