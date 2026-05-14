@@ -20,7 +20,9 @@ export class ServicioRepository {
 
   obtenerPorId(id) {
     const servicio = this.servicios[id];
-    if (!servicio || !this.activos[id]) return null;
+    if (!servicio || !this.activos[id]) {
+      throw new NotFoundError('Servicio no encontrado');
+    }
     return servicio;
   }
 
@@ -31,8 +33,8 @@ export class ServicioRepository {
   }
 
   modificar(id, datosActualizados) {
-    const servicio = this.obtenerPorId(id);
-    if (!servicio) {
+    const servicio = this.servicios[id];
+    if (!servicio || !this.activos[id]) {
       throw new NotFoundError('Servicio no encontrado');
     }
     Object.assign(servicio, datosActualizados);
@@ -40,6 +42,10 @@ export class ServicioRepository {
   }
 
   eliminar(id) {
+    const servicio = this.servicios[id];
+    if (!servicio || !this.activos[id]) {
+      throw new NotFoundError('Servicio no encontrado');
+    }
     // Baja lógica: en Mongo sería { activo: false }
     this.activos[id] = false;
     return true;

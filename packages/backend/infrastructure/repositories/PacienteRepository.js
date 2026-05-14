@@ -1,44 +1,56 @@
-import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
+import { NotFoundError } from '../../errors/AppError.js';
+import { PacienteModel } from '../schemas/PacienteSchema.js';
 
 export class PacienteRepository {
-  constructor() {
-    this.pacientes = {};
-    this.nextId = 1;
-  }
-
+  // CREATE
   async save(paciente) {
-    if (!paciente || typeof paciente !== 'object') {
-      throw new BadRequestError('El paciente es inválido');
+    if (paciente._id) {
+      return await PacienteModel.findByIdAndUpdate(paciente._id, paciente, { new: true })
+        .populate('usuario')
+        .populate('obraSocial')
+        .populate('plan');
+    } else {
+      const newPaciente = new PacienteModel(paciente);
+      const savedPaciente = await newPaciente.save();
+      await savedPaciente.populate('usuario');
+      return savedPaciente;
     }
-    if (!paciente.id) {
-      paciente.id = this.nextId++;
-    }
-    this.pacientes[paciente.id] = paciente;
-    return paciente;
   }
 
+  // READ
   async findById(id) {
-    return this.pacientes[id] ?? null;
-  }
-
-  async modificar(id, datosActualizados) {
-    const paciente = this.pacientes[id];
+    const paciente = await PacienteModel.findById(id)
+      .populate('usuario')
+      .populate('obraSocial')
+      .populate('plan');
     if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }
-    Object.assign(paciente, datosActualizados);
     return paciente;
   }
 
   async findAll() {
-    return Object.values(this.pacientes);
+    return await PacienteModel.find().populate('usuario').populate('obraSocial').populate('plan');
   }
 
-  async eliminar(id) {
-    if (!this.pacientes[id]) {
+  // UPDATE
+  async update(id, datosActualizados) {
+    const paciente = await PacienteModel.findByIdAndUpdate(id, datosActualizados, { new: true })
+      .populate('usuario')
+      .populate('obraSocial')
+      .populate('plan');
+    if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }
-    delete this.pacientes[id];
+    return paciente;
+  }
+
+  // DELETE
+  async delete(id) {
+    const result = await PacienteModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new NotFoundError('Paciente no encontrado');
+    }
     return true;
   }
 }

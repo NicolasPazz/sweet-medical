@@ -1,44 +1,67 @@
-import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
+import { NotFoundError } from '../../errors/AppError.js';
+import { MedicoModel } from '../schemas/MedicoSchema.js';
 
 export class MedicoRepository {
-  constructor() {
-    this.medicos = {};
-    this.nextId = 1;
-  }
-
+  // CREATE
   async save(medico) {
-    if (!medico || typeof medico !== 'object') {
-      throw new BadRequestError('El médico es inválido');
+    if (medico._id) {
+      return await MedicoModel.findByIdAndUpdate(medico._id, medico, { new: true })
+        .populate('usuario')
+        .populate('especialidades')
+        .populate('practicas')
+        .populate('sedes')
+        .populate('turnosActualesYFuturos');
+    } else {
+      const newMedico = new MedicoModel(medico);
+      const savedMedico = await newMedico.save();
+      await savedMedico.populate('usuario');
+      return savedMedico;
     }
-    if (!medico.id) {
-      medico.id = this.nextId++;
-    }
-    this.medicos[medico.id] = medico;
-    return medico;
   }
 
+  // READ
   async findById(id) {
-    return this.medicos[id] ?? null;
-  }
-
-  async modificar(id, datosActualizados) {
-    const medico = this.medicos[id];
+    const medico = await MedicoModel.findById(id)
+      .populate('usuario')
+      .populate('especialidades')
+      .populate('practicas')
+      .populate('sedes')
+      .populate('turnosActualesYFuturos');
     if (!medico) {
       throw new NotFoundError('Médico no encontrado');
     }
-    Object.assign(medico, datosActualizados);
     return medico;
   }
 
   async findAll() {
-    return Object.values(this.medicos);
+    return await MedicoModel.find()
+      .populate('usuario')
+      .populate('especialidades')
+      .populate('practicas')
+      .populate('sedes')
+      .populate('turnosActualesYFuturos');
   }
 
-  async eliminar(id) {
-    if (!this.medicos[id]) {
+  // UPDATE
+  async update(id, datosActualizados) {
+    const medico = await MedicoModel.findByIdAndUpdate(id, datosActualizados, { new: true })
+      .populate('usuario')
+      .populate('especialidades')
+      .populate('practicas')
+      .populate('sedes')
+      .populate('turnosActualesYFuturos');
+    if (!medico) {
       throw new NotFoundError('Médico no encontrado');
     }
-    delete this.medicos[id];
+    return medico;
+  }
+
+  // DELETE
+  async delete(id) {
+    const result = await MedicoModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new NotFoundError('Médico no encontrado');
+    }
     return true;
   }
 }

@@ -1,61 +1,54 @@
-import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
+import { NotFoundError } from '../../errors/AppError.js';
+import { TurnoModel } from '../schemas/TurnoSchema.js';
 
 export class TurnoRepository {
-  constructor() {
-    this.turnos = {};
-    this.nextId = 1;
-  }
-
+  // CREATE
   async save(turno) {
-    if (!turno || typeof turno !== 'object') {
-      throw new BadRequestError('El turno es inválido');
+    if (turno._id) {
+      return await TurnoModel.findByIdAndUpdate(turno._id, turno, { new: true });
+    } else {
+      const newTurno = new TurnoModel(turno);
+      return await newTurno.save();
     }
-    if (!turno.id) {
-      turno.id = this.nextId++;
-    }
-    this.turnos[turno.id] = turno;
-    return turno;
   }
 
+  // READ
   async findById(id) {
-    return this.turnos[id] ?? null;
-  }
-
-  findAllByMedicId(medicId) {
-    return Object.values(this.turnos).filter(
-      (turno) => turno.medico && turno.medico.id === medicId,
-    );
-  }
-
-  async obtenerPorPacienteId(pacienteId) {
-    return Object.values(this.turnos).filter(
-      (turno) => turno.paciente && turno.paciente.id === pacienteId,
-    );
-  }
-
-  async modificar(id, datosActualizados) {
-    const turno = this.turnos[id];
+    const turno = await TurnoModel.findById(id).populate('medico').populate('paciente');
     if (!turno) {
       throw new NotFoundError('Turno no encontrado');
     }
-    Object.assign(turno, datosActualizados);
     return turno;
   }
 
   async findAll() {
-    return Object.values(this.turnos);
+    return await TurnoModel.find().populate('medico').populate('paciente');
   }
 
-  async eliminar(id) {
-    if (!this.turnos[id]) {
+  async findAllByMedicId(medicId) {
+    return await TurnoModel.find({ medico: medicId }).populate('paciente');
+  }
+
+  async findAllByPatientId(pacienteId) {
+    return await TurnoModel.find({ paciente: pacienteId }).populate('medico');
+  }
+
+  // UPDATE
+  async update(id, datosActualizados) {
+    const turno = await TurnoModel.findByIdAndUpdate(id, datosActualizados, { new: true });
+    if (!turno) {
       throw new NotFoundError('Turno no encontrado');
     }
-    delete this.turnos[id];
-    return true;
+    return turno;
   }
 
-  async findAllByPatientId(id_paciente) {
-    return Object.values(this.turnos).filter((t) => t.paciente && t.paciente.id == id_paciente);
+  // DELETE
+  async delete(id) {
+    const result = await TurnoModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new NotFoundError('Turno no encontrado');
+    }
+    return true;
   }
 }
 

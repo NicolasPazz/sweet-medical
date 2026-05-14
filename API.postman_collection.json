@@ -1,290 +1,596 @@
 {
-  "info": {
-    "_postman_id": "680649eb-35f9-4712-b0b1-765be62cc970",
-    "name": "API TP DDS",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "48272706",
-    "_collection_link": "https://go.postman.co/collection/48272706-680649eb-35f9-4712-b0b1-765be62cc970?source=collection_link"
-  },
-  "item": [
-    {
-      "name": "http://localhost:3001/pacientes/all",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/pacientes/all",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "pacientes",
-            "all"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/medicos/all",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/medicos/all",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "medicos",
-            "all"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/medicos/datosIniciales",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3001/medicos/datosIniciales",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "medicos",
-            "datosIniciales"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/1/disponibilidad/2",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/turnos/1/disponibilidad/2",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "1",
-            "disponibilidad",
-            "2"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/paciente/11/reserva/2",
-      "request": {
-        "method": "PATCH",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3001/turnos/paciente/11/reserva/2",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "paciente",
-            "11",
-            "reserva",
-            "2"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/medico/1/cancelacion/1",
-      "request": {
-        "method": "PATCH",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"motivo\": \"Cancelado por el paciente\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3001/turnos/medico/1/cancelacion/1",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "medico",
-            "1",
-            "cancelacion",
-            "1"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/1/all",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/turnos/1/all",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "1",
-            "all"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/medico/1/historial/1",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/turnos/medico/1/historial/1",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "medico",
-            "1",
-            "historial",
-            "1"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/1/realizado/2",
-      "request": {
-        "method": "PATCH",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3001/turnos/1/realizado/2",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "1",
-            "realizado",
-            "2"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/medicos/disponibilidad",
-      "request": {
-        "method": "PATCH",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"id_medico\": 1,\r\n    \"disponibilidades\": [\r\n        {\r\n            \"diaSemana\": \"Martes\",\r\n            \"horaDesde\": \"7:00\",\r\n            \"horaHasta\": \"9:00\"\r\n        }\r\n    ]\r\n\r\n\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3001/medicos/disponibilidad",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "medicos",
-            "disponibilidad"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "http://localhost:3001/turnos/all",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3001/turnos/all",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3001",
-          "path": [
-            "turnos",
-            "all"
-          ]
-        }
-      },
-      "response": []
-    }
-  ]
+	"info": {
+		"_postman_id": "1acda39e-09ba-4376-88a4-7e6ebcd99477",
+		"name": "API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43637471",
+		"_collection_link": "https://nicolaspaz-7741775.postman.co/workspace/Nicolas-Paz's-Workspace~290c9eb3-6d31-4de4-8a70-01f6b216242d/collection/43637471-1acda39e-09ba-4376-88a4-7e6ebcd99477?action=share&source=collection_link&creator=43637471"
+	},
+	"item": [
+		{
+			"name": "Medico",
+			"item": [
+				{
+					"name": "Obtener todos los médicos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/medicos/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"medicos",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar datos iniciales del médico",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id_medico\": 1,\r\n  \"nombre\": \"Carlos\",\r\n  \"apellido\": \"Martínez\",\r\n  \"especialidad\": \"Cardiología\",\r\n  \"sede\": \"Centro Médico Sweet\",\r\n  \"matricula\": \"CM-12345\",\r\n  \"email\": \"carlos.martinez@sweetmedical.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/medicos/datosIniciales",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"medicos",
+								"datosIniciales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar disponibilidad del médico",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id_medico\": 1,\r\n  \"disponibilidades\": [\r\n    {\r\n      \"diaSemana\": \"Martes\",\r\n      \"horaDesde\": \"07:00\",\r\n      \"horaHasta\": \"09:00\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/medicos/disponibilidad",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"medicos",
+								"disponibilidad"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notificacion",
+			"item": [
+				{
+					"name": "Obtener notificaciones leídas por usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/leidas/11",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								"leidas",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener notificaciones no leídas por usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/no-leidas/11",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								"no-leidas",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar notificación como leída",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"idUsuario\": 11\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/45",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								"45"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear notificación",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"destinatario\": 11,\n  \"remitente\": 2,\n  \"mensaje\": \"Su turno con el Dr. Martínez fue confirmado para el 2026-06-20 a las 10:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Paciente",
+			"item": [
+				{
+					"name": "Obtener todos los pacientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/pacientes/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"pacientes",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener historial de turnos por paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/pacientes/11/turnos",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"pacientes",
+								"11",
+								"turnos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Servicio",
+			"item": [
+				{
+					"name": "Obtener todos los servicios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar servicio",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": 1,\n  \"tipo\": \"ESPECIALIDAD\",\n  \"nombre\": \"Consulta de Cardiología\",\n  \"duracionTurnoEnMins\": 45,\n  \"costo\": 8500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener servicio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/22",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modificar servicio",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": 1,\n  \"tipo\": \"ESPECIALIDAD\",\n  \"nombre\": \"Consulta de Cardiología Avanzada\",\n  \"duracionTurnoEnMins\": 45,\n  \"costo\": 9200\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/22",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar servicio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"idUsuario\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/22",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								"22"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Turno",
+			"item": [
+				{
+					"name": "Consultar disponibilidad de turno para paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/1/disponibilidad/2",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"1",
+								"disponibilidad",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reservar turno para paciente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/paciente/11/reserva/2",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"paciente",
+								"11",
+								"reserva",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar turno por paciente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"motivo\": \"El paciente no puede asistir\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/paciente/11/cancelacion/2",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"paciente",
+								"11",
+								"cancelacion",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar turno por el Médico",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"motivo\": \"Reprogramación por imprevisto del médico\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/medico/1/cancelacion/1",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"medico",
+								"1",
+								"cancelacion",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener historial de turnos por Médico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/medico/1/historial/1",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"medico",
+								"1",
+								"historial",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar turno como realizado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/1/realizado/2",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"1",
+								"realizado",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar turnos disponibles (Paginado)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/disponibles?page=1&size=10&especialidad=Cardiología&fechaDesde=2026-06-01",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"disponibles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "especialidad",
+									"value": "Cardiología"
+								},
+								{
+									"key": "fechaDesde",
+									"value": "2026-06-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener todos los turnos del médico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/1/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"1",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener todos los turnos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "backendBaseURL",
+			"value": ""
+		}
+	]
 }

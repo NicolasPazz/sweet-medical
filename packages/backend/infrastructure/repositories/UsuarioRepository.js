@@ -1,44 +1,45 @@
-import { BadRequestError, NotFoundError } from '../../errors/AppError.js';
+import { NotFoundError } from '../../errors/AppError.js';
+import { UsuarioModel } from '../schemas/UsuarioSchema.js';
 
 export class UsuarioRepository {
-  constructor() {
-    this.usuarios = {};
-    this.nextId = 1;
-  }
-
+  // CREATE
   async save(usuario) {
-    if (!usuario || typeof usuario !== 'object') {
-      throw new BadRequestError('El usuario es inválido');
+    if (usuario._id) {
+      return await UsuarioModel.findByIdAndUpdate(usuario._id, usuario, { new: true });
+    } else {
+      const newUsuario = new UsuarioModel(usuario);
+      return await newUsuario.save();
     }
-    if (!usuario.id) {
-      usuario.id = this.nextId++;
-    }
-    this.usuarios[usuario.id] = usuario;
-    return usuario;
   }
 
+  // READ
   async findById(id) {
-    return this.usuarios[id] ?? null;
-  }
-
-  async modificar(id, datosActualizados) {
-    const usuario = this.usuarios[id];
+    const usuario = await UsuarioModel.findById(id);
     if (!usuario) {
       throw new NotFoundError('Usuario no encontrado');
     }
-    Object.assign(usuario, datosActualizados);
     return usuario;
   }
 
   async findAll() {
-    return Object.values(this.usuarios);
+    return await UsuarioModel.find();
   }
 
-  async eliminar(id) {
-    if (!this.usuarios[id]) {
+  // UPDATE
+  async update(id, datosActualizados) {
+    const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, { new: true });
+    if (!usuario) {
       throw new NotFoundError('Usuario no encontrado');
     }
-    delete this.usuarios[id];
+    return usuario;
+  }
+
+  // DELETE
+  async delete(id) {
+    const result = await UsuarioModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new NotFoundError('Usuario no encontrado');
+    }
     return true;
   }
 }
