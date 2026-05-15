@@ -1,13 +1,14 @@
 import cron from 'node-cron';
 import { turnoService } from '../services/TurnoService.js';
+import { logger } from '../utils/logger.js';
 
-// Se ejecuta el día 1 de cada mes a las 02:00 AM
-cron.schedule('* * * * *', async () => {
+// Se ejecuta todos los días a las 02:00 AM
+cron.schedule('0 2 * * *', async () => {
   try {
-    console.log('Inicio cronjob');
+    logger.info('Inicio cronjob');
 
     await turnoService.refrescarTurnos();
   } catch (error) {
-    console.error('Error en el proceso batch de refresco de turnos:', error);
+    logger.error('Error en el proceso batch de refresco de turnos:', error);
   }
 });

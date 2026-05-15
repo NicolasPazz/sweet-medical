@@ -34,7 +34,11 @@ export class PacienteRepository {
   }
 
   async findAll() {
-    return await PacienteModel.find().populate('usuario').populate('obraSocial').populate('plan');
+    return await PacienteModel.find()
+      .populate('usuario')
+      .populate('obraSocial')
+      .populate('plan')
+      .lean();
   }
 
   // ACTUALIZAR

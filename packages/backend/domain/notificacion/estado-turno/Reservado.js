@@ -1,10 +1,15 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
+import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Reservado {
   id;
   constructor(turno) {
     this.turno = turno;
+  }
+
+  getEstadoNombre() {
+    return EstadoTurno.RESERVADO;
   }
 
   notificar(remitente) {

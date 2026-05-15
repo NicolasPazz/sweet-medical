@@ -1,7 +1,7 @@
 import { MedicoService } from '../services/MedicoService.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
-import { DiaSemana } from '../domain/utils/enum/DiaSemana.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
+import { DiaSemana } from '../utils/enum/DiaSemana.js';
 
 export class MedicoController {
   constructor({ medicoService = new MedicoService() } = {}) {

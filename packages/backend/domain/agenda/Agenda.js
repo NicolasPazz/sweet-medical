@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { Turno } from '../turno/Turno.js';
 import {
   horaAMinutos,
@@ -6,7 +6,7 @@ import {
   obtenerDisponibilidadesLibres,
   calcularHoraDesdeMinutos,
   horarioIncluido,
-} from '../utils/functions.js';
+} from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Usuario } from '../usuario/Usuario.js';
@@ -20,14 +20,14 @@ export class Agenda {
     const offset = servicio.duracionTurnoEnMins;
 
     for (const disponibilidad of disponibilidadesLibres) {
-      console.log('Hola');
-
       let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
       const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
 
-      console.log('actualMinutos: ' + actualMinutos);
-      console.log('offset: ' + offset);
-      console.log('tiempoLimite: ' + tiempoLimite);
+      logger.debug('actualMinutos: ' + actualMinutos);
+      logger.debug('offset: ' + offset);
+      logger.debug('tiempoLimite: ' + tiempoLimite);
+
+      const sedeDelMedico = medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null;
 
       while (actualMinutos + offset <= tiempoLimite) {
         const turno = new Turno(
@@ -35,12 +35,12 @@ export class Agenda {
           null,
           disponibilidad.diaSemana,
           calcularHoraDesdeMinutos(actualMinutos),
-          null,
+          sedeDelMedico,
           servicio,
           servicio.costo,
         );
 
-        console.log('Turno generado:', turno);
+        logger.debug('Turno generado:', turno);
 
         turnos.push(turno);
 
@@ -65,8 +65,8 @@ export class Agenda {
 
     const turnos = [];
 
-    console.log('DISPONIBILIDADES LIBRES para el medico de id: ' + medico.id);
-    console.log(disponibilidadesLibres);
+    logger.debug('DISPONIBILIDADES LIBRES para el medico de id: ' + medico._id || medico.id);
+    logger.debug(disponibilidadesLibres);
 
     for (const especialidad of medico.especialidades) {
       turnos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
@@ -147,7 +147,7 @@ export class Agenda {
   static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
     // 1. Validación de entrada (Fundamental para el Médico 17)
     if (!diaSemanaDeseado || !horaInicioStr) {
-      console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
+      logger.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
       return new Date(); // Retornamos hoy para evitar el undefined.getTime()
     }
 

@@ -40,7 +40,7 @@ export class MedicoRepository {
   }
 
   async findByMatricula(matricula) {
-    return await MedicoModel.findOne({ matricula });
+    return await MedicoModel.findOne({ matricula }).lean();
   }
 
   async findAll() {
@@ -49,7 +49,8 @@ export class MedicoRepository {
       .populate('especialidades')
       .populate('practicas')
       .populate('sedes')
-      .populate('turnosActualesYFuturos');
+      .populate('turnosActualesYFuturos')
+      .lean();
   }
 
   // ACTUALIZAR

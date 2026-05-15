@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Medico } from '../../domain/usuario/Medico.js';
-import { DiaSemana } from '../../domain/utils/enum/DiaSemana.js';
+import { DiaSemana } from '../../utils/enum/DiaSemana.js';
 
 const medicoSchema = new mongoose.Schema(
   {

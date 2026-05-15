@@ -1,6 +1,6 @@
 import { PacienteService } from '../services/PacienteService.js';
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class PacienteController {
   constructor({ pacienteService = new PacienteService() } = {}) {

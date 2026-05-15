@@ -1,10 +1,16 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../../utils/logger.js';
+import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Realizado {
   id;
   constructor(turno) {
     this.turno = turno;
   }
+
+  getEstadoNombre() {
+    return EstadoTurno.REALIZADO;
+  }
+
   notificar(_remitente) {
     // Si el estado es DISPONIBLE o REALIZADO, no hay notificación
     logger.debug(

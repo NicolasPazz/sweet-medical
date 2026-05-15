@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 import { Turno } from '../../domain/turno/Turno.js';
 import { CambioEstadoTurno } from '../../domain/turno/CambioEstadoTurno.js';
+import { EstadoTurno } from '../../domain/turno/EstadoTurno.js';
 
 const cambioEstadoTurnoSchema = new mongoose.Schema(
   {
     fechaHoraIngreso: { type: Date, default: Date.now },
-    estado: { type: mongoose.Schema.Types.Mixed, required: true },
+    estado: { type: String, required: true, trim: true, enum: Object.values(EstadoTurno) },
     turno: { type: mongoose.Schema.Types.ObjectId, ref: 'Turno' },
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     motivo: { type: String, required: true, trim: true, maxlength: 500 },
@@ -31,7 +32,7 @@ const turnoSchema = new mongoose.Schema(
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
     fechaHora: { type: Date, default: null },
-    estado: { type: mongoose.Schema.Types.Mixed, required: true },
+    estado: { type: String, required: true, trim: true, enum: Object.values(EstadoTurno) },
     costo: { type: Number, required: true, min: 0 },
     historialEstados: [cambioEstadoTurnoSchema],
   },
@@ -40,6 +41,7 @@ const turnoSchema = new mongoose.Schema(
 
 turnoSchema.index({ estado: 1, fechaHora: 1 });
 turnoSchema.index({ medico: 1, estado: 1, fechaHora: 1 });
+turnoSchema.index({ medico: 1, 'servicio._id': 1, estado: 1 });
 turnoSchema.index({ 'servicio.nombre': 1 });
 turnoSchema.index({ 'sede.nombre': 1 });
 

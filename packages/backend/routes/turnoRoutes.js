@@ -24,6 +24,10 @@ turnoRouter
   .patch((req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
 
 turnoRouter
+  .route('/medico/:id_usuario/confirmar/:id_turno')
+  .patch((req, res, next) => turnoController.aceptarTurno(req, res, next));
+
+turnoRouter
   .route('/medico/:id_usuario/historial/:id_paciente')
   .get((req, res, next) => turnoController.obtenerHistorial(req, res, next));
 
@@ -37,7 +41,7 @@ turnoRouter
 
 turnoRouter
   .route('/:id_medico/all')
-  .get((req, res, next) => turnoController.getAllOfMedic(req, res, next));
+  .get((req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
 
 turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, res, next));
 

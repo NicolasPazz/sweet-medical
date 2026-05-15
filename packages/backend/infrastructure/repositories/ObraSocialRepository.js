@@ -30,7 +30,6 @@ export class ObraSocialRepository {
   }
 
   // ACTUALIZAR
-  // No hay método update definido
 
   // ELIMINAR
   async delete(id) {

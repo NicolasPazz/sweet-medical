@@ -24,7 +24,7 @@ export class MedicoService {
 
     return medico;
   }
-  
+
   async crearMedico(data) {
     if (!data?.usuario || !data?.matricula || !data?.nombre) {
       throw new Error('Faltan datos obligatorios para crear el médico');

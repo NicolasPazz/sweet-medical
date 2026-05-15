@@ -1,4 +1,5 @@
 import { GeneradorDisponibilidad } from './agenda/GeneradorDisponibilidad.js';
+import { logger } from '../utils/logger.js';
 
 let disponibilidades = [
   { diaSemana: 'Lunes', horaDesde: 2, horaHasta: 4 },
@@ -7,12 +8,12 @@ let disponibilidades = [
 
 const bloqueNuevo = { diaSemana: 'Lunes', horaDesde: 22, horaHasta: 23.5 };
 
-console.log('LISTA INICIAL: ');
+logger.info('LISTA INICIAL: ');
 
-console.log(disponibilidades);
+logger.info(disponibilidades);
 
 GeneradorDisponibilidad.actualizarDisponibilidad(bloqueNuevo, disponibilidades);
 
-console.log('LISTA FINAL: ');
+logger.info('LISTA FINAL: ');
 
-console.log(disponibilidades);
+logger.info(disponibilidades);

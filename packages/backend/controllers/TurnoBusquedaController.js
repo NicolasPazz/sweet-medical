@@ -1,4 +1,4 @@
-import { logger } from '../domain/utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 export class TurnoBusquedaController {
   static crear(turnoBusquedaService) {

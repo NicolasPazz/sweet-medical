@@ -6,11 +6,11 @@ import { Practica } from '../domain/servicios/Practica.js';
 import { Sede } from '../domain/servicios/Sede.js';
 import { Plan } from '../domain/cobertura/Plan.js';
 
-import { DiaSemana } from '../domain/utils/enum/DiaSemana.js';
+import { DiaSemana } from '../utils/enum/DiaSemana.js';
 import { NivelCobertura } from '../domain/cobertura/NivelCobertura.js';
 import { DisponibilidadHoraria } from '../domain/agenda/DisponibilidadHoraria.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
-import { logger } from '../domain/utils/logger.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
+import { logger } from '../utils/logger.js';
 
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
@@ -20,6 +20,9 @@ import { practicaRepository } from '../infrastructure/repositories/PracticaRepos
 import { sedeRepository } from '../infrastructure/repositories/SedeRepository.js';
 import { planRepository } from '../infrastructure/repositories/PlanRepository.js';
 import { obraSocialRepository } from '../infrastructure/repositories/obraSocialRepository.js';
+import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
+
+import { turnoService } from '../services/TurnoService.js';
 
 import { UsuarioModel } from '../infrastructure/schemas/UsuarioSchema.js';
 import { MedicoModel } from '../infrastructure/schemas/MedicoSchema.js';
@@ -42,6 +45,8 @@ export class AdminController {
     this.sedeRepository = sedeRepository;
     this.planRepository = planRepository;
     this.obraSocialRepository = obraSocialRepository;
+    this.turnoRepository = turnoRepository;
+    this.turnoService = turnoService;
   }
 
   cargarDatosIniciales = async (req, res, next) => {
@@ -255,12 +260,20 @@ export class AdminController {
       logger.info(`✅ Se cargaron ${pacientesGuardados.length} pacientes.`);
 
       // 8. Cargar turnos
+      await turnoRepository.deleteAll();
+
+      logger.info('⏳ Iniciando generación batch de turnos iniciales...');
+
+      await turnoService.refrescarTurnos();
+
+      logger.info('✅ Turnos iniciales generados exitosamente.');
 
       return res.status(201).json({
         status: 'success',
         message: 'Datos iniciales cargados exitosamente',
       });
     } catch (error) {
+      logger.error('❌ Error al cargar datos iniciales:', error.message);
       return next(error);
     }
   };

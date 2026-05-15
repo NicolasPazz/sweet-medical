@@ -1,9 +1,14 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../../utils/logger.js';
+import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Disponible {
   id;
   constructor(turno) {
     this.turno = turno;
+  }
+
+  getEstadoNombre() {
+    return EstadoTurno.DISPONIBLE;
   }
 
   notificar(_remitente) {

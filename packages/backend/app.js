@@ -4,6 +4,7 @@ import router from './routes/router.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorLogger } from './middlewares/errorLogger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { logger } from './utils/logger.js';
 
 const app = express();
 
@@ -43,11 +44,11 @@ app.launch = function () {
   const portToUse = this.port || process.env.PORT || 3001;
 
   this.listen(portToUse, async () => {
-    console.log(`🚀 Servidor listo en http://localhost:${portToUse}`);
-    console.log(`🏥 Health check: http://localhost:${portToUse}/health`);
+    logger.info(`🚀 Servidor listo en http://localhost:${portToUse}`);
+    logger.info(`🏥 Health check: http://localhost:${portToUse}/health`);
 
     try {
-      console.log('⏳ Ejecutando carga automática...');
+      logger.info('⏳ Ejecutando carga automática...');
 
       const url = `http://localhost:${portToUse}/admin/datos-iniciales`;
 
@@ -61,12 +62,12 @@ app.launch = function () {
       const responseData = await response.json();
 
       if (response.ok) {
-        console.log('✅ Carga automática exitosa!');
+        logger.info('✅ Carga automática exitosa!');
       } else {
-        console.error('❌ La ruta respondió con error:', responseData);
+        logger.error('❌ La ruta respondió con error:', responseData);
       }
     } catch (error) {
-      console.error('💥 No se pudo conectar a la ruta automática:', error.message);
+      logger.error('💥 No se pudo conectar a la ruta automática:', error.message);
     }
   });
 };

@@ -36,7 +36,8 @@ export class NotificacionRepository {
     })
       .populate('destinatario')
       .populate('remitente')
-      .sort({ fechaHoraCreacion: -1 });
+      .sort({ fechaHoraCreacion: -1 })
+      .lean();
   }
 
   async findAllUnreadByUserId(userId) {
@@ -46,7 +47,8 @@ export class NotificacionRepository {
     })
       .populate('destinatario')
       .populate('remitente')
-      .sort({ fechaHoraCreacion: -1 });
+      .sort({ fechaHoraCreacion: -1 })
+      .lean();
   }
 
   async obtenerLeidas(idUsuario) {
@@ -81,7 +83,6 @@ export class NotificacionRepository {
   }
 
   // ELIMINAR
-  // No hay método eliminar definido
 }
 
 export const notificacionRepository = new NotificacionRepository();

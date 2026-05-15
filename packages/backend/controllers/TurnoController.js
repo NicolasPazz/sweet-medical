@@ -1,6 +1,6 @@
 import { BadRequestError } from '../errors/AppError.js';
 import { TurnoService } from '../services/TurnoService.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class TurnoController {
   constructor({ turnoService = new TurnoService() } = {}) {
@@ -83,6 +83,21 @@ export class TurnoController {
     }
   };
 
+  aceptarTurno = async (req, res, next) => {
+    try {
+      const idUsuario = req.params.id_usuario;
+      ValidadorId.validarIds(idUsuario);
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+
+      await this.turnoService.aceptarTurno(idUsuario, idTurno);
+
+      return res.status(200).json({ status: 'success' });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   obtenerDisponibilidad = async (req, res, next) => {
     try {
       const idUsuario = req.params.id_usuario;
@@ -101,12 +116,12 @@ export class TurnoController {
     }
   };
 
-  getAllOfMedic = async (req, res, next) => {
+  obtenerTurnosMedico = async (req, res, next) => {
     try {
       const idMedico = req.params.id_medico;
       ValidadorId.validarIds(idMedico);
 
-      const turnos = await this.turnoService.getAllOfMedic(idMedico);
+      const turnos = await this.turnoService.obtenerTurnosMedico(idMedico);
 
       return res.status(200).json({
         status: 'success',

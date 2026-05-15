@@ -7,15 +7,18 @@ import { Paciente } from '../domain/usuario/Paciente.js';
 import { Medico } from '../domain/usuario/Medico.js';
 import { Reservado } from '../domain/notificacion/estado-turno/Reservado.js';
 import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
+import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
 import { Realizado } from '../domain/notificacion/estado-turno/Realizado.js';
 import { Agenda } from '../domain/agenda/Agenda.js';
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
+import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
 } from '../errors/AppError.js';
+import { logger } from '../utils/logger.js';
 
 export class TurnoService {
   turnoRepository;
@@ -54,16 +57,17 @@ export class TurnoService {
 
     turno.paciente = paciente;
 
-    const turnosReservados = this.turnoRepository
-      .findAllByMedicId(turno.medico.id)
-      .filter((t) => t.estado instanceof Reservado);
+    const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
+      turno.medico.id,
+      EstadoTurno.RESERVADO,
+    );
 
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
     const notificacion = turno.actualizarEstado(new Reservado(turno), usuario, 'Reserva de turno');
 
-    this.notificacionRepository.save(notificacion);
-    this.turnoRepository.save(turno);
+    await this.notificacionRepository.save(notificacion);
+    await this.turnoRepository.save(turno);
 
     return turno;
   }
@@ -118,11 +122,11 @@ export class TurnoService {
 
     if (indice !== -1) {
       turno.medico.turnosActualesYFuturos.splice(indice, 1);
-      this.medicoRepository.save(turno.medico);
+      await this.medicoRepository.save(turno.medico);
     }
 
-    this.notificacionRepository.save(notificacion);
-    this.turnoRepository.save(turno);
+    await this.notificacionRepository.save(notificacion);
+    await this.turnoRepository.save(turno);
 
     return turno;
   }
@@ -195,11 +199,47 @@ export class TurnoService {
 
     if (indice !== -1) {
       medico.turnosActualesYFuturos.splice(indice, 1);
-      this.medicoRepository.save(medico);
+      await this.medicoRepository.save(medico);
     }
 
-    this.turnoRepository.save(turno);
+    await this.turnoRepository.save(turno);
 
+    return turno;
+  }
+
+  async aceptarTurno(id_usuario, id_turno) {
+    const usuario = await this.usuarioRepository.findById(id_usuario);
+
+    if (usuario == null) {
+      throw new NotFoundError('Usuario no encontrado');
+    }
+
+    if (usuario.roles.filter((u) => u instanceof Medico).length === 0) {
+      throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
+    }
+
+    const turno = await this.turnoRepository.findById(id_turno);
+
+    if (turno == null) {
+      throw new NotFoundError('Turno no encontrado');
+    }
+
+    const medico = usuario.roles.find((r) => r instanceof Medico);
+
+    if (turno.medico !== medico) {
+      throw new ConflictError('El turno no pertenece al medico');
+    }
+
+    if (!(turno.estado instanceof Reservado)) {
+      throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
+    }
+
+    const notificacion = turno.actualizarEstado(new Confirmado(turno), usuario, 'Turno confirmado');
+    if (notificacion) {
+      await this.notificacionRepository.save(notificacion);
+    }
+
+    await this.turnoRepository.save(turno);
     return turno;
   }
 
@@ -216,8 +256,9 @@ export class TurnoService {
 
     const medico = usuario.roles.find((r) => r instanceof Medico);
 
-    const turnosDelServicio = medico.turnosActualesYFuturos.filter(
-      (t) => t.servicio.id == id_servicio && t.estado instanceof Disponible,
+    const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
+      medico.id,
+      id_servicio,
     );
 
     const dataParaEnviar = turnosDelServicio.map((t) => ({
@@ -239,20 +280,20 @@ export class TurnoService {
     const TAMANO_LOTE = 20; // Procesa de a 20 médicos para cuidar la RAM y las conexiones a DB
     const metricas = { procesados: 0, fallidos: 0, total: 0 };
 
-    console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
+    logger.info(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
-      // 1. Obtener todos los médicos (si el volumen es masivo, aquí usaríamos paginación)
+      // 1. Obtener todos los médicos
       const medicos = await this.medicoRepository.findAll();
 
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
-        console.log('[BATCH] No hay médicos para procesar.');
+        logger.info('[BATCH] No hay médicos para procesar.');
         return;
       }
 
-      // 2. Procesamiento por lotes (Chunks)
+      // 2. Procesamiento por lotes
       for (let i = 0; i < medicos.length; i += TAMANO_LOTE) {
         const loteActual = medicos.slice(i, i + TAMANO_LOTE);
 
@@ -261,29 +302,37 @@ export class TurnoService {
           loteActual.map(async (medico) => {
             try {
               const agenda = new Agenda();
-              const turnosCancelados = await agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(medico);
 
-              this.medicoRepository.save(medico);
+              for (const t of turnosCancelados) {
+                await this.turnoRepository.save(t);
+              }
 
-              turnosCancelados.forEach((t) => this.turnoRepository.save(t));
+              const idsTurnos = [];
+              for (const t of medico.turnosActualesYFuturos) {
+                const turnoGuardado = await this.turnoRepository.save(t);
+                idsTurnos.push(turnoGuardado.id || turnoGuardado._id);
+              }
 
-              medico.turnosActualesYFuturos.forEach((t) => this.turnoRepository.save(t));
+              medico.turnosActualesYFuturos = idsTurnos;
 
               metricas.procesados++;
             } catch (errorMedico) {
               metricas.fallidos++;
-              console.error(`[BATCH ERROR] Médico ID ${medico.id}: ${errorMedico.message}`);
+              logger.error(
+                `[BATCH ERROR] Médico ID ${medico._id || medico.id}: ${errorMedico.message}`,
+              );
             }
           }),
         );
 
-        console.log(
+        logger.debug(
           `[BATCH PROGRESS] Lote completado. Progreso: ${metricas.procesados + metricas.fallidos}/${metricas.total}`,
         );
       }
 
       // 3. Reporte final
-      console.log(`
+      logger.debug(`
             --- RESUMEN DEL PROCESO BATCH ---
             Finalizado: ${new Date().toISOString()}
             Total Médicos: ${metricas.total}
@@ -291,12 +340,12 @@ export class TurnoService {
             Fallidos:      ${metricas.fallidos}
             ---------------------------------`);
     } catch (error) {
-      console.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
+      logger.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
       throw error; // Relanzamos para que el CronJob pueda loguear el fallo fatal
     }
   }
 
-  async getAllOfMedic(id_medico) {
+  async obtenerTurnosMedico(id_medico) {
     const medico = await this.medicoRepository.findById(id_medico);
 
     if (medico == null) {

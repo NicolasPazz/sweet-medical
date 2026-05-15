@@ -1,11 +1,10 @@
 import { TurnoModel } from '../schemas/TurnoSchema.js';
 import { EstadoTurno } from '../../domain/turno/EstadoTurno.js';
-import { logger } from '../../domain/utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
   // CREAR
-  // No hay métodos CREAR
 
   // LEER
   async search(specification, sortParams, paginationParams) {
@@ -62,7 +61,7 @@ export class BusquedaTurnosRepository {
       });
     }
 
-    // PAGINATION
+    // PAGINACION
     if (paginationParams) {
       const { page, limit } = paginationParams;
       const skip = (page - 1) * limit;
@@ -83,8 +82,6 @@ export class BusquedaTurnosRepository {
   }
 
   // ACTUALIZAR
-  // No hay métodos ACTUALIZAR
 
   // ELIMINAR
-  // No hay métodos ELIMINAR
 }

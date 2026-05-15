@@ -8,12 +8,13 @@
   "scripts": {
     "start:backend": "npm start --workspace=backend",
     "dev:backend": "npm run dev --workspace=backend",
+    "test:backend": "npm test --workspace=backend -- --verbose",
     "start:frontend": "npm start --workspace=frontend",
-    "start:dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
-    "format": "prettier --write \".\"",
-    "lint": "eslint --fix \".\"",
-    "fix:all": "npm run format && npm run lint",
-    "prepare": "husky"
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "start:dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "format": "prettier --write \"packages/**/*.js\"",
+    "lint": "eslint --fix \"packages/**/*.js\"",
+    "fix:all": "npm run format && npm run lint"
   },
   "keywords": [],
   "author": "",

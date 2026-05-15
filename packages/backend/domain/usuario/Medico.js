@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { Agenda } from '../agenda/Agenda.js';
 import { GeneradorDisponibilidad } from '../agenda/GeneradorDisponibilidad.js';
 

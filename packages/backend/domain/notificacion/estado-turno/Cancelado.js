@@ -1,11 +1,17 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
+import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Cancelado {
   id;
   constructor(turno) {
     this.turno = turno;
   }
+
+  getEstadoNombre() {
+    return EstadoTurno.CANCELADO;
+  }
+
   notificar(remitente) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();

@@ -4,7 +4,7 @@ echo "===================================================="
 echo "🎨 Linteando archivos modificados..."
 echo "===================================================="
 
-npx lint-staged
+npm run fix:all
 RESULTADO=$?
 
 if [ $RESULTADO -ne 0 ]; then

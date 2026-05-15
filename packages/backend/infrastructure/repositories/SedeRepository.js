@@ -30,7 +30,6 @@ export class SedeRepository {
   }
 
   // ACTUALIZAR
-  // No hay método update definido
 
   // ELIMINAR
   async delete(id) {

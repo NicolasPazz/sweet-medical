@@ -1,5 +1,5 @@
 import { NotificacionService } from '../services/NotificacionService.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 export class NotificacionController {

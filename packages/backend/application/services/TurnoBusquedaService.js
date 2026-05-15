@@ -1,7 +1,7 @@
 import { MotorCostos } from '../../domain/cobertura/MotorCostos.js';
 import { TurnoMapper } from '../../domain/turno/dtos/TurnoMapper.js';
 import { FiltroBusquedaSpecification } from '../../domain/busqueda/FiltroBusquedaSpecification.js';
-import { logger } from '../../domain/utils/logger.js';
+import { logger } from '../../utils/logger.js';
 
 const MAX_RESULTADOS_COSTO = 500;
 

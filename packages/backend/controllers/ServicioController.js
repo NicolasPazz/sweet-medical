@@ -1,5 +1,5 @@
 import { ServicioService } from '../services/ServicioService.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 const TIPOS_SERVICIO_VALIDOS = ['ESPECIALIDAD', 'PRACTICA'];

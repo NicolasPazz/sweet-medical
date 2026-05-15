@@ -2,7 +2,7 @@ import { NotificacionRepository } from '../infrastructure/repositories/Notificac
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 import { Notificacion } from '../domain/notificacion/Notificacion.js';
 import { NotFoundError } from '../errors/AppError.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class NotificacionService {
   constructor({ notificacionRepository = new NotificacionRepository() } = {}) {

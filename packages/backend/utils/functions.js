@@ -1,5 +1,7 @@
 // utils/dateUtils.js
 
+import { logger } from './logger.js';
+
 export {
   crearFechaDesdeAtributos,
   horaAMinutos,
@@ -171,8 +173,8 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
       fragmentosLibres = nuevosFragmentos;
     });
 
-    console.log('FRAGMENTOS LIBRES: ');
-    console.log(fragmentosLibres);
+    logger.debug('FRAGMENTOS LIBRES: ');
+    logger.debug(fragmentosLibres);
 
     // 4. Transformamos los minutos de nuevo a formato horario para devolver
     fragmentosLibres.forEach((f) => {

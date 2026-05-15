@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 
 export class Notificacion {
   // MongoDB va a agregar _id al documento cuando lo insertes, no necesitás anticiparlo en la clase.

@@ -1,7 +1,7 @@
 import { CambioEstadoTurno } from './CambioEstadoTurno.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { Usuario } from '../usuario/Usuario.js';
 
 export class Turno {

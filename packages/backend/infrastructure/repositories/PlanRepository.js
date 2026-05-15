@@ -31,7 +31,6 @@ export class PlanRepository {
   }
 
   // ACTUALIZAR
-  // No hay método update definido
 
   // ELIMINAR
   async delete(id) {

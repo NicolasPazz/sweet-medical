@@ -4,7 +4,7 @@ import { servicioRepository } from '../infrastructure/repositories/ServicioRepos
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 import { Usuario } from '../domain/usuario/Usuario.js';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/AppError.js';
-import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class ServicioService {
   constructor() {
@@ -69,7 +69,7 @@ export class ServicioService {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    const tipoReal = servicioOriginal.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD';
+    const tipoReal = servicio.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD';
 
     if (datosActualizados.tipo && datosActualizados.tipo !== tipoReal) {
       throw new BadRequestError(
