@@ -39,6 +39,10 @@ export class MedicoRepository {
     return medico;
   }
 
+  async findByMatricula(matricula) {
+    return await MedicoModel.findOne({ matricula });
+  }
+
   async findAll() {
     return await MedicoModel.find()
       .populate('usuario')
@@ -75,5 +79,4 @@ export class MedicoRepository {
     return await MedicoModel.deleteMany({});
   }
 }
-
 export const medicoRepository = new MedicoRepository();
