@@ -8,8 +8,6 @@ import { Plan } from '../domain/cobertura/Plan.js';
 
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
 import { NivelCobertura } from '../domain/cobertura/NivelCobertura.js';
-import { DisponibilidadHoraria } from '../domain/agenda/DisponibilidadHoraria.js';
-import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/logger.js';
 
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
@@ -32,8 +30,6 @@ import { PracticaModel } from '../infrastructure/schemas/PracticaSchema.js';
 import { SedeModel } from '../infrastructure/schemas/SedeSchema.js';
 import { PlanModel } from '../infrastructure/schemas/PlanSchema.js';
 import { ObraSocialModel } from '../infrastructure/schemas/ObraSocialSchema.js';
-
-import { BadRequestError } from '../errors/AppError.js';
 
 export class AdminController {
   constructor() {
@@ -176,7 +172,7 @@ export class AdminController {
       }
 
       const usuarioAdmin = Usuario.USUARIO_SISTEMA;
-      const usuarioAdminGuardado = await this.usuarioRepository.save(usuarioAdmin);
+      await this.usuarioRepository.save(usuarioAdmin);
       logger.info(`✅ Se cargó usuario admin_sweet.`);
 
       const usuariosMedicosGuardados =

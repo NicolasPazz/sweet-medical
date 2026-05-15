@@ -6,7 +6,6 @@ import { Reservado } from '../../domain/notificacion/estado-turno/Reservado.js';
 import { Confirmado } from '../../domain/notificacion/estado-turno/Confirmado.js';
 import { Cancelado } from '../../domain/notificacion/estado-turno/Cancelado.js';
 import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
-import { logger } from '../../utils/logger.js';
 
 export class TurnoRepository {
   _obtenerValorEstado(estado) {

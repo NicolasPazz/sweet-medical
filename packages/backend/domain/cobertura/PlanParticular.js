@@ -6,7 +6,7 @@ export class PlanParticular extends Plan {
     super('Particular');
   }
 
-  calcularCosto(prestacion, tipo) {
+  calcularCosto(prestacion) {
     // El particular nunca tiene cobertura
     const costoFinal = prestacion.costoBase || prestacion.costoConsulta || 0;
 

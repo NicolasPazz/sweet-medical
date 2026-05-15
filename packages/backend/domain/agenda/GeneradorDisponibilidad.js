@@ -1,5 +1,3 @@
-import { DisponibilidadHoraria } from '../agenda/DisponibilidadHoraria.js';
-
 export class GeneradorDisponibilidad {
   static actualizarDisponibilidad(nuevaDisponibilidad, disponibilidades) {
     // 1. Identificar TODOS los que colisionan con el nuevo bloque

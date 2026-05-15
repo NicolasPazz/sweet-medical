@@ -12,12 +12,7 @@ import { Realizado } from '../domain/notificacion/estado-turno/Realizado.js';
 import { Agenda } from '../domain/agenda/Agenda.js';
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
-import {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-} from '../errors/AppError.js';
+import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
 
 export class TurnoService {

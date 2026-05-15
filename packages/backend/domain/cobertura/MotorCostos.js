@@ -1,6 +1,4 @@
 import { PlanParticular } from './PlanParticular.js';
-import { NivelCobertura } from './NivelCobertura.js';
-import { logger } from '../../utils/logger.js';
 
 export class MotorCostos {
   /**

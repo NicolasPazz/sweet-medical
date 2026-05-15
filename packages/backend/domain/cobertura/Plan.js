@@ -35,7 +35,7 @@ export class Plan {
    * @param {String} tipo - 'especialidad' o 'practica'
    * @returns {Object} { nivel: String, costo: Number }
    */
-  calcularCosto(prestacion, tipo) {
+  calcularCosto() {
     throw new Error('calcularCosto debe ser implementado por subclases');
   }
 }

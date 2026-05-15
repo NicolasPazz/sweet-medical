@@ -1,7 +1,6 @@
 import { TurnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
 import { PacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { NotFoundError } from '../errors/AppError.js';
-import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class PacienteService {
   constructor({

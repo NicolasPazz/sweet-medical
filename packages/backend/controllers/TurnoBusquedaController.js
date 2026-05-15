@@ -2,7 +2,7 @@ import { logger } from '../utils/logger.js';
 
 export class TurnoBusquedaController {
   static crear(turnoBusquedaService) {
-    return async (req, res, next) => {
+    return async (req, res) => {
       try {
         const {
           profesionalId,
