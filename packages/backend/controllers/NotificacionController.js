@@ -9,7 +9,9 @@ export class NotificacionController {
 
   obtenerLeidas = async (req, res, next) => {
     try {
-      const idUsuario = ValidadorId.validarIds(req.params.idUsuario);
+      const idUsuario = req.params.idUsuario;
+      ValidadorId.validarIds(idUsuario);
+
       const resultado = await this.notificacionService.obtenerLeidas(idUsuario);
       return res.status(200).json({
         status: 'success',
@@ -22,7 +24,9 @@ export class NotificacionController {
 
   obtenerNoLeidas = async (req, res, next) => {
     try {
-      const idUsuario = ValidadorId.validarIds(req.params.idUsuario);
+      const idUsuario = req.params.idUsuario;
+      ValidadorId.validarIds(idUsuario);
+
       const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);
       return res.status(200).json({
         status: 'success',
@@ -35,8 +39,10 @@ export class NotificacionController {
 
   marcarComoLeida = async (req, res, next) => {
     try {
-      const id = ValidadorId.validarIds(req.params.id);
-      const idUsuario = ValidadorId.validarIds(req.body.idUsuario);
+      const id = req.params.id;
+      ValidadorId.validarIds(id);
+      const idUsuario = req.body.idUsuario;
+      ValidadorId.validarIds(idUsuario);
       const resultado = await this.notificacionService.marcarComoLeida(id, idUsuario);
       return res.status(200).json({
         status: 'success',
@@ -61,8 +67,10 @@ export class NotificacionController {
   };
 
   extraerYValidarBodyNotificacion(body) {
-    const destinatario = ValidadorId.validarIds(body.destinatario);
-    const remitente = ValidadorId.validarIds(body.remitente);
+    const destinatario = body.destinatario;
+    ValidadorId.validarIds(destinatario);
+    const remitente = body.remitente;
+    ValidadorId.validarIds(remitente);
 
     if (typeof body.mensaje !== 'string' || body.mensaje.trim().length === 0) {
       throw new BadRequestError('El mensaje no puede estar vacío');

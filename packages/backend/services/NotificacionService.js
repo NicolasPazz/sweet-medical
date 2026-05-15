@@ -12,12 +12,12 @@ export class NotificacionService {
 
   obtenerLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.obtenerLeidas(idUsuario);
+    return this.notificacionRepository.findAllReadByUserId(idUsuario);
   }
 
   obtenerNoLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.obtenerNoLeidas(idUsuario);
+    return this.notificacionRepository.findAllUnreadByUserId(idUsuario);
   }
 
   marcarComoLeida(id, idUsuario) {
@@ -33,7 +33,7 @@ export class NotificacionService {
       throw new NotFoundError('Notificación no encontrada');
     }
 
-    return this.notificacionRepository.marcarComoLeida(id);
+    return this.notificacionRepository.markAsRead(id);
   }
 
   save(datosNotificacion) {
