@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { ObraSocialModel } from '../schemas/ObraSocialSchema.js';
 
 export class ObraSocialRepository {
-  // CREATE
+  // CREAR
   async save(obraSocial) {
     if (obraSocial._id) {
       return await ObraSocialModel.findByIdAndUpdate(obraSocial._id, obraSocial, { new: true });
@@ -12,7 +12,11 @@ export class ObraSocialRepository {
     }
   }
 
-  // READ
+  async saveAll(obrasSociales) {
+    return await ObraSocialModel.insertMany(obrasSociales);
+  }
+
+  // LEER
   async findById(id) {
     const obraSocial = await ObraSocialModel.findById(id);
     if (!obraSocial) {
@@ -25,16 +29,20 @@ export class ObraSocialRepository {
     return await ObraSocialModel.find();
   }
 
-  // UPDATE
+  // ACTUALIZAR
   // No hay método update definido
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await ObraSocialModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Obra social no encontrada');
     }
     return true;
+  }
+
+  async deleteAll() {
+    return await ObraSocialModel.deleteMany({});
   }
 }
 

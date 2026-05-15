@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { PlanModel } from '../schemas/PlanSchema.js';
 
 export class PlanRepository {
-  // CREATE
+  // CREAR
   async save(plan) {
     if (plan._id) {
       return await PlanModel.findByIdAndUpdate(plan._id, plan, { new: true });
@@ -13,7 +13,11 @@ export class PlanRepository {
     }
   }
 
-  // READ
+  async saveAll(planes) {
+    return await PlanModel.insertMany(planes);
+  }
+
+  // LEER
   async findById(id) {
     const plan = await PlanModel.findById(id);
     if (!plan) {
@@ -26,16 +30,20 @@ export class PlanRepository {
     return await PlanModel.find();
   }
 
-  // UPDATE
+  // ACTUALIZAR
   // No hay método update definido
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await PlanModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Plan no encontrado');
     }
     return true;
+  }
+
+  async deleteAll() {
+    return await PlanModel.deleteMany({});
   }
 }
 

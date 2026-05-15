@@ -18,13 +18,6 @@ const usuarioSchema = new mongoose.Schema(
       minlength: 6,
       maxlength: 128,
     },
-    roles: [
-      {
-        type: String,
-        enum: ['MEDICO', 'PACIENTE', 'ADMIN'],
-        trim: true,
-      },
-    ],
   },
   { timestamps: true, collection: 'usuarios' },
 );

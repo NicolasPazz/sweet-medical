@@ -10,7 +10,9 @@ export class PacienteController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idPaciente = this.parsearId(req.params.id);
+      const idPaciente = req.params.id;
+
+      ValidadorId.validarIds(idPaciente);
 
       const resultado = await this.pacienteService.obtenerHistorialTurnos(idPaciente);
 
@@ -41,10 +43,4 @@ export class PacienteController {
       return next(error);
     }
   };
-
-  parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
-  }
 }

@@ -53,7 +53,7 @@ export class Agenda {
 
   //Genera todos los turnos segun la disponibilidad actual de un medico
   refrescarTurnosSegunDisponibilidadDe(medico) {
-    // TODO
+    // POR HACER
     logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
 
     const turnosEliminados = this.eliminarTurnosDesactualizados(medico);

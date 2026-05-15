@@ -24,12 +24,12 @@ export class ServicioService {
   }
 
   obtenerTodos() {
-    return this.servicioRepository.obtenerTodos();
+    return this.servicioRepository.findAll();
   }
 
   obtenerPorId(id) {
     ValidadorId.validarIds(id);
-    const servicio = this.servicioRepository.obtenerPorId(id);
+    const servicio = this.servicioRepository.findById(id);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
@@ -64,23 +64,35 @@ export class ServicioService {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = this.servicioRepository.obtenerPorId(id);
+    const servicio = this.servicioRepository.findById(id);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    return this.servicioRepository.modificar(id, datosActualizados);
+    const tipoReal = servicioOriginal.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD';
+
+    if (datosActualizados.tipo && datosActualizados.tipo !== tipoReal) {
+      throw new BadRequestError(
+        `No se puede cambiar el tipo de servicio. El ID ${id} pertenece a una ${tipoReal}.`,
+      );
+    }
+
+    if (!datosActualizados.tipo) {
+      datosActualizados.tipo = tipoReal;
+    }
+
+    return this.servicioRepository.update(id, datosActualizados);
   }
 
   async eliminar(idUsuario, id) {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = this.servicioRepository.obtenerPorId(id);
+    const servicio = this.servicioRepository.findById(id);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    return this.servicioRepository.eliminar(id);
+    return this.servicioRepository.delete(id);
   }
 }

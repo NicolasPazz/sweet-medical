@@ -2,17 +2,21 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { PracticaModel } from '../schemas/PracticaSchema.js';
 
 export class PracticaRepository {
-  // CREATE
+  // CREAR
   async save(practica) {
     if (practica._id) {
-      return await PracticaModel.findByIdAndUpdate(practica._id, practica, { new: true });
+      return await PracticaModel.findByIdAndUpdate(practica._id, practica);
     } else {
-      const newPractica = new PracticaModel(practica);
-      return await newPractica.save();
+      const nuevaPractica = new PracticaModel(practica);
+      return await nuevaPractica.save();
     }
   }
 
-  // READ
+  async saveAll(practicas) {
+    return await PracticaModel.insertMany(practicas);
+  }
+
+  // LEER
   async findById(id) {
     const practica = await PracticaModel.findById(id);
     if (!practica) {
@@ -22,25 +26,29 @@ export class PracticaRepository {
   }
 
   async findAll() {
-    return await PracticaModel.find({ activo: true });
+    return await PracticaModel.find();
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async update(id, datosActualizados) {
-    const practica = await PracticaModel.findByIdAndUpdate(id, datosActualizados, { new: true });
+    const practica = await PracticaModel.findByIdAndUpdate(id, datosActualizados);
     if (!practica) {
       throw new NotFoundError('Práctica no encontrada');
     }
     return practica;
   }
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
-    const result = await PracticaModel.findByIdAndUpdate(id, { activo: false }, { new: true });
+    const result = await PracticaModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Práctica no encontrada');
     }
     return true;
+  }
+
+  async deleteAll() {
+    await PracticaModel.deleteMany({});
   }
 }
 

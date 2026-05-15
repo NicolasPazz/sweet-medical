@@ -9,8 +9,8 @@ export class TurnoController {
 
   reservarTurno = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.params.id_usuario);
-      const idTurno = this.parsearId(req.params.id_turno);
+      const idUsuario = ValidadorId.validarIds(req.params.id_usuario);
+      const idTurno = ValidadorId.validarIds(req.params.id_turno);
 
       await this.turnoService.reservarTurno(idUsuario, idTurno);
 
@@ -30,8 +30,8 @@ export class TurnoController {
 
   cancelarTurno = async (req, res, next, esMedico) => {
     try {
-      const idUsuario = this.parsearId(req.params.id_usuario);
-      const idTurno = this.parsearId(req.params.id_turno);
+      const idUsuario = ValidadorId.validarIds(req.params.id_usuario);
+      const idTurno = ValidadorId.validarIds(req.params.id_turno);
       const { motivo } = req.body;
 
       if (motivo == null) {
@@ -48,8 +48,8 @@ export class TurnoController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idPaciente = this.parsearId(req.params.id_paciente);
-      const idUsuario = this.parsearId(req.params.id_usuario);
+      const idPaciente = ValidadorId.validarIds(req.params.id_paciente);
+      const idUsuario = ValidadorId.validarIds(req.params.id_usuario);
 
       const historial = await this.turnoService.obtenerHistorial(idPaciente, idUsuario);
 
@@ -64,8 +64,8 @@ export class TurnoController {
 
   finalizarTurno = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.params.id_usuario);
-      const idTurno = this.parsearId(req.params.id_turno);
+      const idUsuario = ValidadorId.validarIds(req.params.id_usuario);
+      const idTurno = ValidadorId.validarIds(req.params.id_turno);
 
       await this.turnoService.finalizarTurno(idUsuario, idTurno);
 
@@ -77,8 +77,8 @@ export class TurnoController {
 
   obtenerDisponibilidad = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.params.id_usuario);
-      const idServicio = this.parsearId(req.params.id_servicio);
+      const idUsuario = ValidadorId.validarIds(req.params.id_usuario);
+      const idServicio = ValidadorId.validarIds(req.params.id_servicio);
 
       const disponibilidad = await this.turnoService.obtenerDisponibilidad(idUsuario, idServicio);
 
@@ -93,7 +93,7 @@ export class TurnoController {
 
   getAllOfMedic = async (req, res, next) => {
     try {
-      const idMedico = this.parsearId(req.params.id_medico);
+      const idMedico = ValidadorId.validarIds(req.params.id_medico);
 
       const turnos = await this.turnoService.getAllOfMedic(idMedico);
 
@@ -118,9 +118,4 @@ export class TurnoController {
       return next(error);
     }
   };
-
-  parsearId(valor) {
-    ValidadorId.validarIds(valor);
-    return valor;
-  }
 }

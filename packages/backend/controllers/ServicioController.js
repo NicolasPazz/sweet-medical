@@ -4,7 +4,6 @@ import { BadRequestError } from '../errors/AppError.js';
 
 const TIPOS_SERVICIO_VALIDOS = ['ESPECIALIDAD', 'PRACTICA'];
 
-// Al guardar servicios en Mongo, vamos a usar campo discriminante tipo (ESPECIALIDAD o PRACTICA)
 export class ServicioController {
   constructor({ servicioService = new ServicioService() } = {}) {
     this.servicioService = servicioService;
@@ -21,7 +20,8 @@ export class ServicioController {
 
   obtenerPorId = async (req, res, next) => {
     try {
-      const id = this.parsearId(req.params.id);
+      const id = req.params.id;
+      ValidadorId.validarIds(id);
       const resultado = await this.servicioService.obtenerPorId(id);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
@@ -31,7 +31,8 @@ export class ServicioController {
 
   agregar = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.body.idUsuario);
+      const idUsuario = req.body.idUsuario;
+      ValidadorId.validarIds(idUsuario);
       const datosServicio = this.extraerYValidarBodyServicio(req.body);
       const servicioAgregado = await this.servicioService.agregar(idUsuario, datosServicio);
       return res.status(201).json({ status: 'created', data: servicioAgregado });
@@ -42,9 +43,13 @@ export class ServicioController {
 
   modificar = async (req, res, next) => {
     try {
-      const id = this.parsearId(req.params.id);
-      const idUsuario = this.parsearId(req.body.idUsuario);
+      const id = req.params.id;
+      const idUsuario = req.body.idUsuario;
+
+      ValidadorId.validarIds(id, idUsuario);
+
       const datosActualizados = this.extraerYValidarBodyServicio(req.body);
+
       const servicioModificado = await this.servicioService.modificar(
         idUsuario,
         id,
@@ -58,8 +63,10 @@ export class ServicioController {
 
   eliminar = async (req, res, next) => {
     try {
-      const id = this.parsearId(req.params.id);
-      const idUsuario = this.parsearId(req.body.idUsuario);
+      const id = req.params.id;
+      ValidadorId.validarIds(id);
+      const idUsuario = req.body.idUsuario;
+      ValidadorId.validarIds(idUsuario);
       await this.servicioService.eliminar(idUsuario, id);
       return res.status(204).send();
     } catch (error) {
@@ -103,11 +110,5 @@ export class ServicioController {
     }
 
     return datos;
-  }
-
-  parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
   }
 }

@@ -4,10 +4,10 @@ import { logger } from '../../domain/utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
-  // CREATE
-  // No hay métodos CREATE
+  // CREAR
+  // No hay métodos CREAR
 
-  // READ
+  // LEER
   async search(specification, sortParams, paginationParams) {
     const criteria = specification.toCriteria();
 
@@ -82,9 +82,9 @@ export class BusquedaTurnosRepository {
     return this.search(specification, sortParams, paginationParams);
   }
 
-  // UPDATE
-  // No hay métodos UPDATE
+  // ACTUALIZAR
+  // No hay métodos ACTUALIZAR
 
-  // DELETE
-  // No hay métodos DELETE
+  // ELIMINAR
+  // No hay métodos ELIMINAR
 }

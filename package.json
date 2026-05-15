@@ -10,8 +10,9 @@
     "dev:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm start --workspace=frontend",
     "start:dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
-    "lint": "eslint .",
-    "format": "prettier . --write",
+    "format": "prettier --write \".\"",
+    "lint": "eslint --fix \".\"",
+    "fix:all": "npm run format && npm run lint",
     "prepare": "husky"
   },
   "keywords": [],

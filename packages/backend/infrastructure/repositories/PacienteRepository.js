@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { PacienteModel } from '../schemas/PacienteSchema.js';
 
 export class PacienteRepository {
-  // CREATE
+  // CREAR
   async save(paciente) {
     if (paciente._id) {
       return await PacienteModel.findByIdAndUpdate(paciente._id, paciente, { new: true })
@@ -17,7 +17,11 @@ export class PacienteRepository {
     }
   }
 
-  // READ
+  async saveAll(pacientes) {
+    return await PacienteModel.insertMany(pacientes);
+  }
+
+  // LEER
   async findById(id) {
     const paciente = await PacienteModel.findById(id)
       .populate('usuario')
@@ -33,7 +37,7 @@ export class PacienteRepository {
     return await PacienteModel.find().populate('usuario').populate('obraSocial').populate('plan');
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async update(id, datosActualizados) {
     const paciente = await PacienteModel.findByIdAndUpdate(id, datosActualizados, { new: true })
       .populate('usuario')
@@ -45,13 +49,17 @@ export class PacienteRepository {
     return paciente;
   }
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await PacienteModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Paciente no encontrado');
     }
     return true;
+  }
+
+  async deleteAll() {
+    return await PacienteModel.deleteMany({});
   }
 }
 

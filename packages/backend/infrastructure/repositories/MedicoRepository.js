@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { MedicoModel } from '../schemas/MedicoSchema.js';
 
 export class MedicoRepository {
-  // CREATE
+  // CREAR
   async save(medico) {
     if (medico._id) {
       return await MedicoModel.findByIdAndUpdate(medico._id, medico, { new: true })
@@ -13,13 +13,19 @@ export class MedicoRepository {
         .populate('turnosActualesYFuturos');
     } else {
       const newMedico = new MedicoModel(medico);
+
       const savedMedico = await newMedico.save();
+
       await savedMedico.populate('usuario');
       return savedMedico;
     }
   }
 
-  // READ
+  async saveAll(medicos) {
+    return await MedicoModel.insertMany(medicos);
+  }
+
+  // LEER
   async findById(id) {
     const medico = await MedicoModel.findById(id)
       .populate('usuario')
@@ -42,7 +48,7 @@ export class MedicoRepository {
       .populate('turnosActualesYFuturos');
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async update(id, datosActualizados) {
     const medico = await MedicoModel.findByIdAndUpdate(id, datosActualizados, { new: true })
       .populate('usuario')
@@ -56,13 +62,17 @@ export class MedicoRepository {
     return medico;
   }
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await MedicoModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Médico no encontrado');
     }
     return true;
+  }
+
+  async deleteAll() {
+    return await MedicoModel.deleteMany({});
   }
 }
 

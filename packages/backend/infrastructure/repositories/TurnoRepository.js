@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { TurnoModel } from '../schemas/TurnoSchema.js';
 
 export class TurnoRepository {
-  // CREATE
+  // CREAR
   async save(turno) {
     if (turno._id) {
       return await TurnoModel.findByIdAndUpdate(turno._id, turno, { new: true });
@@ -12,7 +12,11 @@ export class TurnoRepository {
     }
   }
 
-  // READ
+  async saveAll(turnos) {
+    return await TurnoModel.insertMany(turnos);
+  }
+
+  // LEER
   async findById(id) {
     const turno = await TurnoModel.findById(id).populate('medico').populate('paciente');
     if (!turno) {
@@ -33,7 +37,7 @@ export class TurnoRepository {
     return await TurnoModel.find({ paciente: pacienteId }).populate('medico');
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async update(id, datosActualizados) {
     const turno = await TurnoModel.findByIdAndUpdate(id, datosActualizados, { new: true });
     if (!turno) {
@@ -42,13 +46,17 @@ export class TurnoRepository {
     return turno;
   }
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await TurnoModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Turno no encontrado');
     }
     return true;
+  }
+
+  async deleteAll() {
+    await TurnoModel.deleteMany({});
   }
 }
 

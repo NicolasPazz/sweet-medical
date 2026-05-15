@@ -1,103 +1,13 @@
-import { Usuario } from '../domain/usuario/Usuario.js';
-import { Medico } from '../domain/usuario/Medico.js';
-import { Paciente } from '../domain/usuario/Paciente.js';
-import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
-import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
-import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
-import { DisponibilidadHoraria } from '../domain/agenda/DisponibilidadHoraria.js';
-import { DiaSemana } from '../domain/utils/enum/DiaSemana.js';
-import { Especialidad } from '../domain/servicios/Especialidad.js';
-import { BadRequestError } from '../errors/AppError.js';
 import { MedicoService } from '../services/MedicoService.js';
-import { Practica } from '../domain/servicios/Practica.js';
+import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { ValidadorId } from '../domain/utils/ValidadorId.js';
+import { DiaSemana } from '../domain/utils/enum/DiaSemana.js';
 
 export class MedicoController {
   constructor({ medicoService = new MedicoService() } = {}) {
-    this.usuarioRepository = usuarioRepository;
-    this.medicoRepository = medicoRepository;
-    this.pacienteRepository = pacienteRepository;
     this.medicoService = medicoService;
+    this.medicoRepository = medicoRepository;
   }
-
-  cargarDatosIniciales = async (req, res, next) => {
-    try {
-      const catalogoEspecialidades = [
-        new Especialidad('Pediatría', 30, 5000),
-        new Especialidad('Kinesiología', 45, 4500),
-        new Especialidad('Cardiología', 20, 7000),
-        new Especialidad('General', 15, 3500),
-      ];
-
-      const practica = new Practica('Codigo-1', 'Radiografía', 30, 4500);
-
-      catalogoEspecialidades.forEach((especialidad, i) => {
-        especialidad.id = i + 1; // i arranca en 0, le sumamos 1 si querés que el ID empiece en 1
-      });
-
-      for (let i = 1; i <= 10; i++) {
-        // 1. Creamos el objeto Usuario (Credenciales)
-        const nombreUsuario = `medico${i}`;
-        const password = `pass123_${i}`;
-        const nuevoUsuario = new Usuario(nombreUsuario, password);
-
-        // 2. Creamos el objeto Medico vinculando el usuario anterior
-        const matricula = `MAT-${1000 + i}`;
-        const nombreCompleto = `Dr. Especialista ${i}`;
-        const nuevoMedico = new Medico(nuevoUsuario, matricula, nombreCompleto);
-
-        const primerDia = i % 2 === 0 ? DiaSemana.LUNES : DiaSemana.MARTES;
-        const segundoDia = i % 2 === 0 ? DiaSemana.MIERCOLES : DiaSemana.JUEVES;
-
-        const especialidadAsignada = catalogoEspecialidades[i % catalogoEspecialidades.length];
-
-        const disponibilidades = [
-          new DisponibilidadHoraria(primerDia, '08:00', '12:00'),
-          new DisponibilidadHoraria(segundoDia, '14:00', '18:00'),
-        ];
-
-        nuevoMedico.disponibilidades = disponibilidades;
-        nuevoMedico.especialidades.push(especialidadAsignada);
-
-        if (i == 1) {
-          nuevoMedico.especialidades.push(catalogoEspecialidades[2]);
-          nuevoMedico.practicas.push(practica);
-        }
-
-        nuevoUsuario.roles.push(nuevoMedico);
-        // Agregamos a la lista de resultados
-        this.usuarioRepository.save(nuevoUsuario);
-        this.medicoRepository.save(nuevoMedico);
-      }
-
-      for (let i = 1; i <= 5; i++) {
-        // 1. Creamos el objeto Usuario (Credenciales)
-        const nombreUsuario = `paciente${i}`;
-        const password = `pass123_${i}`;
-        const nuevoUsuario = new Usuario(nombreUsuario, password);
-
-        // 2. Creamos el objeto Paciente vinculando el usuario anterior
-        const dni = `${40000000 + i}`;
-        const nombre = `Paciente Prueba ${i}`;
-        const obraSocial = i % 2 === 0 ? 'OSDE' : 'Swiss Medical';
-        const plan = i % 2 === 0 ? '210' : 'Básico';
-        const nuevoPaciente = new Paciente(nuevoUsuario, dni, nombre, obraSocial, plan);
-
-        nuevoUsuario.roles.push(nuevoPaciente);
-
-        // 3. Persistimos
-        this.usuarioRepository.save(nuevoUsuario);
-        this.pacienteRepository.save(nuevoPaciente);
-      }
-
-      return res.status(201).json({
-        status: 'success',
-        data: 'Carga completada',
-      });
-    } catch (error) {
-      return next(error);
-    }
-  };
 
   leerMedicos = async (req, res, next) => {
     try {
@@ -134,8 +44,9 @@ export class MedicoController {
 
   actualizarDisponibilidad = async (req, res, next) => {
     try {
-      const { disponibilidades } = req.body;
-      const idMedico = this.parsearId(req.body.id_medico);
+      const { disponibilidades, id_medico } = req.body;
+
+      ValidadorId.validarIds(id_medico);
 
       if (!Array.isArray(disponibilidades)) {
         throw new BadRequestError('Se esperaba una lista de disponibilidades');
@@ -160,17 +71,11 @@ export class MedicoController {
         throw new BadRequestError('Días de semana no válidos recibidos');
       }
 
-      await this.medicoService.actualizarDisponibilidad(idMedico, disponibilidades);
+      await this.medicoService.actualizarDisponibilidad(id_medico, disponibilidades);
 
       return res.status(200).json({ status: 'success' });
     } catch (error) {
       return next(error);
     }
   };
-
-  parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
-  }
 }

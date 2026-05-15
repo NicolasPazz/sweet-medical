@@ -2,7 +2,7 @@ import { NotificacionModel } from '../schemas/NotificacionSchema.js';
 import { NotFoundError } from '../../errors/AppError.js';
 
 export class NotificacionRepository {
-  // CREATE
+  // CREAR
   async save(notificacion) {
     if (notificacion._id) {
       return await NotificacionModel.findByIdAndUpdate(notificacion._id, notificacion, {
@@ -18,7 +18,7 @@ export class NotificacionRepository {
     }
   }
 
-  // READ
+  // LEER
   async findById(id) {
     const notificacion = await NotificacionModel.findById(id)
       .populate('destinatario')
@@ -57,7 +57,7 @@ export class NotificacionRepository {
     return this.findAllUnreadByUserId(idUsuario);
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async markAsRead(id) {
     const notificacion = await NotificacionModel.findByIdAndUpdate(
       id,
@@ -80,8 +80,8 @@ export class NotificacionRepository {
     return this.markAsRead(id);
   }
 
-  // DELETE
-  // No hay método delete definido
+  // ELIMINAR
+  // No hay método eliminar definido
 }
 
 export const notificacionRepository = new NotificacionRepository();

@@ -42,9 +42,32 @@ app.use(errorHandler);
 app.launch = function () {
   const portToUse = this.port || process.env.PORT || 3001;
 
-  this.listen(portToUse, () => {
+  this.listen(portToUse, async () => {
     console.log(`🚀 Servidor listo en http://localhost:${portToUse}`);
     console.log(`🏥 Health check: http://localhost:${portToUse}/health`);
+
+    try {
+      console.log('⏳ Ejecutando carga automática...');
+
+      const url = `http://localhost:${portToUse}/admin/datos-iniciales`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        console.log('✅ Carga automática exitosa!');
+      } else {
+        console.error('❌ La ruta respondió con error:', responseData);
+      }
+    } catch (error) {
+      console.error('💥 No se pudo conectar a la ruta automática:', error.message);
+    }
   });
 };
 

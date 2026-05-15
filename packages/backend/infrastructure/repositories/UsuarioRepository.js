@@ -2,7 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { UsuarioModel } from '../schemas/UsuarioSchema.js';
 
 export class UsuarioRepository {
-  // CREATE
+  // CREAR
   async save(usuario) {
     if (usuario._id) {
       return await UsuarioModel.findByIdAndUpdate(usuario._id, usuario, { new: true });
@@ -12,7 +12,11 @@ export class UsuarioRepository {
     }
   }
 
-  // READ
+  async saveAll(usuarios) {
+    return await UsuarioModel.insertMany(usuarios);
+  }
+
+  // LEER
   async findById(id) {
     const usuario = await UsuarioModel.findById(id);
     if (!usuario) {
@@ -25,7 +29,7 @@ export class UsuarioRepository {
     return await UsuarioModel.find();
   }
 
-  // UPDATE
+  // ACTUALIZAR
   async update(id, datosActualizados) {
     const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, { new: true });
     if (!usuario) {
@@ -34,13 +38,17 @@ export class UsuarioRepository {
     return usuario;
   }
 
-  // DELETE
+  // ELIMINAR
   async delete(id) {
     const result = await UsuarioModel.findByIdAndDelete(id);
     if (!result) {
       throw new NotFoundError('Usuario no encontrado');
     }
     return true;
+  }
+
+  async deleteAll() {
+    return await UsuarioModel.deleteMany({});
   }
 }
 

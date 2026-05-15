@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Medico } from '../../domain/usuario/Medico.js';
+import { DiaSemana } from '../../domain/utils/enum/DiaSemana.js';
 
 const medicoSchema = new mongoose.Schema(
   {
@@ -18,7 +19,7 @@ const medicoSchema = new mongoose.Schema(
     sedes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Sede' }],
     disponibilidades: [
       {
-        diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
+        diaSemana: { type: String, required: true, enum: Object.values(DiaSemana) },
         horaDesde: { type: String, required: true, trim: true, maxlength: 10 },
         horaHasta: { type: String, required: true, trim: true, maxlength: 10 },
       },
