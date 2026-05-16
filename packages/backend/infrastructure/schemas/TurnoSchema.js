@@ -22,6 +22,7 @@ const turnoSchema = new mongoose.Schema(
     paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente', default: null },
     servicio: {
       _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+      codigo: { type: String, trim: true },
       nombre: { type: String, required: true, trim: true, maxlength: 100 },
       costo: { type: Number, required: true, min: 0 },
     },
@@ -31,7 +32,7 @@ const turnoSchema = new mongoose.Schema(
     },
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
-    fechaHora: { type: Date, default: null },
+    fechaHora: { type: Date },
     estado: { type: String, required: true, trim: true, enum: Object.values(EstadoTurno) },
     costo: { type: Number, required: true, min: 0 },
     historialEstados: [cambioEstadoTurnoSchema],

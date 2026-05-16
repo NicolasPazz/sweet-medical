@@ -14,14 +14,14 @@ export class MedicoController {
       const medicos = await this.medicoRepository.findAll();
 
       const dataParaEnviar = medicos.map((m) => ({
-        id_usuario: m.usuario.id,
-        id_medico: m.id,
+        id_usuario: m.usuario?.id || m.usuario?._id,
+        id_medico: m.id || m._id,
         nombre: m.nombre,
         especialidades: m.especialidades,
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,
         turnos: m.turnosActualesYFuturos.map((turno) => ({
-          id: turno.id,
+          id: turno.id || turno._id,
           fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]
           medico: turno.medico.nombre,
           servicio: turno.servicio ? turno.servicio.nombre : 'Consulta General',

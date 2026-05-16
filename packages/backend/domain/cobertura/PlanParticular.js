@@ -8,7 +8,7 @@ export class PlanParticular extends Plan {
 
   calcularCosto(prestacion) {
     // El particular nunca tiene cobertura
-    const costoFinal = prestacion.costoBase || prestacion.costoConsulta || 0;
+    const costoFinal = prestacion.costo ?? (prestacion.costoBase || prestacion.costoConsulta || 0);
 
     return {
       nivel: NivelCobertura.NO_CUBIERTA,

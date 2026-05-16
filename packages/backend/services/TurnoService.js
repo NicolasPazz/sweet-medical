@@ -366,19 +366,21 @@ export class TurnoService {
     const turnos = await this.turnoRepository.findAll();
 
     return turnos.map((t) => ({
-      id_turno: t.id,
-      id_medico: t.medico.id,
-      id_paciente: t.paciente ? t.paciente.id : 'N/A',
+      id_turno: t.id || t._id,
+      id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
+      id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
       sede: t.sede ? t.sede : 'N/A',
       servicio: t.servicio ? t.servicio.nombre : 'N/A',
       estado: t.estado ? t.estado.constructor.name : 'N/A',
-      historialEstados: t.historialEstados.map((historialEstado) => ({
-        fechaHoraCambio: historialEstado.fechaHoraIngreso,
-        estado: historialEstado.estado.constructor.name,
-        motivo: historialEstado.motivo,
-        actor: historialEstado.usuario.nombreUsuario,
-      })),
+      historialEstados: Array.isArray(t.historialEstados)
+        ? t.historialEstados.map((historialEstado) => ({
+            fechaHoraCambio: historialEstado.fechaHoraIngreso,
+            estado: historialEstado.estado.constructor.name,
+            motivo: historialEstado.motivo,
+            actor: historialEstado.usuario?.nombreUsuario,
+          }))
+        : [],
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,

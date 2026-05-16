@@ -40,6 +40,11 @@ export class Agenda {
           servicio.costo,
         );
 
+        turno.fechaHora = Agenda.configurarFechaCercana(
+          disponibilidad.diaSemana,
+          calcularHoraDesdeMinutos(actualMinutos),
+        );
+
         logger.debug('Turno generado:', turno);
 
         turnos.push(turno);
@@ -144,14 +149,14 @@ export class Agenda {
    * Genera la fecha y hora más cercana hacia el futuro para un turno,
    * basándose en el día de la semana y la hora de inicio.
    */
-  static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
+  static configurarFechaCercana(diaSemanaDeseado, horaInicioStr, referencia = new Date()) {
     // 1. Validación de entrada (Fundamental para el Médico 17)
     if (!diaSemanaDeseado || !horaInicioStr) {
       logger.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
       return new Date(); // Retornamos hoy para evitar el undefined.getTime()
     }
 
-    const hoy = new Date();
+    const hoy = new Date(referencia.getTime());
     const dias = {
       DOMINGO: 0,
       LUNES: 1,
@@ -168,16 +173,20 @@ export class Agenda {
     // 2. Si el día no existe en el mapa, evitamos el NaN
     if (objetivo === undefined) return hoy;
 
-    let diferencia = objetivo - diaActual;
-    if (diferencia <= 0) {
-      diferencia += 7;
+    const [horas, minutos] = horaInicioStr.split(':').map(Number);
+    const ahoraHoras = hoy.getHours();
+    const ahoraMinutos = hoy.getMinutes();
+
+    let diferencia = (objetivo - diaActual + 7) % 7;
+    if (diferencia === 0) {
+      if (horas < ahoraHoras || (horas === ahoraHoras && minutos <= ahoraMinutos)) {
+        diferencia = 7;
+      }
     }
 
     // 3. Crear el nuevo objeto sin mutar el original
     const resultado = new Date(hoy.getTime());
     resultado.setDate(hoy.getDate() + diferencia);
-
-    const [horas, minutos] = horaInicioStr.split(':').map(Number);
     resultado.setHours(horas, minutos, 0, 0);
 
     return resultado;

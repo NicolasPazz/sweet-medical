@@ -13,19 +13,25 @@ export class Plan {
   }
 
   obtenerCoberturaPorEspecialidad(especialidad) {
-    const cobertura = this.coberturasEspecialidad.find(
-      (c) => c.especialidad.id === especialidad.id,
-    );
+    const especialidadId = especialidad?.id ?? especialidad?._id;
+    const cobertura = this.coberturasEspecialidad.find((c) => {
+      const actualId = c.especialidad?.id ?? c.especialidad?._id;
+      return String(actualId) === String(especialidadId);
+    });
     logger.debug(
-      `Nivel Cobertura encontrada para la especialidad ${especialidad.nombre}:`,
+      `Nivel Cobertura encontrada para la especialidad ${especialidad?.nombre}:`,
       cobertura?.nivel,
     );
     return cobertura?.nivel;
   }
 
   obtenerCoberturaPorPractica(practica) {
-    const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
-    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura?.nivel);
+    const practicaId = practica?.id ?? practica?._id;
+    const cobertura = this.coberturasPractica.find((c) => {
+      const actualId = c.practica?.id ?? c.practica?._id;
+      return String(actualId) === String(practicaId);
+    });
+    logger.debug(`Cobertura encontrada para la práctica ${practica?.nombre}:`, cobertura?.nivel);
     return cobertura?.nivel;
   }
 

@@ -15,7 +15,7 @@ export class PlanPrepaga extends Plan {
       nivel = this.obtenerCoberturaPorPractica(prestacion) || NivelCobertura.NO_CUBIERTA;
     }
 
-    let costoFinal = prestacion.costoBase || prestacion.costoConsulta || 0;
+    let costoFinal = prestacion.costo ?? (prestacion.costoBase || prestacion.costoConsulta || 0);
 
     switch (nivel) {
       case NivelCobertura.TOTAL:

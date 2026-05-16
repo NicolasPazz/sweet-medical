@@ -140,7 +140,11 @@ export class TurnoRepository {
 
   // LEER
   async findById(id) {
-    const turno = await TurnoModel.findById(id).populate('medico').populate('paciente').lean();
+    const turno = await TurnoModel.findById(id)
+      .populate('medico')
+      .populate('paciente')
+      .populate({ path: 'historialEstados.usuario' })
+      .lean();
     if (!turno) {
       throw new NotFoundError('Turno no encontrado');
     }
@@ -148,12 +152,19 @@ export class TurnoRepository {
   }
 
   async findAll() {
-    const turnos = await TurnoModel.find().populate('medico').populate('paciente').lean();
+    const turnos = await TurnoModel.find()
+      .populate('medico')
+      .populate('paciente')
+      .populate({ path: 'historialEstados.usuario' })
+      .lean();
     return this._hidratarColeccion(turnos);
   }
 
   async findAllByMedicId(medicId) {
-    const turnos = await TurnoModel.find({ medico: medicId }).populate('paciente').lean();
+    const turnos = await TurnoModel.find({ medico: medicId })
+      .populate('paciente')
+      .populate({ path: 'historialEstados.usuario' })
+      .lean();
     return this._hidratarColeccion(turnos);
   }
 
@@ -161,6 +172,7 @@ export class TurnoRepository {
     const estadoValor = this._obtenerValorEstado(estado);
     const turnos = await TurnoModel.find({ medico: medicId, estado: estadoValor })
       .populate('paciente')
+      .populate({ path: 'historialEstados.usuario' })
       .lean();
     return this._hidratarColeccion(turnos);
   }
@@ -170,12 +182,17 @@ export class TurnoRepository {
       medico: medicId,
       estado: EstadoTurno.DISPONIBLE,
       'servicio._id': servicioId,
-    }).lean();
+    })
+      .populate({ path: 'historialEstados.usuario' })
+      .lean();
     return this._hidratarColeccion(turnos);
   }
 
   async findAllByPatientId(pacienteId) {
-    const turnos = await TurnoModel.find({ paciente: pacienteId }).populate('medico').lean();
+    const turnos = await TurnoModel.find({ paciente: pacienteId })
+      .populate('medico')
+      .populate({ path: 'historialEstados.usuario' })
+      .lean();
     return this._hidratarColeccion(turnos);
   }
 
