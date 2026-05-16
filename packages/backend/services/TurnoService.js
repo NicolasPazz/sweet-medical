@@ -14,6 +14,7 @@ import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
+import { Rol } from '../domain/usuario/Rol.js';
 
 export class TurnoService {
   turnoRepository;
@@ -28,41 +29,68 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
 
+    console.log("debug");
+
+    const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
-
-    const paciente = usuario.roles.find((r) => r instanceof Paciente);
-
+    const paciente = await this.pacienteRepository.findByIdUsuario(id_usuario);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
-
     const turno = await this.turnoRepository.findById(id_turno);
+
+    console.log("ESTADO DIVERTIDO:", turno.estado); 
+    console.log("ESTADO DIVERTIDO ES INSTANCIA DE DISPONIBLE:", turno.estado.constructor);
 
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
 
+    console.log("turno: " + turno.constructor);
+
+    turno.estado = new Disponible(turno);
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
-
     turno.paciente = paciente;
-
+    console.log("MEDICO ID:" + turno.medico._id);
+    
+    // REVISAR
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
-      turno.medico.id,
+      turno.medico._id,
       EstadoTurno.RESERVADO,
     );
 
+    console.log("tengo mucho sifilis");
+
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    const notificacion = turno.actualizarEstado(new Reservado(turno), usuario, 'Reserva de turno');
+    console.log("FECHA HORA: " + turno.fechaHora);
+
+    console.log("ESTE USUARIO TIENE SIFILIS: ", usuario);
+
+    console.log("TURNO TIENE SIFILIS: ", turno);
+
+    logger.debug("turno: " + turno.constructor.name);
+
+    logger.debug("Destinatario: " + usuario.constructor);
+
+    const usuarioAdmin = await this.usuarioRepository.findUsuarioAdmin();
+
+    
+    logger.debug("Destinatario: " + usuarioAdmin.constructor);
+
+    const notificacion = turno.actualizarEstado(usuarioAdmin, new Reservado(turno), usuario, 'Reserva de turno');
+    console.log("tengo mucho sifilis");
 
     await this.notificacionRepository.save(notificacion);
+        console.log("tengo mucho sifilis");
+    
     await this.turnoRepository.save(turno);
+    console.log("tengo mucho sifilis");
 
     return turno;
   }
@@ -85,7 +113,7 @@ export class TurnoService {
     }
 
     if (!esMedico) {
-      const paciente = usuario.roles.find((r) => r instanceof Paciente);
+      const paciente = usuario.roles.find((r) => r === Rol.PACIENTE);
 
       if (paciente == null) {
         throw new NotFoundError('Paciente no encontrado');
@@ -95,7 +123,7 @@ export class TurnoService {
         throw new ConflictError('El paciente no tiene el turno asignado');
       }
     } else {
-      const medico = usuario.roles.find((r) => r instanceof Medico);
+      const medico = usuario.roles.find((r) => r === Rol.MEDICO);
 
       if (medico == null) {
         throw new NotFoundError('Médico no encontrado');
@@ -133,7 +161,7 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u instanceof Medico).length === 0) {
+    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
@@ -168,7 +196,7 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u instanceof Medico).length === 0) {
+    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
@@ -178,7 +206,7 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    const medico = usuario.roles.find((r) => r instanceof Medico);
+    const medico = usuario.roles.find((r) => r === Rol.MEDICO);
 
     if (turno.medico !== medico) {
       throw new ConflictError('El turno no pertenece al medico');
@@ -209,7 +237,7 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u instanceof Medico).length === 0) {
+    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
@@ -219,7 +247,7 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    const medico = usuario.roles.find((r) => r instanceof Medico);
+    const medico = usuario.roles.find((r) => r === Rol.MEDICO);
 
     if (turno.medico !== medico) {
       throw new ConflictError('El turno no pertenece al medico');
@@ -245,16 +273,25 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u instanceof Medico).length === 0) {
+    console.log(usuario.roles);
+
+    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
+    console.log("USUARIO ID:" +usuario.id);
+    console.log("USUARIO ID:" +usuario._id);
 
-    const medico = usuario.roles.find((r) => r instanceof Medico);
+    const medico = await this.medicoRepository.findByIdUsuario(usuario._id);
+
+    console.log("MEDICO ID:" + medico._id);
+    console.log("MEDICO ID:" + medico._id);
 
     const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
-      medico.id,
+      medico._id,
       id_servicio,
     );
+
+    console.log(turnosDelServicio);
 
     const dataParaEnviar = turnosDelServicio.map((t) => ({
       id: t.id,
@@ -273,7 +310,7 @@ export class TurnoService {
 
   async refrescarTurnos() {
     const TAMANO_LOTE = 20; // Procesa de a 20 médicos para cuidar la RAM y las conexiones a DB
-    const metricas = { procesados: 0, fallidos: 0, total: 0 };
+    const metricas ={ procesados: 0, fallidos: 0, total: 0 };
 
     logger.info(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
@@ -303,13 +340,18 @@ export class TurnoService {
                 await this.turnoRepository.save(t);
               }
 
+              console.log("TURNOS DEL MEDICO: " +medico.turnosActualesYFuturos);
+
               const idsTurnos = [];
               for (const t of medico.turnosActualesYFuturos) {
+                console.log("ENTRO A LOS TURNOS DE UN MEDICO");
                 const turnoGuardado = await this.turnoRepository.save(t);
                 idsTurnos.push(turnoGuardado.id || turnoGuardado._id);
               }
 
               medico.turnosActualesYFuturos = idsTurnos;
+              
+              await this.medicoRepository.save(medico);
 
               metricas.procesados++;
             } catch (errorMedico) {

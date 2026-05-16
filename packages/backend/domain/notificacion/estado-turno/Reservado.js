@@ -13,14 +13,19 @@ export class Reservado {
   }
 
   notificar(remitente) {
-    // Se notifica al médico indicando paciente y servicio solicitado (especialidad o práctica).
     const servicio = this.turno.obtenerNombreServicio();
     logger.debug(
       `Creando notificación para turno ${this.turno.id} en estado RESERVADO por paciente ${this.turno.paciente.nombre} para servicio ${servicio}.`,
     );
+
+    // 🚀 CORRECCIÓN CLAVE: Extraemos explícitamente el .id o ._id de los usuarios
+    // en lugar de enviarle el objeto completo a Mongoose.
+    const destinatarioId = this.turno.medico.usuario.id || this.turno.medico.usuario._id;
+    const remitenteId = remitente.id || remitente._id;
+
     return new Notificacion(
-      this.turno.medico.usuario,
-      remitente,
+      destinatarioId, // Pasa el ID limpio (ej: string de 24 caracteres)
+      remitenteId,    // Pasa el ID limpio (ej: '000000000000000000000001')
       `Nuevo turno reservado por paciente ${this.turno.paciente.nombre} para ${servicio}.`,
     );
   }

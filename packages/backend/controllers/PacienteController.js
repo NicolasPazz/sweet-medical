@@ -28,11 +28,14 @@ export class PacienteController {
   leerPacientes = async (req, res, next) => {
     try {
       const pacientes = await this.pacienteRepository.findAll();
-
+      
       const dataParaEnviar = pacientes.map((p) => ({
-        id_usuario: p.usuario.id,
-        id_paciente: p.id,
+        id_usuario: p.usuario._id,
+        id_paciente: p._id,
         nombre: p.nombre,
+        dni: p.dni,
+        obraSocial: p.obraSocial ? p.obraSocial.nombre : 'N/A',
+        plan: p.plan ? p.plan.nombre : 'N/A',
       }));
 
       return res.status(200).json({

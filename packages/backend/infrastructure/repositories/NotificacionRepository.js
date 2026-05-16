@@ -1,20 +1,32 @@
 import { NotificacionModel } from '../schemas/NotificacionSchema.js';
 import { NotFoundError } from '../../errors/AppError.js';
+import { Notificacion } from '../../domain/notificacion/Notificacion.js';
 
 export class NotificacionRepository {
+
+  _hidratar(datos) {
+    return this.fromDB(datos);
+  }
+
+  _hidratarColeccion(datos) {
+    return datos.map((d) => this._hidratar(d));
+  }
+
   // CREAR
   async save(notificacion) {
     if (notificacion._id) {
-      return await NotificacionModel.findByIdAndUpdate(notificacion._id, notificacion, {
-        new: true,
-      })
+      const actualizada = await NotificacionModel.findByIdAndUpdate(notificacion._id, notificacion, { new: true })
         .populate('destinatario')
-        .populate('remitente');
+        .populate('remitente')
+        .lean();
+      return this._hidratar(actualizada);
     } else {
-      const newNotificacion = new NotificacionModel(notificacion);
-      const savedNotificacion = await newNotificacion.save();
-      await savedNotificacion.populate('destinatario');
-      return savedNotificacion;
+      const saved = await NotificacionModel.create(notificacion);
+      const completa = await NotificacionModel.findById(saved._id)
+        .populate('destinatario')
+        .populate('remitente')
+        .lean();
+      return this._hidratar(completa);
     }
   }
 
@@ -22,33 +34,28 @@ export class NotificacionRepository {
   async findById(id) {
     const notificacion = await NotificacionModel.findById(id)
       .populate('destinatario')
-      .populate('remitente');
-    if (!notificacion) {
-      throw new NotFoundError('Notificación no encontrada');
-    }
-    return notificacion;
+      .populate('remitente')
+      .lean();
+    if (!notificacion) throw new NotFoundError('Notificación no encontrada');
+    return this._hidratar(notificacion);
   }
 
   async findAllReadByUserId(userId) {
-    return await NotificacionModel.find({
-      destinatario: userId,
-      leida: true,
-    })
+    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: true })
       .populate('destinatario')
       .populate('remitente')
       .sort({ fechaHoraCreacion: -1 })
       .lean();
+    return this._hidratarColeccion(notificaciones);
   }
 
   async findAllUnreadByUserId(userId) {
-    return await NotificacionModel.find({
-      destinatario: userId,
-      leida: false,
-    })
+    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: false })
       .populate('destinatario')
       .populate('remitente')
       .sort({ fechaHoraCreacion: -1 })
       .lean();
+    return this._hidratarColeccion(notificaciones);
   }
 
   async obtenerLeidas(idUsuario) {
@@ -63,26 +70,31 @@ export class NotificacionRepository {
   async markAsRead(id) {
     const notificacion = await NotificacionModel.findByIdAndUpdate(
       id,
-      {
-        leida: true,
-        fechaHoraLeida: new Date(),
-      },
+      { leida: true, fechaHoraLeida: new Date() },
       { new: true },
     )
       .populate('destinatario')
-      .populate('remitente');
-
-    if (!notificacion) {
-      throw new NotFoundError('Notificación no encontrada');
-    }
-    return notificacion;
+      .populate('remitente')
+      .lean();
+    if (!notificacion) throw new NotFoundError('Notificación no encontrada');
+    return this._hidratar(notificacion);
   }
 
   async marcarComoLeida(id) {
     return this.markAsRead(id);
   }
 
-  // ELIMINAR
+  async fromDB(datos) {
+  const notificacion = Object.create(Notificacion.prototype);
+  notificacion.id = datos._id ?? datos.id;
+  notificacion.destinatario = datos.destinatario;
+  notificacion.remitente = datos.remitente;
+  notificacion.mensaje = datos.mensaje;
+  notificacion.fechaHoraCreacion = datos.fechaHoraCreacion;
+  notificacion.fechaHoraLeida = datos.fechaHoraLeida;
+  notificacion.leida = datos.leida;
+  return notificacion;
+}
 }
 
 export const notificacionRepository = new NotificacionRepository();

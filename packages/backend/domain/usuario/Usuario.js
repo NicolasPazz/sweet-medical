@@ -10,7 +10,12 @@ export class Usuario {
     this.roles = [];
   }
 
-  static get USUARIO_SISTEMA() {
-    return new Usuario('SISTEMA', 123456789);
-  }
+  
+
+  static USUARIO_SISTEMA = (() => {
+  const admin = new Usuario('ADMIN', 123456789);
+  admin.roles = ['ADMIN'];
+  admin.id = '000000000000000000000001';
+  return admin;
+})();
 }

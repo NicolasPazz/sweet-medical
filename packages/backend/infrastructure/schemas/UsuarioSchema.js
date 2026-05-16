@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Usuario } from '../../domain/usuario/Usuario.js';
+import { Rol } from '../../domain/usuario/Rol.js';
 
 const usuarioSchema = new mongoose.Schema(
   {
@@ -17,6 +18,13 @@ const usuarioSchema = new mongoose.Schema(
       trim: true,
       minlength: 6,
       maxlength: 128,
+    },
+    roles: { 
+      type: [{ 
+        type: String, 
+        enum: Object.values(Rol) 
+      }], 
+      default: [] 
     },
   },
   { timestamps: true, collection: 'usuarios' },

@@ -6,14 +6,14 @@ import { Reservado } from '../../domain/notificacion/estado-turno/Reservado.js';
 import { Confirmado } from '../../domain/notificacion/estado-turno/Confirmado.js';
 import { Cancelado } from '../../domain/notificacion/estado-turno/Cancelado.js';
 import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
+import { Turno } from '../../domain/turno/Turno.js';
 
 export class TurnoRepository {
+
   _obtenerValorEstado(estado) {
     if (!estado) return null;
     if (typeof estado === 'string') return estado.toUpperCase();
-    if (typeof estado.getEstadoNombre === 'function') {
-      return estado.getEstadoNombre();
-    }
+    if (typeof estado.getEstadoNombre === 'function') return estado.getEstadoNombre();
     if (estado instanceof Disponible) return EstadoTurno.DISPONIBLE;
     if (estado instanceof Reservado) return EstadoTurno.RESERVADO;
     if (estado instanceof Confirmado) return EstadoTurno.CONFIRMADO;
@@ -26,25 +26,13 @@ export class TurnoRepository {
     if (!turno || !turno.estado) return turno;
 
     const estadoValor = String(turno.estado).toUpperCase();
-
     switch (estadoValor) {
-      case EstadoTurno.DISPONIBLE:
-        turno.estado = new Disponible(turno);
-        break;
-      case EstadoTurno.RESERVADO:
-        turno.estado = new Reservado(turno);
-        break;
-      case EstadoTurno.CONFIRMADO:
-        turno.estado = new Confirmado(turno);
-        break;
-      case EstadoTurno.CANCELADO:
-        turno.estado = new Cancelado(turno);
-        break;
-      case EstadoTurno.REALIZADO:
-        turno.estado = new Realizado(turno);
-        break;
-      default:
-        throw new Error(`Estado de turno corrupto en la DB: ${estadoValor}`);
+      case EstadoTurno.DISPONIBLE: turno.estado = new Disponible(turno); break;
+      case EstadoTurno.RESERVADO:  turno.estado = new Reservado(turno);  break;
+      case EstadoTurno.CONFIRMADO: turno.estado = new Confirmado(turno); break;
+      case EstadoTurno.CANCELADO:  turno.estado = new Cancelado(turno);  break;
+      case EstadoTurno.REALIZADO:  turno.estado = new Realizado(turno);  break;
+      default: throw new Error(`Estado de turno corrupto en la DB: ${estadoValor}`);
     }
 
     if (Array.isArray(turno.historialEstados)) {
@@ -52,56 +40,37 @@ export class TurnoRepository {
         if (!hist || !hist.estado) return hist;
         const estadoHist = String(hist.estado).toUpperCase();
         switch (estadoHist) {
-          case EstadoTurno.DISPONIBLE:
-            hist.estado = new Disponible(turno);
-            break;
-          case EstadoTurno.RESERVADO:
-            hist.estado = new Reservado(turno);
-            break;
-          case EstadoTurno.CONFIRMADO:
-            hist.estado = new Confirmado(turno);
-            break;
-          case EstadoTurno.CANCELADO:
-            hist.estado = new Cancelado(turno);
-            break;
-          case EstadoTurno.REALIZADO:
-            hist.estado = new Realizado(turno);
-            break;
-          default:
-            throw new Error(`Historial corrupto en DB: ${estadoHist}`);
+          case EstadoTurno.DISPONIBLE: hist.estado = new Disponible(turno); break;
+          case EstadoTurno.RESERVADO:  hist.estado = new Reservado(turno);  break;
+          case EstadoTurno.CONFIRMADO: hist.estado = new Confirmado(turno); break;
+          case EstadoTurno.CANCELADO:  hist.estado = new Cancelado(turno);  break;
+          case EstadoTurno.REALIZADO:  hist.estado = new Realizado(turno);  break;
+          default: throw new Error(`Historial corrupto en DB: ${estadoHist}`);
         }
         return hist;
       });
     }
-    return turno;
+    return this.fromDB(turno);
   }
 
   _hidratarColeccion(turnos) {
-    if (!Array.isArray(turnos)) {
-      return this._hidratarEstado(turnos);
-    }
+    if (!Array.isArray(turnos)) return this._hidratarEstado(turnos);
     return turnos.map((turno) => this._hidratarEstado(turno));
   }
 
   _deshidratarTurno(turno) {
     const objeto = turno && typeof turno.toObject === 'function' ? turno.toObject() : { ...turno };
 
-    if (objeto.estado) {
-      objeto.estado = this._obtenerValorEstado(turno.estado);
-    }
+    if (objeto.estado) objeto.estado = this._obtenerValorEstado(turno.estado);
     if (objeto.medico && typeof objeto.medico === 'object') {
       objeto.medico = objeto.medico.id || objeto.medico._id;
     }
     if (objeto.paciente && typeof objeto.paciente === 'object') {
       objeto.paciente = objeto.paciente.id || objeto.paciente._id;
     }
-
     if (Array.isArray(objeto.historialEstados)) {
       objeto.historialEstados = objeto.historialEstados.map((historialEstado) => {
-        if (!historialEstado) {
-          return historialEstado;
-        }
-
+        if (!historialEstado) return historialEstado;
         const newHistorial = { ...historialEstado };
         if (newHistorial.estado) {
           newHistorial.estado = this._obtenerValorEstado(historialEstado.estado);
@@ -114,7 +83,6 @@ export class TurnoRepository {
         return newHistorial;
       });
     }
-
     return objeto;
   }
 
@@ -122,13 +90,22 @@ export class TurnoRepository {
   async save(turno) {
     const payload = this._deshidratarTurno(turno);
 
-    if (payload._id) {
-      const updated = await TurnoModel.findByIdAndUpdate(payload._id, payload, { new: true });
-      return this._hidratarEstado(updated);
+    if (payload._id || payload.id) {
+      const id = payload._id || payload.id;
+      const turnoGuardado = await TurnoModel.findByIdAndUpdate(id, payload, { new: true })
+        .populate('medico')
+        .populate('paciente')
+        .populate({ path: 'historialEstados.usuario' })
+        .lean();
+      return this._hidratarEstado(turnoGuardado);
     } else {
-      const newTurno = new TurnoModel(payload);
-      const saved = await newTurno.save();
-      return this._hidratarEstado(saved);
+      const nuevoTurno = await TurnoModel.create(payload);
+      const turnoGuardado = await TurnoModel.findById(nuevoTurno._id)
+        .populate('medico')
+        .populate('paciente')
+        .populate({ path: 'historialEstados.usuario' })
+        .lean();
+      return this._hidratarEstado(turnoGuardado);
     }
   }
 
@@ -144,10 +121,8 @@ export class TurnoRepository {
       .populate('medico')
       .populate('paciente')
       .populate({ path: 'historialEstados.usuario' })
-      .lean();
-    if (!turno) {
-      throw new NotFoundError('Turno no encontrado');
-    }
+      .lean();                                          // <-- este era el fix
+    if (!turno) throw new NotFoundError('Turno no encontrado');
     return this._hidratarEstado(turno);
   }
 
@@ -200,24 +175,38 @@ export class TurnoRepository {
   async update(id, datosActualizados) {
     const payload = this._deshidratarTurno(datosActualizados);
     const turno = await TurnoModel.findByIdAndUpdate(id, payload, { new: true }).lean();
-    if (!turno) {
-      throw new NotFoundError('Turno no encontrado');
-    }
+    if (!turno) throw new NotFoundError('Turno no encontrado');
     return this._hidratarEstado(turno);
   }
 
   // ELIMINAR
   async delete(id) {
     const result = await TurnoModel.findByIdAndDelete(id);
-    if (!result) {
-      throw new NotFoundError('Turno no encontrado');
-    }
+    if (!result) throw new NotFoundError('Turno no encontrado');
     return true;
   }
 
   async deleteAll() {
     await TurnoModel.deleteMany({});
   }
+
+  async fromDB(datos) {
+  const turno = Object.create(Turno.prototype);
+  turno.id = datos._id ?? datos.id;
+  turno.medico = datos.medico;
+  turno.paciente = datos.paciente;
+  turno.diaSemana = datos.diaSemana;
+  turno.hora = datos.hora;
+  turno.sede = datos.sede;
+  turno.servicio = datos.servicio;
+  turno.costo = datos.costo;
+  turno.fechaHora = datos.fechaHora;
+  turno.historialEstados = datos.historialEstados ?? [];
+  turno.estado = datos.estado; // ya viene hidratado del repo
+  return turno;
+}
+
+
 }
 
 export const turnoRepository = new TurnoRepository();

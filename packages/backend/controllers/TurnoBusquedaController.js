@@ -81,7 +81,7 @@ export class TurnoBusquedaController {
           ...resultado,
         });
       } catch (error) {
-        logger.error(error);
+        logger.error(error.message);
 
         return res.status(400).json({
           status: 'error',

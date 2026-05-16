@@ -17,30 +17,38 @@ export class Turno {
   diaSemana;
   hora;
 
-  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo) {
+  // Modificado: Ahora recibe un objeto con propiedades para mapeo directo de base de datos/JSON
+  constructor({ id, medico, paciente, diaSemana, hora, sede, servicio, costo, fechaHora, historialEstados = [] }) {
+    this.id = id;
     this.medico = medico;
     this.paciente = paciente;
     this.diaSemana = diaSemana;
     this.hora = hora;
     this.sede = sede;
-    this.servicio = servicio.costo ? servicio : null;
-    this.historialEstados = [];
+    this.fechaHora = fechaHora;
+    this.servicio = servicio?.costo ? servicio : servicio; // Flexibilidad si ya viene instanciado
+    this.historialEstados = historialEstados;
     this.costo = costo;
-
-    this.actualizarEstado(new Disponible(this), Usuario.USUARIO_SISTEMA, 'Turno generado');
+    this.estado = "DISPONIBLE"; // Valor por defecto temporal que tu _prepararParaDominio va a pisar con la clase de estado real
   }
 
-  actualizarEstado(nuevoEstado, quien, motivo) {
+  // En Turno.js, agregás este método estático:
+
+
+  actualizarEstado(usuarioQueLlama, nuevoEstado, quien, motivo) {
+    logger.debug("USUARIO QUE LLAMA (deberia ser admin:", usuarioQueLlama);
+    logger.debug("nuevoEstado:", nuevoEstado);
+    logger.debug("quien:", quien);
+    logger.debug("motivo:", motivo);
+    
     const nuevoCambio = new CambioEstadoTurno(nuevoEstado, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
-    logger.debug(
-      `Turno ${this.id} actualizado a estado ${nuevoEstado.constructor.name} por ${quien.nombreUsuario} con motivo: ${motivo}`,
-    );
+    // Corregido: Usamos coma en lugar de concatenar con '+' para evitar el [object Object] en el logger
+    logger.debug(`Turno ${this.id} actualizado a estado ${nuevoEstado.constructor.name} por con motivo: ${motivo}`, quien);
 
-    // Esta funcion debe devolver void, esto se hará en un service mas adelante
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(this);
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuarioQueLlama, this);
     return notificacion;
   }
 
@@ -49,7 +57,7 @@ export class Turno {
   }
 
   obtenerUltimoActor() {
-    if (this.historialEstados.length === 0) {
+    if (!this.historialEstados || this.historialEstados.length === 0) {
       logger.warn(`Turno ${this.id} no tiene historial de estados para obtener el último actor.`);
       return null;
     }

@@ -2,6 +2,7 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { PracticaModel } from '../schemas/PracticaSchema.js';
 
 export class PracticaRepository {
+
   // CREAR
   async save(practica) {
     if (practica._id) {

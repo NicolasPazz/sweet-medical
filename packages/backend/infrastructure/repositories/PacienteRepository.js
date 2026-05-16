@@ -33,6 +33,20 @@ export class PacienteRepository {
     return paciente;
   }
 
+    async findByIdUsuario(usuarioId) {
+    const paciente = await PacienteModel.findOne({ usuario: usuarioId })
+      .populate('usuario')
+      .populate('obraSocial')
+      .populate('plan')
+      .lean();
+
+    if (!paciente) {
+      throw new NotFoundError('Paciente no encontrado');
+    }
+
+    return paciente;
+  }
+
   async findAll() {
     return await PacienteModel.find()
       .populate('usuario')

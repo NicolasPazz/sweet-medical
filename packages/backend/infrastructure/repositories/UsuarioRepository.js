@@ -50,6 +50,12 @@ export class UsuarioRepository {
   async deleteAll() {
     return await UsuarioModel.deleteMany({});
   }
+
+  async findUsuarioAdmin() {
+    return await UsuarioModel.findOne({ roles: 'ADMIN' });
+  }
+
+  
 }
 
 export const usuarioRepository = new UsuarioRepository();

@@ -47,7 +47,7 @@ app.launch = function () {
     logger.info(`🚀 Servidor listo en http://localhost:${portToUse}`);
     logger.info(`🏥 Health check: http://localhost:${portToUse}/health`);
 
-    try {
+    /*try {
       logger.info('⏳ Ejecutando carga automática...');
 
       const url = `http://localhost:${portToUse}/admin/datos-iniciales`;
@@ -68,7 +68,7 @@ app.launch = function () {
       }
     } catch (error) {
       logger.error('💥 No se pudo conectar a la ruta automática:', error.message);
-    }
+    }*/
   });
 };
 

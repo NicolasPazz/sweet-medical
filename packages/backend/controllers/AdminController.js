@@ -5,6 +5,7 @@ import { Especialidad } from '../domain/servicios/Especialidad.js';
 import { Practica } from '../domain/servicios/Practica.js';
 import { Sede } from '../domain/servicios/Sede.js';
 import { Plan } from '../domain/cobertura/Plan.js';
+import { Rol } from '../domain/usuario/Rol.js';
 
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
 import { NivelCobertura } from '../domain/cobertura/NivelCobertura.js';
@@ -158,22 +159,30 @@ export class AdminController {
       await this.usuarioRepository.deleteAll();
       await UsuarioModel.syncIndexes();
 
+      const usuariosAdminsGenerados = [];
       const usuariosPacientesGenerados = [];
       const usuariosMedicosGenerados = [];
+      
+      const usuarioAdmin = new Usuario("ADMIN", "12345678");
+      usuarioAdmin.roles.push(Rol.ADMIN);
+      usuariosAdminsGenerados.push(usuarioAdmin);
 
       for (let i = 1; i <= 10; i++) {
         const usuarioMedico = new Usuario(`medico${i}`, `pass123_${i}`);
+        usuarioMedico.roles.push(Rol.MEDICO);
         usuariosMedicosGenerados.push(usuarioMedico);
       }
 
       for (let i = 1; i <= 40; i++) {
         const usuarioPaciente = new Usuario(`paciente${i}`, `pass123_${i}`);
+        usuarioPaciente.roles.push(Rol.PACIENTE);
         usuariosPacientesGenerados.push(usuarioPaciente);
       }
 
-      const usuarioAdmin = Usuario.USUARIO_SISTEMA;
       await this.usuarioRepository.save(usuarioAdmin);
       logger.info(`✅ Se cargó usuario admin_sweet.`);
+
+      const usuariosAdminsGuardados = await this.usuarioRepository.saveAll(usuariosAdminsGenerados);
 
       const usuariosMedicosGuardados =
         await this.usuarioRepository.saveAll(usuariosMedicosGenerados);

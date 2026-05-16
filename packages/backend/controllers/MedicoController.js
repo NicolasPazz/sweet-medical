@@ -13,6 +13,16 @@ export class MedicoController {
     try {
       const medicos = await this.medicoRepository.findAll();
 
+      const medico1 = medicos[0];
+
+       const primerTurno = medico1.turnosActualesYFuturos[0];
+
+      console.log("ESTADO: " + primerTurno.estado);
+
+      for(const medico of medicos){
+        console.log("medico:" + medico.constructor );
+      }
+
       const dataParaEnviar = medicos.map((m) => ({
         id_usuario: m.usuario?.id || m.usuario?._id,
         id_medico: m.id || m._id,
