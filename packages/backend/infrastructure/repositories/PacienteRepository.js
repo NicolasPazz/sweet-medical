@@ -1,24 +1,48 @@
 import { NotFoundError } from '../../errors/AppError.js';
 import { PacienteModel } from '../schemas/PacienteSchema.js';
+import { Paciente } from '../../domain/usuario/Paciente.js';
 
 export class PacienteRepository {
+
+  fromDB(datos) {
+    const paciente = Object.create(Paciente.prototype);
+    paciente.id = datos._id ?? datos.id;
+    paciente.usuario = datos.usuario;
+    paciente.dni = datos.dni;
+    paciente.nombre = datos.nombre;
+    paciente.obraSocial = datos.obraSocial ?? null;
+    paciente.plan = datos.plan ?? null;
+    return paciente;
+  }
+
+  _hidratarColeccion(datos) {
+    return datos.map((d) => this.fromDB(d));
+  }
+
   // CREAR
   async save(paciente) {
-    if (paciente._id) {
-      return await PacienteModel.findByIdAndUpdate(paciente._id, paciente, { new: true })
+    if (paciente._id || paciente.id) {
+      const id = paciente._id ?? paciente.id;
+      const guardado = await PacienteModel.findByIdAndUpdate(id, paciente, { new: true })
         .populate('usuario')
         .populate('obraSocial')
-        .populate('plan');
+        .populate('plan')
+        .lean();
+      return this.fromDB(guardado);
     } else {
-      const newPaciente = new PacienteModel(paciente);
-      const savedPaciente = await newPaciente.save();
-      await savedPaciente.populate('usuario');
-      return savedPaciente;
+      const nuevo = await PacienteModel.create(paciente);
+      const guardado = await PacienteModel.findById(nuevo._id)
+        .populate('usuario')
+        .populate('obraSocial')
+        .populate('plan')
+        .lean();
+      return this.fromDB(guardado);
     }
   }
 
   async saveAll(pacientes) {
-    return await PacienteModel.insertMany(pacientes);
+    const docs = await PacienteModel.insertMany(pacientes);
+    return this._hidratarColeccion(docs.map((d) => d.toObject()));
   }
 
   // LEER
@@ -26,33 +50,29 @@ export class PacienteRepository {
     const paciente = await PacienteModel.findById(id)
       .populate('usuario')
       .populate('obraSocial')
-      .populate('plan');
-    if (!paciente) {
-      throw new NotFoundError('Paciente no encontrado');
-    }
-    return paciente;
+      .populate('plan')
+      .lean();
+    if (!paciente) throw new NotFoundError('Paciente no encontrado');
+    return this.fromDB(paciente);
   }
 
-    async findByIdUsuario(usuarioId) {
+  async findByIdUsuario(usuarioId) {
     const paciente = await PacienteModel.findOne({ usuario: usuarioId })
       .populate('usuario')
       .populate('obraSocial')
       .populate('plan')
       .lean();
-
-    if (!paciente) {
-      throw new NotFoundError('Paciente no encontrado');
-    }
-
-    return paciente;
+    if (!paciente) throw new NotFoundError('Paciente no encontrado');
+    return this.fromDB(paciente);
   }
 
   async findAll() {
-    return await PacienteModel.find()
+    const pacientes = await PacienteModel.find()
       .populate('usuario')
       .populate('obraSocial')
       .populate('plan')
       .lean();
+    return this._hidratarColeccion(pacientes);
   }
 
   // ACTUALIZAR
@@ -60,24 +80,21 @@ export class PacienteRepository {
     const paciente = await PacienteModel.findByIdAndUpdate(id, datosActualizados, { new: true })
       .populate('usuario')
       .populate('obraSocial')
-      .populate('plan');
-    if (!paciente) {
-      throw new NotFoundError('Paciente no encontrado');
-    }
-    return paciente;
+      .populate('plan')
+      .lean();
+    if (!paciente) throw new NotFoundError('Paciente no encontrado');
+    return this.fromDB(paciente);
   }
 
   // ELIMINAR
   async delete(id) {
     const result = await PacienteModel.findByIdAndDelete(id);
-    if (!result) {
-      throw new NotFoundError('Paciente no encontrado');
-    }
+    if (!result) throw new NotFoundError('Paciente no encontrado');
     return true;
   }
 
   async deleteAll() {
-    return await PacienteModel.deleteMany({});
+    await PacienteModel.deleteMany({});
   }
 }
 
