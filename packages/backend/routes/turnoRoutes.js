@@ -11,6 +11,7 @@ const motorCostos = new MotorCostos();
 const turnoBusquedaService = new TurnoBusquedaService(repository, motorCostos);
 const turnoRouter = express.Router();
 
+// --- Rutas de Paciente ---
 turnoRouter
   .route('/paciente/:id_usuario/reserva/:id_turno')
   .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
@@ -19,6 +20,7 @@ turnoRouter
   .route('/paciente/:id_usuario/cancelacion/:id_turno')
   .patch((req, res, next) => turnoController.cancelarTurnoPaciente(req, res, next));
 
+// --- Rutas de Médico ---
 turnoRouter
   .route('/medico/:id_usuario/cancelacion/:id_turno')
   .patch((req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
@@ -31,6 +33,15 @@ turnoRouter
   .route('/medico/:id_usuario/historial/:id_paciente')
   .get((req, res, next) => turnoController.obtenerHistorial(req, res, next));
 
+turnoRouter
+  .route('/:id_usuario/propuesta-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.proponerReprogramacion(req, res, next));
+
+turnoRouter
+  .route('/:id_usuario/responder-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.responderReprogramacion(req, res, next));
+
+// --- Otras Consultas del flujo ---
 turnoRouter
   .route('/:id_usuario/realizado/:id_turno')
   .patch((req, res, next) => turnoController.finalizarTurno(req, res, next));
