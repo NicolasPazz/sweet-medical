@@ -4,7 +4,8 @@ import { Paciente } from '../domain/usuario/Paciente.js';
 import { Especialidad } from '../domain/servicios/Especialidad.js';
 import { Practica } from '../domain/servicios/Practica.js';
 import { Sede } from '../domain/servicios/Sede.js';
-import { Plan } from '../domain/cobertura/Plan.js';
+import { PlanPrepaga } from '../domain/cobertura/PlanPrepaga.js';
+import { PlanParticular } from '../domain/cobertura/PlanParticular.js';
 import { Rol } from '../domain/usuario/Rol.js';
 
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
@@ -32,7 +33,7 @@ import { SedeModel } from '../infrastructure/schemas/SedeSchema.js';
 import { PlanModel } from '../infrastructure/schemas/PlanSchema.js';
 import { ObraSocialModel } from '../infrastructure/schemas/ObraSocialSchema.js';
 
-export class AdminController {
+export class SeedingController {
   constructor() {
     this.usuarioRepository = usuarioRepository;
     this.medicoRepository = medicoRepository;
@@ -48,6 +49,7 @@ export class AdminController {
 
   cargarDatosIniciales = async (req, res, next) => {
     try {
+      // 0. Cargar sedes
       await this.sedeRepository.deleteAll();
       await SedeModel.syncIndexes();
 
@@ -59,7 +61,7 @@ export class AdminController {
 
       const sedesGuardadas = await this.sedeRepository.saveAll(sedes);
 
-      logger.info(`✅ Se cargaron ${sedesGuardadas.length} sedes.`);
+      logger.info(`Se cargaron ${sedesGuardadas.length} sedes.`);
 
       // 1. Cargar especialidades
       await this.especialidadRepository.deleteAll();
@@ -81,7 +83,7 @@ export class AdminController {
 
       const especialidadesGuardadas = await this.especialidadRepository.saveAll(especialidades);
 
-      logger.info(`✅ Se cargaron ${especialidadesGuardadas.length} especialidades.`);
+      logger.info(`Se cargaron ${especialidadesGuardadas.length} especialidades.`);
 
       // 2. Cargar prácticas
       await this.practicaRepository.deleteAll();
@@ -95,14 +97,15 @@ export class AdminController {
 
       const practicasGuardadas = await this.practicaRepository.saveAll(practicas);
 
-      logger.info(`✅ Se cargaron ${practicasGuardadas.length} prácticas.`);
+      logger.info(`Se cargaron ${practicasGuardadas.length} prácticas.`);
 
       // 3. Cargar planes
       await this.planRepository.deleteAll();
       await PlanModel.syncIndexes();
 
-      const planBasico = new Plan('Básico');
-      const planPremium = new Plan('Premium');
+      const planBasico = new PlanPrepaga('Básico');
+      const planPremium = new PlanPrepaga('Premium');
+      const planParticular = new PlanParticular();
 
       planBasico.coberturasEspecialidad = [
         { especialidad: especialidadesGuardadas[0]._id, nivel: NivelCobertura.TOTAL },
@@ -122,11 +125,11 @@ export class AdminController {
         nivel: NivelCobertura.TOTAL,
       }));
 
-      const planes = [planBasico, planPremium];
+      const planes = [planBasico, planPremium, planParticular];
 
       const planesGuardados = await this.planRepository.saveAll(planes);
 
-      logger.info(`✅ Se cargaron ${planesGuardados.length} planes.`);
+      logger.info(`Se cargaron ${planesGuardados.length} planes.`);
 
       // 4. Cargar obras sociales
       await this.obraSocialRepository.deleteAll();
@@ -153,46 +156,48 @@ export class AdminController {
 
       const obrasSocialesGuardadas = await this.obraSocialRepository.saveAll(obrasSociales);
 
-      logger.info(`✅ Se cargaron ${obrasSocialesGuardadas.length} obras sociales.`);
+      logger.info(`Se cargaron ${obrasSocialesGuardadas.length} obras sociales.`);
 
       // 5. Cargar usuarios
       await this.usuarioRepository.deleteAll();
       await UsuarioModel.syncIndexes();
 
-      const usuariosAdminsGenerados = [];
-      const usuariosPacientesGenerados = [];
       const usuariosMedicosGenerados = [];
-      
-      const usuarioAdmin = new Usuario("ADMIN", "12345678");
-      usuarioAdmin.roles.push(Rol.ADMIN);
-      usuariosAdminsGenerados.push(usuarioAdmin);
+      const usuariosPacientesGenerados = [];
 
+      // Cargar único Admin de forma directa
+      const payloadAdminSistema = {
+        _id: Usuario.USUARIO_SISTEMA.id,
+        nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
+        password: Usuario.USUARIO_SISTEMA.password,
+        roles: Usuario.USUARIO_SISTEMA.roles,
+      };
+
+      await this.usuarioRepository.saveAll([payloadAdminSistema]);
+
+      logger.info(`Se cargó usuario admin_sweet.`);
+
+      // Generar lotes de Médicos
       for (let i = 1; i <= 10; i++) {
         const usuarioMedico = new Usuario(`medico${i}`, `pass123_${i}`);
         usuarioMedico.roles.push(Rol.MEDICO);
         usuariosMedicosGenerados.push(usuarioMedico);
       }
+      const usuariosMedicosGuardados =
+        await this.usuarioRepository.saveAll(usuariosMedicosGenerados);
 
+      // Generar lotes de Pacientes
       for (let i = 1; i <= 40; i++) {
         const usuarioPaciente = new Usuario(`paciente${i}`, `pass123_${i}`);
         usuarioPaciente.roles.push(Rol.PACIENTE);
         usuariosPacientesGenerados.push(usuarioPaciente);
       }
-
-      await this.usuarioRepository.save(usuarioAdmin);
-      logger.info(`✅ Se cargó usuario admin_sweet.`);
-
-      const usuariosAdminsGuardados = await this.usuarioRepository.saveAll(usuariosAdminsGenerados);
-
-      const usuariosMedicosGuardados =
-        await this.usuarioRepository.saveAll(usuariosMedicosGenerados);
-
       const usuariosPacientesGuardados = await this.usuarioRepository.saveAll(
         usuariosPacientesGenerados,
       );
 
       logger.info(
-        `✅ Se cargaron ${usuariosMedicosGuardados.length + usuariosPacientesGuardados.length} usuarios.`,
+        `Se cargaron ${usuariosMedicosGuardados.length + usuariosPacientesGuardados.length} usuarios profesionales y pacientes.`,
       );
 
       // 6. Cargar médicos
@@ -232,7 +237,7 @@ export class AdminController {
 
       const medicosGuardados = await this.medicoRepository.saveAll(medicos);
 
-      logger.info(`✅ Se cargaron ${medicosGuardados.length} médicos.`);
+      logger.info(`Se cargaron ${medicosGuardados.length} médicos.`);
 
       // 7. Cargar pacientes
       await this.pacienteRepository.deleteAll();
@@ -262,23 +267,23 @@ export class AdminController {
 
       const pacientesGuardados = await this.pacienteRepository.saveAll(pacientes);
 
-      logger.info(`✅ Se cargaron ${pacientesGuardados.length} pacientes.`);
+      logger.info(`Se cargaron ${pacientesGuardados.length} pacientes.`);
 
       // 8. Cargar turnos
       await turnoRepository.deleteAll();
 
-      logger.info('⏳ Iniciando generación batch de turnos iniciales...');
+      logger.info('Iniciando generación batch de turnos iniciales...');
 
       await turnoService.refrescarTurnos();
 
-      logger.info('✅ Turnos iniciales generados exitosamente.');
+      logger.info('Turnos iniciales generados exitosamente.');
 
       return res.status(201).json({
         status: 'success',
         message: 'Datos iniciales cargados exitosamente',
       });
     } catch (error) {
-      logger.error('❌ Error al cargar datos iniciales:', error.message);
+      logger.error('Error al cargar datos iniciales:', error.message);
       return next(error);
     }
   };

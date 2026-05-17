@@ -4,6 +4,7 @@ import { NivelCobertura } from './NivelCobertura.js';
 export class PlanParticular extends Plan {
   constructor() {
     super('Particular');
+    this.tipoPlan = 'Particular';
   }
 
   calcularCosto(prestacion) {

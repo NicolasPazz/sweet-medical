@@ -1,5 +1,3 @@
-import { logger } from '../../utils/logger.js';
-
 export class Plan {
   id;
   nombre;
@@ -7,40 +5,33 @@ export class Plan {
   coberturasPractica;
 
   constructor(nombre) {
+    /*if (nombre && typeof nombre === 'object' && !nombre.constructor.name.includes('ObjectId')) {
+      Object.assign(this, nombre);
+      this.id = this.id || this._id;
+      return;
+    }*/
+
     this.nombre = nombre;
     this.coberturasEspecialidad = [];
     this.coberturasPractica = [];
   }
 
   obtenerCoberturaPorEspecialidad(especialidad) {
-    const especialidadId = especialidad?.id ?? especialidad?._id;
-    const cobertura = this.coberturasEspecialidad.find((c) => {
-      const actualId = c.especialidad?.id ?? c.especialidad?._id;
-      return String(actualId) === String(especialidadId);
-    });
-    logger.debug(
-      `Nivel Cobertura encontrada para la especialidad ${especialidad?.nombre}:`,
-      cobertura?.nivel,
-    );
-    return cobertura?.nivel;
+    const idBuscado = especialidad?.id ?? especialidad?._id;
+
+    return this.coberturasEspecialidad.find(
+      (c) => String(c.especialidad?.id || c.especialidad) === String(idBuscado),
+    )?.nivel;
   }
 
   obtenerCoberturaPorPractica(practica) {
-    const practicaId = practica?.id ?? practica?._id;
-    const cobertura = this.coberturasPractica.find((c) => {
-      const actualId = c.practica?.id ?? c.practica?._id;
-      return String(actualId) === String(practicaId);
-    });
-    logger.debug(`Cobertura encontrada para la práctica ${practica?.nombre}:`, cobertura?.nivel);
-    return cobertura?.nivel;
+    const idBuscado = practica?.id ?? practica?._id;
+
+    return this.coberturasPractica.find(
+      (c) => String(c.practica?.id || c.practica) === String(idBuscado),
+    )?.nivel;
   }
 
-  /**
-   * Método polimórfico - delegará el cálculo final dependiendo de la naturaleza del plan.
-   * @param {Object} prestacion - Especialidad o Práctica
-   * @param {String} tipo - 'especialidad' o 'practica'
-   * @returns {Object} { nivel: String, costo: Number }
-   */
   calcularCosto() {
     throw new Error('calcularCosto debe ser implementado por subclases');
   }

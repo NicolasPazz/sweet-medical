@@ -1,42 +1,45 @@
-import { NotificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
+import { notificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 import { Notificacion } from '../domain/notificacion/Notificacion.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class NotificacionService {
-  constructor({ notificacionRepository = new NotificacionRepository() } = {}) {
+  constructor() {
     this.notificacionRepository = notificacionRepository;
     this.usuarioRepository = usuarioRepository;
   }
 
-  obtenerLeidas(idUsuario) {
+  async obtenerLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.findAllReadByUserId(idUsuario);
+    return await this.notificacionRepository.findAllReadByUserId(idUsuario);
   }
 
-  obtenerNoLeidas(idUsuario) {
+  async obtenerNoLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.findAllUnreadByUserId(idUsuario);
+    return await this.notificacionRepository.findAllUnreadByUserId(idUsuario);
   }
 
-  marcarComoLeida(id, idUsuario) {
+  async marcarComoLeida(id, idUsuario) {
     ValidadorId.validarIds(id, idUsuario);
 
-    const notificacion = this.notificacionRepository.findById(id);
+    const notificacion = await this.notificacionRepository.findById(id);
 
     if (!notificacion) {
       throw new NotFoundError('Notificación no encontrada');
     }
 
-    if (notificacion.destinatario !== idUsuario) {
+    const rawId = notificacion.populated('destinatario') || notificacion.destinatario;
+    const idDestinatario = rawId ? rawId.toString() : null;
+
+    if (idDestinatario !== String(idUsuario)) {
       throw new NotFoundError('Notificación no encontrada');
     }
 
-    return this.notificacionRepository.markAsRead(id);
+    return await this.notificacionRepository.markAsRead(id);
   }
 
-  save(datosNotificacion) {
+  async save(datosNotificacion) {
     ValidadorId.validarIds(datosNotificacion.destinatario, datosNotificacion.remitente);
 
     const notificacion = new Notificacion(
@@ -44,6 +47,6 @@ export class NotificacionService {
       datosNotificacion.remitente,
       datosNotificacion.mensaje,
     );
-    return this.notificacionRepository.save(notificacion);
+    return await this.notificacionRepository.save(notificacion);
   }
 }

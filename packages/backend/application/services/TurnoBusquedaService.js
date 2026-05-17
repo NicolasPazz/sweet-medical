@@ -1,5 +1,5 @@
-import { TurnoMapper } from '../../domain/turno/dtos/TurnoMapper.js';
 import { FiltroBusquedaSpecification } from '../../domain/busqueda/FiltroBusquedaSpecification.js';
+import { BadRequestError } from '../../errors/AppError.js';
 
 const MAX_RESULTADOS_COSTO = 500;
 
@@ -9,12 +9,6 @@ export class TurnoBusquedaService {
     this.motorCostos = motorCostos;
   }
 
-  /**
-   * @param {Object} filtros - obj con profesionalId, especialidadId, practicaId, sedeId, fechaDesde, fechaHasta, etc.
-   * @param {Paciente} paciente - Paciente realizando la búsqueda
-   * @param {Object} paginacion - { page, limit, sortBy, sortOrder }
-   */
-
   async buscarTurnos(filtros, paciente, paginacion) {
     const spec = new FiltroBusquedaSpecification(filtros);
     const { page, limit, sortBy, sortOrder } = paginacion;
@@ -22,10 +16,7 @@ export class TurnoBusquedaService {
     let resultadosDomain = [];
     let totalItems = 0;
 
-    // ESTRATEGIA HÍBRIDA
     if (sortBy !== 'costo') {
-      // CASO A: Orden normal (fecha, médico).
-      // Delegamos a la DB (Repository) porque es mucho más rápido y eficiente.
       const queryResult = await this.repository.buscar(
         spec,
         { sortBy, sortOrder },
@@ -34,30 +25,41 @@ export class TurnoBusquedaService {
       resultadosDomain = queryResult.data;
       totalItems = queryResult.total;
     } else {
-      // CASO B: Orden por COSTO.
-      // ¡Problema! MongoDB no sabe cuánto le sale el turno a "Juan" vs "Pedro" (depende de su obra social).
-      // El costo se calcula por código, no está en la tabla.
-
-      // Traemos todos los turnos disponibles (hasta un tope de 500 para no saturar la memoria).
       const allMatches = await this.repository.buscar(spec, null, null);
 
       if (allMatches.total > MAX_RESULTADOS_COSTO) {
-        throw new Error('Demasiados resultados para ordenar por costo. Aplicá más filtros.');
+        throw new BadRequestError(
+          'Demasiados resultados para ordenar por costo. Aplicá más filtros.',
+        );
       }
 
       resultadosDomain = allMatches.data;
       totalItems = allMatches.total;
     }
 
-    // MAPEO Y CÁLCULO DE COSTOS
-    // Convertimos los modelos de DB a DTOs usando el Mapper.
     const dtosMapeados = resultadosDomain.map((turno) => {
-      // Calculamos el costo "en el aire" usando el Motor de Costos.
-      const calculoCosto = this.motorCostos.calcularPara(turno, paciente);
-      return TurnoMapper.toResponseDTO(turno, calculoCosto);
+      const esPractica = !!turno.servicio?.codigo;
+      const turnoAdaptado = {
+        ...turno,
+        practica: esPractica ? turno.servicio : null,
+        especialidad: !esPractica ? turno.servicio : null,
+      };
+
+      const calculoCosto = this.motorCostos.calcularPara(turnoAdaptado, paciente);
+      const baseMapeada = this._mapearTurno(turno);
+
+      const dtoFinal = {
+        ...baseMapeada,
+        costoEstimado: calculoCosto.costoEstimado,
+      };
+
+      if (paciente) {
+        dtoFinal.cobertura = calculoCosto.tipoCobertura;
+      }
+
+      return dtoFinal;
     });
 
-    // Si había que ordenar por costo, ordenamos el array Mapeado en memoria y luego cortamos (slice)
     if (sortBy === 'costo') {
       dtosMapeados.sort((a, b) => {
         if (sortOrder === 'desc') {
@@ -66,7 +68,6 @@ export class TurnoBusquedaService {
         return a.costoEstimado - b.costoEstimado;
       });
 
-      // Aplicar paginación manual
       const startIndex = (page - 1) * limit;
       const paginatedResults = dtosMapeados.slice(startIndex, startIndex + limit);
 
@@ -79,13 +80,47 @@ export class TurnoBusquedaService {
       };
     }
 
-    // Si ya vino ordenado/paginado de BD, devuelvo los mapeados tal cual.
     return {
       data: dtosMapeados,
       total: totalItems,
       page,
       limit,
       totalPages: Math.ceil(totalItems / limit),
+    };
+  }
+
+  _mapearTurno(t) {
+    return {
+      id_turno: t.id || t._id,
+      id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
+      id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
+      fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
+      sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
+
+      servicio: t.servicio
+        ? t.servicio.codigo
+          ? `${t.servicio.codigo} - ${t.servicio.nombre}`
+          : t.servicio.nombre
+        : 'N/A',
+
+      estado:
+        typeof t.estado?.getEstadNombre === 'function'
+          ? t.estado.getEstadoNombre()
+          : typeof t.estado?.getEstadoNombre === 'function'
+            ? t.estado.getEstadoNombre()
+            : t.estado || 'N/A',
+
+      historialEstados: Array.isArray(t.historialEstados)
+        ? t.historialEstados.map((historialEstado) => ({
+            fechaHoraCambio: historialEstado.fechaHoraIngreso,
+            estado: historialEstado.estado,
+            motivo: historialEstado.motivo,
+            actor: historialEstado.usuario?.nombreUsuario,
+          }))
+        : [],
+      costo: t.costo,
+      diaSemana: t.diaSemana,
+      hora: t.hora,
     };
   }
 }

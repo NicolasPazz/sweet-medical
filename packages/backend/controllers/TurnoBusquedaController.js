@@ -1,8 +1,9 @@
+import { BadRequestError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
 
 export class TurnoBusquedaController {
   static crear(turnoBusquedaService) {
-    return async (req, res) => {
+    return async (req, res, next) => {
       try {
         const {
           profesionalId,
@@ -23,33 +24,33 @@ export class TurnoBusquedaController {
 
         // Validaciones - Errores de usuario
         if (isNaN(pageInt) || pageInt < 1) {
-          throw new Error('Page debe ser numérico mayor a 0');
+          throw new BadRequestError('Page debe ser numérico mayor a 0');
         }
 
         if (isNaN(limitInt) || limitInt <= 0) {
-          throw new Error('Limit debe ser numérico mayor a 0');
+          throw new BadRequestError('Limit debe ser numérico mayor a 0');
         }
 
         const sortOrderNormalized = sortOrder.toLowerCase();
         if (!['asc', 'desc'].includes(sortOrderNormalized)) {
-          throw new Error('sortOrder debe ser asc o desc');
+          throw new BadRequestError('sortOrder debe ser asc o desc');
         }
 
         const sortByNormalized = sortBy.toLowerCase();
         if (!['fecha', 'costo'].includes(sortByNormalized)) {
-          throw new Error('sortBy debe ser fecha o costo');
+          throw new BadRequestError('sortBy debe ser fecha o costo');
         }
 
         if (fechaDesde && isNaN(new Date(fechaDesde).getTime())) {
-          throw new Error('fechaDesde no es una fecha válida');
+          throw new BadRequestError('fechaDesde no es una fecha válida');
         }
 
         if (fechaHasta && isNaN(new Date(fechaHasta).getTime())) {
-          throw new Error('fechaHasta no es una fecha válida');
+          throw new BadRequestError('fechaHasta no es una fecha válida');
         }
 
         if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
-          throw new Error('fechaDesde no puede ser posterior a fechaHasta');
+          throw new BadRequestError('fechaDesde no puede ser posterior a fechaHasta');
         }
 
         // Armado de objetos
@@ -82,11 +83,7 @@ export class TurnoBusquedaController {
         });
       } catch (error) {
         logger.error(error.message);
-
-        return res.status(400).json({
-          status: 'error',
-          message: error.message,
-        });
+        return next(error);
       }
     };
   }

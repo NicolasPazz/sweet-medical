@@ -1,68 +1,49 @@
-import { NotFoundError } from '../../errors/AppError.js';
 import { EspecialidadModel } from '../schemas/EspecialidadSchema.js';
-import { Especialidad } from '../../domain/servicios/Especialidad.js';
 
 export class EspecialidadRepository {
-
-  fromDB(datos) {
-    const especialidad = Object.create(Especialidad.prototype);
-    especialidad.id = datos._id ?? datos.id;
-    especialidad.nombre = datos.nombre;
-    especialidad.duracionTurnoEnMins = datos.duracionTurnoEnMins;
-    especialidad.costo = datos.costo;
-    return especialidad;
+  constructor() {
+    this.model = EspecialidadModel;
   }
 
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this.fromDB(d));
+  // LEER
+  async findAll() {
+    return await this.model.find();
+  }
+
+  async findById(id) {
+    return await this.model.findById(id);
   }
 
   // CREAR
   async save(especialidad) {
-    if (especialidad._id || especialidad.id) {
-      const id = especialidad._id ?? especialidad.id;
-      const guardada = await EspecialidadModel.findByIdAndUpdate(id, especialidad, { new: true }).lean();
-      return this.fromDB(guardada);
-    } else {
-      const nueva = await EspecialidadModel.create(especialidad);
-      const guardada = await EspecialidadModel.findById(nueva._id).lean();
-      return this.fromDB(guardada);
+    const id = especialidad.id || especialidad._id;
+
+    if (id) {
+      return await this.update(id, especialidad);
     }
+
+    const nuevaEspecialidad = new this.model(especialidad);
+    return await nuevaEspecialidad.save();
   }
 
   async saveAll(especialidades) {
-    const docs = await EspecialidadModel.insertMany(especialidades);
-    return this._hidratarColeccion(docs.map((d) => d.toObject()));
-  }
-
-  // LEER
-  async findById(id) {
-    const especialidad = await EspecialidadModel.findById(id).lean();
-    if (!especialidad) throw new NotFoundError('Especialidad no encontrada');
-    return this.fromDB(especialidad);
-  }
-
-  async findAll() {
-    const especialidades = await EspecialidadModel.find().lean();
-    return this._hidratarColeccion(especialidades);
+    return await this.model.insertMany(especialidades);
   }
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const especialidad = await EspecialidadModel.findByIdAndUpdate(id, datosActualizados, { new: true }).lean();
-    if (!especialidad) throw new NotFoundError('Especialidad no encontrada');
-    return this.fromDB(especialidad);
+    return await this.model.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    });
   }
 
   // ELIMINAR
   async delete(id) {
-    const result = await EspecialidadModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundError('Especialidad no encontrada');
-    return true;
+    return await this.model.findByIdAndDelete(id);
   }
 
   async deleteAll() {
-    await EspecialidadModel.deleteMany({});
+    await this.model.deleteMany({});
   }
 }
 

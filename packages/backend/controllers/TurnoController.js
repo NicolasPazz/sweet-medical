@@ -16,7 +16,7 @@ export class TurnoController {
 
       await this.turnoService.reservarTurno(idUsuario, idTurno);
 
-      return res.status(200).json({ status: 'success' });
+      return res.status(200).json({ status: 'success', message: 'Turno reservado exitosamente' });
     } catch (error) {
       return next(error);
     }
@@ -44,7 +44,7 @@ export class TurnoController {
 
       await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
 
-      return res.status(200).json({ status: 'success' });
+      return res.status(200).json({ status: 'success', message: 'Turno cancelado exitosamente' });
     } catch (error) {
       return next(error);
     }
@@ -54,10 +54,10 @@ export class TurnoController {
     try {
       const idPaciente = req.params.id_paciente;
       ValidadorId.validarIds(idPaciente);
-      const idUsuario = req.params.id_usuario;
-      ValidadorId.validarIds(idUsuario);
+      const idMedico = req.params.id_usuario;
+      ValidadorId.validarIds(idMedico);
 
-      const historial = await this.turnoService.obtenerHistorial(idPaciente, idUsuario);
+      const historial = await this.turnoService.obtenerHistorial(idPaciente, idMedico);
 
       return res.status(200).json({
         status: 'success',
@@ -77,7 +77,7 @@ export class TurnoController {
 
       await this.turnoService.finalizarTurno(idUsuario, idTurno);
 
-      return res.status(200).json({ status: 'success' });
+      return res.status(200).json({ status: 'success', message: 'Turno finalizado exitosamente' });
     } catch (error) {
       return next(error);
     }
@@ -92,7 +92,7 @@ export class TurnoController {
 
       await this.turnoService.aceptarTurno(idUsuario, idTurno);
 
-      return res.status(200).json({ status: 'success' });
+      return res.status(200).json({ status: 'success', message: 'Turno aceptado exitosamente' });
     } catch (error) {
       return next(error);
     }
@@ -118,7 +118,7 @@ export class TurnoController {
 
   obtenerTurnosMedico = async (req, res, next) => {
     try {
-      const idMedico = req.params.id_medico;
+      const idMedico = req.params.id_usuario;
       ValidadorId.validarIds(idMedico);
 
       const turnos = await this.turnoService.obtenerTurnosMedico(idMedico);

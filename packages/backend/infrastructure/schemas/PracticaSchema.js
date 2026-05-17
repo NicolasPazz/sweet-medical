@@ -30,7 +30,7 @@ const practicaSchema = new mongoose.Schema(
       min: 0,
     },
   },
-  { collection: 'practicas' },
+  { collection: 'practicas', versionKey: false },
 );
 
 practicaSchema.loadClass(Practica);

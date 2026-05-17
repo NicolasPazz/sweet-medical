@@ -39,9 +39,9 @@ export class NotificacionController {
 
   marcarComoLeida = async (req, res, next) => {
     try {
-      const id = req.params.id;
+      const id = req.params.id_notificacion;
       ValidadorId.validarIds(id);
-      const idUsuario = req.body.idUsuario;
+      const idUsuario = req.params.id_destinatario;
       ValidadorId.validarIds(idUsuario);
       const resultado = await this.notificacionService.marcarComoLeida(id, idUsuario);
       return res.status(200).json({

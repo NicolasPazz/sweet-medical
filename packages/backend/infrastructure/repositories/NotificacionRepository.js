@@ -1,69 +1,48 @@
 import { NotificacionModel } from '../schemas/NotificacionSchema.js';
 import { NotFoundError } from '../../errors/AppError.js';
-import { Notificacion } from '../../domain/notificacion/Notificacion.js';
 
 export class NotificacionRepository {
-
-  _hidratar(datos) {
-    return this.fromDB(datos);
-  }
-
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this._hidratar(d));
-  }
-
-  // CREAR
-  async save(notificacion) {
-    if (notificacion._id) {
-      const actualizada = await NotificacionModel.findByIdAndUpdate(notificacion._id, notificacion, { new: true })
-        .populate('destinatario')
-        .populate('remitente')
-        .lean();
-      return this._hidratar(actualizada);
-    } else {
-      const saved = await NotificacionModel.create(notificacion);
-      const completa = await NotificacionModel.findById(saved._id)
-        .populate('destinatario')
-        .populate('remitente')
-        .lean();
-      return this._hidratar(completa);
-    }
+  constructor() {
+    this.model = NotificacionModel;
   }
 
   // LEER
   async findById(id) {
-    const notificacion = await NotificacionModel.findById(id)
-      .populate('destinatario')
-      .populate('remitente')
-      .lean();
+    const notificacion = await NotificacionModel.findById(id);
     if (!notificacion) throw new NotFoundError('Notificación no encontrada');
-    return this._hidratar(notificacion);
+    return notificacion;
   }
 
   async findAllReadByUserId(userId) {
-    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: true })
-      .populate('destinatario')
-      .populate('remitente')
-      .sort({ fechaHoraCreacion: -1 })
-      .lean();
-    return this._hidratarColeccion(notificaciones);
+    return await NotificacionModel.find({ destinatario: userId, leida: true }).sort({
+      fechaHoraCreacion: -1,
+    });
   }
 
   async findAllUnreadByUserId(userId) {
-    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: false })
-      .populate('destinatario')
-      .populate('remitente')
-      .sort({ fechaHoraCreacion: -1 })
-      .lean();
-    return this._hidratarColeccion(notificaciones);
+    return await NotificacionModel.find({ destinatario: userId, leida: false }).sort({
+      fechaHoraCreacion: -1,
+    });
   }
 
-  async obtenerLeidas(idUsuario) {
-    return this.findAllReadByUserId(idUsuario);
-  }
+  // CREAR
+  async save(notificacion) {
+    const id = notificacion.id || notificacion._id;
 
-  async obtenerNoLeidas(idUsuario) {
-    return this.findAllUnreadByUserId(idUsuario);
+    const datosAPersistir = {
+      ...notificacion,
+      destinatario:
+        notificacion.destinatario?.id ||
+        notificacion.destinatario?._id ||
+        notificacion.destinatario,
+      remitente:
+        notificacion.remitente?.id || notificacion.remitente?._id || notificacion.remitente,
+    };
+
+    if (id) {
+      return await NotificacionModel.findByIdAndUpdate(id, datosAPersistir, { new: true });
+    }
+    return await NotificacionModel.create(datosAPersistir);
   }
 
   // ACTUALIZAR
@@ -72,29 +51,10 @@ export class NotificacionRepository {
       id,
       { leida: true, fechaHoraLeida: new Date() },
       { new: true },
-    )
-      .populate('destinatario')
-      .populate('remitente')
-      .lean();
+    );
     if (!notificacion) throw new NotFoundError('Notificación no encontrada');
-    return this._hidratar(notificacion);
+    return notificacion;
   }
-
-  async marcarComoLeida(id) {
-    return this.markAsRead(id);
-  }
-
-  async fromDB(datos) {
-  const notificacion = Object.create(Notificacion.prototype);
-  notificacion.id = datos._id ?? datos.id;
-  notificacion.destinatario = datos.destinatario;
-  notificacion.remitente = datos.remitente;
-  notificacion.mensaje = datos.mensaje;
-  notificacion.fechaHoraCreacion = datos.fechaHoraCreacion;
-  notificacion.fechaHoraLeida = datos.fechaHoraLeida;
-  notificacion.leida = datos.leida;
-  return notificacion;
-}
 }
 
 export const notificacionRepository = new NotificacionRepository();

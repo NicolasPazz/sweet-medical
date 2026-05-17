@@ -12,9 +12,8 @@ router
   .route('/no-leidas/:idUsuario')
   .get((req, res, next) => notificacionController.obtenerNoLeidas(req, res, next));
 
-// En un futuro cuando haya login se va a chequear que el único usuario que pueda leer la notificación sea el destinatario
 router
-  .route('/:id')
+  .route('/:id_notificacion/:id_destinatario')
   .patch((req, res, next) => notificacionController.marcarComoLeida(req, res, next));
 
 router.route('/').post((req, res, next) => notificacionController.save(req, res, next));

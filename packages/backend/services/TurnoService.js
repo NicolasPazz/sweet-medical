@@ -3,8 +3,6 @@ import { usuarioRepository } from '../infrastructure/repositories/UsuarioReposit
 import { notificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
-import { Paciente } from '../domain/usuario/Paciente.js';
-import { Medico } from '../domain/usuario/Medico.js';
 import { Reservado } from '../domain/notificacion/estado-turno/Reservado.js';
 import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
@@ -15,6 +13,7 @@ import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
 import { Rol } from '../domain/usuario/Rol.js';
+import { Usuario } from '../domain/usuario/Usuario.js';
 
 export class TurnoService {
   turnoRepository;
@@ -29,9 +28,6 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
-
-    console.log("debug");
-
     const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
@@ -42,55 +38,33 @@ export class TurnoService {
     }
     const turno = await this.turnoRepository.findById(id_turno);
 
-    console.log("ESTADO DIVERTIDO:", turno.estado); 
-    console.log("ESTADO DIVERTIDO ES INSTANCIA DE DISPONIBLE:", turno.estado.constructor);
-
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    console.log("turno: " + turno.constructor);
-
-    turno.estado = new Disponible(turno);
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
     turno.paciente = paciente;
-    console.log("MEDICO ID:" + turno.medico._id);
-    
-    // REVISAR
+
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
       turno.medico._id,
       EstadoTurno.RESERVADO,
     );
 
-    console.log("tengo mucho sifilis");
-
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    console.log("FECHA HORA: " + turno.fechaHora);
+    const notificacion = turno.actualizarEstado(
+      Usuario.USUARIO_SISTEMA,
+      new Reservado(turno),
+      usuario,
+      'Reserva de turno',
+    );
 
-    console.log("ESTE USUARIO TIENE SIFILIS: ", usuario);
-
-    console.log("TURNO TIENE SIFILIS: ", turno);
-
-    logger.debug("turno: " + turno.constructor.name);
-
-    logger.debug("Destinatario: " + usuario.constructor);
-
-    const usuarioAdmin = await this.usuarioRepository.findUsuarioAdmin();
-
-    
-    logger.debug("Destinatario: " + usuarioAdmin.constructor);
-
-    const notificacion = turno.actualizarEstado(usuarioAdmin, new Reservado(turno), usuario, 'Reserva de turno');
-    console.log("tengo mucho sifilis");
-
-    await this.notificacionRepository.save(notificacion);
-        console.log("tengo mucho sifilis");
-    
+    if (notificacion) {
+      await this.notificacionRepository.save(notificacion);
+    }
     await this.turnoRepository.save(turno);
-    console.log("tengo mucho sifilis");
 
     return turno;
   }
@@ -113,23 +87,19 @@ export class TurnoService {
     }
 
     if (!esMedico) {
-      const paciente = usuario.roles.find((r) => r === Rol.PACIENTE);
-
-      if (paciente == null) {
-        throw new NotFoundError('Paciente no encontrado');
+      if (!usuario.roles.includes(Rol.PACIENTE)) {
+        throw new NotFoundError('El usuario no tiene rol de paciente');
       }
-
-      if (turno.paciente !== paciente) {
+      const idUsuarioDelPaciente = turno.paciente?.usuario?._id || turno.paciente?.usuario;
+      if (String(idUsuarioDelPaciente) !== String(usuario.id || usuario._id)) {
         throw new ConflictError('El paciente no tiene el turno asignado');
       }
     } else {
-      const medico = usuario.roles.find((r) => r === Rol.MEDICO);
-
-      if (medico == null) {
-        throw new NotFoundError('Médico no encontrado');
+      if (!usuario.roles.includes(Rol.MEDICO)) {
+        throw new NotFoundError('El usuario no tiene rol de médico');
       }
-
-      if (turno.medico !== medico) {
+      const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
+      if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
         throw new ConflictError('El médico no tiene el turno asignado');
       }
     }
@@ -139,9 +109,16 @@ export class TurnoService {
       throw new ConflictError('Un turno no puede cancelarse con menos de 1 hora de antelación');
     }
 
-    const notificacion = turno.actualizarEstado(new Cancelado(turno), usuario, motivo);
+    const notificacion = turno.actualizarEstado(
+      Usuario.USUARIO_SISTEMA,
+      new Cancelado(turno),
+      usuario,
+      motivo,
+    );
 
-    const indice = turno.medico.turnosActualesYFuturos.indexOf(turno);
+    const indice = turno.medico.turnosActualesYFuturos.findIndex(
+      (t) => String(t._id || t.id || t) === String(turno.id),
+    );
 
     if (indice !== -1) {
       turno.medico.turnosActualesYFuturos.splice(indice, 1);
@@ -154,39 +131,23 @@ export class TurnoService {
     return turno;
   }
 
-  async obtenerHistorial(idPaciente, idUsuarioNum) {
-    const usuario = await this.usuarioRepository.findById(idUsuarioNum);
+  // id del usuario del paciente, id del usuario del medico que lo solicita
+  async obtenerHistorial(idPaciente, idMedico) {
+    const medico = await this.medicoRepository.findByIdUsuario(idMedico);
 
-    if (usuario == null) {
+    if (medico == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
-      throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
-    }
-
-    const paciente = await this.pacienteRepository.findById(idPaciente);
+    const paciente = await this.pacienteRepository.findByIdUsuario(idPaciente);
 
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const historial = await this.turnoRepository.findAllByPatientId(idPaciente);
+    const historial = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
 
-    const cleanedHistorial = historial.map((turno) => ({
-      id: turno.id,
-      fecha: turno.fecha,
-      medico: {
-        id: turno.medico?.id,
-        nombre: turno.medico?.nombre,
-      },
-      paciente: {
-        id: turno.paciente?.id,
-        nombre: turno.paciente?.nombre,
-      },
-    }));
-
-    return cleanedHistorial;
+    return historial.map((t) => this._mapearTurno(t));
   }
 
   async finalizarTurno(id_usuario, id_turno) {
@@ -196,7 +157,7 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
+    if (!usuario.roles.includes(Rol.MEDICO)) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
@@ -206,23 +167,32 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    const medico = usuario.roles.find((r) => r === Rol.MEDICO);
+    const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
 
-    if (turno.medico !== medico) {
+    if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
       throw new ConflictError('El turno no pertenece al medico');
     }
 
-    if (turno.estado instanceof Realizado) {
-      throw new ConflictError('El turno ya esta realizado');
+    if (!(turno.estado instanceof Confirmado)) {
+      throw new ConflictError('El turno no está en estado confirmado');
     }
 
-    turno.actualizarEstado(new Realizado(turno), usuario, 'Turno finalizado');
+    turno.actualizarEstado(
+      Usuario.USUARIO_SISTEMA,
+      new Realizado(turno),
+      usuario,
+      'Turno finalizado',
+    );
 
-    const indice = medico.turnosActualesYFuturos.indexOf(turno);
+    if (Array.isArray(turno.medico?.turnosActualesYFuturos)) {
+      const indice = turno.medico.turnosActualesYFuturos.findIndex(
+        (t) => String(t._id || t.id) === String(turno.id),
+      );
 
-    if (indice !== -1) {
-      medico.turnosActualesYFuturos.splice(indice, 1);
-      await this.medicoRepository.save(medico);
+      if (indice !== -1) {
+        turno.medico.turnosActualesYFuturos.splice(indice, 1);
+        await this.medicoRepository.save(turno.medico);
+      }
     }
 
     await this.turnoRepository.save(turno);
@@ -237,7 +207,7 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
+    if (!usuario.roles.includes(Rol.MEDICO)) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
@@ -247,9 +217,9 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    const medico = usuario.roles.find((r) => r === Rol.MEDICO);
+    const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
 
-    if (turno.medico !== medico) {
+    if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
       throw new ConflictError('El turno no pertenece al medico');
     }
 
@@ -257,7 +227,12 @@ export class TurnoService {
       throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
     }
 
-    const notificacion = turno.actualizarEstado(new Confirmado(turno), usuario, 'Turno confirmado');
+    const notificacion = turno.actualizarEstado(
+      Usuario.USUARIO_SISTEMA,
+      new Confirmado(turno),
+      usuario,
+      'Turno confirmado',
+    );
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
@@ -267,57 +242,29 @@ export class TurnoService {
   }
 
   async obtenerDisponibilidad(id_usuario, id_servicio) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
 
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
+    if (medico == null) {
+      throw new NotFoundError('Médico no encontrado');
     }
-
-    console.log(usuario.roles);
-
-    if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
-      throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
-    }
-    console.log("USUARIO ID:" +usuario.id);
-    console.log("USUARIO ID:" +usuario._id);
-
-    const medico = await this.medicoRepository.findByIdUsuario(usuario._id);
-
-    console.log("MEDICO ID:" + medico._id);
-    console.log("MEDICO ID:" + medico._id);
 
     const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
-      medico._id,
+      medico.id || medico._id,
       id_servicio,
     );
 
-    console.log(turnosDelServicio);
-
-    const dataParaEnviar = turnosDelServicio.map((t) => ({
-      id: t.id,
-      fechaHora: t.fechaHora,
-      diaSemana: t.diaSemana,
-      hora: t.hora,
-      sede: t.sede,
-      costo: t.costo,
-      estado: t.estado.constructor.name,
-      nombreUsuario: usuario.nombreUsuario,
-      servicio: t.servicio ? { id: t.servicio.id, nombre: t.servicio.nombre } : null,
-    }));
-
-    return dataParaEnviar;
+    return turnosDelServicio.map((t) => this._mapearTurno(t));
   }
 
   async refrescarTurnos() {
     const TAMANO_LOTE = 20; // Procesa de a 20 médicos para cuidar la RAM y las conexiones a DB
-    const metricas ={ procesados: 0, fallidos: 0, total: 0 };
+    const metricas = { procesados: 0, fallidos: 0, total: 0 };
 
     logger.info(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
       // 1. Obtener todos los médicos
       const medicos = await this.medicoRepository.findAll();
-
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
@@ -333,25 +280,18 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-              const agenda = new Agenda();
-              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+              const { turnosEliminados, nuevosTurnos } =
+                Agenda.refrescarTurnosSegunDisponibilidadDe(medico);
 
-              for (const t of turnosCancelados) {
+              // 1. Persistimos las bajas en la DB de turnos
+              for (const t of turnosEliminados) {
                 await this.turnoRepository.save(t);
               }
 
-              console.log("TURNOS DEL MEDICO: " +medico.turnosActualesYFuturos);
-
-              const idsTurnos = [];
-              for (const t of medico.turnosActualesYFuturos) {
-                console.log("ENTRO A LOS TURNOS DE UN MEDICO");
-                const turnoGuardado = await this.turnoRepository.save(t);
-                idsTurnos.push(turnoGuardado.id || turnoGuardado._id);
+              // 2. Persistimos los nuevos turnos generados en la DB de turnos
+              for (const t of nuevosTurnos) {
+                await this.turnoRepository.save(t);
               }
-
-              medico.turnosActualesYFuturos = idsTurnos;
-              
-              await this.medicoRepository.save(medico);
 
               metricas.procesados++;
             } catch (errorMedico) {
@@ -382,43 +322,48 @@ export class TurnoService {
     }
   }
 
-  async obtenerTurnosMedico(id_medico) {
-    const medico = await this.medicoRepository.findById(id_medico);
+  async obtenerTurnosMedico(id_usuario) {
+    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
 
     if (medico == null) {
       throw new NotFoundError('Médico no encontrado');
     }
 
-    const turnos = await this.turnoRepository.findAllByMedicId(id_medico);
+    const turnos = await this.turnoRepository.findAllByMedicId(medico.id || medico._id);
 
-    return turnos.map((turno) => ({
-      id: turno.id,
-      fecha: turno.fechaHora ? turno.fechaHora : 'N/A',
-      medico: turno.medico.nombre,
-      servicio: turno.servicio ? turno.servicio.nombre : 'Consulta General',
-      sede: turno.sede ? turno.sede.nombre : 'N/A',
-      estado: turno.estado ? turno.estado.constructor.name : 'N/A',
-      costoPaciente: turno.costo,
-      horario: turno.hora,
-      diaSemana: turno.diaSemana,
-    }));
+    return turnos.map((t) => this._mapearTurno(t));
   }
 
   async getAll() {
     const turnos = await this.turnoRepository.findAll();
+    return turnos.map((t) => this._mapearTurno(t));
+  }
 
-    return turnos.map((t) => ({
+  _mapearTurno(t) {
+    return {
       id_turno: t.id || t._id,
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
-      sede: t.sede ? t.sede : 'N/A',
-      servicio: t.servicio ? t.servicio.nombre : 'N/A',
-      estado: t.estado ? t.estado.constructor.name : 'N/A',
+      sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
+
+      servicio: t.servicio
+        ? t.servicio.codigo
+          ? `${t.servicio.codigo} - ${t.servicio.nombre}`
+          : t.servicio.nombre
+        : 'N/A',
+
+      estado:
+        typeof t.estado?.getEstadNombre === 'function'
+          ? t.estado.getEstadoNombre()
+          : typeof t.estado?.getEstadoNombre === 'function'
+            ? t.estado.getEstadoNombre()
+            : t.estado || 'N/A',
+
       historialEstados: Array.isArray(t.historialEstados)
         ? t.historialEstados.map((historialEstado) => ({
             fechaHoraCambio: historialEstado.fechaHoraIngreso,
-            estado: historialEstado.estado.constructor.name,
+            estado: historialEstado.estado,
             motivo: historialEstado.motivo,
             actor: historialEstado.usuario?.nombreUsuario,
           }))
@@ -426,7 +371,7 @@ export class TurnoService {
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,
-    }));
+    };
   }
 }
 

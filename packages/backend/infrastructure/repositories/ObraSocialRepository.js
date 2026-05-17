@@ -1,62 +1,49 @@
-import { NotFoundError } from '../../errors/AppError.js';
 import { ObraSocialModel } from '../schemas/ObraSocialSchema.js';
-import { ObraSocial } from '../../domain/cobertura/ObraSocial.js';
 
 export class ObraSocialRepository {
-
-  fromDB(datos) {
-    const obraSocial = Object.create(ObraSocial.prototype);
-    obraSocial.id = datos._id ?? datos.id;
-    obraSocial.nombre = datos.nombre;
-    obraSocial.planes = datos.planes ?? [];
-    return obraSocial;
+  constructor() {
+    this.model = ObraSocialModel;
   }
 
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this.fromDB(d));
+  // LEER
+  async findAll() {
+    return await this.model.find();
+  }
+
+  async findById(id) {
+    return await this.model.findById(id);
   }
 
   // CREAR
   async save(obraSocial) {
-    if (obraSocial._id || obraSocial.id) {
-      const id = obraSocial._id ?? obraSocial.id;
-      const guardada = await ObraSocialModel.findByIdAndUpdate(id, obraSocial, { new: true })
-        .populate('planes')
-        .lean();
-      return this.fromDB(guardada);
-    } else {
-      const nueva = await ObraSocialModel.create(obraSocial);
-      const guardada = await ObraSocialModel.findById(nueva._id).populate('planes').lean();
-      return this.fromDB(guardada);
+    const id = obraSocial.id || obraSocial._id;
+
+    if (id) {
+      return await this.update(id, obraSocial);
     }
+
+    const nuevaObraSocial = new this.model(obraSocial);
+    return await nuevaObraSocial.save();
   }
 
   async saveAll(obrasSociales) {
-    const docs = await ObraSocialModel.insertMany(obrasSociales);
-    return this._hidratarColeccion(docs.map((d) => d.toObject()));
+    return await this.model.insertMany(obrasSociales);
   }
 
-  // LEER
-  async findById(id) {
-    const obraSocial = await ObraSocialModel.findById(id).populate('planes').lean();
-    if (!obraSocial) throw new NotFoundError('Obra social no encontrada');
-    return this.fromDB(obraSocial);
-  }
-
-  async findAll() {
-    const obrasSociales = await ObraSocialModel.find().populate('planes').lean();
-    return this._hidratarColeccion(obrasSociales);
+  // ACTUALIZAR
+  async update(id, datosActualizados) {
+    return await this.model.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    });
   }
 
   // ELIMINAR
   async delete(id) {
-    const result = await ObraSocialModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundError('Obra social no encontrada');
-    return true;
+    return await this.model.findByIdAndDelete(id);
   }
 
   async deleteAll() {
-    await ObraSocialModel.deleteMany({});
+    await this.model.deleteMany({});
   }
 }
 

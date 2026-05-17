@@ -23,13 +23,13 @@ export class ServicioService {
     }
   }
 
-  obtenerTodos() {
-    return this.servicioRepository.findAll();
+  async obtenerTodos() {
+    return await this.servicioRepository.findAll();
   }
 
-  obtenerPorId(id) {
+  async obtenerPorId(id) {
     ValidadorId.validarIds(id);
-    const servicio = this.servicioRepository.findById(id);
+    const servicio = await this.servicioRepository.findById(id);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
@@ -40,13 +40,8 @@ export class ServicioService {
     await this.verificarUsuarioSistema(idUsuario);
 
     let servicio;
-    if (datosServicio.tipo === 'ESPECIALIDAD') {
-      servicio = new Especialidad(
-        datosServicio.nombre,
-        datosServicio.duracionTurnoEnMins,
-        datosServicio.costo,
-      );
-    } else if (datosServicio.tipo === 'PRACTICA') {
+
+    if (datosServicio.codigo) {
       servicio = new Practica(
         datosServicio.codigo,
         datosServicio.nombre,
@@ -54,45 +49,42 @@ export class ServicioService {
         datosServicio.costo,
       );
     } else {
-      throw new BadRequestError('Tipo de servicio inválido');
+      servicio = new Especialidad(
+        datosServicio.nombre,
+        datosServicio.duracionTurnoEnMins,
+        datosServicio.costo,
+      );
     }
 
-    return this.servicioRepository.save(servicio, datosServicio.tipo);
+    return await this.servicioRepository.save(servicio);
   }
 
   async modificar(idUsuario, id, datosActualizados) {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = this.servicioRepository.findById(id);
+    const servicio = await this.servicioRepository.findById(id);
+
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    const tipoReal = servicio.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD';
-
-    if (datosActualizados.tipo && datosActualizados.tipo !== tipoReal) {
-      throw new BadRequestError(
-        `No se puede cambiar el tipo de servicio. El ID ${id} pertenece a una ${tipoReal}.`,
-      );
+    if (servicio.codigo === undefined && datosActualizados.codigo !== undefined) {
+      throw new BadRequestError('No se puede modificar ni asignar un código a una Especialidad.');
     }
 
-    if (!datosActualizados.tipo) {
-      datosActualizados.tipo = tipoReal;
-    }
-
-    return this.servicioRepository.update(id, datosActualizados);
+    return await this.servicioRepository.update(id, datosActualizados);
   }
 
   async eliminar(idUsuario, id) {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = this.servicioRepository.findById(id);
+    const servicio = await this.servicioRepository.findById(id);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    return this.servicioRepository.delete(id);
+    return await this.servicioRepository.delete(id);
   }
 }

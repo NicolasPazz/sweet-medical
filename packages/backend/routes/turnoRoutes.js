@@ -40,7 +40,7 @@ turnoRouter
   .get((req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
 
 turnoRouter
-  .route('/:id_medico/all')
+  .route('/:id_usuario/all')
   .get((req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
 
 turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, res, next));

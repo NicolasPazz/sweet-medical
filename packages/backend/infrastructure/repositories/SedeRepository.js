@@ -1,60 +1,49 @@
-import { NotFoundError } from '../../errors/AppError.js';
 import { SedeModel } from '../schemas/SedeSchema.js';
-import { Sede } from '../../domain/servicios/Sede.js';
 
 export class SedeRepository {
-
-  fromDB(datos) {
-    const sede = Object.create(Sede.prototype);
-    sede.id = datos._id ?? datos.id;
-    sede.nombre = datos.nombre;
-    sede.direccion = datos.direccion;
-    return sede;
+  constructor() {
+    this.model = SedeModel;
   }
 
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this.fromDB(d));
+  // LEER
+  async findAll() {
+    return await this.model.find();
+  }
+
+  async findById(id) {
+    return await this.model.findById(id);
   }
 
   // CREAR
   async save(sede) {
-    if (sede._id || sede.id) {
-      const id = sede._id ?? sede.id;
-      const guardada = await SedeModel.findByIdAndUpdate(id, sede, { new: true }).lean();
-      return this.fromDB(guardada);
-    } else {
-      const nueva = await SedeModel.create(sede);
-      const guardada = await SedeModel.findById(nueva._id).lean();
-      return this.fromDB(guardada);
+    const id = sede.id || sede._id;
+
+    if (id) {
+      return await this.update(id, sede);
     }
+
+    const nuevaSede = new this.model(sede);
+    return await nuevaSede.save();
   }
 
   async saveAll(sedes) {
-    const docs = await SedeModel.insertMany(sedes);
-    return this._hidratarColeccion(docs.map((d) => d.toObject()));
+    return await this.model.insertMany(sedes);
   }
 
-  // LEER
-  async findById(id) {
-    const sede = await SedeModel.findById(id).lean();
-    if (!sede) throw new NotFoundError('Sede no encontrada');
-    return this.fromDB(sede);
-  }
-
-  async findAll() {
-    const sedes = await SedeModel.find().lean();
-    return this._hidratarColeccion(sedes);
+  // ACTUALIZAR
+  async update(id, datosActualizados) {
+    return await this.model.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    });
   }
 
   // ELIMINAR
   async delete(id) {
-    const result = await SedeModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundError('Sede no encontrada');
-    return true;
+    return await this.model.findByIdAndDelete(id);
   }
 
   async deleteAll() {
-    await SedeModel.deleteMany({});
+    await this.model.deleteMany({});
   }
 }
 

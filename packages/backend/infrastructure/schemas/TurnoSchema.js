@@ -2,12 +2,16 @@ import mongoose from 'mongoose';
 import { Turno } from '../../domain/turno/Turno.js';
 import { CambioEstadoTurno } from '../../domain/turno/CambioEstadoTurno.js';
 import { EstadoTurno } from '../../domain/turno/EstadoTurno.js';
+import { Disponible } from '../../domain/notificacion/estado-turno/Disponible.js';
+import { Reservado } from '../../domain/notificacion/estado-turno/Reservado.js';
+import { Confirmado } from '../../domain/notificacion/estado-turno/Confirmado.js';
+import { Cancelado } from '../../domain/notificacion/estado-turno/Cancelado.js';
+import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
 
 const cambioEstadoTurnoSchema = new mongoose.Schema(
   {
     fechaHoraIngreso: { type: Date, default: Date.now },
     estado: { type: String, required: true, trim: true, enum: Object.values(EstadoTurno) },
-    turno: { type: mongoose.Schema.Types.ObjectId, ref: 'Turno' },
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     motivo: { type: String, required: true, trim: true, maxlength: 500 },
   },
@@ -33,12 +37,56 @@ const turnoSchema = new mongoose.Schema(
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
     fechaHora: { type: Date },
-    estado: { type: String, required: true, trim: true, enum: Object.values(EstadoTurno) },
+    estado: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: Object.values(EstadoTurno),
+      get: function (val) {
+        return mapearAClaseEstado(val, this);
+      },
+      set: function (val) {
+        if (val && typeof val.getEstadoNombre === 'function') return val.getEstadoNombre();
+        return val;
+      },
+    },
     costo: { type: Number, required: true, min: 0 },
     historialEstados: [cambioEstadoTurnoSchema],
   },
   { collection: 'turnos' },
 );
+
+turnoSchema.pre(/^find/, function (next) {
+  this.populate('medico').populate('paciente').populate({ path: 'historialEstados.usuario' });
+  next();
+});
+
+function mapearAClaseEstado(estadoValor, turno) {
+  switch (String(estadoValor).toUpperCase()) {
+    case 'DISPONIBLE':
+      return new Disponible(turno);
+    case 'RESERVADO':
+      return new Reservado(turno);
+    case 'CONFIRMADO':
+      return new Confirmado(turno);
+    case 'CANCELADO':
+      return new Cancelado(turno);
+    case 'REALIZADO':
+      return new Realizado(turno);
+    default:
+      return estadoValor;
+  }
+}
+
+turnoSchema.post('init', function (doc) {
+  if (doc.estado) doc.estado = mapearAClaseEstado(doc.estado, doc);
+
+  if (Array.isArray(doc.historialEstados)) {
+    doc.historialEstados.forEach((historial) => {
+      historial.turno = doc;
+    });
+  }
+});
 
 turnoSchema.index({ estado: 1, fechaHora: 1 });
 turnoSchema.index({ medico: 1, estado: 1, fechaHora: 1 });

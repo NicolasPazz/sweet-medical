@@ -2,6 +2,6 @@
 
 echo ""
 echo "===================================================="
-echo "⏳ Corriendo resumen de tests en backend..."
+echo "Corriendo resumen de tests en backend..."
 echo "===================================================="
 (npm test --workspace=backend -- --silent --reporters=summary) || true

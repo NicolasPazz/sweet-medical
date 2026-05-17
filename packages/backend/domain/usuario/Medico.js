@@ -13,22 +13,28 @@ export class Medico {
   disponibilidades;
   turnosActualesYFuturos;
 
-  // Modificado: Mapeo limpio destructurado. Si no vienen listas (vuelven de BD), inicializa arrays vacíos.
-  constructor({ id, usuario, matricula, nombre, especialidades = [], practicas = [], sedes = [], disponibilidades = [], turnosActualesYFuturos = [] }) {
-    this.id = id;
+  constructor(usuario, matricula, nombre) {
+    /*if (usuario && typeof usuario === 'object' && !usuario.constructor.name.includes('ObjectId')) {
+      Object.assign(this, usuario);
+      this.id = this.id || this._id;
+      return;
+    }*/
+
     this.usuario = usuario;
     this.matricula = matricula;
     this.nombre = nombre;
-    this.especialidades = especialidades;
-    this.practicas = practicas;
-    this.sedes = sedes;
-    this.disponibilidades = disponibilidades;
-    this.turnosActualesYFuturos = turnosActualesYFuturos;
+    this.especialidades = [];
+    this.practicas = [];
+    this.sedes = [];
+    this.disponibilidades = [];
+    this.turnosActualesYFuturos = [];
   }
 
   definirDisponibilidad(disponibilidad) {
     GeneradorDisponibilidad.actualizarDisponibilidad(disponibilidad, this.disponibilidades);
-    logger.debug(`Disponibilidad definida para el médico ${this.nombre} el día ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`);
+    logger.debug(
+      `Disponibilidad definida para el médico ${this.nombre} el día ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`,
+    );
   }
 
   refrescarTurnos() {

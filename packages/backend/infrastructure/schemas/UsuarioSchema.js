@@ -19,12 +19,14 @@ const usuarioSchema = new mongoose.Schema(
       minlength: 6,
       maxlength: 128,
     },
-    roles: { 
-      type: [{ 
-        type: String, 
-        enum: Object.values(Rol) 
-      }], 
-      default: [] 
+    roles: {
+      type: [
+        {
+          type: String,
+          enum: Object.values(Rol),
+        },
+      ],
+      default: [],
     },
   },
   { timestamps: true, collection: 'usuarios' },

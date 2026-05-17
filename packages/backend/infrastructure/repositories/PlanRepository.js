@@ -1,61 +1,45 @@
-import { NotFoundError } from '../../errors/AppError.js';
 import { PlanModel } from '../schemas/PlanSchema.js';
-import { Plan } from '../../domain/cobertura/Plan.js';
 
 export class PlanRepository {
-
-  fromDB(datos) {
-    const plan = Object.create(Plan.prototype);
-    plan.id = datos._id ?? datos.id;
-    plan.nombre = datos.nombre;
-    plan.coberturasEspecialidad = datos.coberturasEspecialidad ?? [];
-    plan.coberturasPractica = datos.coberturasPractica ?? [];
-    return plan;
+  constructor() {
+    this.model = PlanModel;
   }
 
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this.fromDB(d));
+  // LEER
+  async findAll() {
+    return await this.model.find();
+  }
+
+  async findById(id) {
+    return await this.model.findById(id);
   }
 
   // CREAR
   async save(plan) {
-    if (plan._id || plan.id) {
-      const id = plan._id ?? plan.id;
-      const guardado = await PlanModel.findByIdAndUpdate(id, plan, { new: true }).lean();
-      return this.fromDB(guardado);
-    } else {
-      const nuevo = await PlanModel.create(plan);
-      const guardado = await PlanModel.findById(nuevo._id).lean();
-      return this.fromDB(guardado);
+    const id = plan.id || plan._id;
+
+    if (id) {
+      return await this.update(id, plan);
     }
+
+    const nuevoPlan = new this.model(plan);
+    return await nuevoPlan.save();
   }
 
   async saveAll(planes) {
-    const docs = await PlanModel.insertMany(planes);
-    return this._hidratarColeccion(docs.map((d) => d.toObject()));
+    return await this.model.insertMany(planes);
   }
 
-  // LEER
-  async findById(id) {
-    const plan = await PlanModel.findById(id).lean();
-    if (!plan) throw new NotFoundError('Plan no encontrado');
-    return this.fromDB(plan);
-  }
-
-  async findAll() {
-    const planes = await PlanModel.find().lean();
-    return this._hidratarColeccion(planes);
+  // ACTUALIZAR
+  async update(id, datosActualizados) {
+    return await this.model.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    });
   }
 
   // ELIMINAR
-  async delete(id) {
-    const result = await PlanModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundError('Plan no encontrado');
-    return true;
-  }
-
   async deleteAll() {
-    await PlanModel.deleteMany({});
+    await this.model.deleteMany({});
   }
 }
 

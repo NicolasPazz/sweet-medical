@@ -17,7 +17,10 @@ export class Cancelado {
     const servicio = this.turno.obtenerNombreServicio();
 
     // 1. Caso: El paciente cancela (requiere que exista paciente)
-    if (this.turno.paciente && actor && actor.id === this.turno.paciente.usuario?.id) {
+    const actorId = actor?.id || actor?._id;
+    const pacienteUsuarioId = this.turno.paciente.usuario?.id || this.turno.paciente.usuario?._id;
+
+    if (this.turno.paciente && actorId && String(actorId) === String(pacienteUsuarioId)) {
       logger.debug(`Notificando al médico por cancelación del paciente.`);
       return new Notificacion(
         this.turno.medico.usuario,

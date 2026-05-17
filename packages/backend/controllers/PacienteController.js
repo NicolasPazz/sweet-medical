@@ -10,11 +10,11 @@ export class PacienteController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idPaciente = req.params.id;
+      const idUsuario = req.params.id_usuario;
 
-      ValidadorId.validarIds(idPaciente);
+      ValidadorId.validarIds(idUsuario);
 
-      const resultado = await this.pacienteService.obtenerHistorialTurnos(idPaciente);
+      const resultado = await this.pacienteService.obtenerHistorialTurnos(idUsuario);
 
       return res.status(200).json({
         status: 'success',
@@ -28,7 +28,7 @@ export class PacienteController {
   leerPacientes = async (req, res, next) => {
     try {
       const pacientes = await this.pacienteRepository.findAll();
-      
+
       const dataParaEnviar = pacientes.map((p) => ({
         id_usuario: p.usuario._id,
         id_paciente: p._id,

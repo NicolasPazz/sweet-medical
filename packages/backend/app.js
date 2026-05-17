@@ -44,13 +44,13 @@ app.launch = function () {
   const portToUse = this.port || process.env.PORT || 3001;
 
   this.listen(portToUse, async () => {
-    logger.info(`🚀 Servidor listo en http://localhost:${portToUse}`);
-    logger.info(`🏥 Health check: http://localhost:${portToUse}/health`);
+    logger.info(`Servidor listo en http://localhost:${portToUse}`);
+    logger.info(`Health check: http://localhost:${portToUse}/health`);
 
-    /*try {
-      logger.info('⏳ Ejecutando carga automática...');
+    try {
+      /*logger.info('Ejecutando carga automática...');
 
-      const url = `http://localhost:${portToUse}/admin/datos-iniciales`;
+      const url = `http://localhost:${portToUse}/seeding/datos-iniciales`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -62,13 +62,13 @@ app.launch = function () {
       const responseData = await response.json();
 
       if (response.ok) {
-        logger.info('✅ Carga automática exitosa!');
+        logger.info('Carga automática exitosa!');
       } else {
-        logger.error('❌ La ruta respondió con error:', responseData);
-      }
+        logger.error('La ruta respondió con error:', responseData);
+      }*/
     } catch (error) {
-      logger.error('💥 No se pudo conectar a la ruta automática:', error.message);
-    }*/
+      logger.error('No se pudo conectar a la ruta automática:', error.message);
+    }
   });
 };
 

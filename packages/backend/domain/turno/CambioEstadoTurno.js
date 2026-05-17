@@ -1,7 +1,7 @@
 export class CambioEstadoTurno {
   id;
   fechaHoraIngreso;
-  estado;
+  estado; // Enum EstadoTurno
   turno;
   usuario;
   motivo;
@@ -10,7 +10,7 @@ export class CambioEstadoTurno {
     this.fechaHoraIngreso = new Date();
     this.estado = estado;
     this.turno = turno;
-    this.usuario = usuario;
+    this.usuario = usuario?.id || usuario?._id || usuario;
     this.motivo = motivo;
   }
 }

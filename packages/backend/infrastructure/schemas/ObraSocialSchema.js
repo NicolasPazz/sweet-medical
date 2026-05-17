@@ -16,6 +16,11 @@ const obraSocialSchema = new mongoose.Schema(
   { collection: 'obras_sociales' },
 );
 
+obraSocialSchema.pre(/^find/, function (next) {
+  this.populate('planes');
+  next();
+});
+
 obraSocialSchema.loadClass(ObraSocial);
 
 export const ObraSocialModel = mongoose.model('ObraSocial', obraSocialSchema);

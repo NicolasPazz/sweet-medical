@@ -1,120 +1,52 @@
-import { NotFoundError } from '../../errors/AppError.js';
 import { MedicoModel } from '../schemas/MedicoSchema.js';
-import { Medico } from '../../domain/usuario/Medico.js';
-import { turnoRepository } from './TurnoRepository.js';
 
 export class MedicoRepository {
-
-  fromDB(datos) {
-    const medico = Object.create(Medico.prototype);
-    medico.id = datos._id ?? datos.id;
-    medico.usuario = datos.usuario;
-    medico.matricula = datos.matricula;
-    medico.nombre = datos.nombre;
-    medico.especialidades = datos.especialidades ?? [];
-    medico.practicas = datos.practicas ?? [];
-    medico.sedes = datos.sedes ?? [];
-    medico.disponibilidades = datos.disponibilidades ?? [];
-    medico.turnosActualesYFuturos = Array.isArray(datos.turnosActualesYFuturos)
-      ? datos.turnosActualesYFuturos.map((t) => turnoRepository._hidratarEstado(t))
-      : [];
-    return medico;
+  constructor() {
+    this.model = MedicoModel;
   }
 
-  _hidratarColeccion(datos) {
-    return datos.map((d) => this.fromDB(d));
+  // LEER
+  async findAll() {
+    return await this.model.find().populate('turnosActualesYFuturos');
+  }
+
+  async findById(id) {
+    return await this.model.findById(id).populate('turnosActualesYFuturos');
+  }
+
+  async findByIdUsuario(usuarioId) {
+    return await this.model.findOne({ usuario: usuarioId }).populate('turnosActualesYFuturos');
+  }
+
+  async findByMatricula(matricula) {
+    return await this.model.findOne({ matricula }).populate('turnosActualesYFuturos');
   }
 
   // CREAR
   async save(medico) {
-    if (medico._id || medico.id) {
-      const id = medico._id ?? medico.id;
-      const guardado = await MedicoModel.findByIdAndUpdate(id, medico, { new: true })
-        .populate('usuario')
-        .populate('especialidades')
-        .populate('practicas')
-        .populate('sedes')
-        .populate('turnosActualesYFuturos')
-        .lean();
-      return this.fromDB(guardado);
-    } else {
-      const nuevo = await MedicoModel.create(medico);
-      const guardado = await MedicoModel.findById(nuevo._id)
-        .populate('usuario')
-        .lean();
-      return this.fromDB(guardado);
-    }
+    const id = medico.id || medico._id;
+    if (id) return await this.update(id, medico);
+
+    const nuevoMedico = new this.model(medico);
+    return await nuevoMedico.save();
   }
 
   async saveAll(medicos) {
-    const docs = await MedicoModel.insertMany(medicos);
-    return this._hidratarColeccion(docs.map((d) => d.toObject()));
-  }
-
-  // LEER
-  async findById(id) {
-    const medico = await MedicoModel.findById(id)
-      .populate('usuario')
-      .populate('especialidades')
-      .populate('practicas')
-      .populate('sedes')
-      .populate('turnosActualesYFuturos')
-      .lean();
-    if (!medico) throw new NotFoundError('Médico no encontrado');
-    return this.fromDB(medico);
-  }
-
-  async findByIdUsuario(usuarioId) {
-    const medico = await MedicoModel.findOne({ usuario: usuarioId })
-      .populate('usuario')
-      .populate('especialidades')
-      .populate('practicas')
-      .populate('sedes')
-      .populate('turnosActualesYFuturos')
-      .lean();
-    if (!medico) throw new NotFoundError('Médico no encontrado');
-    return this.fromDB(medico);
-  }
-
-  async findByMatricula(matricula) {
-    const medico = await MedicoModel.findOne({ matricula }).lean();
-    if (!medico) return null;
-    return this.fromDB(medico);
-  }
-
-  async findAll() {
-    const medicos = await MedicoModel.find()
-      .populate('usuario')
-      .populate('especialidades')
-      .populate('practicas')
-      .populate('sedes')
-      .populate('turnosActualesYFuturos')
-      .lean();
-    return this._hidratarColeccion(medicos);
+    return await this.model.insertMany(medicos);
   }
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const medico = await MedicoModel.findByIdAndUpdate(id, datosActualizados, { new: true })
-      .populate('usuario')
-      .populate('especialidades')
-      .populate('practicas')
-      .populate('sedes')
-      .populate('turnosActualesYFuturos')
-      .lean();
-    if (!medico) throw new NotFoundError('Médico no encontrado');
-    return this.fromDB(medico);
+    return await this.model.findByIdAndUpdate(id, datosActualizados, { new: true });
   }
 
   // ELIMINAR
   async delete(id) {
-    const result = await MedicoModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundError('Médico no encontrado');
-    return true;
+    return await this.model.findByIdAndDelete(id);
   }
 
   async deleteAll() {
-    await MedicoModel.deleteMany({});
+    await this.model.deleteMany({});
   }
 }
 

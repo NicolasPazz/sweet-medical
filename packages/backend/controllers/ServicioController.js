@@ -2,8 +2,6 @@ import { ServicioService } from '../services/ServicioService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
-const TIPOS_SERVICIO_VALIDOS = ['ESPECIALIDAD', 'PRACTICA'];
-
 export class ServicioController {
   constructor({ servicioService = new ServicioService() } = {}) {
     this.servicioService = servicioService;
@@ -33,7 +31,9 @@ export class ServicioController {
     try {
       const idUsuario = req.body.idUsuario;
       ValidadorId.validarIds(idUsuario);
-      const datosServicio = this.extraerYValidarBodyServicio(req.body);
+
+      const datosServicio = this.validarCuerpoCreacion(req.body);
+
       const servicioAgregado = await this.servicioService.agregar(idUsuario, datosServicio);
       return res.status(201).json({ status: 'created', data: servicioAgregado });
     } catch (error) {
@@ -48,7 +48,7 @@ export class ServicioController {
 
       ValidadorId.validarIds(id, idUsuario);
 
-      const datosActualizados = this.extraerYValidarBodyServicio(req.body);
+      const datosActualizados = this.validarCuerpoModificacion(req.body);
 
       const servicioModificado = await this.servicioService.modificar(
         idUsuario,
@@ -74,13 +74,7 @@ export class ServicioController {
     }
   };
 
-  extraerYValidarBodyServicio(body) {
-    if (!body.tipo || !TIPOS_SERVICIO_VALIDOS.includes(body.tipo)) {
-      throw new BadRequestError(
-        `El tipo de servicio es inválido. Los valores aceptados son: ${TIPOS_SERVICIO_VALIDOS.join(', ')}`,
-      );
-    }
-
+  validarCuerpoCreacion(body) {
     if (typeof body.nombre !== 'string' || body.nombre.trim().length === 0) {
       throw new BadRequestError('El nombre no puede estar vacío');
     }
@@ -96,15 +90,50 @@ export class ServicioController {
     }
 
     const datos = {
-      tipo: body.tipo,
       nombre: body.nombre.trim(),
       duracionTurnoEnMins,
       costo,
     };
 
-    if (body.tipo === 'PRACTICA') {
+    if (body.codigo !== undefined) {
       if (typeof body.codigo !== 'string' || body.codigo.trim().length === 0) {
-        throw new BadRequestError('El código es requerido para una Práctica');
+        throw new BadRequestError('El código no puede estar vacío');
+      }
+      datos.codigo = body.codigo.trim();
+    }
+
+    return datos;
+  }
+
+  validarCuerpoModificacion(body) {
+    const datos = {};
+
+    if (body.nombre !== undefined) {
+      if (typeof body.nombre !== 'string' || body.nombre.trim().length === 0) {
+        throw new BadRequestError('El nombre no puede estar vacío');
+      }
+      datos.nombre = body.nombre.trim();
+    }
+
+    if (body.duracionTurnoEnMins !== undefined) {
+      const duracionTurnoEnMins = Number(body.duracionTurnoEnMins);
+      if (!Number.isInteger(duracionTurnoEnMins) || duracionTurnoEnMins <= 0) {
+        throw new BadRequestError('La duración del turno debe ser un entero positivo');
+      }
+      datos.duracionTurnoEnMins = duracionTurnoEnMins;
+    }
+
+    if (body.costo !== undefined) {
+      const costo = Number(body.costo);
+      if (!Number.isFinite(costo) || costo < 0) {
+        throw new BadRequestError('El costo debe ser un número no negativo');
+      }
+      datos.costo = costo;
+    }
+
+    if (body.codigo !== undefined) {
+      if (typeof body.codigo !== 'string' || body.codigo.trim().length === 0) {
+        throw new BadRequestError('El código no puede estar vacío');
       }
       datos.codigo = body.codigo.trim();
     }

@@ -19,15 +19,31 @@ const medicoSchema = new mongoose.Schema(
     sedes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Sede' }],
     disponibilidades: [
       {
+        _id: false,
         diaSemana: { type: String, required: true, enum: Object.values(DiaSemana) },
         horaDesde: { type: String, required: true, trim: true, maxlength: 10 },
         horaHasta: { type: String, required: true, trim: true, maxlength: 10 },
       },
     ],
-    turnosActualesYFuturos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Turno' }],
   },
-  { timestamps: true, collection: 'medicos' },
+  {
+    timestamps: true,
+    collection: 'medicos',
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true },
+  },
 );
+
+medicoSchema.virtual('turnosActualesYFuturos', {
+  ref: 'Turno', // El modelo con el que se va a enlazar
+  localField: '_id', // El campo origen en este esquema
+  foreignField: 'medico', // El campo destino en el esquema de Turno
+});
+
+medicoSchema.pre(/^find/, function (next) {
+  this.populate('usuario').populate('especialidades').populate('practicas').populate('sedes');
+  next();
+});
 
 medicoSchema.loadClass(Medico);
 

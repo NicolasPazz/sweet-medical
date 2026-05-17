@@ -8,33 +8,13 @@ export class ServicioRepository {
     this.practicaRepository = practicaRepository;
   }
 
-  // CREAR
-  async save(servicio, servicioTipo) {
-    const tipo = servicioTipo?.toUpperCase();
-
-    if (tipo === 'ESPECIALIDAD') {
-      return await this.especialidadRepository.save(servicio);
-    }
-    if (tipo === 'PRACTICA') {
-      return await this.practicaRepository.save(servicio);
-    }
-
-    throw new Error('Tipo de servicio inválido. Debe ser ESPECIALIDAD o PRACTICA.');
-  }
-
   // LEER
   async findById(id) {
-    try {
-      return await this.especialidadRepository.findById(id);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
-    }
+    const especialidad = await this.especialidadRepository.findById(id);
+    if (especialidad) return especialidad;
 
-    try {
-      return await this.practicaRepository.findById(id);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
-    }
+    const practica = await this.practicaRepository.findById(id);
+    if (practica) return practica;
 
     throw new NotFoundError('Servicio no encontrado');
   }
@@ -48,35 +28,35 @@ export class ServicioRepository {
     return [...specialties, ...practices];
   }
 
+  // CREAR
+  async save(servicio) {
+    const esPractica = servicio.codigo !== undefined;
+
+    if (esPractica) {
+      return await this.practicaRepository.save(servicio);
+    }
+    return await this.especialidadRepository.save(servicio);
+  }
+
+  // ACTUALIZAR
   async update(id, updatedData) {
-    try {
-      return await this.especialidadRepository.update(id, updatedData);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
-    }
+    const servicioExistente = await this.findById(id);
 
-    try {
+    const esPractica = servicioExistente.codigo !== undefined;
+
+    if (esPractica) {
       return await this.practicaRepository.update(id, updatedData);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
     }
-
-    throw new NotFoundError('Servicio no encontrado');
+    return await this.especialidadRepository.update(id, updatedData);
   }
 
   // ELIMINAR
   async delete(id) {
-    try {
-      return await this.especialidadRepository.delete(id);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
-    }
+    const especialidad = await this.especialidadRepository.delete(id);
+    if (especialidad) return especialidad;
 
-    try {
-      return await this.practicaRepository.delete(id);
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) throw error;
-    }
+    const practica = await this.practicaRepository.delete(id);
+    if (practica) return practica;
 
     throw new NotFoundError('Servicio no encontrado');
   }

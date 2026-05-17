@@ -9,7 +9,7 @@ pacienteRouter
   .get((req, res, next) => pacienteController.leerPacientes(req, res, next));
 
 pacienteRouter
-  .route('/:id/turnos')
+  .route('/:id_usuario/turnos')
   .get((req, res, next) => pacienteController.obtenerHistorial(req, res, next));
 
 export default pacienteRouter;

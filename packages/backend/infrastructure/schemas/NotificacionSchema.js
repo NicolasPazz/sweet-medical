@@ -13,6 +13,11 @@ const notificacionSchema = new mongoose.Schema(
   { collection: 'notificaciones' },
 );
 
+/*notificacionSchema.pre(/^find/, function (next) {
+  this.populate('destinatario').populate('remitente');
+  next();
+});*/
+
 notificacionSchema.index({ destinatario: 1, leida: 1, fechaHoraCreacion: -1 });
 
 notificacionSchema.loadClass(Notificacion);

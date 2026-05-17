@@ -5,27 +5,16 @@ import { logger } from '../../utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
-
-  // LEER
-  async search(specification, sortParams, paginationParams) {
+  async buscar(specification, sortParams, paginationParams) {
     const criteria = specification.toCriteria();
 
-    const query = {
-      estado: EstadoTurno.DISPONIBLE,
-    };
+    const query = { estado: EstadoTurno.DISPONIBLE };
 
-    if (criteria.profesionalId) {
-      query.medico = new mongoose.Types.ObjectId(criteria.profesionalId);
-    }
+    if (criteria.profesionalId) query.medico = new mongoose.Types.ObjectId(criteria.profesionalId);
+    if (criteria.sede) query['sede.nombre'] = { $regex: criteria.sede, $options: 'i' };
 
-    const servicioBusqueda = criteria.servicio || criteria.especialidad || criteria.practica;
-    if (servicioBusqueda) {
-      query['servicio.nombre'] = { $regex: servicioBusqueda, $options: 'i' };
-    }
-
-    if (criteria.sede) {
-      query['sede.nombre'] = { $regex: criteria.sede, $options: 'i' };
-    }
+    const servicio = criteria.servicio || criteria.especialidad || criteria.practica;
+    if (servicio) query['servicio.nombre'] = { $regex: servicio, $options: 'i' };
 
     if (criteria.fechaDesde || criteria.fechaHasta) {
       query.fechaHora = {};
@@ -34,8 +23,6 @@ export class BusquedaTurnosRepository {
     } else {
       query.fechaHora = { $gte: new Date() };
     }
-
-    logger.debug('Query construida:', query);
 
     let mongoQuery = TurnoModel.find(query).populate('medico');
 
@@ -50,16 +37,8 @@ export class BusquedaTurnosRepository {
       mongoQuery = mongoQuery.skip((page - 1) * limit).limit(limit);
     }
 
-    const docs = await mongoQuery.lean().exec();
-    const total = await TurnoModel.countDocuments(query);
+    const [data, total] = await Promise.all([mongoQuery.exec(), TurnoModel.countDocuments(query)]);
 
-    return {
-      data: turnoRepository._hidratarColeccion(docs),
-      total,
-    };
-  }
-
-  async buscar(specification, sortParams, paginationParams) {
-    return this.search(specification, sortParams, paginationParams);
+    return { data, total };
   }
 }

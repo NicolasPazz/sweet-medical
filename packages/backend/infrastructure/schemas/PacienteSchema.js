@@ -12,6 +12,11 @@ const pacienteSchema = new mongoose.Schema(
   { timestamps: true, collection: 'pacientes' },
 );
 
+pacienteSchema.pre(/^find/, function (next) {
+  this.populate('usuario').populate('obraSocial').populate('plan');
+  next();
+});
+
 pacienteSchema.loadClass(Paciente);
 
 export const PacienteModel = mongoose.model('Paciente', pacienteSchema);
