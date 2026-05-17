@@ -5,5 +5,9 @@
   "RECORDATORIO_PACIENTE": "Reminder: Tomorrow is your appointment with Dr. {{nombre}}.",
   "CANCELACION_A_MEDICO": "Patient {{nombre}} has cancelled their appointment for {{servicio}}.",
   "CANCELACION_A_PACIENTE": "The professional has cancelled your appointment on {{fecha}} at {{sede}} for {{servicio}}.",
-  "RESERVA_A_MEDICO": "New appointment reserved by patient {{nombre}} for {{servicio}}."
+  "RESERVA_A_MEDICO": "New appointment reserved by patient {{nombre}} for {{servicio}}.",
+  
+  "PROPUESTA_ACEPTADA": "Rescheduling proposal successfully accepted.",
+  "PROPUESTA_RECHAZADA": "Rescheduling proposal rejected by the counterparty.",
+  "PROPUESTA_RECIBIDA": "The {{rolProponente}} has requested to reschedule the appointment for {{fecha}}."
 }

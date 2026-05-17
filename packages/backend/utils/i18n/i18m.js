@@ -1,36 +1,22 @@
 import i18next from 'i18next';
-// Importamos los archivos JSON
-import sistemaEs from '../../locales/es/sistema.json' assert { type: 'json' };
-import sistemaEn from '../../locales/en/sistema.json' assert { type: 'json' };
-import negocioEs from '../../locales/es/negocio.json' assert { type: 'json' };
-import negocioEn from '../../locales/en/negocio.json' assert { type: 'json' };
+import negocioEs from './locales/es/negocio.json' with { type: 'json' };
+import negocioEn from './locales/en/negocio.json' with { type: 'json' };
 
-// --- CONFIGURACIÓN MANUAL --- 
-const IDIOMA_PARA_LOGS = 'es';    // Puede ser 'es' o 'en'
-const IDIOMA_PARA_NEGOCIO = 'es'; // Puede ser 'es' o 'en'
-// ----------------------------
+// Configuración de idioma por defecto para la lógica de negocio
+const IDIOMA_DEFAULT = 'es';
 
 i18next.init({
+  lng: IDIOMA_DEFAULT,
   fallbackLng: 'es',
-  ns: ['sistema', 'negocio'],
   resources: {
-    es: { sistema: sistemaEs, negocio: negocioEs },
-    en: { sistema: sistemaEn, negocio: negocioEn }
+    es: { translation: negocioEs },
+    en: { translation: negocioEn }
   }
 });
 
-// Función para traducir logs (usa siempre IDIOMA_PARA_LOGS)
-export const tLog = (clave, parametros) => {
-  return i18next.t(`sistema:${clave}`, { 
-    ...parametros, 
-    lng: IDIOMA_PARA_LOGS 
-  });
+// Función única para traducir mensajes del negocio (notificaciones, errores, etc.)
+export const t = (clave, parametros) => {
+  return i18next.t(clave, parametros);
 };
 
-// Función para traducir mensajes al usuario (usa siempre IDIOMA_PARA_NEGOCIO)
-export const tNegocio = (clave, parametros) => {
-  return i18next.t(`negocio:${clave}`, { 
-    ...parametros, 
-    lng: IDIOMA_PARA_NEGOCIO 
-  });
-};
+export default i18next;
