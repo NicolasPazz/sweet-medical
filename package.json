@@ -14,7 +14,8 @@
     "start:dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "format": "prettier --write \"packages/**/*.js\"",
     "lint": "eslint --fix \"packages/**/*.js\"",
-    "fix:all": "npm run format && npm run lint"
+    "fix:all": "npm run format && npm run lint",
+    "test:coverage:backend": "npm run test:backend -- --coverage"
   },
   "keywords": [],
   "author": "",

@@ -5,9 +5,12 @@ import { NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class NotificacionService {
-  constructor() {
-    this.notificacionRepository = notificacionRepository;
-    this.usuarioRepository = usuarioRepository;
+  constructor({
+    notificacionRepository: notificacionRepo = notificacionRepository,
+    usuarioRepository: usuarioRepo = usuarioRepository,
+  } = {}) {
+    this.notificacionRepository = notificacionRepo;
+    this.usuarioRepository = usuarioRepo;
   }
 
   async obtenerLeidas(idUsuario) {

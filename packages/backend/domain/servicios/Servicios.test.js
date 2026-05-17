@@ -1,7 +1,7 @@
 import request from 'supertest';
-import app from '../app.js';
-import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
-import { Usuario } from '../domain/usuario/Usuario.js';
+import app from '../../app.js';
+import { usuarioRepository } from '../../infrastructure/repositories/UsuarioRepository.js';
+import { Usuario } from '../usuario/Usuario.js';
 
 // Para los endpoints de ABM de servicios, el service valida que el usuario
 // que opera sea el usuario Sistema. Como el repo es en memoria, necesitamos
@@ -12,7 +12,7 @@ let idSistema;
 // beforeAll corre una sola vez antes de todos los tests del archivo.
 // Acá registramos al usuario Sistema en el repo para que los tests puedan usarlo.
 beforeAll(async () => {
-  const usuarioSistema = new Usuario(Usuario.USUARIO_SISTEMA.nombreUsuario, null);
+  const usuarioSistema = Usuario.USUARIO_SISTEMA;
   const guardado = await usuarioRepository.save(usuarioSistema);
   idSistema = guardado.id;
 });

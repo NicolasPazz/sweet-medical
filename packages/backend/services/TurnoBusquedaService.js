@@ -1,5 +1,5 @@
-import { FiltroBusquedaSpecification } from '../../domain/busqueda/FiltroBusquedaSpecification.js';
-import { BadRequestError } from '../../errors/AppError.js';
+import { FiltroBusquedaSpecification } from '../domain/busqueda/FiltroBusquedaSpecification.js';
+import { BadRequestError } from '../errors/AppError.js';
 
 const MAX_RESULTADOS_COSTO = 500;
 

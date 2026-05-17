@@ -7,9 +7,12 @@ import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/AppErr
 import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class ServicioService {
-  constructor() {
-    this.servicioRepository = servicioRepository;
-    this.usuarioRepository = usuarioRepository;
+  constructor({
+    servicioRepository: servicioRepo = servicioRepository,
+    usuarioRepository: usuarioRepo = usuarioRepository,
+  } = {}) {
+    this.servicioRepository = servicioRepo;
+    this.usuarioRepository = usuarioRepo;
   }
 
   async verificarUsuarioSistema(idUsuario) {

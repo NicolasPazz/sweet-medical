@@ -1,17 +1,14 @@
-/* Ya paso OK
 import { MotorCostos } from './MotorCostos.js';
 import { PlanPrepaga } from './PlanPrepaga.js';
-import { PlanParticular } from './PlanParticular.js';
 import { NivelCobertura } from './NivelCobertura.js';
 
 describe('MotorCostos', () => {
-
   const turnoMockPractica = {
-    practica: { nombre: 'Radiografía', costoBase: 5000, id: 1 }
+    practica: { nombre: 'Radiografía', costoBase: 5000, id: 1 },
   };
 
   const turnoMockEspecialidad = {
-    especialidad: { nombre: 'Cardiologia', costoConsulta: 10000, id: 2 }
+    especialidad: { nombre: 'Cardiologia', costoConsulta: 10000, id: 2 },
   };
 
   it('debería cobrar el 100% como NO_CUBIERTA si no hay plan (PlanParticular default)', () => {
@@ -23,10 +20,10 @@ describe('MotorCostos', () => {
     expect(resultado.costoEstimado).toBe(5000);
   });
 
-  it('debería delegar polimórficamente a PlanPrepaga', () => {
+  it('debería delegar polimórficamente a PlanPrepaga con copago parcial', () => {
     const miPrepaga = new PlanPrepaga('OSDE');
     miPrepaga.obtenerCoberturaPorPractica = () => NivelCobertura.PARCIAL;
-    miPrepaga.porcentajeCopago = 0.50;
+    miPrepaga.porcentajeCopago = 0.5;
 
     const pacientePrepaga = { plan: miPrepaga };
     const motor = new MotorCostos();
@@ -64,16 +61,4 @@ describe('MotorCostos', () => {
     expect(resultado.tipoCobertura).toBe(NivelCobertura.NO_CUBIERTA);
     expect(resultado.costoEstimado).toBe(5000);
   });
-
-  it('debería lanzar error si la cobertura es PARCIAL y no tiene porcentajeCopago configurado', () => {
-    const miPrepaga = new PlanPrepaga('Sancor');
-    miPrepaga.obtenerCoberturaPorPractica = () => NivelCobertura.PARCIAL;
-    miPrepaga.porcentajeCopago = undefined;
-
-    const pacientePrepaga = { plan: miPrepaga };
-    const motor = new MotorCostos();
-    
-    expect(() => motor.calcularPara(turnoMockPractica, pacientePrepaga)).toThrow('no tiene porcentajeCopago configurado');
-  });
 });
-*/

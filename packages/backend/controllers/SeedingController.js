@@ -287,4 +287,17 @@ export class SeedingController {
       return next(error);
     }
   };
+
+  refrescarTurnos = async (req, res, next) => {
+    try {
+      await this.turnoService.refrescarTurnos();
+      return res.status(200).json({
+        status: 'success',
+        message: 'Turnos refrescados exitosamente',
+      });
+    } catch (error) {
+      logger.error('Error al refrescar turnos:', error.message);
+      return next(error);
+    }
+  };
 }
