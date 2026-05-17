@@ -1,7 +1,5 @@
 import { TurnoModel } from '../schemas/TurnoSchema.js';
 import { EstadoTurno } from '../../domain/turno/EstadoTurno.js';
-import { turnoRepository } from './TurnoRepository.js';
-import { logger } from '../../utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
