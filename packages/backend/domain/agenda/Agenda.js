@@ -40,9 +40,7 @@ export class Agenda {
           costo: servicio.costo,
           admin: admin,
         });
-        logger.debug(
-          'Estado del turno: ' + turno.estado.constructor,
-        );
+
         turno.fechaHora = Agenda.configurarFechaCercana(
           disponibilidad.diaSemana,
           calcularHoraDesdeMinutos(actualMinutos),
