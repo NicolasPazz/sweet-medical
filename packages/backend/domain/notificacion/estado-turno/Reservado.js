@@ -1,5 +1,6 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Reservado {
@@ -14,6 +15,7 @@ export class Reservado {
 
   notificar(remitente) {
     const servicio = this.turno.obtenerNombreServicio();
+
     logger.debug(
       `Creando notificación para turno ${this.turno.id} en estado RESERVADO por paciente ${this.turno.paciente.nombre} para servicio ${servicio}.`,
     );
@@ -26,7 +28,10 @@ export class Reservado {
     return new Notificacion(
       destinatarioId, // Pasa el ID limpio (ej: string de 24 caracteres)
       remitenteId, // Pasa el ID limpio (ej: '000000000000000000000001')
-      `Nuevo turno reservado por paciente ${this.turno.paciente.nombre} para ${servicio}.`,
+      tNegocio('RESERVA_A_MEDICO', {
+        nombre: this.turno.paciente.nombre,
+        servicio
+      }),
     );
   }
 }

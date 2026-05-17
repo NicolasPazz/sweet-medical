@@ -1,4 +1,5 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from "../utils/logger.js";
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Notificacion {
   // MongoDB va a agregar _id al documento cuando lo insertes, no necesitás anticiparlo en la clase.
@@ -25,6 +26,12 @@ export class Notificacion {
   marcarComoLeida() {
     this.leida = true;
     this.fechaHoraLeida = new Date();
-    logger.debug(`Notificación ${this.id} marcada como leída el: ${this.fechaHoraLeida}`);
+    
+    logger.debug(
+      tLog('LOG_NOTIFICACION_LEIDA', {
+        id: this.id,
+        fecha: this.fechaHoraLeida.toISOString()
+      })
+    );
   }
 }
