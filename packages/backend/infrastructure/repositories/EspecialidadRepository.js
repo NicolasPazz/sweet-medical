@@ -3,7 +3,6 @@ import { EspecialidadModel } from '../schemas/EspecialidadSchema.js';
 import { Especialidad } from '../../domain/servicios/Especialidad.js';
 
 export class EspecialidadRepository {
-
   fromDB(datos) {
     const especialidad = Object.create(Especialidad.prototype);
     especialidad.id = datos._id ?? datos.id;
@@ -21,7 +20,9 @@ export class EspecialidadRepository {
   async save(especialidad) {
     if (especialidad._id || especialidad.id) {
       const id = especialidad._id ?? especialidad.id;
-      const guardada = await EspecialidadModel.findByIdAndUpdate(id, especialidad, { new: true }).lean();
+      const guardada = await EspecialidadModel.findByIdAndUpdate(id, especialidad, {
+        new: true,
+      }).lean();
       return this.fromDB(guardada);
     } else {
       const nueva = await EspecialidadModel.create(especialidad);
@@ -49,7 +50,9 @@ export class EspecialidadRepository {
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const especialidad = await EspecialidadModel.findByIdAndUpdate(id, datosActualizados, { new: true }).lean();
+    const especialidad = await EspecialidadModel.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    }).lean();
     if (!especialidad) throw new NotFoundError('Especialidad no encontrada');
     return this.fromDB(especialidad);
   }

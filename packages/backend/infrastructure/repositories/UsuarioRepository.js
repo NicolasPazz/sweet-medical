@@ -3,7 +3,6 @@ import { UsuarioModel } from '../schemas/UsuarioSchema.js';
 import { Usuario } from '../../domain/usuario/Usuario.js';
 
 export class UsuarioRepository {
-
   fromDB(datos) {
     const usuario = Object.create(Usuario.prototype);
     usuario.id = datos._id ?? datos.id;
@@ -55,7 +54,9 @@ export class UsuarioRepository {
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, { new: true }).lean();
+    const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    }).lean();
     if (!usuario) throw new NotFoundError('Usuario no encontrado');
     return this.fromDB(usuario);
   }

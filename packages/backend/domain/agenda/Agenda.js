@@ -30,16 +30,16 @@ export class Agenda {
       const sedeDelMedico = medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null;
 
       while (actualMinutos + offset <= tiempoLimite) {
-        const turno = new Turno(
+        const turno = new Turno({
           medico,
-          null,
-          disponibilidad.diaSemana,
-          calcularHoraDesdeMinutos(actualMinutos),
-          sedeDelMedico,
+          paciente: null,
+          diaSemana: disponibilidad.diaSemana,
+          hora: calcularHoraDesdeMinutos(actualMinutos),
+          sede: sedeDelMedico,
           servicio,
-          servicio.costo,
-        );
-
+          costo: servicio.costo,
+        });
+        logger.debug("Estado del turno: " + turno.estado.constructor);
         turno.fechaHora = Agenda.configurarFechaCercana(
           disponibilidad.diaSemana,
           calcularHoraDesdeMinutos(actualMinutos),

@@ -13,16 +13,6 @@ export class MedicoController {
     try {
       const medicos = await this.medicoRepository.findAll();
 
-      const medico1 = medicos[0];
-
-       const primerTurno = medico1.turnosActualesYFuturos[0];
-
-      console.log("ESTADO: " + primerTurno.estado);
-
-      for(const medico of medicos){
-        console.log("medico:" + medico.constructor );
-      }
-
       const dataParaEnviar = medicos.map((m) => ({
         id_usuario: m.usuario?.id || m.usuario?._id,
         id_medico: m.id || m._id,
@@ -33,7 +23,7 @@ export class MedicoController {
         turnos: m.turnosActualesYFuturos.map((turno) => ({
           id: turno.id || turno._id,
           fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]
-          medico: turno.medico.nombre,
+          medico: m.nombre,
           servicio: turno.servicio ? turno.servicio.nombre : 'Consulta General',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
           estado: turno.estado ? turno.estado.constructor.name : 'N/A',

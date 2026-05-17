@@ -18,7 +18,18 @@ export class Turno {
   hora;
 
   // Modificado: Ahora recibe un objeto con propiedades para mapeo directo de base de datos/JSON
-  constructor({ id, medico, paciente, diaSemana, hora, sede, servicio, costo, fechaHora, historialEstados = [] }) {
+  constructor({
+    id,
+    medico,
+    paciente,
+    diaSemana,
+    hora,
+    sede,
+    servicio,
+    costo,
+    fechaHora,
+    historialEstados = [],
+  }) {
     this.id = id;
     this.medico = medico;
     this.paciente = paciente;
@@ -29,24 +40,26 @@ export class Turno {
     this.servicio = servicio?.costo ? servicio : servicio; // Flexibilidad si ya viene instanciado
     this.historialEstados = historialEstados;
     this.costo = costo;
-    this.estado = "DISPONIBLE"; // Valor por defecto temporal que tu _prepararParaDominio va a pisar con la clase de estado real
+    this.estado = new Disponible(this);
   }
 
   // En Turno.js, agregás este método estático:
 
-
   actualizarEstado(usuarioQueLlama, nuevoEstado, quien, motivo) {
-    logger.debug("USUARIO QUE LLAMA (deberia ser admin:", usuarioQueLlama);
-    logger.debug("nuevoEstado:", nuevoEstado);
-    logger.debug("quien:", quien);
-    logger.debug("motivo:", motivo);
-    
+    logger.debug('USUARIO QUE LLAMA (deberia ser admin:', usuarioQueLlama);
+    logger.debug('nuevoEstado:', nuevoEstado);
+    logger.debug('quien:', quien);
+    logger.debug('motivo:', motivo);
+
     const nuevoCambio = new CambioEstadoTurno(nuevoEstado, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
     // Corregido: Usamos coma en lugar de concatenar con '+' para evitar el [object Object] en el logger
-    logger.debug(`Turno ${this.id} actualizado a estado ${nuevoEstado.constructor.name} por con motivo: ${motivo}`, quien);
+    logger.debug(
+      `Turno ${this.id} actualizado a estado ${nuevoEstado.constructor.name} por con motivo: ${motivo}`,
+      quien,
+    );
 
     const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuarioQueLlama, this);
     return notificacion;

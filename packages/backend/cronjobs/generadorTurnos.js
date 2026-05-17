@@ -3,7 +3,7 @@ import { turnoService } from '../services/TurnoService.js';
 import { logger } from '../utils/logger.js';
 
 // Se ejecuta todos los días a las 02:00 AM
-cron.schedule('0 2 * * *', async () => {
+cron.schedule('0 * * * *', async () => {
   try {
     logger.info('Inicio cronjob');
 

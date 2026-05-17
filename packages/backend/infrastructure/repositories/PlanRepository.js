@@ -3,7 +3,6 @@ import { PlanModel } from '../schemas/PlanSchema.js';
 import { Plan } from '../../domain/cobertura/Plan.js';
 
 export class PlanRepository {
-
   fromDB(datos) {
     const plan = Object.create(Plan.prototype);
     plan.id = datos._id ?? datos.id;

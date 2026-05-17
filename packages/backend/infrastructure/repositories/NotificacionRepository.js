@@ -3,7 +3,6 @@ import { NotFoundError } from '../../errors/AppError.js';
 import { Notificacion } from '../../domain/notificacion/Notificacion.js';
 
 export class NotificacionRepository {
-
   _hidratar(datos) {
     return this.fromDB(datos);
   }
@@ -15,7 +14,11 @@ export class NotificacionRepository {
   // CREAR
   async save(notificacion) {
     if (notificacion._id) {
-      const actualizada = await NotificacionModel.findByIdAndUpdate(notificacion._id, notificacion, { new: true })
+      const actualizada = await NotificacionModel.findByIdAndUpdate(
+        notificacion._id,
+        notificacion,
+        { new: true },
+      )
         .populate('destinatario')
         .populate('remitente')
         .lean();
@@ -85,16 +88,16 @@ export class NotificacionRepository {
   }
 
   async fromDB(datos) {
-  const notificacion = Object.create(Notificacion.prototype);
-  notificacion.id = datos._id ?? datos.id;
-  notificacion.destinatario = datos.destinatario;
-  notificacion.remitente = datos.remitente;
-  notificacion.mensaje = datos.mensaje;
-  notificacion.fechaHoraCreacion = datos.fechaHoraCreacion;
-  notificacion.fechaHoraLeida = datos.fechaHoraLeida;
-  notificacion.leida = datos.leida;
-  return notificacion;
-}
+    const notificacion = Object.create(Notificacion.prototype);
+    notificacion.id = datos._id ?? datos.id;
+    notificacion.destinatario = datos.destinatario;
+    notificacion.remitente = datos.remitente;
+    notificacion.mensaje = datos.mensaje;
+    notificacion.fechaHoraCreacion = datos.fechaHoraCreacion;
+    notificacion.fechaHoraLeida = datos.fechaHoraLeida;
+    notificacion.leida = datos.leida;
+    return notificacion;
+  }
 }
 
 export const notificacionRepository = new NotificacionRepository();

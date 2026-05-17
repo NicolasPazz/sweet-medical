@@ -5,7 +5,6 @@ import { logger } from '../../utils/logger.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
-
   // LEER
   async search(specification, sortParams, paginationParams) {
     const criteria = specification.toCriteria();

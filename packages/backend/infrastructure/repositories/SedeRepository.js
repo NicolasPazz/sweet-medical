@@ -3,7 +3,6 @@ import { SedeModel } from '../schemas/SedeSchema.js';
 import { Sede } from '../../domain/servicios/Sede.js';
 
 export class SedeRepository {
-
   fromDB(datos) {
     const sede = Object.create(Sede.prototype);
     sede.id = datos._id ?? datos.id;

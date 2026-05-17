@@ -3,7 +3,6 @@ import { PacienteModel } from '../schemas/PacienteSchema.js';
 import { Paciente } from '../../domain/usuario/Paciente.js';
 
 export class PacienteRepository {
-
   fromDB(datos) {
     const paciente = Object.create(Paciente.prototype);
     paciente.id = datos._id ?? datos.id;

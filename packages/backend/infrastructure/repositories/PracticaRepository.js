@@ -3,7 +3,6 @@ import { PracticaModel } from '../schemas/PracticaSchema.js';
 import { Practica } from '../../domain/servicios/Practica.js';
 
 export class PracticaRepository {
-
   fromDB(datos) {
     const practica = Object.create(Practica.prototype);
     practica.id = datos._id ?? datos.id;
@@ -50,7 +49,9 @@ export class PracticaRepository {
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const practica = await PracticaModel.findByIdAndUpdate(id, datosActualizados, { new: true }).lean();
+    const practica = await PracticaModel.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    }).lean();
     if (!practica) throw new NotFoundError('Práctica no encontrada');
     return this.fromDB(practica);
   }

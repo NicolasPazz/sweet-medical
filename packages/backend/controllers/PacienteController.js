@@ -28,7 +28,7 @@ export class PacienteController {
   leerPacientes = async (req, res, next) => {
     try {
       const pacientes = await this.pacienteRepository.findAll();
-      
+
       const dataParaEnviar = pacientes.map((p) => ({
         id_usuario: p.usuario._id,
         id_paciente: p._id,

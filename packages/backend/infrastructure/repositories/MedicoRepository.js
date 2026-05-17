@@ -4,7 +4,6 @@ import { Medico } from '../../domain/usuario/Medico.js';
 import { turnoRepository } from './TurnoRepository.js';
 
 export class MedicoRepository {
-
   fromDB(datos) {
     const medico = Object.create(Medico.prototype);
     medico.id = datos._id ?? datos.id;
@@ -39,9 +38,7 @@ export class MedicoRepository {
       return this.fromDB(guardado);
     } else {
       const nuevo = await MedicoModel.create(medico);
-      const guardado = await MedicoModel.findById(nuevo._id)
-        .populate('usuario')
-        .lean();
+      const guardado = await MedicoModel.findById(nuevo._id).populate('usuario').lean();
       return this.fromDB(guardado);
     }
   }

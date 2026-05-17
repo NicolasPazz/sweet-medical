@@ -3,7 +3,6 @@ import { ObraSocialModel } from '../schemas/ObraSocialSchema.js';
 import { ObraSocial } from '../../domain/cobertura/ObraSocial.js';
 
 export class ObraSocialRepository {
-
   fromDB(datos) {
     const obraSocial = Object.create(ObraSocial.prototype);
     obraSocial.id = datos._id ?? datos.id;

@@ -20,12 +20,16 @@ export class Reservado {
 
     // 🚀 CORRECCIÓN CLAVE: Extraemos explícitamente el .id o ._id de los usuarios
     // en lugar de enviarle el objeto completo a Mongoose.
-    const destinatarioId = this.turno.medico.usuario.id || this.turno.medico.usuario._id;
-    const remitenteId = remitente.id || remitente._id;
+    const destinatarioId = this.turno.medico.usuario?.toString
+      ? this.turno.medico.usuario.toString()
+      : String(this.turno.medico.usuario);
+    const remitenteId = remitente.id?.toString
+      ? remitente.id.toString()
+      : (remitente._id ?? remitente).toString();
 
     return new Notificacion(
       destinatarioId, // Pasa el ID limpio (ej: string de 24 caracteres)
-      remitenteId,    // Pasa el ID limpio (ej: '000000000000000000000001')
+      remitenteId, // Pasa el ID limpio (ej: '000000000000000000000001')
       `Nuevo turno reservado por paciente ${this.turno.paciente.nombre} para ${servicio}.`,
     );
   }

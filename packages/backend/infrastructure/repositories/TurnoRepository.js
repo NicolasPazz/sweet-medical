@@ -9,7 +9,6 @@ import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
 import { Turno } from '../../domain/turno/Turno.js';
 
 export class TurnoRepository {
-
   _obtenerValorEstado(estado) {
     if (!estado) return null;
     if (typeof estado === 'string') return estado.toUpperCase();
@@ -27,12 +26,23 @@ export class TurnoRepository {
 
     const estadoValor = String(turno.estado).toUpperCase();
     switch (estadoValor) {
-      case EstadoTurno.DISPONIBLE: turno.estado = new Disponible(turno); break;
-      case EstadoTurno.RESERVADO:  turno.estado = new Reservado(turno);  break;
-      case EstadoTurno.CONFIRMADO: turno.estado = new Confirmado(turno); break;
-      case EstadoTurno.CANCELADO:  turno.estado = new Cancelado(turno);  break;
-      case EstadoTurno.REALIZADO:  turno.estado = new Realizado(turno);  break;
-      default: throw new Error(`Estado de turno corrupto en la DB: ${estadoValor}`);
+      case EstadoTurno.DISPONIBLE:
+        turno.estado = new Disponible(turno);
+        break;
+      case EstadoTurno.RESERVADO:
+        turno.estado = new Reservado(turno);
+        break;
+      case EstadoTurno.CONFIRMADO:
+        turno.estado = new Confirmado(turno);
+        break;
+      case EstadoTurno.CANCELADO:
+        turno.estado = new Cancelado(turno);
+        break;
+      case EstadoTurno.REALIZADO:
+        turno.estado = new Realizado(turno);
+        break;
+      default:
+        throw new Error(`Estado de turno corrupto en la DB: ${estadoValor}`);
     }
 
     if (Array.isArray(turno.historialEstados)) {
@@ -40,12 +50,23 @@ export class TurnoRepository {
         if (!hist || !hist.estado) return hist;
         const estadoHist = String(hist.estado).toUpperCase();
         switch (estadoHist) {
-          case EstadoTurno.DISPONIBLE: hist.estado = new Disponible(turno); break;
-          case EstadoTurno.RESERVADO:  hist.estado = new Reservado(turno);  break;
-          case EstadoTurno.CONFIRMADO: hist.estado = new Confirmado(turno); break;
-          case EstadoTurno.CANCELADO:  hist.estado = new Cancelado(turno);  break;
-          case EstadoTurno.REALIZADO:  hist.estado = new Realizado(turno);  break;
-          default: throw new Error(`Historial corrupto en DB: ${estadoHist}`);
+          case EstadoTurno.DISPONIBLE:
+            hist.estado = new Disponible(turno);
+            break;
+          case EstadoTurno.RESERVADO:
+            hist.estado = new Reservado(turno);
+            break;
+          case EstadoTurno.CONFIRMADO:
+            hist.estado = new Confirmado(turno);
+            break;
+          case EstadoTurno.CANCELADO:
+            hist.estado = new Cancelado(turno);
+            break;
+          case EstadoTurno.REALIZADO:
+            hist.estado = new Realizado(turno);
+            break;
+          default:
+            throw new Error(`Historial corrupto en DB: ${estadoHist}`);
         }
         return hist;
       });
@@ -121,7 +142,7 @@ export class TurnoRepository {
       .populate('medico')
       .populate('paciente')
       .populate({ path: 'historialEstados.usuario' })
-      .lean();                                          // <-- este era el fix
+      .lean(); // <-- este era el fix
     if (!turno) throw new NotFoundError('Turno no encontrado');
     return this._hidratarEstado(turno);
   }
@@ -190,23 +211,21 @@ export class TurnoRepository {
     await TurnoModel.deleteMany({});
   }
 
-  async fromDB(datos) {
-  const turno = Object.create(Turno.prototype);
-  turno.id = datos._id ?? datos.id;
-  turno.medico = datos.medico;
-  turno.paciente = datos.paciente;
-  turno.diaSemana = datos.diaSemana;
-  turno.hora = datos.hora;
-  turno.sede = datos.sede;
-  turno.servicio = datos.servicio;
-  turno.costo = datos.costo;
-  turno.fechaHora = datos.fechaHora;
-  turno.historialEstados = datos.historialEstados ?? [];
-  turno.estado = datos.estado; // ya viene hidratado del repo
-  return turno;
-}
-
-
+  fromDB(datos) {
+    const turno = Object.create(Turno.prototype);
+    turno.id = datos._id ?? datos.id;
+    turno.medico = datos.medico;
+    turno.paciente = datos.paciente;
+    turno.diaSemana = datos.diaSemana;
+    turno.hora = datos.hora;
+    turno.sede = datos.sede;
+    turno.servicio = datos.servicio;
+    turno.costo = datos.costo;
+    turno.fechaHora = datos.fechaHora;
+    turno.historialEstados = datos.historialEstados ?? [];
+    turno.estado = datos.estado; // ya viene hidratado del repo
+    return turno;
+  }
 }
 
 export const turnoRepository = new TurnoRepository();

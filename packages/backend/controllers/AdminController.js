@@ -105,20 +105,20 @@ export class AdminController {
       const planPremium = new Plan('Premium');
 
       planBasico.coberturasEspecialidad = [
-        { especialidad: especialidadesGuardadas[0]._id, nivel: NivelCobertura.TOTAL },
-        { especialidad: especialidadesGuardadas[1]._id, nivel: NivelCobertura.PARCIAL },
-        { especialidad: especialidadesGuardadas[5]._id, nivel: NivelCobertura.TOTAL },
+        { especialidad: especialidadesGuardadas[0].id, nivel: NivelCobertura.TOTAL },
+        { especialidad: especialidadesGuardadas[1].id, nivel: NivelCobertura.PARCIAL },
+        { especialidad: especialidadesGuardadas[5].id, nivel: NivelCobertura.TOTAL },
       ];
       planBasico.coberturasPractica = [
-        { practica: practicasGuardadas[0]._id, nivel: NivelCobertura.PARCIAL },
+        { practica: practicasGuardadas[0].id, nivel: NivelCobertura.PARCIAL },
       ];
 
       planPremium.coberturasEspecialidad = especialidadesGuardadas.map((esp) => ({
-        especialidad: esp._id,
+        especialidad: esp.id,
         nivel: NivelCobertura.TOTAL,
       }));
       planPremium.coberturasPractica = practicasGuardadas.map((prac) => ({
-        practica: prac._id,
+        practica: prac.id,
         nivel: NivelCobertura.TOTAL,
       }));
 
@@ -135,19 +135,19 @@ export class AdminController {
       const obrasSociales = [
         {
           nombre: 'OSDE',
-          planes: [planesGuardados[0]._id],
+          planes: [planesGuardados[0].id],
         },
         {
           nombre: 'Swiss Medical',
-          planes: [planesGuardados[1]._id],
+          planes: [planesGuardados[1].id],
         },
         {
           nombre: 'Galeno',
-          planes: [planesGuardados[1]._id],
+          planes: [planesGuardados[1].id],
         },
         {
           nombre: 'IOMA',
-          planes: [planesGuardados[0]._id],
+          planes: [planesGuardados[0].id],
         },
       ];
 
@@ -162,8 +162,8 @@ export class AdminController {
       const usuariosAdminsGenerados = [];
       const usuariosPacientesGenerados = [];
       const usuariosMedicosGenerados = [];
-      
-      const usuarioAdmin = new Usuario("ADMIN", "12345678");
+
+      const usuarioAdmin = new Usuario('ADMIN', '12345678');
       usuarioAdmin.roles.push(Rol.ADMIN);
       usuariosAdminsGenerados.push(usuarioAdmin);
 
@@ -179,10 +179,8 @@ export class AdminController {
         usuariosPacientesGenerados.push(usuarioPaciente);
       }
 
-      await this.usuarioRepository.save(usuarioAdmin);
-      logger.info(`✅ Se cargó usuario admin_sweet.`);
-
       const usuariosAdminsGuardados = await this.usuarioRepository.saveAll(usuariosAdminsGenerados);
+      logger.info(`✅ Se cargó usuario admin_sweet.`);
 
       const usuariosMedicosGuardados =
         await this.usuarioRepository.saveAll(usuariosMedicosGenerados);
@@ -208,16 +206,16 @@ export class AdminController {
         const matricula = `MAT-${1000 + i}`;
         const nombreCompleto = `Dr. Especialista ${i + 1}`;
 
-        const nuevoMedico = new Medico(usuarioDb._id, matricula, nombreCompleto);
+        const nuevoMedico = new Medico({ usuario: usuarioDb.id, matricula, nombre: nombreCompleto });
 
         nuevoMedico.especialidades = [
-          especialidadesGuardadas[i % especialidadesGuardadas.length]._id,
-          especialidadesGuardadas[(i + 1) % especialidadesGuardadas.length]._id,
+          especialidadesGuardadas[i % especialidadesGuardadas.length].id,
+          especialidadesGuardadas[(i + 1) % especialidadesGuardadas.length].id,
         ];
 
-        nuevoMedico.practicas = [practicasGuardadas[i % practicasGuardadas.length]._id];
+        nuevoMedico.practicas = [practicasGuardadas[i % practicasGuardadas.length].id];
 
-        nuevoMedico.sedes = [sedesGuardadas[i % sedesGuardadas.length]._id];
+        nuevoMedico.sedes = [sedesGuardadas[i % sedesGuardadas.length].id];
 
         const dia1 = dias[i % dias.length];
         const dia2 = dias[(i + 2) % dias.length];
@@ -250,11 +248,11 @@ export class AdminController {
         const planAsignado = planesGuardados[i % planesGuardados.length];
 
         const nuevoPaciente = new Paciente(
-          usuarioDb._id,
+          usuarioDb.id,
           dni,
           nombreCompleto,
-          obraSocialAsignada._id,
-          planAsignado._id,
+          obraSocialAsignada.id,
+          planAsignado.id,
         );
 
         pacientes.push(nuevoPaciente);

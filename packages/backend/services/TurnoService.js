@@ -29,8 +29,7 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
-
-    console.log("debug");
+    console.log('debug');
 
     const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
@@ -42,55 +41,59 @@ export class TurnoService {
     }
     const turno = await this.turnoRepository.findById(id_turno);
 
-    console.log("ESTADO DIVERTIDO:", turno.estado); 
-    console.log("ESTADO DIVERTIDO ES INSTANCIA DE DISPONIBLE:", turno.estado.constructor);
+    console.log('ESTADO DIVERTIDO:', turno.estado);
+    console.log('ESTADO DIVERTIDO ES INSTANCIA DE DISPONIBLE:', turno.estado.constructor);
 
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    console.log("turno: " + turno.constructor);
+    console.log('turno: ' + turno.constructor);
 
     turno.estado = new Disponible(turno);
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
     turno.paciente = paciente;
-    console.log("MEDICO ID:" + turno.medico._id);
-    
+    console.log('MEDICO ID:' + turno.medico._id);
+
     // REVISAR
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
       turno.medico._id,
       EstadoTurno.RESERVADO,
     );
 
-    console.log("tengo mucho sifilis");
+    console.log('tengo mucho sifilis');
 
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    console.log("FECHA HORA: " + turno.fechaHora);
+    console.log('FECHA HORA: ' + turno.fechaHora);
 
-    console.log("ESTE USUARIO TIENE SIFILIS: ", usuario);
+    console.log('ESTE USUARIO TIENE SIFILIS: ', usuario);
 
-    console.log("TURNO TIENE SIFILIS: ", turno);
+    console.log('TURNO TIENE SIFILIS: ', turno);
 
-    logger.debug("turno: " + turno.constructor.name);
+    logger.debug('turno: ' + turno.constructor.name);
 
-    logger.debug("Destinatario: " + usuario.constructor);
+    logger.debug('Destinatario: ' + usuario.constructor);
 
     const usuarioAdmin = await this.usuarioRepository.findUsuarioAdmin();
 
-    
-    logger.debug("Destinatario: " + usuarioAdmin.constructor);
+    logger.debug('Destinatario: ' + usuarioAdmin.constructor);
 
-    const notificacion = turno.actualizarEstado(usuarioAdmin, new Reservado(turno), usuario, 'Reserva de turno');
-    console.log("tengo mucho sifilis");
+    const notificacion = turno.actualizarEstado(
+      usuarioAdmin,
+      new Reservado(turno),
+      usuario,
+      'Reserva de turno',
+    );
+    console.log('tengo mucho sifilis');
 
     await this.notificacionRepository.save(notificacion);
-        console.log("tengo mucho sifilis");
-    
+    console.log('tengo mucho sifilis');
+
     await this.turnoRepository.save(turno);
-    console.log("tengo mucho sifilis");
+    console.log('tengo mucho sifilis');
 
     return turno;
   }
@@ -278,13 +281,13 @@ export class TurnoService {
     if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
-    console.log("USUARIO ID:" +usuario.id);
-    console.log("USUARIO ID:" +usuario._id);
+    console.log('USUARIO ID:' + usuario.id);
+    console.log('USUARIO ID:' + usuario._id);
 
     const medico = await this.medicoRepository.findByIdUsuario(usuario._id);
 
-    console.log("MEDICO ID:" + medico._id);
-    console.log("MEDICO ID:" + medico._id);
+    console.log('MEDICO ID:' + medico._id);
+    console.log('MEDICO ID:' + medico._id);
 
     const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
       medico._id,
@@ -310,7 +313,7 @@ export class TurnoService {
 
   async refrescarTurnos() {
     const TAMANO_LOTE = 20; // Procesa de a 20 médicos para cuidar la RAM y las conexiones a DB
-    const metricas ={ procesados: 0, fallidos: 0, total: 0 };
+    const metricas = { procesados: 0, fallidos: 0, total: 0 };
 
     logger.info(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
@@ -340,17 +343,17 @@ export class TurnoService {
                 await this.turnoRepository.save(t);
               }
 
-              console.log("TURNOS DEL MEDICO: " +medico.turnosActualesYFuturos);
+              console.log('TURNOS DEL MEDICO: ' + medico.turnosActualesYFuturos);
 
               const idsTurnos = [];
               for (const t of medico.turnosActualesYFuturos) {
-                console.log("ENTRO A LOS TURNOS DE UN MEDICO");
+                console.log('ENTRO A LOS TURNOS DE UN MEDICO');
                 const turnoGuardado = await this.turnoRepository.save(t);
                 idsTurnos.push(turnoGuardado.id || turnoGuardado._id);
               }
 
               medico.turnosActualesYFuturos = idsTurnos;
-              
+
               await this.medicoRepository.save(medico);
 
               metricas.procesados++;
