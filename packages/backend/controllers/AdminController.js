@@ -270,7 +270,7 @@ export class AdminController {
       await turnoRepository.deleteAll();
 
       logger.info('⏳ Iniciando generación batch de turnos iniciales...');
-      
+
       await turnoService.refrescarTurnos();
 
       logger.info('✅ Turnos iniciales generados exitosamente.');
