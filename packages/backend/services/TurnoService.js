@@ -82,7 +82,7 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    if (!(turno.estado instanceof Reservado)) {
+    if (!(turno.estado instanceof Reservado) && !(turno.estado instanceof Confirmado)) {
       throw new ConflictError('No se puede cancelar el turno en este estado');
     }
 
@@ -116,22 +116,15 @@ export class TurnoService {
       motivo,
     );
 
-    const indice = turno.medico.turnosActualesYFuturos.findIndex(
-      (t) => String(t._id || t.id || t) === String(turno.id),
-    );
-
-    if (indice !== -1) {
-      turno.medico.turnosActualesYFuturos.splice(indice, 1);
-      await this.medicoRepository.save(turno.medico);
+    if (notificacion) {
+      await this.notificacionRepository.save(notificacion);
     }
 
-    await this.notificacionRepository.save(notificacion);
     await this.turnoRepository.save(turno);
 
     return turno;
   }
 
-  // id del usuario del paciente, id del usuario del medico que lo solicita
   async obtenerHistorial(idPaciente, idMedico) {
     const medico = await this.medicoRepository.findByIdUsuario(idMedico);
 

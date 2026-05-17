@@ -537,7 +537,7 @@
 								},
 								{
 									"key": "id_turno",
-									"value": "6a095793763748b4d6650f78"
+									"value": "6a095793763748b4d6650f7a"
 								}
 							]
 						}
@@ -564,11 +564,11 @@
 							"variable": [
 								{
 									"key": "id_usuario",
-									"value": "6a095793763748b4d6650f03"
+									"value": "6a095793763748b4d6650f05"
 								},
 								{
 									"key": "id_turno",
-									"value": "6a095793763748b4d6650f76"
+									"value": "6a095793763748b4d6650f7a"
 								}
 							]
 						}
@@ -590,16 +590,26 @@
 							}
 						},
 						"url": {
-							"raw": "{{backendBaseURL}}/turnos/paciente/11/cancelacion/2",
+							"raw": "{{backendBaseURL}}/turnos/paciente/:id_usuario/cancelacion/:id_turno",
 							"host": [
 								"{{backendBaseURL}}"
 							],
 							"path": [
 								"turnos",
 								"paciente",
-								"11",
+								":id_usuario",
 								"cancelacion",
-								"2"
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f0e"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f76"
+								}
 							]
 						}
 					},
@@ -620,16 +630,26 @@
 							}
 						},
 						"url": {
-							"raw": "{{backendBaseURL}}/turnos/medico/1/cancelacion/1",
+							"raw": "{{backendBaseURL}}/turnos/medico/:id_usuario/cancelacion/:id_turno",
 							"host": [
 								"{{backendBaseURL}}"
 							],
 							"path": [
 								"turnos",
 								"medico",
-								"1",
+								":id_usuario",
 								"cancelacion",
-								"1"
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f04"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f78"
+								}
 							]
 						}
 					},
@@ -654,11 +674,11 @@
 							"variable": [
 								{
 									"key": "id_usuario_del_medico",
-									"value": "6a095793763748b4d6650f03"
+									"value": "6a095793763748b4d6650f05"
 								},
 								{
 									"key": "id_turno",
-									"value": "6a095793763748b4d6650f76"
+									"value": "6a095793763748b4d6650f7a"
 								}
 							]
 						}
