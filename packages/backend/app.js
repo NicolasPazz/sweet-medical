@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger.config.js';
 import router from './routes/router.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorLogger } from './middlewares/errorLogger.js';
@@ -31,6 +33,19 @@ app.get('/health', (req, res) => {
   });
 });
 
+// --- Documentación Swagger ---
+app.use('/api-docs', swaggerUi.serve);
+app.get(
+  '/api-docs',
+  swaggerUi.setup(swaggerSpec, { swaggerOptions: { persistAuthorizationData: true } }),
+);
+
+// --- Ruta alternativa para Swagger JSON ---
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // --- Rutas de Negocio ---
 app.use(router);
 
@@ -46,6 +61,7 @@ app.launch = function () {
   this.listen(portToUse, async () => {
     logger.info(`Servidor listo en http://localhost:${portToUse}`);
     logger.info(`Health check: http://localhost:${portToUse}/health`);
+    logger.info(`Documentación Swagger: http://localhost:${portToUse}/api-docs`);
 
     try {
       /*logger.info('Ejecutando carga automática...');
