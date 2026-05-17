@@ -29,6 +29,7 @@ export class Turno {
     costo,
     fechaHora,
     historialEstados = [],
+    admin
   }) {
     this.id = id;
     this.medico = medico;
@@ -40,7 +41,7 @@ export class Turno {
     this.servicio = servicio?.costo ? servicio : servicio; // Flexibilidad si ya viene instanciado
     this.historialEstados = historialEstados;
     this.costo = costo;
-    this.estado = new Disponible(this);
+    this.actualizarEstado(admin, new Disponible(this), admin, "Turno generado");
   }
 
   // En Turno.js, agregás este método estático:

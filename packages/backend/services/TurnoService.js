@@ -320,7 +320,7 @@ export class TurnoService {
     try {
       // 1. Obtener todos los médicos
       const medicos = await this.medicoRepository.findAll();
-
+      const admin = await this.usuarioRepository.findUsuarioAdmin();
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
@@ -337,7 +337,7 @@ export class TurnoService {
           loteActual.map(async (medico) => {
             try {
               const agenda = new Agenda();
-              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(admin,medico);
 
               for (const t of turnosCancelados) {
                 await this.turnoRepository.save(t);

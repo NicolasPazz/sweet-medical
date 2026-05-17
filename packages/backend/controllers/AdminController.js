@@ -206,7 +206,11 @@ export class AdminController {
         const matricula = `MAT-${1000 + i}`;
         const nombreCompleto = `Dr. Especialista ${i + 1}`;
 
-        const nuevoMedico = new Medico({ usuario: usuarioDb.id, matricula, nombre: nombreCompleto });
+        const nuevoMedico = new Medico({
+          usuario: usuarioDb.id,
+          matricula,
+          nombre: nombreCompleto,
+        });
 
         nuevoMedico.especialidades = [
           especialidadesGuardadas[i % especialidadesGuardadas.length].id,
@@ -266,7 +270,7 @@ export class AdminController {
       await turnoRepository.deleteAll();
 
       logger.info('⏳ Iniciando generación batch de turnos iniciales...');
-
+      
       await turnoService.refrescarTurnos();
 
       logger.info('✅ Turnos iniciales generados exitosamente.');

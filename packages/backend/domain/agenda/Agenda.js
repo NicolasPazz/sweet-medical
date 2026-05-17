@@ -12,7 +12,7 @@ import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Usuario } from '../usuario/Usuario.js';
 
 export class Agenda {
-  generarTurno(servicio, medico, disponibilidadesLibres) {
+  generarTurno(admin,servicio, medico, disponibilidadesLibres) {
     logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico.nombre}`);
 
     const turnos = [];
@@ -38,8 +38,12 @@ export class Agenda {
           sede: sedeDelMedico,
           servicio,
           costo: servicio.costo,
+          admin: admin
+
         });
-        logger.debug("Estado del turno: " + turno.estado.constructor);
+        logger.debug(
+          'Estado del turno: ' + turno.estado.constructor,
+        );
         turno.fechaHora = Agenda.configurarFechaCercana(
           disponibilidad.diaSemana,
           calcularHoraDesdeMinutos(actualMinutos),
@@ -57,7 +61,7 @@ export class Agenda {
   }
 
   //Genera todos los turnos segun la disponibilidad actual de un medico
-  refrescarTurnosSegunDisponibilidadDe(medico) {
+  refrescarTurnosSegunDisponibilidadDe(admin,medico) {
     // POR HACER
     logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
 
@@ -74,11 +78,11 @@ export class Agenda {
     logger.debug(disponibilidadesLibres);
 
     for (const especialidad of medico.especialidades) {
-      turnos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
+      turnos.push(...this.generarTurno(admin,especialidad, medico, disponibilidadesLibres));
     }
 
     for (const practica of medico.practicas) {
-      turnos.push(...this.generarTurno(practica, medico, disponibilidadesLibres));
+      turnos.push(...this.generarTurno(admin,practica, medico, disponibilidadesLibres));
     }
 
     medico.turnosActualesYFuturos.push(...turnos);
