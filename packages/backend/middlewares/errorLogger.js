@@ -1,5 +1,7 @@
+import { logger } from '../utils/logger.js';
+
 export function errorLogger(err, req, res, next) {
-  console.error({
+  logger.error({
     timestamp: new Date().toISOString(),
     method: req.method,
     path: req.originalUrl,

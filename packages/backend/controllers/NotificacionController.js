@@ -1,6 +1,6 @@
-import { NotificacionService } from "../services/NotificacionService.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
-import { BadRequestError } from "../errors/AppError.js";
+import { NotificacionService } from '../services/NotificacionService.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
+import { BadRequestError } from '../errors/AppError.js';
 
 export class NotificacionController {
   constructor({ notificacionService = new NotificacionService() } = {}) {
@@ -9,10 +9,12 @@ export class NotificacionController {
 
   obtenerLeidas = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.params.idUsuario);
+      const idUsuario = req.params.idUsuario;
+      ValidadorId.validarIds(idUsuario);
+
       const resultado = await this.notificacionService.obtenerLeidas(idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -22,10 +24,12 @@ export class NotificacionController {
 
   obtenerNoLeidas = async (req, res, next) => {
     try {
-      const idUsuario = this.parsearId(req.params.idUsuario);
+      const idUsuario = req.params.idUsuario;
+      ValidadorId.validarIds(idUsuario);
+
       const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -35,11 +39,13 @@ export class NotificacionController {
 
   marcarComoLeida = async (req, res, next) => {
     try {
-      const id = this.parsearId(req.params.id);
-      const idUsuario = this.parsearId(req.body.idUsuario);
+      const id = req.params.id;
+      ValidadorId.validarIds(id);
+      const idUsuario = req.body.idUsuario;
+      ValidadorId.validarIds(idUsuario);
       const resultado = await this.notificacionService.marcarComoLeida(id, idUsuario);
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -52,7 +58,7 @@ export class NotificacionController {
       const datosNotificacion = this.extraerYValidarBodyNotificacion(req.body);
       const resultado = await this.notificacionService.save(datosNotificacion);
       return res.status(201).json({
-        status: "created",
+        status: 'created',
         data: resultado,
       });
     } catch (error) {
@@ -61,11 +67,13 @@ export class NotificacionController {
   };
 
   extraerYValidarBodyNotificacion(body) {
-    const destinatario = this.parsearId(body.destinatario);
-    const remitente = this.parsearId(body.remitente);
+    const destinatario = body.destinatario;
+    ValidadorId.validarIds(destinatario);
+    const remitente = body.remitente;
+    ValidadorId.validarIds(remitente);
 
-    if (typeof body.mensaje !== "string" || body.mensaje.trim().length === 0) {
-      throw new BadRequestError("El mensaje no puede estar vacío");
+    if (typeof body.mensaje !== 'string' || body.mensaje.trim().length === 0) {
+      throw new BadRequestError('El mensaje no puede estar vacío');
     }
 
     return {
@@ -73,11 +81,5 @@ export class NotificacionController {
       remitente,
       mensaje: body.mensaje.trim(),
     };
-  }
-
-  parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
   }
 }

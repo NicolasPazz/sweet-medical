@@ -1,24 +1,28 @@
-import { Notificacion } from "./Notificacion.js";
-import { Usuario } from "../usuario/Usuario.js";
+import { Notificacion } from './Notificacion.js';
+import { Usuario } from '../usuario/Usuario.js';
 
 export class FactoryNotificacion {
-  static crearSegunEstadoTurno(turno) {
-    return turno.estado.notificar(Usuario.USUARIO_SISTEMA);
+  static crearSegunEstadoTurno(usuarioQueLlama, turno) {
+    return turno.estado.notificar(usuarioQueLlama);
   }
 
-  // Esto se ejecutara desdes un cron
+  // Esto se ejecutará desde un cron
   static crearRecordatoriosDiaPrevio(turno) {
-    const remitente = Usuario.USUARIO_SISTEMA;
+    const remitenteId = Usuario.USUARIO_SISTEMA.id; // Extraemos el ID stático limpio
+
+    const medicoUsuarioId = turno.medico.usuario.id || turno.medico.usuario._id;
+    const pacienteUsuarioId = turno.paciente.usuario.id || turno.paciente.usuario._id;
+
     return [
       new Notificacion(
-        turno.medico.usuario,
-        remitente,
-        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`
+        medicoUsuarioId,
+        remitenteId,
+        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`,
       ),
       new Notificacion(
-        turno.paciente.usuario,
-        remitente,
-        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`
+        pacienteUsuarioId,
+        remitenteId,
+        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`,
       ),
     ];
   }

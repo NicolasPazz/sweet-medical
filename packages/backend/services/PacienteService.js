@@ -1,7 +1,6 @@
-import { TurnoRepository } from "../repositories/TurnoRepository.js";
-import { PacienteRepository } from "../repositories/PacienteRepository.js";
-import { NotFoundError } from "../errors/AppError.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
+import { TurnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
+import { PacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { NotFoundError } from '../errors/AppError.js';
 
 export class PacienteService {
   constructor({
@@ -12,15 +11,12 @@ export class PacienteService {
     this.pacienteRepository = pacienteRepository;
   }
 
-  async obtenerHistorialTurnos(pacienteId) {
-    const id = Number(pacienteId);
-    ValidadorId.validarIds(id);
-
+  async obtenerHistorialTurnos(id) {
     const paciente = await this.pacienteRepository.findById(id);
     if (!paciente) {
-      throw new NotFoundError("Paciente no encontrado");
+      throw new NotFoundError('Paciente no encontrado');
     }
 
-    return this.turnoRepository.obtenerPorPacienteId(id);
+    return this.turnoRepository.findAllByPatientId(id);
   }
 }

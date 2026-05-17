@@ -1,45 +1,75 @@
-import { BadRequestError, NotFoundError } from "../../errors/AppError.js";
+import { NotFoundError } from '../../errors/AppError.js';
+import { UsuarioModel } from '../schemas/UsuarioSchema.js';
+import { Usuario } from '../../domain/usuario/Usuario.js';
 
 export class UsuarioRepository {
-  constructor() {
-    this.usuarios = {};
-    this.nextId = 1;
+  fromDB(datos) {
+    const usuario = Object.create(Usuario.prototype);
+    usuario.id = datos._id ?? datos.id;
+    usuario.nombreUsuario = datos.nombreUsuario;
+    usuario.password = datos.password;
+    usuario.roles = datos.roles ?? [];
+    return usuario;
   }
 
+  _hidratarColeccion(datos) {
+    return datos.map((d) => this.fromDB(d));
+  }
+
+  // CREAR
   async save(usuario) {
-    if (!usuario || typeof usuario !== "object") {
-      throw new BadRequestError("El usuario es inválido");
+    if (usuario._id || usuario.id) {
+      const id = usuario._id ?? usuario.id;
+      const guardado = await UsuarioModel.findByIdAndUpdate(id, usuario, { new: true }).lean();
+      return this.fromDB(guardado);
+    } else {
+      const nuevo = await UsuarioModel.create(usuario);
+      const guardado = await UsuarioModel.findById(nuevo._id).lean();
+      return this.fromDB(guardado);
     }
-    if (!usuario.id) {
-      usuario.id = this.nextId++;
-    }
-    this.usuarios[usuario.id] = usuario;
-    return usuario;
   }
 
+  async saveAll(usuarios) {
+    const docs = await UsuarioModel.insertMany(usuarios);
+    return this._hidratarColeccion(docs.map((d) => d.toObject()));
+  }
+
+  // LEER
   async findById(id) {
-    return this.usuarios[id] ?? null;
-  }
-
-  async modificar(id, datosActualizados) {
-    const usuario = this.usuarios[id];
-    if (!usuario) {
-      throw new NotFoundError("Usuario no encontrado");
-    }
-    Object.assign(usuario, datosActualizados);
-    return usuario;
+    const usuario = await UsuarioModel.findById(id).lean();
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+    return this.fromDB(usuario);
   }
 
   async findAll() {
-    return Object.values(this.usuarios);
+    const usuarios = await UsuarioModel.find().lean();
+    return this._hidratarColeccion(usuarios);
   }
 
-  async eliminar(id) {
-    if (!this.usuarios[id]) {
-      throw new NotFoundError("Usuario no encontrado");
-    }
-    delete this.usuarios[id];
+  async findUsuarioAdmin() {
+    const usuario = await UsuarioModel.findOne({ roles: 'ADMIN' }).lean();
+    if (!usuario) return null;
+    return this.fromDB(usuario);
+  }
+
+  // ACTUALIZAR
+  async update(id, datosActualizados) {
+    const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, {
+      new: true,
+    }).lean();
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+    return this.fromDB(usuario);
+  }
+
+  // ELIMINAR
+  async delete(id) {
+    const result = await UsuarioModel.findByIdAndDelete(id);
+    if (!result) throw new NotFoundError('Usuario no encontrado');
     return true;
+  }
+
+  async deleteAll() {
+    await UsuarioModel.deleteMany({});
   }
 }
 

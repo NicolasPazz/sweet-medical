@@ -1,6 +1,6 @@
-import { PacienteService } from "../services/PacienteService.js";
-import { pacienteRepository } from "../repositories/PacienteRepository.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
+import { PacienteService } from '../services/PacienteService.js';
+import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class PacienteController {
   constructor({ pacienteService = new PacienteService() } = {}) {
@@ -10,12 +10,14 @@ export class PacienteController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idPaciente = this.parsearId(req.params.id);
+      const idPaciente = req.params.id;
+
+      ValidadorId.validarIds(idPaciente);
 
       const resultado = await this.pacienteService.obtenerHistorialTurnos(idPaciente);
 
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: resultado,
       });
     } catch (error) {
@@ -28,23 +30,20 @@ export class PacienteController {
       const pacientes = await this.pacienteRepository.findAll();
 
       const dataParaEnviar = pacientes.map((p) => ({
-        id_usuario: p.usuario.id,
-        id_paciente: p.id,
+        id_usuario: p.usuario._id,
+        id_paciente: p._id,
         nombre: p.nombre,
+        dni: p.dni,
+        obraSocial: p.obraSocial ? p.obraSocial.nombre : 'N/A',
+        plan: p.plan ? p.plan.nombre : 'N/A',
       }));
 
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         data: dataParaEnviar,
       });
     } catch (error) {
       return next(error);
     }
   };
-
-  parsearId(valor) {
-    const id = Number(valor);
-    ValidadorId.validarIds(id);
-    return id;
-  }
 }

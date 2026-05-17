@@ -1,8 +1,8 @@
-import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
-import { usuarioRepository } from "../repositories/UsuarioRepository.js";
-import { Notificacion } from "../domain/notificacion/Notificacion.js";
-import { NotFoundError } from "../errors/AppError.js";
-import { ValidadorId } from "../domain/utils/ValidadorId.js";
+import { NotificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
+import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
+import { Notificacion } from '../domain/notificacion/Notificacion.js';
+import { NotFoundError } from '../errors/AppError.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class NotificacionService {
   constructor({ notificacionRepository = new NotificacionRepository() } = {}) {
@@ -12,12 +12,12 @@ export class NotificacionService {
 
   obtenerLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.obtenerLeidas(idUsuario);
+    return this.notificacionRepository.findAllReadByUserId(idUsuario);
   }
 
   obtenerNoLeidas(idUsuario) {
     ValidadorId.validarIds(idUsuario);
-    return this.notificacionRepository.obtenerNoLeidas(idUsuario);
+    return this.notificacionRepository.findAllUnreadByUserId(idUsuario);
   }
 
   marcarComoLeida(id, idUsuario) {
@@ -26,14 +26,14 @@ export class NotificacionService {
     const notificacion = this.notificacionRepository.findById(id);
 
     if (!notificacion) {
-      throw new NotFoundError("Notificación no encontrada");
+      throw new NotFoundError('Notificación no encontrada');
     }
 
     if (notificacion.destinatario !== idUsuario) {
-      throw new NotFoundError("Notificación no encontrada");
+      throw new NotFoundError('Notificación no encontrada');
     }
 
-    return this.notificacionRepository.marcarComoLeida(id);
+    return this.notificacionRepository.markAsRead(id);
   }
 
   save(datosNotificacion) {
@@ -42,7 +42,7 @@ export class NotificacionService {
     const notificacion = new Notificacion(
       datosNotificacion.destinatario,
       datosNotificacion.remitente,
-      datosNotificacion.mensaje
+      datosNotificacion.mensaje,
     );
     return this.notificacionRepository.save(notificacion);
   }

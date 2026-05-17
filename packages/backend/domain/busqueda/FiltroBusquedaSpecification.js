@@ -18,7 +18,7 @@ export class FiltroBusquedaSpecification {
       practica: this.practica,
       sede: this.sede,
       fechaDesde: this.fechaDesde,
-      fechaHasta: this.fechaHasta
+      fechaHasta: this.fechaHasta,
     };
   }
 }

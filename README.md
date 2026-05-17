@@ -93,15 +93,15 @@ npm run start:dev
 
 ## 1. Ramas Principales
 
-* **`main`**: Contiene el código estable, funcional y testeado. Solo se actualiza al finalizar cada iteración. Es la rama que finalmente se desplegará en producción.
-* **`develop`**: Es la rama de integración principal. Todo el código nuevo de las funcionalidades en curso converge acá.
+- **`main`**: Contiene el código estable, funcional y testeado. Solo se actualiza al finalizar cada iteración. Es la rama que finalmente se desplegará en producción.
+- **`develop`**: Es la rama de integración principal. Todo el código nuevo de las funcionalidades en curso converge acá.
 
 ## 2. Ramas de Soporte
 
-* **`feature/<nombre-tarea>`**: Utilizadas para desarrollar cada nuevo requerimiento (ej. `feature/modelo-dominio`, `feature/health-check`).
-  * **Salen de:** `develop`
-  * **Vuelven a:** `develop`
-* **`bugfix/<nombre-error>`**: Utilizadas para resolver errores puntuales detectados durante la integración en `develop`.
+- **`feature/<nombre-tarea>`**: Utilizadas para desarrollar cada nuevo requerimiento (ej. `feature/modelo-dominio`, `feature/health-check`).
+  - **Salen de:** `develop`
+  - **Vuelven a:** `develop`
+- **`bugfix/<nombre-error>`**: Utilizadas para resolver errores puntuales detectados durante la integración en `develop`.
 
 ## 3. Flujo de Trabajo
 

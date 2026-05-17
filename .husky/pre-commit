@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+echo "===================================================="
+echo "🎨 Linteando archivos modificados..."
+echo "===================================================="
+
+npm run fix:all
+RESULTADO=$?
+
+if [ $RESULTADO -ne 0 ]; then
+  echo ""
+  echo "❌ ERROR: El linter detectó problemas que no pudo arreglar."
+  echo "⚠️  Por favor, solucionalo antes de hacer un commit."
+  echo "===================================================="
+  exit 1
+fi
+
+echo ""
+echo "✅ Commit completado"

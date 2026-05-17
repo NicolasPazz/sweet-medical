@@ -1,31 +1,19 @@
-import express from "express";
-import cors from "cors";
-import { turnoRouter } from './routes/turnoRoutes.js';
+import 'dotenv/config';
+import server from './app.js';
+import { MongoDBClient } from './infrastructure/config/database.js';
+import { logger } from './utils/logger.js';
 
-const app = express();
+const PORT = process.env.PORT || 3001;
 
-app.use(express.json());
+const start = async () => {
+  try {
+    await MongoDBClient.connect();
 
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-      : true,
-  })
-);
+    server.port = PORT;
+    server.launch();
+  } catch (error) {
+    logger.error('Error al iniciar la aplicación:', error);
+  }
+};
 
-app.get("/", (req, res) => {
-  res.send("API Sweet Medical funcionando correctamente.");
-});
-
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    service: "sweet-medical-backend",
-  });
-});
-
-app.use("/turnos", turnoRouter);
-
-export default app;
+start();

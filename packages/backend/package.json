@@ -10,7 +10,7 @@
     "test:servicios": "jest --runInBand tests/servicios.test.js",
     "test:datosIniciales": "jest --runInBand tests/datosIniciales.test.js",
     "test:turnosMedicosPacientes": "jest --runInBand tests/turnosMedicosPacientes.test.js"
-    },
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
+    "mongoose": "^8.0.0",
     "node-cron": "^4.2.1"
   },
   "devDependencies": {
@@ -28,14 +29,6 @@
     "cross-env": "^10.1.0",
     "jest": "^29.7.0",
     "supertest": "^7.0.0"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    },
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ]
   },
   "type": "module"
 }

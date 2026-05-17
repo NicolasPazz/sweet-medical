@@ -1,47 +1,101 @@
-import { Notificacion } from "../domain/notificacion/Notificacion.js";
-import { NotFoundError, BadRequestError } from "../errors/AppError.js";
+import { NotificacionModel } from '../schemas/NotificacionSchema.js';
+import { NotFoundError } from '../../errors/AppError.js';
+import { Notificacion } from '../../domain/notificacion/Notificacion.js';
 
 export class NotificacionRepository {
-  constructor() {
-    this.notificaciones = {};
-    this.nextId = 1;
+  _hidratar(datos) {
+    return this.fromDB(datos);
   }
 
-  findById(id) {
-    return this.notificaciones[id] ?? null;
+  _hidratarColeccion(datos) {
+    return datos.map((d) => this._hidratar(d));
   }
 
-  save(notificacion) {
-    if (!(notificacion instanceof Notificacion)) {
-      throw new BadRequestError("La notificación es inválida");
+  // CREAR
+  async save(notificacion) {
+    if (notificacion._id) {
+      const actualizada = await NotificacionModel.findByIdAndUpdate(
+        notificacion._id,
+        notificacion,
+        { new: true },
+      )
+        .populate('destinatario')
+        .populate('remitente')
+        .lean();
+      return this._hidratar(actualizada);
+    } else {
+      const saved = await NotificacionModel.create(notificacion);
+      const completa = await NotificacionModel.findById(saved._id)
+        .populate('destinatario')
+        .populate('remitente')
+        .lean();
+      return this._hidratar(completa);
     }
-
-    const id = notificacion.id ?? this.nextId++;
-    notificacion.id = id;
-    this.notificaciones[id] = notificacion;
-    return notificacion;
   }
 
-  obtenerLeidas(idUsuario) {
-    return Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === true
-    );
+  // LEER
+  async findById(id) {
+    const notificacion = await NotificacionModel.findById(id)
+      .populate('destinatario')
+      .populate('remitente')
+      .lean();
+    if (!notificacion) throw new NotFoundError('Notificación no encontrada');
+    return this._hidratar(notificacion);
   }
 
-  obtenerNoLeidas(idUsuario) {
-    return Object.values(this.notificaciones).filter(
-      (notificacion) => notificacion.destinatario === idUsuario && notificacion.leida === false
-    );
+  async findAllReadByUserId(userId) {
+    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: true })
+      .populate('destinatario')
+      .populate('remitente')
+      .sort({ fechaHoraCreacion: -1 })
+      .lean();
+    return this._hidratarColeccion(notificaciones);
   }
 
-  marcarComoLeida(id) {
-    const notificacion = this.notificaciones[id];
+  async findAllUnreadByUserId(userId) {
+    const notificaciones = await NotificacionModel.find({ destinatario: userId, leida: false })
+      .populate('destinatario')
+      .populate('remitente')
+      .sort({ fechaHoraCreacion: -1 })
+      .lean();
+    return this._hidratarColeccion(notificaciones);
+  }
 
-    if (!notificacion) {
-      throw new NotFoundError("Notificación no encontrada");
-    }
+  async obtenerLeidas(idUsuario) {
+    return this.findAllReadByUserId(idUsuario);
+  }
 
-    notificacion.marcarComoLeida();
+  async obtenerNoLeidas(idUsuario) {
+    return this.findAllUnreadByUserId(idUsuario);
+  }
+
+  // ACTUALIZAR
+  async markAsRead(id) {
+    const notificacion = await NotificacionModel.findByIdAndUpdate(
+      id,
+      { leida: true, fechaHoraLeida: new Date() },
+      { new: true },
+    )
+      .populate('destinatario')
+      .populate('remitente')
+      .lean();
+    if (!notificacion) throw new NotFoundError('Notificación no encontrada');
+    return this._hidratar(notificacion);
+  }
+
+  async marcarComoLeida(id) {
+    return this.markAsRead(id);
+  }
+
+  async fromDB(datos) {
+    const notificacion = Object.create(Notificacion.prototype);
+    notificacion.id = datos._id ?? datos.id;
+    notificacion.destinatario = datos.destinatario;
+    notificacion.remitente = datos.remitente;
+    notificacion.mensaje = datos.mensaje;
+    notificacion.fechaHoraCreacion = datos.fechaHoraCreacion;
+    notificacion.fechaHoraLeida = datos.fechaHoraLeida;
+    notificacion.leida = datos.leida;
     return notificacion;
   }
 }

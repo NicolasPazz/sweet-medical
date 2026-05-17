@@ -1,48 +1,84 @@
-import { NotFoundError } from "../errors/AppError.js";
+import { NotFoundError } from '../../errors/AppError.js';
+import { especialidadRepository } from './EspecialidadRepository.js';
+import { practicaRepository } from './PracticaRepository.js';
 
 export class ServicioRepository {
   constructor() {
-    this.servicios = {};
-    this.nextId = 1;
-    // En Mongo, activo y tipo quedan como campos del documento, fuera del dominio
-    this.activos = {};
+    this.especialidadRepository = especialidadRepository;
+    this.practicaRepository = practicaRepository;
   }
 
-  // eslint-disable-next-line no-unused-vars
-  save(servicio, _tipoServicio) {
-    if (!servicio.id) {
-      servicio.id = this.nextId++;
+  // CREAR
+  async save(servicio, servicioTipo) {
+    const tipo = servicioTipo?.toUpperCase();
+
+    if (tipo === 'ESPECIALIDAD') {
+      return await this.especialidadRepository.save(servicio);
     }
-    this.servicios[servicio.id] = servicio;
-    this.activos[servicio.id] = true;
-    return servicio;
-  }
-
-  obtenerPorId(id) {
-    const servicio = this.servicios[id];
-    if (!servicio || !this.activos[id]) return null;
-    return servicio;
-  }
-
-  obtenerTodos() {
-    return Object.entries(this.servicios)
-      .filter(([id]) => this.activos[id])
-      .map(([, servicio]) => servicio);
-  }
-
-  modificar(id, datosActualizados) {
-    const servicio = this.obtenerPorId(id);
-    if (!servicio) {
-      throw new NotFoundError("Servicio no encontrado");
+    if (tipo === 'PRACTICA') {
+      return await this.practicaRepository.save(servicio);
     }
-    Object.assign(servicio, datosActualizados);
-    return servicio;
+
+    throw new Error('Tipo de servicio inválido. Debe ser ESPECIALIDAD o PRACTICA.');
   }
 
-  eliminar(id) {
-    // Baja lógica: en Mongo sería { activo: false }
-    this.activos[id] = false;
-    return true;
+  // LEER
+  async findById(id) {
+    try {
+      return await this.especialidadRepository.findById(id);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    try {
+      return await this.practicaRepository.findById(id);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    throw new NotFoundError('Servicio no encontrado');
+  }
+
+  async findAll() {
+    const [specialties, practices] = await Promise.all([
+      this.especialidadRepository.findAll(),
+      this.practicaRepository.findAll(),
+    ]);
+
+    return [...specialties, ...practices];
+  }
+
+  async update(id, updatedData) {
+    try {
+      return await this.especialidadRepository.update(id, updatedData);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    try {
+      return await this.practicaRepository.update(id, updatedData);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    throw new NotFoundError('Servicio no encontrado');
+  }
+
+  // ELIMINAR
+  async delete(id) {
+    try {
+      return await this.especialidadRepository.delete(id);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    try {
+      return await this.practicaRepository.delete(id);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+    }
+
+    throw new NotFoundError('Servicio no encontrado');
   }
 }
 

@@ -1,4 +1,4 @@
-import { AppError } from "../errors/AppError.js";
+import { AppError } from '../errors/AppError.js';
 
 export function errorHandler(err, req, res, next) {
   if (res.headersSent) {
@@ -14,8 +14,8 @@ export function errorHandler(err, req, res, next) {
   }
 
   return res.status(500).json({
-    status: "error",
-    message: "Error interno del servidor",
+    status: 'error',
+    message: 'Error interno del servidor',
     timestamp: new Date().toISOString(),
   });
 }
