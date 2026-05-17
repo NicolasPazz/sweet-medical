@@ -29,8 +29,6 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
-    console.log('debug');
-
     const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
@@ -41,45 +39,24 @@ export class TurnoService {
     }
     const turno = await this.turnoRepository.findById(id_turno);
 
-    console.log('ESTADO DIVERTIDO:', turno.estado);
-    console.log('ESTADO DIVERTIDO ES INSTANCIA DE DISPONIBLE:', turno.estado.constructor);
-
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
-
-    console.log('turno: ' + turno.constructor);
 
     turno.estado = new Disponible(turno);
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
     turno.paciente = paciente;
-    console.log('MEDICO ID:' + turno.medico._id);
 
-    // REVISAR
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
       turno.medico._id,
       EstadoTurno.RESERVADO,
     );
 
-    console.log('tengo mucho sifilis');
-
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    console.log('FECHA HORA: ' + turno.fechaHora);
-
-    console.log('ESTE USUARIO TIENE SIFILIS: ', usuario);
-
-    console.log('TURNO TIENE SIFILIS: ', turno);
-
-    logger.debug('turno: ' + turno.constructor.name);
-
-    logger.debug('Destinatario: ' + usuario.constructor);
-
     const usuarioAdmin = await this.usuarioRepository.findUsuarioAdmin();
-
-    logger.debug('Destinatario: ' + usuarioAdmin.constructor);
 
     const notificacion = turno.actualizarEstado(
       usuarioAdmin,
@@ -87,13 +64,9 @@ export class TurnoService {
       usuario,
       'Reserva de turno',
     );
-    console.log('tengo mucho sifilis');
 
     await this.notificacionRepository.save(notificacion);
-    console.log('tengo mucho sifilis');
-
     await this.turnoRepository.save(turno);
-    console.log('tengo mucho sifilis');
 
     return turno;
   }
@@ -276,25 +249,16 @@ export class TurnoService {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    console.log(usuario.roles);
-
     if (usuario.roles.filter((u) => u === Rol.MEDICO).length === 0) {
       throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
-    console.log('USUARIO ID:' + usuario.id);
-    console.log('USUARIO ID:' + usuario._id);
 
     const medico = await this.medicoRepository.findByIdUsuario(usuario._id);
-
-    console.log('MEDICO ID:' + medico._id);
-    console.log('MEDICO ID:' + medico._id);
 
     const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
       medico._id,
       id_servicio,
     );
-
-    console.log(turnosDelServicio);
 
     const dataParaEnviar = turnosDelServicio.map((t) => ({
       id: t.id,
@@ -337,17 +301,14 @@ export class TurnoService {
           loteActual.map(async (medico) => {
             try {
               const agenda = new Agenda();
-              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(admin,medico);
+              const turnosCancelados = agenda.refrescarTurnosSegunDisponibilidadDe(admin, medico);
 
               for (const t of turnosCancelados) {
                 await this.turnoRepository.save(t);
               }
 
-              console.log('TURNOS DEL MEDICO: ' + medico.turnosActualesYFuturos);
-
               const idsTurnos = [];
               for (const t of medico.turnosActualesYFuturos) {
-                console.log('ENTRO A LOS TURNOS DE UN MEDICO');
                 const turnoGuardado = await this.turnoRepository.save(t);
                 idsTurnos.push(turnoGuardado.id || turnoGuardado._id);
               }
