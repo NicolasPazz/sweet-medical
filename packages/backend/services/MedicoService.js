@@ -3,9 +3,12 @@ import { medicoRepository } from '../infrastructure/repositories/MedicoRepositor
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 
 export class MedicoService {
-  constructor() {
-    this.medicoRepository = medicoRepository;
-    this.usuarioRepository = usuarioRepository;
+  constructor({
+    medicoRepository: medicoRepo = medicoRepository,
+    usuarioRepository: usuarioRepo = usuarioRepository,
+  } = {}) {
+    this.medicoRepository = medicoRepo;
+    this.usuarioRepository = usuarioRepo;
   }
 
   async actualizarDisponibilidad(id_medico, disponibilidades) {
@@ -20,7 +23,7 @@ export class MedicoService {
       diaSemana: d.diaSemana.trim().toUpperCase(),
     }));
 
-    medicoRepository.save(medico);
+    this.medicoRepository.save(medico);
 
     return medico;
   }

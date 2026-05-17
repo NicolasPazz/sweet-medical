@@ -1,7 +1,7 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
 import { TurnoBusquedaController } from '../controllers/TurnoBusquedaController.js';
-import { TurnoBusquedaService } from '../application/services/TurnoBusquedaService.js';
+import { TurnoBusquedaService } from '../services/TurnoBusquedaService.js';
 import { BusquedaTurnosRepository } from '../infrastructure/repositories/BusquedaTurnosRepository.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 

@@ -4,5 +4,6 @@ export default {
   transform: {
     '^.+\\.js$': 'babel-jest',
   },
-  testMatch: ['**/tests/**/*.test.js'],
+  testMatch: ['**/*.test.js'],
+  setupFilesAfterEnv: ['./jest.setup.js'],
 };

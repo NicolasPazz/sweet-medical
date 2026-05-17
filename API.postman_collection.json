@@ -401,7 +401,7 @@
 							"variable": [
 								{
 									"key": "id_usuario",
-									"value": "6a095793763748b4d6650f03"
+									"value": "6a09dd781c91c496abde71bd"
 								}
 							]
 						}
@@ -712,6 +712,24 @@
 							"path": [
 								"seeding",
 								"datos-iniciales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refrescar turnos",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/seeding/refrescar-turnos",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"seeding",
+								"refrescar-turnos"
 							]
 						}
 					},

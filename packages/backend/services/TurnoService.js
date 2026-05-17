@@ -19,12 +19,18 @@ export class TurnoService {
   turnoRepository;
   pacienteRepository;
 
-  constructor() {
-    this.turnoRepository = turnoRepository;
-    this.usuarioRepository = usuarioRepository;
-    this.notificacionRepository = notificacionRepository;
-    this.medicoRepository = medicoRepository;
-    this.pacienteRepository = pacienteRepository;
+  constructor({
+    turnoRepository: turnoRepo = turnoRepository,
+    usuarioRepository: usuarioRepo = usuarioRepository,
+    notificacionRepository: notificacionRepo = notificacionRepository,
+    medicoRepository: medicoRepo = medicoRepository,
+    pacienteRepository: pacienteRepo = pacienteRepository,
+  } = {}) {
+    this.turnoRepository = turnoRepo;
+    this.usuarioRepository = usuarioRepo;
+    this.notificacionRepository = notificacionRepo;
+    this.medicoRepository = medicoRepo;
+    this.pacienteRepository = pacienteRepo;
   }
 
   async reservarTurno(id_usuario, id_turno) {

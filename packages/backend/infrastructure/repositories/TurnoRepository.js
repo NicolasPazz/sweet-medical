@@ -53,7 +53,15 @@ export class TurnoRepository {
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    return await this.model.findByIdAndUpdate(id, datosActualizados, { new: true });
+    const estadoLimpio = this._obtenerStringEstado(datosActualizados.estado);
+
+    const payload = datosActualizados._doc
+      ? { ...datosActualizados._doc }
+      : { ...datosActualizados };
+
+    payload.estado = estadoLimpio;
+
+    return await this.model.findByIdAndUpdate(id, payload, { new: true });
   }
 
   // ELIMINAR
