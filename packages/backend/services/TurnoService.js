@@ -26,7 +26,7 @@ export class TurnoService {
   } = {}) {
     this.turnoRepository = turnoRepo;
     this.usuarioRepository = usuarioRepo;
-    this.notificacionRepository = notificacionRepo;GI
+    this.notificacionRepository = notificacionRepo;
     this.medicoRepository = medicoRepo;
     this.pacienteRepository = pacienteRepo;
   }
