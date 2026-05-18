@@ -24,10 +24,16 @@ describe('MedicoService', () => {
     });
   });
 
-  it('actualiza disponibilidad con mayúsculas y guarda el médico', async () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+
+  it('actualiza disponibilidad con mayúsculas y espera el guardado del médico (await)', async () => {
     const medicoExistente = { id: 'm-1', disponibilidades: [] };
     mockMedicoRepository.findById.mockResolvedValue(medicoExistente);
-    mockMedicoRepository.save.mockResolvedValue({});
+    // Aseguramos que resuelva la promesa correctamente para el await
+    mockMedicoRepository.save.mockResolvedValue(true);
 
     const resultado = await service.actualizarDisponibilidad('m-1', [
       { diaSemana: ' lunes ', horaInicio: '09:00', horaFin: '12:00' },
@@ -48,14 +54,15 @@ describe('MedicoService', () => {
     await expect(service.actualizarDisponibilidad('m-1', [])).rejects.toThrow(NotFoundError);
   });
 
+
   it('crea un médico nuevo con usuario si no existe matrícula duplicada', async () => {
     const datos = {
       usuario: { nombreUsuario: 'drhouse', contrasena: '1234', email: 'house@example.com' },
       matricula: '1234',
       nombre: 'Dr. House',
-      especialidades: [],
-      practicas: [],
-      sedes: [],
+      especialidades: ['s-cardio'],
+      practicas: ['p-rx'],
+      sedes: ['sede-central'],
     };
 
     mockMedicoRepository.findByMatricula.mockResolvedValue(null);
@@ -82,6 +89,7 @@ describe('MedicoService', () => {
         usuario: 'u-1',
         matricula: '1234',
         nombre: 'Dr. House',
+        especialidades: ['s-cardio'],
       }),
     );
     expect(resultado).toEqual({
@@ -90,6 +98,28 @@ describe('MedicoService', () => {
       matricula: '1234',
       nombre: 'Dr. House',
     });
+  });
+
+  it('asigna arrays vacíos por defecto si no se envían colecciones opcionales al crear', async () => {
+    // TEST NUEVO: Evalúa el cortocircuito (|| []) del código de producción
+    const datosMinimos = {
+      usuario: { nombreUsuario: 'doctor-min', contrasena: 'root', email: 'min@test.com' },
+      matricula: '9999',
+      nombre: 'Dr. Mínimo'
+      // Omitimos especialidades, practicas y sedes de forma intencional
+    };
+
+    mockMedicoRepository.findByMatricula.mockResolvedValue(null);
+    mockUsuarioRepository.save.mockResolvedValue({ _id: 'u-2' });
+    mockMedicoRepository.crear.mockImplementation((medicoRecibido) => Promise.resolve(medicoRecibido));
+
+    const resultado = await service.crearMedico(datosMinimos);
+
+    // Verificamos que la lógica de inicialización defensiva haya operado bien
+    expect(resultado.especialidades).toEqual([]);
+    expect(resultado.practicas).toEqual([]);
+    expect(resultado.sedes).toEqual([]);
+    expect(resultado.disponibilidades).toEqual([]);
   });
 
   it('lanza ConflictError si la matrícula ya existe al crear médico', async () => {
