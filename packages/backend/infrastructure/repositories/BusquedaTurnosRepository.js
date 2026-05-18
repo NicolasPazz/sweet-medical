@@ -3,16 +3,28 @@ import { EstadoTurno } from '../../domain/turno/EstadoTurno.js';
 import mongoose from 'mongoose';
 
 export class BusquedaTurnosRepository {
+  _crearRegexFiltro(texto) {
+    if (!texto) return null;
+    const textoSeguro = texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapar caracteres especiales
+    const regexStr = textoSeguro
+      .replace(/[aáAÁ]/g, '[aáAÁ]')
+      .replace(/[eéEÉ]/g, '[eéEÉ]')
+      .replace(/[iíIÍ]/g, '[iíIÍ]')
+      .replace(/[oóOÓ]/g, '[oóOÓ]')
+      .replace(/[uúüUÚÜ]/g, '[uúüUÚÜ]');
+    return { $regex: regexStr, $options: 'i' };
+  }
+
   async buscar(specification, sortParams, paginationParams) {
     const criteria = specification.toCriteria();
 
     const query = { estado: EstadoTurno.DISPONIBLE };
 
     if (criteria.profesionalId) query.medico = new mongoose.Types.ObjectId(criteria.profesionalId);
-    if (criteria.sede) query['sede.nombre'] = { $regex: criteria.sede, $options: 'i' };
+    if (criteria.sede) query['sede.nombre'] = this._crearRegexFiltro(criteria.sede);
 
     const servicio = criteria.servicio || criteria.especialidad || criteria.practica;
-    if (servicio) query['servicio.nombre'] = { $regex: servicio, $options: 'i' };
+    if (servicio) query['servicio.nombre'] = this._crearRegexFiltro(servicio);
 
     if (criteria.fechaDesde || criteria.fechaHasta) {
       query.fechaHora = {};
@@ -40,3 +52,5 @@ export class BusquedaTurnosRepository {
     return { data, total };
   }
 }
+
+export const busquedaTurnosRepository = new BusquedaTurnosRepository();

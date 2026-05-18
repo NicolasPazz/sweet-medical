@@ -1,14 +1,10 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
 import { TurnoBusquedaController } from '../controllers/TurnoBusquedaController.js';
-import { TurnoBusquedaService } from '../services/TurnoBusquedaService.js';
-import { BusquedaTurnosRepository } from '../infrastructure/repositories/BusquedaTurnosRepository.js';
-import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
+import { turnoBusquedaService } from '../services/TurnoBusquedaService.js';
 
 const turnoController = new TurnoController();
-const repository = new BusquedaTurnosRepository();
-const motorCostos = new MotorCostos();
-const turnoBusquedaService = new TurnoBusquedaService(repository, motorCostos);
+const turnoBusquedaController = new TurnoBusquedaController();
 const turnoRouter = express.Router();
 
 /**
@@ -486,6 +482,6 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  *       500:
  *         description: Error interno del servidor
  */
-turnoRouter.route('/disponibles').get(TurnoBusquedaController.crear(turnoBusquedaService));
+turnoRouter.route('/disponibles').get(turnoBusquedaController.crear(turnoBusquedaService));
 
 export default turnoRouter;

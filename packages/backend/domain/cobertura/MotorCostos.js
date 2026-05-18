@@ -7,7 +7,7 @@ export class MotorCostos {
    * @param {Paciente} paciente (Puede ser null si aún no se asignó paciente en la búsqueda, asumiremos particular)
    * @returns {Object} { tipoCobertura: String, costoEstimado: Number }
    */
-  calcularPara(turno, paciente) {
+  static calcularPara(turno, paciente) {
     let prestacion;
     let tipo;
 
