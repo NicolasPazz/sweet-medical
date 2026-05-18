@@ -352,7 +352,7 @@ export class TurnoService {
         fechaHoraCambio: e.fechaHoraIngreso,
         estado: e.estado,
         motivo: e.motivo ? e.motivo : "N/A",
-        actor: e.usuario ? e.usuario : "N/A"
+        actor: e.usuario ? e.usuario.nombreUsuario : "N/A"
       })), 
       costo: t.costo,
       diaSemana: t.diaSemana,

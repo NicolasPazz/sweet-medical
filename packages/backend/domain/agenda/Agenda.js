@@ -3,10 +3,9 @@ import { Turno } from "../turno/Turno.js";
 import { horaAMinutos, estaEnDisponibilidad, obtenerDisponibilidadesLibres, calcularHoraDesdeMinutos, horarioIncluido} from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from "../notificacion/estado-turno/Cancelado.js";
-import { Usuario } from "../usuario/Usuario.js";
 
 export class Agenda {
-  static generarTurno(servicio, medico, disponibilidadesLibres) {
+  static generarTurno(servicio, medico, disponibilidadesLibres, usuarioSistema) {
     
     logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico.nombre}`);
 
@@ -20,7 +19,7 @@ export class Agenda {
 
       while(actualMinutos + offset <= tiempoLimite){
 
-      const turno = new Turno(medico, null, disponibilidad.diaSemana, calcularHoraDesdeMinutos(actualMinutos), null, servicio, servicio.costo);
+      const turno = new Turno(medico, null, disponibilidad.diaSemana, calcularHoraDesdeMinutos(actualMinutos), null, servicio, servicio.costo, usuarioSistema);
 
       turnos.push(turno);
 
@@ -32,21 +31,21 @@ export class Agenda {
     return turnos;
   }
 
-  static refrescarTurnosSegunDisponibilidadDe(medico) {
+  static refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema) {
   logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
   
-  const turnosEliminados = this.eliminarTurnosDesactualizados(medico);
+  const turnosEliminados = this.eliminarTurnosDesactualizados(medico, usuarioSistema);
   
   const disponibilidadesLibres = obtenerDisponibilidadesLibres(medico.disponibilidades, medico.turnosActualesYFuturos);
 
   const turnosNuevos = [];
   
   for(const especialidad of medico.especialidades){
-    turnosNuevos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
+    turnosNuevos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres, usuarioSistema));
   }
 
   for(const practica of medico.practicas){
-    turnosNuevos.push(...this.generarTurno(practica, medico, disponibilidadesLibres));
+    turnosNuevos.push(...this.generarTurno(practica, medico, disponibilidadesLibres, usuarioSistema));
   }
 
   medico.turnosActualesYFuturos.push(...turnosNuevos);
@@ -56,7 +55,7 @@ export class Agenda {
 
 
 
-  static eliminarTurnosDesactualizados(medico) {
+  static eliminarTurnosDesactualizados(medico, usuarioSistema) {
   const lista = medico.turnosActualesYFuturos;
 
   const turnosEliminados = [];
@@ -71,7 +70,7 @@ export class Agenda {
       );
 
       if (!estaEnRango) {
-        turno.actualizarEstado(Usuario.USUARIO_SISTEMA, new Cancelado(turno), Usuario.USUARIO_SISTEMA, "Dejo de cumplir con la disponibilidad del medico");
+        turno.actualizarEstado(usuarioSistema, new Cancelado(turno), "Dejo de cumplir con la disponibilidad del medico");
         turnosEliminados.push(turno);
         lista.splice(i, 1);
       }

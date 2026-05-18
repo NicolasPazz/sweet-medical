@@ -1,5 +1,4 @@
 import { Notificacion } from './Notificacion.js';
-import { Usuario } from '../usuario/Usuario.js';
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(usuarioQueLlama, turno) {
@@ -7,8 +6,8 @@ export class FactoryNotificacion {
   }
 
   // Esto se ejecutará desde un cron
-  static crearRecordatoriosDiaPrevio(turno) {
-    const remitenteId = Usuario.USUARIO_SISTEMA.id; // Extraemos el ID stático limpio
+  static crearRecordatoriosDiaPrevio(turno, usuarioSistema) {
+    const remitenteId = usuarioSistema?.id || usuarioSistema?._id;
 
     const medicoUsuarioId = turno.medico.usuario.id || turno.medico.usuario._id;
     const pacienteUsuarioId = turno.paciente.usuario.id || turno.paciente.usuario._id;

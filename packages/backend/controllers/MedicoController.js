@@ -28,7 +28,7 @@ export class MedicoController {
           servicio: turno.servicio
             ? {
                 nombre: turno.servicio.nombre,
-                codigo: turno.servicio.codigo || null,
+                codigo: turno.servicio.codigo || "N/A",
                 id: turno.servicio ? turno.servicio._id : "N/A"
               }
             : 'N/A',
