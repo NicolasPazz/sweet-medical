@@ -30,10 +30,11 @@ const turnoSchema = new mongoose.Schema(
       codigo: { type: String, trim: true },
       nombre: { type: String, required: true, trim: true, maxlength: 100 },
       costo: { type: Number, required: true, min: 0 },
+      duracionTurnoEnMins: { type: Number, required: true, min: 1 },
     },
     sede: {
-      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-      nombre: { type: String, required: true, trim: true, maxlength: 100 },
+      _id: { type: mongoose.Schema.Types.ObjectId },
+      nombre: { type: String, trim: true, maxlength: 100 },
     },
     diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
@@ -65,6 +66,7 @@ const turnoSchema = new mongoose.Schema(
 );
 
 turnoSchema.pre(/^find/, function (next) {
+  if (this.options?._populatingFromMedico) return next();
   this.populate('medico').populate('paciente').populate({ path: 'historialEstados.usuario' });
   next();
 });

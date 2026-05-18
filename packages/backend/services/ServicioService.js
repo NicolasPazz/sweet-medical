@@ -5,6 +5,7 @@ import { usuarioRepository } from '../infrastructure/repositories/UsuarioReposit
 import { Usuario } from '../domain/usuario/Usuario.js';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
+import { logger } from '../utils/logger.js';
 
 export class ServicioService {
   constructor({
@@ -21,8 +22,8 @@ export class ServicioService {
     if (!usuario) {
       throw new NotFoundError('Usuario no encontrado');
     }
-    if (usuario.nombreUsuario !== Usuario.USUARIO_SISTEMA.nombreUsuario) {
-      throw new ForbiddenError('Solo el usuario Sistema puede realizar esta operación');
+    if (usuario.nombreUsuario !== 'SISTEMA') {
+      throw new ForbiddenError('Solo el usuario SISTEMA puede realizar esta operación');
     }
   }
 
@@ -62,32 +63,39 @@ export class ServicioService {
     return await this.servicioRepository.save(servicio);
   }
 
-  async modificar(idUsuario, id, datosActualizados) {
+  async modificar(idUsuario, id, datosActualizados, tipoServicio) {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = await this.servicioRepository.findById(id);
+    const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoServicio);
 
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
-
+    logger.debug(servicio);
     if (servicio.codigo === undefined && datosActualizados.codigo !== undefined) {
       throw new BadRequestError('No se puede modificar ni asignar un código a una Especialidad.');
     }
+    if (tipoServicio == 'ESPECIALIDAD')
+      return await this.servicioRepository.updateEspecialidad(id, datosActualizados);
+    else if (tipoServicio == 'PRACTICA')
+      return await this.servicioRepository.updatePractica(id, datosActualizados);
 
-    return await this.servicioRepository.update(id, datosActualizados);
+    throw new NotFoundError('Servicio no encontrado');
   }
 
-  async eliminar(idUsuario, id) {
+  async eliminar(idUsuario, id, tipoServicio) {
     await this.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
-    const servicio = await this.servicioRepository.findById(id);
+    const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoServicio);
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
-
-    return await this.servicioRepository.delete(id);
+    const data = { activo: false };
+    if (tipoServicio == 'ESPECIALIDAD')
+      return await this.servicioRepository.updateEspecialidad(id, data);
+    else if (tipoServicio == 'PRACTICA')
+      return await this.servicioRepository.updatePractica(id, data);
   }
 }

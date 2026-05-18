@@ -20,7 +20,7 @@ export class Turno {
   hora;
   propuestaCambio = null;
 
-  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo) {
+  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo, usuarioSistema) {
     this.medico = medico;
     this.paciente = paciente;
     this.diaSemana = diaSemana;
@@ -30,15 +30,12 @@ export class Turno {
     this.historialEstados = [];
     this.costo = costo;
 
-    this.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
-      new Disponible(this),
-      Usuario.USUARIO_SISTEMA,
-      'Turno generado',
-    );
+    this.actualizarEstado(usuarioSistema, new Disponible(this), 'Turno generado');
   }
 
-  actualizarEstado(usuarioQueLlama, nuevoEstado, quien, motivo) {
+  actualizarEstado(quien, nuevoEstado, motivo) {
+    console.log('QUIEN LLAMA? ', quien);
+
     const estadoEnum =
       typeof nuevoEstado.getEstadoNombre === 'function'
         ? nuevoEstado.getEstadoNombre()
@@ -48,7 +45,7 @@ export class Turno {
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuarioQueLlama, this);
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(quien, this);
     return notificacion;
   }
 
@@ -62,8 +59,7 @@ export class Turno {
     const notificacion = this.actualizarEstado(
       usuarioQueLlama,
       new PendienteReprogramacion(this),
-      usuarioQueLlama,
-      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
+      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`
     );
 
     return notificacion;

@@ -7,11 +7,11 @@ export class PracticaRepository {
 
   // LEER
   async findAll() {
-    return await this.model.find();
+    return await this.model.find({ activo: true });
   }
 
   async findById(id) {
-    return await this.model.findById(id);
+    return await this.model.findOne({ _id: id, activo: true });
   }
 
   // CREAR
@@ -39,7 +39,7 @@ export class PracticaRepository {
 
   // ELIMINAR
   async delete(id) {
-    return await this.model.findByIdAndDelete(id);
+    return await this.model.findByIdAndUpdate(id, { activo: false });
   }
 
   async deleteAll() {

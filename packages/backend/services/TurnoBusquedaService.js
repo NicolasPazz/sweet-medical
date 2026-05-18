@@ -1,13 +1,16 @@
 import { FiltroBusquedaSpecification } from '../domain/busqueda/FiltroBusquedaSpecification.js';
 import { BadRequestError } from '../errors/AppError.js';
+import { busquedaTurnosRepository } from "../infrastructure/repositories/BusquedaTurnosRepository.js";
+import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 const MAX_RESULTADOS_COSTO = 500;
 
 export class TurnoBusquedaService {
-  constructor(busquedaTurnosRepository, motorCostos) {
-    this.repository = busquedaTurnosRepository;
-    this.motorCostos = motorCostos;
-  }
+  constructor({
+      turnoBusquedaRepository: turnoRepo = busquedaTurnosRepository,
+    } = {}) {
+      this.turnoRepository = turnoRepo;
+    }
 
   async buscarTurnos(filtros, paciente, paginacion) {
     const spec = new FiltroBusquedaSpecification(filtros);
@@ -17,7 +20,7 @@ export class TurnoBusquedaService {
     let totalItems = 0;
 
     if (sortBy !== 'costo') {
-      const queryResult = await this.repository.buscar(
+      const queryResult = await this.turnoRepository.buscar(
         spec,
         { sortBy, sortOrder },
         { page, limit },
@@ -25,14 +28,14 @@ export class TurnoBusquedaService {
       resultadosDomain = queryResult.data;
       totalItems = queryResult.total;
     } else {
-      const allMatches = await this.repository.buscar(spec, null, null);
+      const allMatches = await this.turnoRepository.buscar(spec, null, null);
 
       if (allMatches.total > MAX_RESULTADOS_COSTO) {
         throw new BadRequestError(
           'Demasiados resultados para ordenar por costo. Aplicá más filtros.',
         );
       }
-
+      
       resultadosDomain = allMatches.data;
       totalItems = allMatches.total;
     }
@@ -45,7 +48,7 @@ export class TurnoBusquedaService {
         especialidad: !esPractica ? turno.servicio : null,
       };
 
-      const calculoCosto = this.motorCostos.calcularPara(turnoAdaptado, paciente);
+      const calculoCosto = MotorCostos.calcularPara(turnoAdaptado, paciente);
       const baseMapeada = this._mapearTurno(turno);
 
       const dtoFinal = {
@@ -90,11 +93,18 @@ export class TurnoBusquedaService {
   }
 
   _mapearTurno(t) {
+    const medico = t.medico || null;
+
     return {
       id_turno: t.id || t._id,
-      id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
-      id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
-      fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
+      profesional: medico
+        ? {
+            id: medico.id || medico._id,
+            nombre: medico.nombre || 'N/A',
+            matricula: medico.matricula || 'N/A',
+          }
+        : null,
+      fechaHora: t.fechaHora ?? 'N/A',
       sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
 
       servicio: t.servicio
@@ -103,12 +113,12 @@ export class TurnoBusquedaService {
           : t.servicio.nombre
         : 'N/A',
 
+      tipoServicio: t.servicio?.codigo ? 'PRACTICA' : 'ESPECIALIDAD',
+
       estado:
-        typeof t.estado?.getEstadNombre === 'function'
+        typeof t.estado?.getEstadoNombre === 'function'
           ? t.estado.getEstadoNombre()
-          : typeof t.estado?.getEstadoNombre === 'function'
-            ? t.estado.getEstadoNombre()
-            : t.estado || 'N/A',
+          : t.estado || 'N/A',
 
       historialEstados: Array.isArray(t.historialEstados)
         ? t.historialEstados.map((historialEstado) => ({
@@ -124,3 +134,5 @@ export class TurnoBusquedaService {
     };
   }
 }
+
+export const turnoBusquedaService = new TurnoBusquedaService();

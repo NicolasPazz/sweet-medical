@@ -11,9 +11,7 @@ import { Agenda } from '../domain/agenda/Agenda.js';
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
-import { logger } from '../utils/logger.js';
 import { Rol } from '../domain/usuario/Rol.js';
-import { Usuario } from '../domain/usuario/Usuario.js';
 
 export class TurnoService {
   turnoRepository;
@@ -38,10 +36,12 @@ export class TurnoService {
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
+
     const paciente = await this.pacienteRepository.findByIdUsuario(id_usuario);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
+
     const turno = await this.turnoRepository.findById(id_turno);
 
     if (turno == null) {
@@ -51,6 +51,11 @@ export class TurnoService {
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
+
+    if (turno.paciente == paciente) {
+      console.log('HAY QUE ELIMINAR LA LINEA DE ABAJO');
+    }
+
     turno.paciente = paciente;
 
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
@@ -60,12 +65,7 @@ export class TurnoService {
 
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    const notificacion = turno.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
-      new Reservado(turno),
-      usuario,
-      'Reserva de turno',
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -115,12 +115,7 @@ export class TurnoService {
       throw new ConflictError('Un turno no puede cancelarse con menos de 1 hora de antelación');
     }
 
-    const notificacion = turno.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
-      new Cancelado(turno),
-      usuario,
-      motivo,
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Cancelado(turno), motivo);
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -176,12 +171,7 @@ export class TurnoService {
       throw new ConflictError('El turno no está en estado confirmado');
     }
 
-    turno.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
-      new Realizado(turno),
-      usuario,
-      'Turno finalizado',
-    );
+    turno.actualizarEstado(usuario, new Realizado(turno), 'Turno finalizado');
 
     if (Array.isArray(turno.medico?.turnosActualesYFuturos)) {
       const indice = turno.medico.turnosActualesYFuturos.findIndex(
@@ -226,12 +216,7 @@ export class TurnoService {
       throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
     }
 
-    const notificacion = turno.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
-      new Confirmado(turno),
-      usuario,
-      'Turno confirmado',
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
@@ -256,10 +241,10 @@ export class TurnoService {
   }
 
   async refrescarTurnos() {
-    const TAMANO_LOTE = 20; // Procesa de a 20 médicos para cuidar la RAM y las conexiones a DB
+    const TAMANO_LOTE = 20;
     const metricas = { procesados: 0, fallidos: 0, total: 0 };
 
-    logger.info(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
+    console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
       // 1. Obtener todos los médicos
@@ -267,57 +252,65 @@ export class TurnoService {
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
-        logger.info('[BATCH] No hay médicos para procesar.');
+        console.log('[BATCH] No hay médicos para procesar.');
         return;
       }
 
-      // 2. Procesamiento por lotes
+      // 2. Procesamiento por lotes (Chunks)
       for (let i = 0; i < medicos.length; i += TAMANO_LOTE) {
         const loteActual = medicos.slice(i, i + TAMANO_LOTE);
 
-        // Procesamos el lote actual en paralelo para mayor eficiencia
+        // Procesamos el lote actual en paralelo
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-              const { turnosEliminados, nuevosTurnos } =
-                Agenda.refrescarTurnosSegunDisponibilidadDe(medico);
+              const usuarioSistema = await usuarioRepository.findUsuarioSistema();
 
-              // 1. Persistimos las bajas en la DB de turnos
+              const { turnosEliminados, turnosNuevos } =
+                Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
+
+              medico.turnosActualesYFuturos
+                .filter((t) => t.estado instanceof Disponible)
+                .forEach((t) => console.log('HORA DEL TURNO GENERADO: ' + t.hora));
+
               for (const t of turnosEliminados) {
                 await this.turnoRepository.save(t);
               }
 
-              // 2. Persistimos los nuevos turnos generados en la DB de turnos
-              for (const t of nuevosTurnos) {
+              const medicoId = medico.id || medico._id;
+              for (const t of turnosNuevos) {
+                // Asignar fechaHora basada en el diaSemana y hora del turno
+                if (!t.fechaHora) {
+                  t.fechaHora = Agenda.configurarFechaCercana(t.diaSemana, t.hora);
+                }
+                t.medico = medicoId;
                 await this.turnoRepository.save(t);
               }
 
               metricas.procesados++;
             } catch (errorMedico) {
               metricas.fallidos++;
-              logger.error(
-                `[BATCH ERROR] Médico ID ${medico._id || medico.id}: ${errorMedico.message}`,
-              );
+              console.error(`[BATCH ERROR] Médico ID ${medico.id}: ${errorMedico.message}`);
             }
           }),
         );
 
-        logger.debug(
+        console.log(
           `[BATCH PROGRESS] Lote completado. Progreso: ${metricas.procesados + metricas.fallidos}/${metricas.total}`,
         );
       }
 
       // 3. Reporte final
-      logger.debug(`
-            --- RESUMEN DEL PROCESO BATCH ---
-            Finalizado: ${new Date().toISOString()}
-            Total Médicos: ${metricas.total}
-            Exitosos:      ${metricas.procesados}
-            Fallidos:      ${metricas.fallidos}
-            ---------------------------------`);
+      console.log(`
+        --- RESUMEN DEL PROCESO BATCH ---
+        Finalizado: ${new Date().toISOString()}
+        Total Médicos: ${metricas.total}
+        Exitosos:      ${metricas.procesados}
+        Fallidos:      ${metricas.fallidos}
+        ---------------------------------`);
     } catch (error) {
-      logger.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
-      throw error; // Relanzamos para que el CronJob pueda loguear el fallo fatal
+      console.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
+      throw error;
     }
   }
 
@@ -346,27 +339,17 @@ export class TurnoService {
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
       sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
 
-      servicio: t.servicio
-        ? t.servicio.codigo
-          ? `${t.servicio.codigo} - ${t.servicio.nombre}`
-          : t.servicio.nombre
-        : 'N/A',
+      servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
+      servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : 'N/A') : 'N/A',
 
-      estado:
-        typeof t.estado?.getEstadNombre === 'function'
-          ? t.estado.getEstadoNombre()
-          : typeof t.estado?.getEstadoNombre === 'function'
-            ? t.estado.getEstadoNombre()
-            : t.estado || 'N/A',
+      estado: t.estado ? t.estado.getEstadoNombre() : 'N/A',
 
-      historialEstados: Array.isArray(t.historialEstados)
-        ? t.historialEstados.map((historialEstado) => ({
-            fechaHoraCambio: historialEstado.fechaHoraIngreso,
-            estado: historialEstado.estado,
-            motivo: historialEstado.motivo,
-            actor: historialEstado.usuario?.nombreUsuario,
-          }))
-        : [],
+      historialEstados: t.historialEstados.map((e) => ({
+        fechaHoraCambio: e.fechaHoraIngreso,
+        estado: e.estado,
+        motivo: e.motivo ? e.motivo : 'N/A',
+        actor: e.usuario ? e.usuario.nombreUsuario : 'N/A',
+      })),
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,

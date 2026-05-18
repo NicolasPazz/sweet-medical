@@ -12,7 +12,7 @@ let idSistema;
 // beforeAll corre una sola vez antes de todos los tests del archivo.
 // Acá registramos al usuario Sistema en el repo para que los tests puedan usarlo.
 beforeAll(async () => {
-  const usuarioSistema = Usuario.USUARIO_SISTEMA;
+  const usuarioSistema = new Usuario('SISTEMA', null);
   const guardado = await usuarioRepository.save(usuarioSistema);
   idSistema = guardado.id;
 });

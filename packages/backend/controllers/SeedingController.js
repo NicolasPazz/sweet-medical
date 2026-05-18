@@ -164,16 +164,19 @@ export class SeedingController {
 
       const usuariosMedicosGenerados = [];
       const usuariosPacientesGenerados = [];
+      const usuariosAdminsGenerados = [];
 
-      // Cargar único Admin de forma directa
-      const payloadAdminSistema = {
-        _id: Usuario.USUARIO_SISTEMA.id,
-        nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
-        password: Usuario.USUARIO_SISTEMA.password,
-        roles: Usuario.USUARIO_SISTEMA.roles,
-      };
+      // NO TOCAR!!!!!!!!!!
+      const usuarioSistema = new Usuario('SISTEMA', '12345678');
+      usuarioSistema.roles.push(Rol.ADMIN);
+      usuariosAdminsGenerados.push(usuarioSistema);
+      //
 
-      await this.usuarioRepository.saveAll([payloadAdminSistema]);
+      await this.usuarioRepository.saveAll(usuarioSistema);
+
+      // Registrar el usuario SISTEMA para que los turnos generados por el batch tengan usuario válido
+      const usuarioSistemaGuardado = await this.usuarioRepository.findUsuarioSistema();
+      Usuario.setUsuarioSistema(usuarioSistemaGuardado);
 
       logger.info(`Se cargó usuario admin_sweet.`);
 
@@ -213,7 +216,7 @@ export class SeedingController {
         const matricula = `MAT-${1000 + i}`;
         const nombreCompleto = `Dr. Especialista ${i + 1}`;
 
-        const nuevoMedico = new Medico(usuarioDb._id, matricula, nombreCompleto);
+        const nuevoMedico = new Medico(usuarioDb.id || usuarioDb._id, matricula, nombreCompleto);
 
         nuevoMedico.especialidades = [
           especialidadesGuardadas[i % especialidadesGuardadas.length]._id,
@@ -255,7 +258,7 @@ export class SeedingController {
         const planAsignado = planesGuardados[i % planesGuardados.length];
 
         const nuevoPaciente = new Paciente(
-          usuarioDb._id,
+          usuarioDb.id || usuarioDb._id,
           dni,
           nombreCompleto,
           obraSocialAsignada._id,
@@ -288,15 +291,18 @@ export class SeedingController {
     }
   };
 
-  refrescarTurnos = async (req, res, next) => {
+  correrProcesoBatch = async (req, res, next) => {
     try {
+      console.log('Proceso GARCH iniciado manualmente');
+
       await this.turnoService.refrescarTurnos();
-      return res.status(200).json({
+
+      return res.status(201).json({
         status: 'success',
-        message: 'Turnos refrescados exitosamente',
+        message: 'Proceso batch realizado exitosamente',
       });
     } catch (error) {
-      logger.error('Error al refrescar turnos:', error.message);
+      logger.error('Error al correr el proceso batch:', error.message);
       return next(error);
     }
   };
