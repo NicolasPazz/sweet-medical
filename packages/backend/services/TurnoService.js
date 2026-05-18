@@ -12,7 +12,6 @@ import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { Rol } from '../domain/usuario/Rol.js';
-import { Usuario } from '../domain/usuario/Usuario.js';
 
 export class TurnoService {
   turnoRepository;
@@ -33,14 +32,17 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
+
     const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
+
     const paciente = await this.pacienteRepository.findByIdUsuario(id_usuario);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
+
     const turno = await this.turnoRepository.findById(id_turno);
 
     if (turno == null) {
@@ -50,6 +52,11 @@ export class TurnoService {
     if (!(turno.estado instanceof Disponible)) {
       throw new ConflictError('El turno no está disponible');
     }
+
+    if(turno.paciente == paciente){
+      console.log("HAY QUE ELIMINAR LA LINEA DE ABAJO");
+    }
+
     turno.paciente = paciente;
 
     const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
@@ -258,31 +265,19 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-              const tamañoListaTurnosAntes = medico.turnosActualesYFuturos.length;
-              console.log('TAMAÑO LISTA DE TURNOS ANTES: ' + tamañoListaTurnosAntes);
 
-              // Invocamos la lógica de la Agenda (que internamente corre t.actualizarEstado() a Cancelado)
               const usuarioSistema = await usuarioRepository.findUsuarioSistema();
 
-              console.log('Usuario recibido:', usuarioSistema);
-
-              const { turnosEliminados, turnosNuevos } =
-                Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
-
-              console.log(
-                'TAMAÑO LISTA DE TURNOS DESPUES: ' + medico.turnosActualesYFuturos.length,
-              );
+              const { turnosEliminados, turnosNuevos } = Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
 
               medico.turnosActualesYFuturos
                 .filter((t) => t.estado instanceof Disponible)
                 .forEach((t) => console.log('HORA DEL TURNO GENERADO: ' + t.hora));
-              // 3. SE GUARDAN PRIMERO LOS TURNOS INDIVIDUALES CANCELADOS
-              // Esto asegura que impacte su nuevo estado en DB antes de que el médico los desvincule
+              
               for (const t of turnosEliminados) {
                 await this.turnoRepository.save(t);
               }
 
-              // 4. GUARDAR SOLO LOS TURNOS NUEVOS
               const medicoId = medico.id || medico._id;
               for (const t of turnosNuevos) {
                 t.medico = medicoId;
