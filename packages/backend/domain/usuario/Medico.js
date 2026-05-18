@@ -1,7 +1,7 @@
 import { logger } from '../../utils/logger.js';
 import { Agenda } from '../agenda/Agenda.js';
 import { GeneradorDisponibilidad } from '../agenda/GeneradorDisponibilidad.js';
-import { tLog } from "../../utils/i18n/i18n.js";
+
 
 export class Medico {
   id;

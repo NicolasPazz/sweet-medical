@@ -10,7 +10,7 @@ import {
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Usuario } from '../usuario/Usuario.js';
-import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
+
 
 export class Agenda {
   static generarTurno(servicio, medico, disponibilidadesLibres, usuarioSistema) {

@@ -4,7 +4,7 @@ import { PendienteReprogramacion } from '../notificacion/estado-turno/PendienteR
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 import { Usuario } from '../usuario/Usuario.js';
-import { tLog } from "../../utils/i18n/i18n.js";
+
 
 export class Turno {
   id;
