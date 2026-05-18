@@ -1,5 +1,6 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
+import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't' para unificar
 
 export class PendienteReprogramacion {
   id;
@@ -24,13 +25,20 @@ export class PendienteReprogramacion {
       ? `${new Date(prop.nuevaFechaHora).toLocaleDateString('es-AR')} a las ${new Date(prop.nuevaFechaHora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`
       : 'una nueva fecha';
 
+    const motivo = prop?.motivo || 'No especificado';
+
     // Caso 1: El Paciente solicita el cambio -> Notifica al Médico
     if (this.turno.paciente && actorId && String(actorId) === String(pacienteUsuarioId)) {
       logger.debug(`Notificando al médico por solicitud de reprogramación del paciente.`);
       return new Notificacion(
         this.turno.medico.usuario,
         remitente,
-        `El paciente ${this.turno.paciente.nombre} solicita reprogramar su turno de ${servicio} para el día ${fechaFormateada}. Motivo: ${prop.motivo}.`,
+        t('PROPUESTA_REPROGRAMACION_A_MEDICO', {
+          nombre: this.turno.paciente.nombre,
+          servicio,
+          fecha: fechaFormateada,
+          motivo
+        }),
       );
     }
 
@@ -40,7 +48,12 @@ export class PendienteReprogramacion {
       return new Notificacion(
         this.turno.paciente.usuario,
         remitente,
-        `El Dr/a. ${this.turno.medico.nombre} propone reprogramar su turno de ${servicio} para el día ${fechaFormateada}. Motivo: ${prop.motivo}.`,
+        t('PROPUESTA_REPROGRAMACION_A_PACIENTE', {
+          nombre: this.turno.medico.nombre,
+          servicio,
+          fecha: fechaFormateada,
+          motivo
+        }),
       );
     }
 

@@ -1,7 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-import { tLog, tNegocio } from "../../../utils/i18n/i18n.js";
+import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't'
 
 export class Confirmado {
   id;
@@ -16,18 +16,18 @@ export class Confirmado {
   notificar(remitente) {
     const servicio = this.turno.obtenerNombreServicio();
 
-    // LOG: Registro técnico en el idioma configurado para el sistema (ej: 'es')
+    // LOG: Registro técnico en consola
     logger.debug(
       `Creando notificación para turno ${this.turno.id} en estado CONFIRMADO por profesional ${this.turno.medico.nombre} para servicio ${servicio}.`,
     );
 
-    // NOTIFICACIÓN: Mensaje al paciente en el idioma de negocio (ej: 'en')
+    // NOTIFICACIÓN: Mensaje traducido dinámicamente para el paciente
     return new Notificacion(
       this.turno.paciente.usuario,
       remitente,
-      tNegocio('CONFIRMACION_TURNO_DETALLADA', {
+      t('CONFIRMACION_TURNO_DETALLADA', {
         servicio: servicio,
-        fecha: this.turno.fechaHora.toLocaleDateString(),
+        fecha: this.turno.fechaHora?.toLocaleDateString() || '',
         sede: this.turno.sede.nombre,
         medico: this.turno.medico.nombre
       })

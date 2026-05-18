@@ -1,7 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-import { tLog, tNegocio } from "../../../utils/i18n/i18n.js";
+import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't'
 
 export class Cancelado {
   id;
@@ -26,22 +26,26 @@ export class Cancelado {
       return new Notificacion(
         this.turno.medico.usuario,
         remitente,
-        `El paciente ${this.turno.paciente.nombre} ha cancelado su turno para ${servicio}.`,
+        t('CANCELACION_A_MEDICO', { 
+          nombre: this.turno.paciente.nombre, 
+          servicio 
+        }),
       );
     }
 
     // 2. Caso: El profesional o el sistema cancelan
     else {
-      // IMPORTANTE: Solo intentamos notificar al paciente SI EXISTE uno
       if (this.turno.paciente) {
         logger.debug(`Notificando al paciente por cancelación del profesional/sistema.`);
         return new Notificacion(
           this.turno.paciente.usuario,
           remitente,
-          `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} para ${servicio}.`,
+          t('CANCELACION_A_PACIENTE', { 
+            fecha: this.turno.fechaHora?.toLocaleDateString() || '', 
+            servicio 
+          }),
         );
       } else {
-        // Si no hay paciente, es un turno libre que se eliminó
         logger.debug(
           `Turno disponible cancelado (ID: ${this.turno.id}). No se requiere notificar paciente.`,
         );

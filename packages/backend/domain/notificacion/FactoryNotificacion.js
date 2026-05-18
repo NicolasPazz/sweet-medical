@@ -1,6 +1,6 @@
 import { Notificacion } from './Notificacion.js';
 import { Usuario } from '../usuario/Usuario.js';
-import { tNegocio } from "../../utils/i18n/i18n.js";
+import { t } from "../../utils/i18n/i18n.js"; // <-- Cambiado a 't' para unificar
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(usuarioQueLlama, turno) {
@@ -9,7 +9,7 @@ export class FactoryNotificacion {
 
   // Esto se ejecutará desde un cron
   static crearRecordatoriosDiaPrevio(turno) {
-    const remitenteId = Usuario.USUARIO_SISTEMA.id; // Extraemos el ID stático limpio
+    const remitenteId = Usuario.USUARIO_SISTEMA.id; // Extraemos el ID estático limpio
 
     const medicoUsuarioId = turno.medico.usuario.id || turno.medico.usuario._id;
     const pacienteUsuarioId = turno.paciente.usuario.id || turno.paciente.usuario._id;
@@ -18,14 +18,14 @@ export class FactoryNotificacion {
       new Notificacion(
         medicoUsuarioId,
         remitenteId,
-        tNegocio('RECORDATORIO_MEDICO', { 
+        t('RECORDATORIO_MEDICO', {
           nombre: turno.paciente.nombre 
         }),
       ),
       new Notificacion(
         pacienteUsuarioId,
         remitenteId,
-        tNegocio('RECORDATORIO_PACIENTE', { 
+        t('RECORDATORIO_PACIENTE', {
           nombre: turno.medico.nombre 
         }),
       ),

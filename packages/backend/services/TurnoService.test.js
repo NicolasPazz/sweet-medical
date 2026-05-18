@@ -546,6 +546,8 @@ describe('TurnoService', () => {
         estado: { getEstadoNombre: () => 'DISPONIBLE' }
       };
 
+      turnoOriginal.servicio = { _id: 's-cardio', nombre: 'Cardiología' };
+
       mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
       mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
       mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(turnoDestinoBache);
