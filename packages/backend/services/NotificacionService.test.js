@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { NotFoundError } from '../errors/AppError.js';
 import { NotificacionService } from './NotificacionService.js';
+import { Notificacion } from '../domain/notificacion/Notificacion.js';
 
 const mockNotificacionRepository = {
   findAllReadByUserId: jest.fn(),
@@ -28,6 +29,10 @@ describe('NotificacionService', () => {
     });
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('obtiene notificaciones leídas para un usuario válido', async () => {
     mockNotificacionRepository.findAllReadByUserId.mockResolvedValue([{ id: '1', leida: true }]);
 
@@ -46,17 +51,32 @@ describe('NotificacionService', () => {
     expect(result).toEqual([{ id: '2', leida: false }]);
   });
 
-  it('marca una notificación como leída cuando el destinatario coincide', async () => {
+
+  it('marca una notificación como leída cuando el destinatario coincide (vía id directo)', async () => {
     mockNotificacionRepository.findById.mockResolvedValue({
       id: validObjectId,
       destinatario: validObjectId,
-      populated: jest.fn(() => null),
+      populated: jest.fn(() => null), // Camino: no viene populado
     });
     mockNotificacionRepository.markAsRead.mockResolvedValue({ id: validObjectId, leida: true });
 
     const result = await service.marcarComoLeida(validObjectId, validObjectId);
 
     expect(mockNotificacionRepository.findById).toHaveBeenCalledWith(validObjectId);
+    expect(mockNotificacionRepository.markAsRead).toHaveBeenCalledWith(validObjectId);
+    expect(result).toEqual({ id: validObjectId, leida: true });
+  });
+
+  it('marca una notificación como leída cuando el destinatario coincide (vía populated de Mongoose)', async () => {
+    mockNotificacionRepository.findById.mockResolvedValue({
+      id: validObjectId,
+      destinatario: { _id: validObjectId, nombreUsuario: 'paciente-test' },
+      populated: jest.fn(() => validObjectId), // Devuelve el ID subyacente del populado
+    });
+    mockNotificacionRepository.markAsRead.mockResolvedValue({ id: validObjectId, leida: true });
+
+    const result = await service.marcarComoLeida(validObjectId, validObjectId);
+
     expect(mockNotificacionRepository.markAsRead).toHaveBeenCalledWith(validObjectId);
     expect(result).toEqual({ id: validObjectId, leida: true });
   });
@@ -81,17 +101,29 @@ describe('NotificacionService', () => {
     );
   });
 
-  it('guarda una nueva notificación correctamente', async () => {
+
+  it('guarda una nueva notificación correctamente e instancia la clase de Dominio', async () => {
     const datosNotificacion = {
       destinatario: validObjectId,
       remitente: validObjectId,
       mensaje: 'Hola',
     };
-    mockNotificacionRepository.save.mockResolvedValue({ id: '5', ...datosNotificacion });
+    
+    mockNotificacionRepository.save.mockImplementation((instancia) => {
+      return Promise.resolve({ id: '5', ...instancia });
+    });
 
     const result = await service.save(datosNotificacion);
 
+    // Verificaciones críticas de arquitectura de capas
     expect(mockNotificacionRepository.save).toHaveBeenCalled();
-    expect(result).toEqual({ id: '5', ...datosNotificacion });
+    expect(result.destinatario).toBe(validObjectId);
+    expect(result.mensaje).toBe('Hola');
+    expect(result.leida).toBe(false);
+  });
+
+
+  it('lanza un error si se le pasa un ID inválido a obtenerLeidas', async () => {
+    await expect(service.obtenerLeidas('id-invalido-123')).rejects.toThrow();
   });
 });
