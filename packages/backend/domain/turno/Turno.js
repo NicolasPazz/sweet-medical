@@ -17,13 +17,7 @@ export class Turno {
   diaSemana;
   hora;
 
-  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo) {
-    /*if (medico && typeof medico === 'object' && !medico.constructor.name.includes('ObjectId')) {
-      Object.assign(this, medico);
-      this.id = this.id || this._id;
-      return;
-    }*/
-
+  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo, usuarioSistema) {
     this.medico = medico;
     this.paciente = paciente;
     this.diaSemana = diaSemana;
@@ -34,14 +28,16 @@ export class Turno {
     this.costo = costo;
 
     this.actualizarEstado(
-      Usuario.USUARIO_SISTEMA,
+      usuarioSistema,
       new Disponible(this),
-      Usuario.USUARIO_SISTEMA,
       'Turno generado',
     );
   }
 
-  actualizarEstado(usuarioQueLlama, nuevoEstado, quien, motivo) {
+  actualizarEstado(quien, nuevoEstado, motivo) {
+
+    console.log("QUIEN LLAMA? ", quien);
+
     const estadoEnum =
       typeof nuevoEstado.getEstadoNombre === 'function'
         ? nuevoEstado.getEstadoNombre()
@@ -51,7 +47,7 @@ export class Turno {
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuarioQueLlama, this);
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(quien, this);
     return notificacion;
   }
 

@@ -2,6 +2,7 @@ import { MedicoService } from '../services/MedicoService.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
+import { Disponible } from "../domain/notificacion/estado-turno/Disponible.js";
 
 export class MedicoController {
   constructor({ medicoService = new MedicoService() } = {}) {
@@ -20,7 +21,7 @@ export class MedicoController {
         especialidades: m.especialidades,
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,
-        turnos: m.turnosActualesYFuturos.map((turno) => ({
+        turnos: m.turnosActualesYFuturos.filter(t => t.estado instanceof Disponible).map((turno) => ({
           id: turno.id || turno._id,
           fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]
           medico: turno.medico.nombre,
@@ -28,6 +29,7 @@ export class MedicoController {
             ? {
                 nombre: turno.servicio.nombre,
                 codigo: turno.servicio.codigo || null,
+                id: turno.servicio ? turno.servicio._id : "N/A"
               }
             : 'N/A',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]

@@ -1,53 +1,75 @@
+import { NotFoundError } from '../../errors/AppError.js';
 import { UsuarioModel } from '../schemas/UsuarioSchema.js';
+import { Usuario } from '../../domain/usuario/Usuario.js';
 
 export class UsuarioRepository {
-  constructor() {
-    this.model = UsuarioModel;
+  fromDB(datos) {
+    const usuario = Object.create(Usuario.prototype);
+    usuario.id = datos._id ?? datos.id;
+    usuario.nombreUsuario = datos.nombreUsuario;
+    usuario.password = datos.password;
+    usuario.roles = datos.roles ?? [];
+    return usuario;
   }
 
-  // LEER
-  async findAll() {
-    return await this.model.find();
-  }
-
-  async findById(id) {
-    return await this.model.findById(id);
-  }
-
-  async findUsuarioAdmin() {
-    return await this.model.findOne({ roles: 'ADMIN' });
+  _hidratarColeccion(datos) {
+    return datos.map((d) => this.fromDB(d));
   }
 
   // CREAR
   async save(usuario) {
-    const id = usuario.id || usuario._id;
-
-    if (id) {
-      return await this.update(id, usuario);
+    if (usuario._id || usuario.id) {
+      const id = usuario._id ?? usuario.id;
+      const guardado = await UsuarioModel.findByIdAndUpdate(id, usuario, { new: true }).lean();
+      return this.fromDB(guardado);
+    } else {
+      const nuevo = await UsuarioModel.create(usuario);
+      const guardado = await UsuarioModel.findById(nuevo._id).lean();
+      return this.fromDB(guardado);
     }
-
-    const nuevoUsuario = new this.model(usuario);
-    return await nuevoUsuario.save();
   }
 
   async saveAll(usuarios) {
-    return await this.model.insertMany(usuarios);
+    const docs = await UsuarioModel.insertMany(usuarios);
+    return this._hidratarColeccion(docs.map((d) => d.toObject()));
+  }
+
+  // LEER
+  async findById(id) {
+    const usuario = await UsuarioModel.findById(id).lean();
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+    return this.fromDB(usuario);
+  }
+
+  async findAll() {
+    const usuarios = await UsuarioModel.find().lean();
+    return this._hidratarColeccion(usuarios);
+  }
+
+  async findUsuarioSistema() {
+    const usuario = await UsuarioModel.findOne({ roles: 'ADMIN' }).lean();
+    if (!usuario) return null;
+    return this.fromDB(usuario);
   }
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    return await this.model.findByIdAndUpdate(id, datosActualizados, {
+    const usuario = await UsuarioModel.findByIdAndUpdate(id, datosActualizados, {
       new: true,
-    });
+    }).lean();
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+    return this.fromDB(usuario);
   }
 
   // ELIMINAR
   async delete(id) {
-    return await this.model.findByIdAndDelete(id);
+    const result = await UsuarioModel.findByIdAndDelete(id);
+    if (!result) throw new NotFoundError('Usuario no encontrado');
+    return true;
   }
 
   async deleteAll() {
-    await this.model.deleteMany({});
+    await UsuarioModel.deleteMany({});
   }
 }
 

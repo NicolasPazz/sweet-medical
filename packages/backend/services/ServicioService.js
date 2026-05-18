@@ -18,8 +18,8 @@ export class ServicioService {
     if (!usuario) {
       throw new NotFoundError('Usuario no encontrado');
     }
-    if (usuario.nombreUsuario !== Usuario.USUARIO_SISTEMA.nombreUsuario) {
-      throw new ForbiddenError('Solo el usuario Sistema puede realizar esta operación');
+    if (usuario.nombreUsuario !== 'SISTEMA') {
+      throw new ForbiddenError('Solo el usuario SISTEMA puede realizar esta operación');
     }
   }
 

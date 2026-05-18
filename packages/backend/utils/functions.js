@@ -1,6 +1,5 @@
 // utils/dateUtils.js
-
-import { logger } from './logger.js';
+import { Disponible } from "../domain/notificacion/estado-turno/Disponible.js";
 
 export {
   crearFechaDesdeAtributos,
@@ -96,97 +95,99 @@ const estaEnDisponibilidad = (diaSemana, hora, disponibilidad) => {
   }
 
   const stringAMinutos = (str) => {
+    if (!str) return 0;
+    // Si viene "7:00", split lo divide en ["7", "00"] perfectamente
     const [hh, mm] = str.split(':').map(Number);
     return hh * 60 + mm;
   };
 
   const minutosFecha = stringAMinutos(hora);
-
   const minutosInicio = stringAMinutos(disponibilidad.horaDesde);
   const minutosFin = stringAMinutos(disponibilidad.horaHasta);
 
-  // 4. Comparación (ignorando año/mes/día)
   return minutosFecha >= minutosInicio && minutosFecha < minutosFin;
 };
 
 /**
- * Genera una lista de fragmentos de disponibilidad (huecos)
+ * Genera una lista de fragmentos de disponibilidad (huecos) 
  * basándose en los turnos que están actualmente en estado Disponible.
- *
+ * 
  * @param {Array} disponibilidades - Lista de { diaSemana, horaDesde, horaHasta }
  * @param {Array} turnosDisponibles - Lista de objetos Turno con estado Disponible
  * @returns {Array} - Nueva lista de objetos Disponibilidad (huecos libres)
  */
 const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) => {
-  const todosLosHuecos = [];
+    const todosLosHuecos = [];
 
-  const stringAMinutos = (str) => {
-    if (!str) return 0;
-    const [hh, mm] = str.split(':').map(Number);
-    return hh * 60 + mm;
-  };
+    const stringAMinutos = (str) => {
+        if (!str) return 0;
+        const [hh, mm] = str.split(':').map(Number);
+        return (hh * 60) + mm;
+    };
 
-  const minutosAString = (min) => {
-    const hh = Math.floor(min / 60)
-      .toString()
-      .padStart(2, '0');
-    const mm = (min % 60).toString().padStart(2, '0');
-    return `${hh}:${mm}`;
-  };
+    const minutosAString = (min) => {
+        const hh = Math.floor(min / 60).toString().padStart(2, '0');
+        const mm = (min % 60).toString().padStart(2, '0');
+        return `${hh}:${mm}`;
+    };
 
-  disponibilidades.forEach((disp) => {
-    const inicioDisp = stringAMinutos(disp.horaDesde);
-    const finDisp = stringAMinutos(disp.horaHasta);
+    disponibilidades.forEach(disp => {
+        const inicioDisp = stringAMinutos(disp.horaDesde);
+        const finDisp = stringAMinutos(disp.horaHasta);
 
-    // 1. Filtramos solo los turnos que OCUPAN espacio (Reservados, Asignados, etc.)
-    // que coincidan con el día y caigan dentro del rango de esta disponibilidad.
-    const turnosQueObstruyen = turnosNoDisponibles.filter((t) => {
-      const minutosTurno = stringAMinutos(t.hora);
-      return t.diaSemana === disp.diaSemana && minutosTurno >= inicioDisp && minutosTurno < finDisp;
+        const turnosQueObstruyen = turnosNoDisponibles.filter(t => {
+            const minutosTurno = stringAMinutos(t.hora);
+            const esDisponible = t.estado instanceof Disponible || 
+                                 (typeof t.estado === 'string' && t.estado.toUpperCase() === 'DISPONIBLE') ||
+                                 (typeof t.estado?.getEstadoNombre === 'function' && t.estado.getEstadoNombre().toUpperCase() === 'DISPONIBLE');
+            return t.diaSemana === disp.diaSemana && 
+                   minutosTurno >= inicioDisp && 
+                   minutosTurno < finDisp && esDisponible;
+        });
+
+        // 2. Iniciamos con el bloque completo de la disponibilidad
+        let fragmentosLibres = [{ inicio: inicioDisp, fin: finDisp }];
+
+        // 3. Aplicamos el "recorte" por cada turno que obstruye
+        turnosQueObstruyen.forEach(turno => {
+            const tInicio = stringAMinutos(turno.hora);
+            const duracion = turno.servicio?.duracionTurnoEnMins;
+            // Si no hay duración guardada no podemos recortar — ignoramos este turno
+            if (!duracion || isNaN(duracion)) return;
+            const tFin = tInicio + duracion;
+
+            let nuevosFragmentos = [];
+            fragmentosLibres.forEach(f => {
+                // Si el turno está totalmente fuera del fragmento libre actual
+                if (tFin <= f.inicio || tInicio >= f.fin) {
+                    nuevosFragmentos.push(f);
+                } else {
+                    // Hay solapamiento: dividimos el fragmento en dos (antes y después del turno)
+                    if (tInicio > f.inicio) {
+                        nuevosFragmentos.push({ inicio: f.inicio, fin: tInicio });
+                    }
+                    if (tFin < f.fin) {
+                        nuevosFragmentos.push({ inicio: tFin, fin: f.fin });
+                    }
+                }
+            });
+            fragmentosLibres = nuevosFragmentos;
+        });
+
+        console.log("FRAGMENTOS LIBRES: ");
+        console.log(fragmentosLibres);
+
+        // 4. Transformamos los minutos de nuevo a formato horario para devolver
+        fragmentosLibres.forEach(f => {
+            todosLosHuecos.push({
+                diaSemana: disp.diaSemana,
+                horaDesde: minutosAString(f.inicio),
+                horaHasta: minutosAString(f.fin)
+            });
+        });
     });
 
-    // 2. Iniciamos con el bloque completo de la disponibilidad
-    let fragmentosLibres = [{ inicio: inicioDisp, fin: finDisp }];
-
-    // 3. Aplicamos el "recorte" por cada turno que obstruye
-    turnosQueObstruyen.forEach((turno) => {
-      const tInicio = stringAMinutos(turno.hora);
-      // Si el turno no tiene práctica/servicio, asumimos una duración estándar (ej: 30 min)
-      const duracion = turno.servicio?.duracionTurnoEnMins;
-      const tFin = tInicio + duracion;
-
-      let nuevosFragmentos = [];
-      fragmentosLibres.forEach((f) => {
-        // Si el turno está totalmente fuera del fragmento libre actual
-        if (tFin <= f.inicio || tInicio >= f.fin) {
-          nuevosFragmentos.push(f);
-        } else {
-          // Hay solapamiento: dividimos el fragmento en dos (antes y después del turno)
-          if (tInicio > f.inicio) {
-            nuevosFragmentos.push({ inicio: f.inicio, fin: tInicio });
-          }
-          if (tFin < f.fin) {
-            nuevosFragmentos.push({ inicio: tFin, fin: f.fin });
-          }
-        }
-      });
-      fragmentosLibres = nuevosFragmentos;
-    });
-
-    logger.debug('FRAGMENTOS LIBRES: ');
-    logger.debug(fragmentosLibres);
-
-    // 4. Transformamos los minutos de nuevo a formato horario para devolver
-    fragmentosLibres.forEach((f) => {
-      todosLosHuecos.push({
-        diaSemana: disp.diaSemana,
-        horaDesde: minutosAString(f.inicio),
-        horaHasta: minutosAString(f.fin),
-      });
-    });
-  });
-
-  return todosLosHuecos;
+    return todosLosHuecos;
 };
 
 /**

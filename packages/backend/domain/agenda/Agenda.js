@@ -1,189 +1,151 @@
-import { logger } from '../../utils/logger.js';
-import { Turno } from '../turno/Turno.js';
-import {
-  horaAMinutos,
-  estaEnDisponibilidad,
-  obtenerDisponibilidadesLibres,
-  calcularHoraDesdeMinutos,
-  horarioIncluido,
-} from '../../utils/functions.js';
+import { logger } from "../../utils/logger.js";
+import { Turno } from "../turno/Turno.js";
+import { horaAMinutos, estaEnDisponibilidad, obtenerDisponibilidadesLibres, calcularHoraDesdeMinutos, horarioIncluido} from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
-import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
-import { Usuario } from '../usuario/Usuario.js';
+import { Cancelado } from "../notificacion/estado-turno/Cancelado.js";
+import { Usuario } from "../usuario/Usuario.js";
 
 export class Agenda {
   static generarTurno(servicio, medico, disponibilidadesLibres) {
+    
     logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico.nombre}`);
 
     const turnos = [];
-
     const offset = servicio.duracionTurnoEnMins;
 
-    for (const disponibilidad of disponibilidadesLibres) {
+    for(const disponibilidad of disponibilidadesLibres){
+
       let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
       const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
 
-      logger.debug('actualMinutos: ' + actualMinutos);
-      logger.debug('offset: ' + offset);
-      logger.debug('tiempoLimite: ' + tiempoLimite);
+      while(actualMinutos + offset <= tiempoLimite){
 
-      const sedeDelMedico = medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null;
+      const turno = new Turno(medico, null, disponibilidad.diaSemana, calcularHoraDesdeMinutos(actualMinutos), null, servicio, servicio.costo);
 
-      while (actualMinutos + offset <= tiempoLimite) {
-        const turno = new Turno(
-          medico,
-          null,
-          disponibilidad.diaSemana,
-          calcularHoraDesdeMinutos(actualMinutos),
-          sedeDelMedico,
-          servicio,
-          servicio.costo,
-        );
+      turnos.push(turno);
 
-        turno.fechaHora = Agenda.configurarFechaCercana(
-          disponibilidad.diaSemana,
-          calcularHoraDesdeMinutos(actualMinutos),
-        );
-
-        logger.debug('Turno generado:', turno);
-
-        turnos.push(turno);
-
-        actualMinutos += offset;
+      actualMinutos += offset;
       }
+    
     }
 
     return turnos;
   }
 
-  //Genera todos los turnos segun la disponibilidad actual de un medico
   static refrescarTurnosSegunDisponibilidadDe(medico) {
-    logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
+  logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
+  
+  const turnosEliminados = this.eliminarTurnosDesactualizados(medico);
+  
+  const disponibilidadesLibres = obtenerDisponibilidadesLibres(medico.disponibilidades, medico.turnosActualesYFuturos);
 
-    const turnosEliminados = this.eliminarTurnosDesactualizados(medico);
-
-    const disponibilidadesLibres = obtenerDisponibilidadesLibres(
-      medico.disponibilidades,
-      medico.turnosActualesYFuturos.filter((t) => t && t.estado instanceof Disponible),
-    );
-
-    const nuevosTurnos = [];
-
-    for (const especialidad of medico.especialidades) {
-      nuevosTurnos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
-    }
-
-    for (const practica of medico.practicas) {
-      nuevosTurnos.push(...this.generarTurno(practica, medico, disponibilidadesLibres));
-    }
-
-    return { turnosEliminados, nuevosTurnos };
+  const turnosNuevos = [];
+  
+  for(const especialidad of medico.especialidades){
+    turnosNuevos.push(...this.generarTurno(especialidad, medico, disponibilidadesLibres));
   }
+
+  for(const practica of medico.practicas){
+    turnosNuevos.push(...this.generarTurno(practica, medico, disponibilidadesLibres));
+  }
+
+  medico.turnosActualesYFuturos.push(...turnosNuevos);
+  return { turnosEliminados, turnosNuevos };
+}
+
+
+
 
   static eliminarTurnosDesactualizados(medico) {
-    const lista = medico.turnosActualesYFuturos;
+  const lista = medico.turnosActualesYFuturos;
 
-    const turnosEliminados = [];
+  const turnosEliminados = [];
 
-    for (let i = lista.length - 1; i >= 0; i--) {
-      const turno = lista[i];
+  for (let i = lista.length - 1; i >= 0; i--) {
+    const turno = lista[i];
 
-      if (turno.estado instanceof Disponible) {
-        const estaEnRango = medico.disponibilidades.some((disp) =>
-          estaEnDisponibilidad(turno.diaSemana, turno.hora, disp),
-        );
+    if (turno.estado instanceof Disponible) {
+      
+      const estaEnRango = medico.disponibilidades.some(disp => 
+        estaEnDisponibilidad(turno.diaSemana, turno.hora, disp)
+      );
 
-        if (!estaEnRango) {
-          turno.actualizarEstado(
-            Usuario.USUARIO_SISTEMA,
-            new Cancelado(turno),
-            Usuario.USUARIO_SISTEMA,
-            'Dejo de cumplir con la disponibilidad del medico',
-          );
-          turnosEliminados.push(turno);
-          lista.splice(i, 1);
-        }
+      if (!estaEnRango) {
+        turno.actualizarEstado(Usuario.USUARIO_SISTEMA, new Cancelado(turno), Usuario.USUARIO_SISTEMA, "Dejo de cumplir con la disponibilidad del medico");
+        turnosEliminados.push(turno);
+        lista.splice(i, 1);
       }
     }
-    return turnosEliminados;
   }
+  return turnosEliminados;
+}
 
-  static generarFechaHora(turnosReservados, turnoActual) {
+  static generarFechaHora(turnosReservados, turnoActual){
+
     let fechaCandidata = this.configurarFechaCercana(turnoActual.diaSemana, turnoActual.hora);
 
-    const reservadosMismoDia = turnosReservados.filter(
-      (t) => t.diaSemana === turnoActual.diaSemana,
-    );
+    const reservadosMismoDia = turnosReservados.filter(t => t.diaSemana === turnoActual.diaSemana);
 
     let hayConflicto = true;
 
     while (hayConflicto) {
-      // Clonamos el turno para la comparación (sin afectar el original todavía)
-      const intentoTurno = { ...turnoActual, fechaHora: fechaCandidata };
+        // Clonamos el turno para la comparación (sin afectar el original todavía)
+        const intentoTurno = { ...turnoActual, fechaHora: fechaCandidata };
 
-      // 2. Buscamos si existe algún solapamiento en ESTA fecha específica
-      const conflicto = reservadosMismoDia.find(
-        (t) =>
-          t.fechaHora.getTime() === fechaCandidata.getTime() || // Misma fecha exacta
-          (t.diaSemana === intentoTurno.diaSemana && horarioIncluido(t, intentoTurno)),
-      );
+        // 2. Buscamos si existe algún solapamiento en ESTA fecha específica
+        const conflicto = reservadosMismoDia.find(t => 
+            t.fechaHora.getTime() === fechaCandidata.getTime() || // Misma fecha exacta
+            (t.diaSemana === intentoTurno.diaSemana && horarioIncluido(t, intentoTurno))
+        );
 
-      if (conflicto) {
-        // 3. Si hay conflicto, saltamos 7 días y volvemos a checkear
-        fechaCandidata.setDate(fechaCandidata.getDate() + 7);
-      } else {
-        // 4. Si no hay conflicto, salimos del bucle
-        hayConflicto = false;
-      }
+        if (conflicto) {
+            // 3. Si hay conflicto, saltamos 7 días y volvemos a checkear
+            fechaCandidata.setDate(fechaCandidata.getDate() + 7);
+        } else {
+            // 4. Si no hay conflicto, salimos del bucle
+            hayConflicto = false;
+        }
     }
 
     return fechaCandidata;
   }
 
   /**
-   * Genera la fecha y hora más cercana hacia el futuro para un turno,
-   * basándose en el día de la semana y la hora de inicio.
-   */
-  static configurarFechaCercana(diaSemanaDeseado, horaInicioStr, referencia = new Date()) {
+ * Genera la fecha y hora más cercana hacia el futuro para un turno,
+ * basándose en el día de la semana y la hora de inicio.
+ */
+  static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
     // 1. Validación de entrada (Fundamental para el Médico 17)
     if (!diaSemanaDeseado || !horaInicioStr) {
-      logger.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
-      return new Date(); // Retornamos hoy para evitar el undefined.getTime()
+        console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
+        return new Date(); // Retornamos hoy para evitar el undefined.getTime()
     }
 
-    const hoy = new Date(referencia.getTime());
+    const hoy = new Date();
     const dias = {
-      DOMINGO: 0,
-      LUNES: 1,
-      MARTES: 2,
-      MIERCOLES: 3,
-      JUEVES: 4,
-      VIERNES: 5,
-      SABADO: 6,
+        "DOMINGO": 0, "LUNES": 1, "MARTES": 2, 
+        "MIERCOLES": 3, "JUEVES": 4, "VIERNES": 5, "SABADO": 6
     };
-
+    
     const objetivo = dias[diaSemanaDeseado.toUpperCase()];
     const diaActual = hoy.getDay();
 
     // 2. Si el día no existe en el mapa, evitamos el NaN
     if (objetivo === undefined) return hoy;
 
-    const [horas, minutos] = horaInicioStr.split(':').map(Number);
-    const ahoraHoras = hoy.getHours();
-    const ahoraMinutos = hoy.getMinutes();
-
-    let diferencia = (objetivo - diaActual + 7) % 7;
-    if (diferencia === 0) {
-      if (horas < ahoraHoras || (horas === ahoraHoras && minutos <= ahoraMinutos)) {
-        diferencia = 7;
-      }
+    let diferencia = objetivo - diaActual;
+    if (diferencia <= 0) {
+        diferencia += 7; 
     }
 
     // 3. Crear el nuevo objeto sin mutar el original
     const resultado = new Date(hoy.getTime());
     resultado.setDate(hoy.getDate() + diferencia);
+
+    const [horas, minutos] = horaInicioStr.split(':').map(Number);
     resultado.setHours(horas, minutos, 0, 0);
 
     return resultado;
-  }
+}
+
 }
