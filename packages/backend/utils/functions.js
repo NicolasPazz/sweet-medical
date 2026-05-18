@@ -1,6 +1,5 @@
 // utils/dateUtils.js
-
-import { logger } from './logger.js';
+import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 
 export {
   crearFechaDesdeAtributos,
@@ -96,16 +95,16 @@ const estaEnDisponibilidad = (diaSemana, hora, disponibilidad) => {
   }
 
   const stringAMinutos = (str) => {
+    if (!str) return 0;
+    // Si viene "7:00", split lo divide en ["7", "00"] perfectamente
     const [hh, mm] = str.split(':').map(Number);
     return hh * 60 + mm;
   };
 
   const minutosFecha = stringAMinutos(hora);
-
   const minutosInicio = stringAMinutos(disponibilidad.horaDesde);
   const minutosFin = stringAMinutos(disponibilidad.horaHasta);
 
-  // 4. Comparación (ignorando año/mes/día)
   return minutosFecha >= minutosInicio && minutosFecha < minutosFin;
 };
 
@@ -138,11 +137,19 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
     const inicioDisp = stringAMinutos(disp.horaDesde);
     const finDisp = stringAMinutos(disp.horaHasta);
 
-    // 1. Filtramos solo los turnos que OCUPAN espacio (Reservados, Asignados, etc.)
-    // que coincidan con el día y caigan dentro del rango de esta disponibilidad.
     const turnosQueObstruyen = turnosNoDisponibles.filter((t) => {
       const minutosTurno = stringAMinutos(t.hora);
-      return t.diaSemana === disp.diaSemana && minutosTurno >= inicioDisp && minutosTurno < finDisp;
+      const esDisponible =
+        t.estado instanceof Disponible ||
+        (typeof t.estado === 'string' && t.estado.toUpperCase() === 'DISPONIBLE') ||
+        (typeof t.estado?.getEstadoNombre === 'function' &&
+          t.estado.getEstadoNombre().toUpperCase() === 'DISPONIBLE');
+      return (
+        t.diaSemana === disp.diaSemana &&
+        minutosTurno >= inicioDisp &&
+        minutosTurno < finDisp &&
+        esDisponible
+      );
     });
 
     // 2. Iniciamos con el bloque completo de la disponibilidad
@@ -151,8 +158,9 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
     // 3. Aplicamos el "recorte" por cada turno que obstruye
     turnosQueObstruyen.forEach((turno) => {
       const tInicio = stringAMinutos(turno.hora);
-      // Si el turno no tiene práctica/servicio, asumimos una duración estándar (ej: 30 min)
       const duracion = turno.servicio?.duracionTurnoEnMins;
+      // Si no hay duración guardada no podemos recortar — ignoramos este turno
+      if (!duracion || isNaN(duracion)) return;
       const tFin = tInicio + duracion;
 
       let nuevosFragmentos = [];
@@ -173,8 +181,8 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
       fragmentosLibres = nuevosFragmentos;
     });
 
-    logger.debug('FRAGMENTOS LIBRES: ');
-    logger.debug(fragmentosLibres);
+    console.log('FRAGMENTOS LIBRES: ');
+    console.log(fragmentosLibres);
 
     // 4. Transformamos los minutos de nuevo a formato horario para devolver
     fragmentosLibres.forEach((f) => {
