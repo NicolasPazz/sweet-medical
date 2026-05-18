@@ -7,11 +7,11 @@ export class EspecialidadRepository {
 
   // LEER
   async findAll() {
-    return await this.model.find();
+    return await this.model.find({ activo: true });
   }
 
   async findById(id) {
-    return await this.model.findById(id);
+    return await this.model.findOne({ _id: id, activo: true });
   }
 
   // CREAR

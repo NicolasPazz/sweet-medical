@@ -29,6 +29,10 @@ const practicaSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    activo: {
+      type: Boolean,
+      default: true,
+    },
   },
   { collection: 'practicas', versionKey: false },
 );

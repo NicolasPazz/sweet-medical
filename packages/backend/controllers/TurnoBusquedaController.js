@@ -83,7 +83,7 @@ export class TurnoBusquedaController {
         // TODO: A futuro la idea es que el paciente se extraiga estrictamente del token JWT (req.user.paciente).
         // Para pruebas de la entrega sin frontend, permitimos enviar pacienteIdTest por query params
         let paciente = req.user?.paciente ?? null;
-        
+
         if (!paciente && pacienteIdTest) {
           paciente = await PacienteModel.findById(pacienteIdTest).populate('plan');
         }

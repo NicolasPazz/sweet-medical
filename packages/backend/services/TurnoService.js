@@ -32,7 +32,6 @@ export class TurnoService {
   }
 
   async reservarTurno(id_usuario, id_turno) {
-
     const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
@@ -53,8 +52,8 @@ export class TurnoService {
       throw new ConflictError('El turno no está disponible');
     }
 
-    if(turno.paciente == paciente){
-      console.log("HAY QUE ELIMINAR LA LINEA DE ABAJO");
+    if (turno.paciente == paciente) {
+      console.log('HAY QUE ELIMINAR LA LINEA DE ABAJO');
     }
 
     turno.paciente = paciente;
@@ -265,15 +264,15 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-
               const usuarioSistema = await usuarioRepository.findUsuarioSistema();
 
-              const { turnosEliminados, turnosNuevos } = Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
+              const { turnosEliminados, turnosNuevos } =
+                Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
 
               medico.turnosActualesYFuturos
                 .filter((t) => t.estado instanceof Disponible)
                 .forEach((t) => console.log('HORA DEL TURNO GENERADO: ' + t.hora));
-              
+
               for (const t of turnosEliminados) {
                 await this.turnoRepository.save(t);
               }
