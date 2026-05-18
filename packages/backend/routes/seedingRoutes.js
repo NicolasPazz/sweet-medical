@@ -52,4 +52,9 @@ seedingRouter
   .route('/proceso-batch')
   .post((req, res, next) => seedingController.correrProcesoBatch(req, res, next));
 
+
+seedingRouter
+  .route('/datos-iniciales')
+  .post((req, res, next) => seedingController.cargarDatosIniciales(req, res, next));
+
 export default seedingRouter;

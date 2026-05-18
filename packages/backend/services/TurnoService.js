@@ -279,6 +279,10 @@ export class TurnoService {
 
               const medicoId = medico.id || medico._id;
               for (const t of turnosNuevos) {
+                // Asignar fechaHora basada en el diaSemana y hora del turno
+                if (!t.fechaHora) {
+                  t.fechaHora = Agenda.configurarFechaCercana(t.diaSemana, t.hora);
+                }
                 t.medico = medicoId;
                 await this.turnoRepository.save(t);
               }

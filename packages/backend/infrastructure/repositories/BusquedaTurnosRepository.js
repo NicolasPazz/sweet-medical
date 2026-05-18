@@ -31,7 +31,7 @@ export class BusquedaTurnosRepository {
       if (criteria.fechaDesde) query.fechaHora.$gte = new Date(criteria.fechaDesde);
       if (criteria.fechaHasta) query.fechaHora.$lte = new Date(criteria.fechaHasta);
     } else {
-      query.fechaHora = { $gte: new Date() };
+      query.$or = [{ fechaHora: { $gte: new Date() } }, { fechaHora: null }];
     }
 
     let mongoQuery = TurnoModel.find(query).populate('medico');
