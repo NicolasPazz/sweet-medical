@@ -45,15 +45,15 @@ export class ServicioController {
     try {
       const id = req.params.id;
       const idUsuario = req.body.idUsuario;
-
       ValidadorId.validarIds(id, idUsuario);
 
       const datosActualizados = this.validarCuerpoModificacion(req.body);
-
+      const tipoServicio = req.body.tipoServicio;
       const servicioModificado = await this.servicioService.modificar(
         idUsuario,
         id,
         datosActualizados,
+        tipoServicio,
       );
       return res.status(200).json({ status: 'success', data: servicioModificado });
     } catch (error) {
@@ -64,10 +64,11 @@ export class ServicioController {
   eliminar = async (req, res, next) => {
     try {
       const id = req.params.id;
-      ValidadorId.validarIds(id);
       const idUsuario = req.body.idUsuario;
-      ValidadorId.validarIds(idUsuario);
-      await this.servicioService.eliminar(idUsuario, id);
+      const tipoServicio = req.body.tipoServicio;
+      this.validarTipoServicio(tipoServicio);
+      ValidadorId.validarIds(id, idUsuario);
+      await this.servicioService.eliminar(idUsuario, id, tipoServicio);
       return res.status(204).send();
     } catch (error) {
       return next(error);
@@ -138,6 +139,19 @@ export class ServicioController {
       datos.codigo = body.codigo.trim();
     }
 
+    this.validarTipoServicio(body);
+
     return datos;
+  }
+
+  validarTipoServicio(body) {
+    if (body.tipoServicio !== undefined) {
+      if (typeof body.tipoServicio !== 'string' || body.tipoServicio.trim().length === 0) {
+        throw new BadRequestError('El tipo de servicio no puede estar vacío');
+      }
+      if (body.tipoServicio !== 'ESPECIALIDAD' && body.tipoServicio !== 'PRACTICA') {
+        throw new BadRequestError('El tipo de servicio debe ser ESPECIALIDAD o PRACTICA');
+      }
+    }
   }
 }

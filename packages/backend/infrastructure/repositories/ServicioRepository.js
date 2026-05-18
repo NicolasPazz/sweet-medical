@@ -1,4 +1,5 @@
 import { NotFoundError } from '../../errors/AppError.js';
+import { logger } from '../../utils/logger.js';
 import { especialidadRepository } from './EspecialidadRepository.js';
 import { practicaRepository } from './PracticaRepository.js';
 
@@ -11,11 +12,19 @@ export class ServicioRepository {
   // LEER
   async findById(id) {
     const especialidad = await this.especialidadRepository.findById(id);
-    if (especialidad) return especialidad;
-
+    if (especialidad) {
+      return especialidad;
+    }
     const practica = await this.practicaRepository.findById(id);
     if (practica) return practica;
 
+    throw new NotFoundError('Servicio no encontrado');
+  }
+
+  async findByIdAndTipoServicio(id, tipoServicio) {
+    if (tipoServicio == 'ESPECIALIDAD') return await this.especialidadRepository.findById(id);
+    if (tipoServicio == 'PRACTICA') return await this.practicaRepository.findById(id);
+    logger.debug('SOY UN ESTORBO');
     throw new NotFoundError('Servicio no encontrado');
   }
 
@@ -39,24 +48,25 @@ export class ServicioRepository {
   }
 
   // ACTUALIZAR
-  async update(id, updatedData) {
-    const servicioExistente = await this.findById(id);
-
-    const esPractica = servicioExistente.codigo !== undefined;
-
-    if (esPractica) {
-      return await this.practicaRepository.update(id, updatedData);
-    }
+  async updateEspecialidad(id, updatedData) {
+    logger.debug('VOY A UPDATEAAAR');
     return await this.especialidadRepository.update(id, updatedData);
   }
 
-  // ELIMINAR
-  async delete(id) {
-    const especialidad = await this.especialidadRepository.delete(id);
-    if (especialidad) return especialidad;
+  async updatePractica(id, updatedData) {
+    logger.debug('VOY A UPDATEAAAR');
+    return await this.practicaRepository.update(id, updatedData);
+  }
 
-    const practica = await this.practicaRepository.delete(id);
-    if (practica) return practica;
+  // ELIMINAR
+  async delete(id, tipoServicio) {
+    if (tipoServicio == 'ESPECIALIDAD') {
+      const especialidad = await this.especialidadRepository.delete(id);
+      if (especialidad) return especialidad;
+    } else if (tipoServicio == 'PRACTICA') {
+      const practica = await this.practicaRepository.delete(id);
+      if (practica) return practica;
+    }
 
     throw new NotFoundError('Servicio no encontrado');
   }
