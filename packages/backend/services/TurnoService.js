@@ -53,11 +53,7 @@ export class TurnoService {
 
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
-    const notificacion = turno.actualizarEstado(
-      usuario,
-      new Reservado(turno),
-      'Reserva de turno',
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -107,11 +103,7 @@ export class TurnoService {
       throw new ConflictError('Un turno no puede cancelarse con menos de 1 hora de antelación');
     }
 
-    const notificacion = turno.actualizarEstado(
-      usuario,
-      new Cancelado(turno),
-      motivo,
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Cancelado(turno), motivo);
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -167,11 +159,7 @@ export class TurnoService {
       throw new ConflictError('El turno no está en estado confirmado');
     }
 
-    turno.actualizarEstado(
-      usuario,
-      new Realizado(turno),
-      'Turno finalizado',
-    );
+    turno.actualizarEstado(usuario, new Realizado(turno), 'Turno finalizado');
 
     if (Array.isArray(turno.medico?.turnosActualesYFuturos)) {
       const indice = turno.medico.turnosActualesYFuturos.findIndex(
@@ -216,11 +204,7 @@ export class TurnoService {
       throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
     }
 
-    const notificacion = turno.actualizarEstado(
-      usuario,
-      new Confirmado(turno),
-      'Turno confirmado',
-    );
+    const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
@@ -245,76 +229,84 @@ export class TurnoService {
   }
 
   async refrescarTurnos() {
-    const TAMANO_LOTE = 20; 
+    const TAMANO_LOTE = 20;
     const metricas = { procesados: 0, fallidos: 0, total: 0 };
 
     console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
-        // 1. Obtener todos los médicos
-        const medicos = await this.medicoRepository.findAll();
-        metricas.total = medicos?.length || 0;
+      // 1. Obtener todos los médicos
+      const medicos = await this.medicoRepository.findAll();
+      metricas.total = medicos?.length || 0;
 
-        if (metricas.total === 0) {
-            console.log("[BATCH] No hay médicos para procesar.");
-            return;
-        }
+      if (metricas.total === 0) {
+        console.log('[BATCH] No hay médicos para procesar.');
+        return;
+      }
 
-        // 2. Procesamiento por lotes (Chunks)
-        for (let i = 0; i < medicos.length; i += TAMANO_LOTE) {
-            const loteActual = medicos.slice(i, i + TAMANO_LOTE);
+      // 2. Procesamiento por lotes (Chunks)
+      for (let i = 0; i < medicos.length; i += TAMANO_LOTE) {
+        const loteActual = medicos.slice(i, i + TAMANO_LOTE);
 
-            // Procesamos el lote actual en paralelo
-            await Promise.all(loteActual.map(async (medico) => {
-                try {
-                        const tamañoListaTurnosAntes = medico.turnosActualesYFuturos.length;
-                        console.log("TAMAÑO LISTA DE TURNOS ANTES: " + tamañoListaTurnosAntes);
+        // Procesamos el lote actual en paralelo
+        await Promise.all(
+          loteActual.map(async (medico) => {
+            try {
+              const tamañoListaTurnosAntes = medico.turnosActualesYFuturos.length;
+              console.log('TAMAÑO LISTA DE TURNOS ANTES: ' + tamañoListaTurnosAntes);
 
-                        // Invocamos la lógica de la Agenda (que internamente corre t.actualizarEstado() a Cancelado)
-                        const usuarioSistema = await usuarioRepository.findUsuarioSistema();
+              // Invocamos la lógica de la Agenda (que internamente corre t.actualizarEstado() a Cancelado)
+              const usuarioSistema = await usuarioRepository.findUsuarioSistema();
 
-                        console.log("Usuario recibido:", usuarioSistema);
+              console.log('Usuario recibido:', usuarioSistema);
 
-                        const { turnosEliminados, turnosNuevos } = Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
+              const { turnosEliminados, turnosNuevos } =
+                Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
 
-                        console.log("TAMAÑO LISTA DE TURNOS DESPUES: " + medico.turnosActualesYFuturos.length);
+              console.log(
+                'TAMAÑO LISTA DE TURNOS DESPUES: ' + medico.turnosActualesYFuturos.length,
+              );
 
-                        medico.turnosActualesYFuturos.filter(t => t.estado instanceof Disponible).forEach(t => console.log("HORA DEL TURNO GENERADO: " + t.hora));
-                        // 3. SE GUARDAN PRIMERO LOS TURNOS INDIVIDUALES CANCELADOS
-                        // Esto asegura que impacte su nuevo estado en DB antes de que el médico los desvincule
-                        for (const t of turnosEliminados) {
-                            await this.turnoRepository.save(t);
-                        }
+              medico.turnosActualesYFuturos
+                .filter((t) => t.estado instanceof Disponible)
+                .forEach((t) => console.log('HORA DEL TURNO GENERADO: ' + t.hora));
+              // 3. SE GUARDAN PRIMERO LOS TURNOS INDIVIDUALES CANCELADOS
+              // Esto asegura que impacte su nuevo estado en DB antes de que el médico los desvincule
+              for (const t of turnosEliminados) {
+                await this.turnoRepository.save(t);
+              }
 
-                        // 4. GUARDAR SOLO LOS TURNOS NUEVOS
-                        const medicoId = medico.id || medico._id;
-                        for (const t of turnosNuevos) {
-                            t.medico = medicoId;
-                            await this.turnoRepository.save(t);
-                        }
+              // 4. GUARDAR SOLO LOS TURNOS NUEVOS
+              const medicoId = medico.id || medico._id;
+              for (const t of turnosNuevos) {
+                t.medico = medicoId;
+                await this.turnoRepository.save(t);
+              }
 
-                        metricas.procesados++;
-                } catch (errorMedico) {
-                    metricas.fallidos++;
-                    console.error(`[BATCH ERROR] Médico ID ${medico.id}: ${errorMedico.message}`);
-                }
-            }));
+              metricas.procesados++;
+            } catch (errorMedico) {
+              metricas.fallidos++;
+              console.error(`[BATCH ERROR] Médico ID ${medico.id}: ${errorMedico.message}`);
+            }
+          }),
+        );
 
-            console.log(`[BATCH PROGRESS] Lote completado. Progreso: ${metricas.procesados + metricas.fallidos}/${metricas.total}`);
-        }
+        console.log(
+          `[BATCH PROGRESS] Lote completado. Progreso: ${metricas.procesados + metricas.fallidos}/${metricas.total}`,
+        );
+      }
 
-        // 3. Reporte final
-        console.log(`
+      // 3. Reporte final
+      console.log(`
         --- RESUMEN DEL PROCESO BATCH ---
         Finalizado: ${new Date().toISOString()}
         Total Médicos: ${metricas.total}
         Exitosos:      ${metricas.procesados}
         Fallidos:      ${metricas.fallidos}
         ---------------------------------`);
-
     } catch (error) {
-        console.error("[BATCH CRITICAL ERROR] Fallo general del proceso:", error);
-        throw error;
+      console.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
+      throw error;
     }
   }
 
@@ -343,17 +335,17 @@ export class TurnoService {
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
       sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
 
-      servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : "N/A") : "N/A",
-      servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : "N/A") : "N/A", 
+      servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
+      servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : 'N/A') : 'N/A',
 
-      estado: t.estado ? t.estado.getEstadoNombre() : "N/A",
-       
+      estado: t.estado ? t.estado.getEstadoNombre() : 'N/A',
+
       historialEstados: t.historialEstados.map((e) => ({
         fechaHoraCambio: e.fechaHoraIngreso,
         estado: e.estado,
-        motivo: e.motivo ? e.motivo : "N/A",
-        actor: e.usuario ? e.usuario.nombreUsuario : "N/A"
-      })), 
+        motivo: e.motivo ? e.motivo : 'N/A',
+        actor: e.usuario ? e.usuario.nombreUsuario : 'N/A',
+      })),
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,

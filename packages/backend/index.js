@@ -16,7 +16,9 @@ const start = async () => {
     if (usuarioSistema) {
       Usuario.setUsuarioSistema(usuarioSistema);
     } else {
-      logger.warn('Usuario SISTEMA no encontrado en BD. Los cronjobs pueden fallar hasta que se corra el seeding.');
+      logger.warn(
+        'Usuario SISTEMA no encontrado en BD. Los cronjobs pueden fallar hasta que se corra el seeding.',
+      );
     }
 
     server.port = PORT;

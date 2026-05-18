@@ -196,7 +196,7 @@ export class SeedingController {
         usuariosPacientesGenerados.push(usuarioPaciente);
       }
       const usuariosPacientesGuardados = await this.usuarioRepository.saveAll(
-        usuariosPacientesGenerados
+        usuariosPacientesGenerados,
       );
 
       logger.info(
@@ -292,21 +292,18 @@ export class SeedingController {
   };
 
   correrProcesoBatch = async (req, res, next) => {
-
     try {
-    
-      console.log("Proceso GARCH iniciado manualmente");
+      console.log('Proceso GARCH iniciado manualmente');
 
       await this.turnoService.refrescarTurnos();
-    
+
       return res.status(201).json({
         status: 'success',
         message: 'Proceso batch realizado exitosamente',
       });
-    }
-    catch (error) {
+    } catch (error) {
       logger.error('Error al correr el proceso batch:', error.message);
       return next(error);
     }
-  }
+  };
 }

@@ -10,6 +10,6 @@ seedingRouter
 
 seedingRouter
   .route('/proceso-batch')
-  .post((req, res, next) => seedingController.correrProcesoBatch(req ,res, next));
+  .post((req, res, next) => seedingController.correrProcesoBatch(req, res, next));
 
 export default seedingRouter;

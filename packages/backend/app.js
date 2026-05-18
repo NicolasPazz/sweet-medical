@@ -5,7 +5,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorLogger } from './middlewares/errorLogger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { logger } from './utils/logger.js';
-import "../backend/cronjobs/generadorTurnos.js";
+import '../backend/cronjobs/generadorTurnos.js';
 
 const app = express();
 

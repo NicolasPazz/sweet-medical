@@ -5,7 +5,7 @@ import { Usuario } from '../../domain/usuario/Usuario.js';
 export class UsuarioRepository {
   fromDB(datos) {
     const usuario = Object.create(Usuario.prototype);
-    usuario.id = datos._id ?? datos.id;
+    usuario.id = (datos._id ?? datos.id)?.toString();
     usuario.nombreUsuario = datos.nombreUsuario;
     usuario.password = datos.password;
     usuario.roles = datos.roles ?? [];

@@ -27,16 +27,11 @@ export class Turno {
     this.historialEstados = [];
     this.costo = costo;
 
-    this.actualizarEstado(
-      usuarioSistema,
-      new Disponible(this),
-      'Turno generado',
-    );
+    this.actualizarEstado(usuarioSistema, new Disponible(this), 'Turno generado');
   }
 
   actualizarEstado(quien, nuevoEstado, motivo) {
-
-    console.log("QUIEN LLAMA? ", quien);
+    console.log('QUIEN LLAMA? ', quien);
 
     const estadoEnum =
       typeof nuevoEstado.getEstadoNombre === 'function'
