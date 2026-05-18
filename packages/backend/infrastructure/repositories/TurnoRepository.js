@@ -35,6 +35,13 @@ export class TurnoRepository {
     return await this.model.find({ paciente: pacienteId });
   }
 
+  async findByMedicFechaHora(medicId, fechaHora) {
+  return await this.model.findOne({
+    medico: medicId,
+    fechaHora: fechaHora
+  });
+}
+
   // CREAR
   async save(turno) {
     const id = turno.id || turno._id;

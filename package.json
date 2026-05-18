@@ -37,6 +37,7 @@
     "express": "^5.2.1",
     "mongoose": "^9.6.2",
     "swagger": "^0.7.5",
+    "i18next": "^26.0.8",
     "zod": "^4.3.6"
   },
   "lint-staged": {

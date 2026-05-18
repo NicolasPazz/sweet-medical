@@ -1,8 +1,10 @@
 import { CambioEstadoTurno } from './CambioEstadoTurno.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
+import { PendienteReprogramacion } from '../notificacion/estado-turno/PendienteReprogramacion.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 import { Usuario } from '../usuario/Usuario.js';
+import { tLog } from "../../utils/i18n/i18n.js";
 
 export class Turno {
   id;
@@ -16,14 +18,9 @@ export class Turno {
   costo;
   diaSemana;
   hora;
+  propuestaCambio = null;
 
   constructor(medico, paciente, diaSemana, hora, sede, servicio, costo) {
-    /*if (medico && typeof medico === 'object' && !medico.constructor.name.includes('ObjectId')) {
-      Object.assign(this, medico);
-      this.id = this.id || this._id;
-      return;
-    }*/
-
     this.medico = medico;
     this.paciente = paciente;
     this.diaSemana = diaSemana;
@@ -52,6 +49,23 @@ export class Turno {
     this.estado = nuevoEstado;
 
     const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuarioQueLlama, this);
+    return notificacion;
+  }
+
+  solicitarReprogramacion(usuarioQueLlama, nuevaFechaHora, motivo) {
+    this.propuestaCambio = {
+      nuevaFechaHora,
+      motivo,
+      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id
+    };
+
+    const notificacion = this.actualizarEstado(
+      usuarioQueLlama,
+      new PendienteReprogramacion(this),
+      usuarioQueLlama,
+      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
+    );
+
     return notificacion;
   }
 

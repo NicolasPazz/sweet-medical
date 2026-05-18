@@ -1,6 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
+import { tLog, tNegocio } from "../../utils/i18n/i18n.js";
 
 export class Cancelado {
   id;

@@ -316,6 +316,15 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
+  .route('/:id_usuario/propuesta-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.proponerReprogramacion(req, res, next));
+
+turnoRouter
+  .route('/:id_usuario/responder-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.responderReprogramacion(req, res, next));
+
+// --- Otras Consultas del flujo ---
+turnoRouter
   .route('/:id_usuario/realizado/:id_turno')
   .patch((req, res, next) => turnoController.finalizarTurno(req, res, next));
 
