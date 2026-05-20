@@ -9,12 +9,13 @@ export class TurnoController {
 
   reservarTurno = async (req, res, next) => {
     try {
-      const idUsuario = req.params.id_usuario;
-      ValidadorId.validarIds(idUsuario);
-      const idTurno = req.params.id_turno;
-      ValidadorId.validarIds(idTurno);
 
-      await this.turnoService.reservarTurno(idUsuario, idTurno);
+      const dtoReserva = req.body;
+
+      ValidadorId.validarIds(dtoReserva.id_usuario);
+      ValidadorId.validarIds(dtoReserva.id_servicio);
+
+      await this.turnoService.reservarTurno(dtoReserva);
 
       return res.status(200).json({ status: 'success', message: 'Turno reservado exitosamente' });
     } catch (error) {

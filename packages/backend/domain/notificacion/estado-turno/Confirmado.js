@@ -12,7 +12,7 @@ export class Confirmado {
     return EstadoTurno.CONFIRMADO;
   }
 
-  notificar(remitente) {
+  generarNotificacion(remitente) {
     const servicio = this.turno.obtenerNombreServicio();
     // Al aceptar un turno, se notifica al paciente.
     logger.debug(

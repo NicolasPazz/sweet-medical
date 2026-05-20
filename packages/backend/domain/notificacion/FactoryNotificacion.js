@@ -1,8 +1,9 @@
 import { Notificacion } from './Notificacion.js';
 
 export class FactoryNotificacion {
+  
   static crearSegunEstadoTurno(usuarioQueLlama, turno) {
-    return turno.estado.notificar(usuarioQueLlama);
+    return turno.estado.generarNotificacion(usuarioQueLlama);
   }
 
   // Esto se ejecutará desde un cron

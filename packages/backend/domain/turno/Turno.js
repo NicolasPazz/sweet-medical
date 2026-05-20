@@ -2,7 +2,6 @@ import { CambioEstadoTurno } from './CambioEstadoTurno.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
-import { Usuario } from '../usuario/Usuario.js';
 
 export class Turno {
   id;
@@ -17,26 +16,21 @@ export class Turno {
   diaSemana;
   hora;
 
-  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo, usuarioSistema) {
+  constructor(medico, paciente, fecha, horaInicio, sede, servicio, costo) {
     this.medico = medico;
     this.paciente = paciente;
-    this.diaSemana = diaSemana;
-    this.hora = hora;
+    this.fechaHora = new Date(fecha);
+    this.hora = horaInicio;
     this.sede = sede;
     this.servicio = servicio?.costo ? servicio : null;
     this.historialEstados = [];
     this.costo = costo;
-
-    this.actualizarEstado(usuarioSistema, new Disponible(this), 'Turno generado');
   }
 
   actualizarEstado(quien, nuevoEstado, motivo) {
     console.log('QUIEN LLAMA? ', quien);
 
-    const estadoEnum =
-      typeof nuevoEstado.getEstadoNombre === 'function'
-        ? nuevoEstado.getEstadoNombre()
-        : nuevoEstado.constructor.name.toUpperCase();
+    const estadoEnum = typeof nuevoEstado.getEstadoNombre === 'function' ? nuevoEstado.getEstadoNombre() : nuevoEstado.constructor.name.toUpperCase();
 
     const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);

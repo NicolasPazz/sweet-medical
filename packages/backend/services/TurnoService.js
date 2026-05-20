@@ -8,10 +8,10 @@ import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
 import { Realizado } from '../domain/notificacion/estado-turno/Realizado.js';
 import { Agenda } from '../domain/agenda/Agenda.js';
-import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
-import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { Rol } from '../domain/usuario/Rol.js';
+import { ValidadorId } from '../utils/ValidadorId.js';
+import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
 
 export class TurnoService {
   turnoRepository;
@@ -31,49 +31,86 @@ export class TurnoService {
     this.pacienteRepository = pacienteRepo;
   }
 
-  async reservarTurno(id_usuario, id_turno) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+  async reservarTurno(dtoReserva) {
+
+    const usuario = await this.usuarioRepository.findById(dtoReserva.id_usuario);
+
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    const paciente = await this.pacienteRepository.findByIdUsuario(id_usuario);
+    const paciente = await this.pacienteRepository.findByIdUsuario(dtoReserva.id_usuario);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const turno = await this.turnoRepository.findById(id_turno);
+    const servicio = await this.servicioRepository.findById(dtoReserva.id_servicio);
 
-    if (turno == null) {
-      throw new NotFoundError('Turno no encontrado');
+    if (servicio == null) {
+      throw new NotFoundError('Servicio no encontrado');
     }
 
-    if (!(turno.estado instanceof Disponible)) {
-      throw new ConflictError('El turno no está disponible');
+    if (dtoReserva.slotsIds == null || !Array.isArray(dtoReserva.slotsIds) || dtoReserva.slotsIds.length === 0) {
+      throw new BadRequestError('Debe proporcionar una lista de IDs de slots para reservar');
     }
 
-    if (turno.paciente == paciente) {
-      console.log('HAY QUE ELIMINAR LA LINEA DE ABAJO');
+    let slots = [];
+
+    for (const id_slot of dtoReserva.slotsIds) {
+      ValidadorId.validarIds(id_slot);
+      const slot = await this.slotRepository.findById(id_slot);
+      if (slot == null) {
+        throw new NotFoundError(`Slot no encontrado: ${id_slot}`);
+      }
+      if (slot.estado !== 'DISPONIBLE') {
+        throw new ConflictError(`El slot con ID ${id_slot} no está disponible para reserva`);
+      }
+      slots.push(slot);
     }
 
-    turno.paciente = paciente;
+    slots = ordenarSlots(slots);
+    
+    if(!validarSlotsContiguos(slots)) {
+      throw new BadRequestError('Los slots seleccionados deben ser contiguos');
+    }
 
-    const turnosReservados = await this.turnoRepository.findAllByMedicIdAndEstado(
-      turno.medico._id,
-      EstadoTurno.RESERVADO,
-    );
+    const slot = slots[0];
 
-    turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
+    const fechaTurno = slot.fecha;
+    const horaInicioTurno = slot.horaInicio;
+    const medico = await this.medicoRepository.findById(slot.idMedico);
+
+    const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(slots, servicio.duracionMins);
+    
+    const tiempoRecolectado = slotsAOcupar.reduce((acc, s) => acc + s.duracionMins, 0);
+
+    if (tiempoRecolectado < servicio.duracionMins) {
+      throw new BadRequestError('Los slots provistos no son suficientes para cubrir la duración del servicio.');
+    }
+
+    if (slotsAOcupar.length === 0) {
+      throw new ConflictError('No hay suficientes slots contiguos disponibles para la duración del servicio');
+    }
+
+    slotsAOcupar.forEach((s) => s.estado = 'RESERVADO');
+
+    const turno = new Turno(medico, paciente, fechaTurno, horaInicioTurno, null, servicio, servicio.costo);
+
+    turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
     
-
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
     await this.turnoRepository.save(turno);
 
-    return turno;
+    for(const slotAOcupar of slotsAOcupar) {
+      slotAOcupar.turnoAsociado = turno;
+      await this.slotRepository.save(slotAOcupar);
+    }
+
+    return;
   }
 
   async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {

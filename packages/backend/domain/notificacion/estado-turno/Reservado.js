@@ -12,7 +12,7 @@ export class Reservado {
     return EstadoTurno.RESERVADO;
   }
 
-  notificar(remitente) {
+  generarNotificacion(remitente) {
     const servicio = this.turno.obtenerNombreServicio();
     logger.debug(
       `Creando notificación para turno ${this.turno.id} en estado RESERVADO por paciente ${this.turno.paciente.nombre} para servicio ${servicio}.`,

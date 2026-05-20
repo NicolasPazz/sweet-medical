@@ -299,4 +299,26 @@ export class Agenda {
 
     return resultado;
   }
+
+  static obtenerSlotsContiguosParaDuracion(slots, duracionTurnoEnMins) {
+    
+    let tiempoTotal = 0;
+
+    const slotsOcupados = [];
+
+    for(const slot of slots) {
+
+      let duracionMins = slot.duracionMins;
+
+      tiempoTotal += duracionMins;
+
+      if(tiempoTotal > duracionTurnoEnMins) {
+        break;
+      }
+
+      slotsOcupados.push(slot);
+    }
+
+    return slotsOcupados;
+  }
 }

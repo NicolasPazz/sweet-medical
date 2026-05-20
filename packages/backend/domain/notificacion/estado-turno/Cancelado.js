@@ -12,7 +12,7 @@ export class Cancelado {
     return EstadoTurno.CANCELADO;
   }
 
-  notificar(remitente) {
+  generarNotificacion(remitente) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
 
