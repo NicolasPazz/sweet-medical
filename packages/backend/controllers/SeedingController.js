@@ -277,7 +277,7 @@ export class SeedingController {
 
       logger.info('Iniciando generación batch de turnos iniciales...');
 
-      await turnoService.refrescarTurnos();
+      await turnoService.refrescarSlots();
 
       logger.info('Turnos iniciales generados exitosamente.');
 
@@ -295,7 +295,7 @@ export class SeedingController {
     try {
       console.log('Proceso GARCH iniciado manualmente');
 
-      await this.turnoService.refrescarTurnos();
+      await this.turnoService.refrescarSlots();
 
       return res.status(201).json({
         status: 'success',

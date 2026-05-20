@@ -66,6 +66,7 @@ export class TurnoService {
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
+    
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -240,9 +241,12 @@ export class TurnoService {
     return turnosDelServicio.map((t) => this._mapearTurno(t));
   }
 
-  async refrescarTurnos() {
+  async refrescarSlots() {
+
     const TAMANO_LOTE = 20;
     const metricas = { procesados: 0, fallidos: 0, total: 0 };
+    const duracionSlot = parseInt(process.env.DURACION_SLOT_MINUTOS) || 30;
+    const semanasMaxGeneracionSlots = parseInt(process.env.NUM_SEMANAS_GENERAR_SLOTS) || 4;
 
     console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
@@ -264,27 +268,22 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-              const usuarioSistema = await usuarioRepository.findUsuarioSistema();
 
-              const { turnosEliminados, turnosNuevos } =
-                Agenda.refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema);
+              const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
 
-              medico.turnosActualesYFuturos
-                .filter((t) => t.estado instanceof Disponible)
-                .forEach((t) => console.log('HORA DEL TURNO GENERADO: ' + t.hora));
+              const {slotsEliminados, slotsNuevos} = Agenda.refrescarSlots(
+                medico,
+                slotsTotales,
+                duracionSlot,
+                semanasMaxGeneracionSlots,
+              );
 
-              for (const t of turnosEliminados) {
-                await this.turnoRepository.save(t);
+              for (const slot of slotsEliminados) {
+                await this.slotsRepository.delete(slot.id || slot._id);
               }
 
-              const medicoId = medico.id || medico._id;
-              for (const t of turnosNuevos) {
-                // Asignar fechaHora basada en el diaSemana y hora del turno
-                if (!t.fechaHora) {
-                  t.fechaHora = Agenda.configurarFechaCercana(t.diaSemana, t.hora);
-                }
-                t.medico = medicoId;
-                await this.turnoRepository.save(t);
+              for (const slot of slotsNuevos) {
+                await this.slotsRepository.save(slot);
               }
 
               metricas.procesados++;

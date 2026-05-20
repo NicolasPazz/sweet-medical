@@ -52,10 +52,9 @@ const crearFechaDesdeAtributos = (diaString, minutosTotales) => {
 
 // Convierte un horario (ej: 8.5 para 8:30) a minutos totales (510)
 const horaAMinutos = (horaString) => {
-  // Dividimos el string en dos partes: horas y minutos
+
   const [horas, minutos] = horaString.split(':').map(Number);
 
-  // Validamos que sean números válidos (opcional pero recomendado)
   if (isNaN(horas) || isNaN(minutos)) return 0;
 
   return horas * 60 + minutos;
@@ -81,7 +80,6 @@ function calcularHoraDesdeMinutos(minutosTotales) {
   return `${horasFormateadas}:${minutosFormateados}`;
 }
 
-// Convierte minutos totales de vuelta a un formato útil o Date
 const sumarMinutosADate = (fechaBase, minutosTotales) => {
   const d = new Date(fechaBase);
   d.setHours(Math.floor(minutosTotales / 60));
@@ -96,7 +94,6 @@ const estaEnDisponibilidad = (diaSemana, hora, disponibilidad) => {
 
   const stringAMinutos = (str) => {
     if (!str) return 0;
-    // Si viene "7:00", split lo divide en ["7", "00"] perfectamente
     const [hh, mm] = str.split(':').map(Number);
     return hh * 60 + mm;
   };
@@ -152,24 +149,19 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
       );
     });
 
-    // 2. Iniciamos con el bloque completo de la disponibilidad
     let fragmentosLibres = [{ inicio: inicioDisp, fin: finDisp }];
 
-    // 3. Aplicamos el "recorte" por cada turno que obstruye
     turnosQueObstruyen.forEach((turno) => {
       const tInicio = stringAMinutos(turno.hora);
       const duracion = turno.servicio?.duracionTurnoEnMins;
-      // Si no hay duración guardada no podemos recortar — ignoramos este turno
       if (!duracion || isNaN(duracion)) return;
       const tFin = tInicio + duracion;
 
       let nuevosFragmentos = [];
       fragmentosLibres.forEach((f) => {
-        // Si el turno está totalmente fuera del fragmento libre actual
         if (tFin <= f.inicio || tInicio >= f.fin) {
           nuevosFragmentos.push(f);
         } else {
-          // Hay solapamiento: dividimos el fragmento en dos (antes y después del turno)
           if (tInicio > f.inicio) {
             nuevosFragmentos.push({ inicio: f.inicio, fin: tInicio });
           }
@@ -184,7 +176,6 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
     console.log('FRAGMENTOS LIBRES: ');
     console.log(fragmentosLibres);
 
-    // 4. Transformamos los minutos de nuevo a formato horario para devolver
     fragmentosLibres.forEach((f) => {
       todosLosHuecos.push({
         diaSemana: disp.diaSemana,
@@ -212,14 +203,11 @@ function configurarFecha(turno) {
   const horas = fechaReferencia.getHours();
   const minutos = fechaReferencia.getMinutes();
 
-  // 2. Crear una copia de "ahora" para empezar a calcular
   let proximaFecha = new Date(ahora);
 
-  // 3. Calcular cuántos días faltan para el próximo (día de semana)
-  // Si hoy es el día objetivo, pero la hora ya pasó, buscará el de la semana que viene.
+
   let diasDeDiferencia = (diaSemanaObjetivo + 7 - ahora.getDay()) % 7;
 
-  // Si es hoy pero el horario ya pasó, sumamos 7 días para que sea el "próximo"
   const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
   const minutosTurno = horas * 60 + minutos;
 
@@ -227,7 +215,6 @@ function configurarFecha(turno) {
     diasDeDiferencia = 7;
   }
 
-  // 4. Ajustar la fecha sumando los días y seteando la hora exacta
   proximaFecha.setDate(ahora.getDate() + diasDeDiferencia);
   proximaFecha.setHours(horas, minutos, 0, 0);
 

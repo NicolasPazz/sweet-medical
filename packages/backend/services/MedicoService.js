@@ -18,7 +18,7 @@ export class MedicoService {
       throw new NotFoundError('Medico no encontrado');
     }
 
-    medico.disponibilidades = medico.disponibilidades = disponibilidades.map((d) => ({
+    medico.disponibilidades = disponibilidades.map((d) => ({
       ...d,
       diaSemana: d.diaSemana.trim().toUpperCase(),
     }));

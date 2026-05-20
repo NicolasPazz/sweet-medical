@@ -7,7 +7,7 @@ cron.schedule('0 2 * * *', async () => {
   try {
     logger.info('Inicio cronjob');
 
-    await turnoService.refrescarTurnos();
+    await turnoService.refrescarSlots();
   } catch (error) {
     logger.error('Error en el proceso batch de refresco de turnos:', error);
   }
