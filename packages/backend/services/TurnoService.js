@@ -66,7 +66,6 @@ export class TurnoService {
     turno.fechaHora = Agenda.generarFechaHora(turnosReservados, turno);
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
-    
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
@@ -242,7 +241,6 @@ export class TurnoService {
   }
 
   async refrescarSlots() {
-
     const TAMANO_LOTE = 20;
     const metricas = { procesados: 0, fallidos: 0, total: 0 };
     const duracionSlot = parseInt(process.env.DURACION_SLOT_MINUTOS) || 30;
@@ -268,10 +266,11 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
+              const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(
+                medico.id || medico._id,
+              );
 
-              const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
-
-              const {slotsEliminados, slotsNuevos} = Agenda.refrescarSlots(
+              const { slotsEliminados, slotsNuevos } = Agenda.refrescarSlots(
                 medico,
                 slotsTotales,
                 duracionSlot,

@@ -2,7 +2,6 @@ import { Especialidad } from '../domain/servicios/Especialidad.js';
 import { Practica } from '../domain/servicios/Practica.js';
 import { servicioRepository } from '../infrastructure/repositories/ServicioRepository.js';
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
-import { Usuario } from '../domain/usuario/Usuario.js';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/logger.js';

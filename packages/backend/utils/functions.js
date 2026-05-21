@@ -52,7 +52,6 @@ const crearFechaDesdeAtributos = (diaString, minutosTotales) => {
 
 // Convierte un horario (ej: 8.5 para 8:30) a minutos totales (510)
 const horaAMinutos = (horaString) => {
-
   const [horas, minutos] = horaString.split(':').map(Number);
 
   if (isNaN(horas) || isNaN(minutos)) return 0;
@@ -204,7 +203,6 @@ function configurarFecha(turno) {
   const minutos = fechaReferencia.getMinutes();
 
   let proximaFecha = new Date(ahora);
-
 
   let diasDeDiferencia = (diaSemanaObjetivo + 7 - ahora.getDay()) % 7;
 

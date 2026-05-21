@@ -43,142 +43,150 @@ export class Agenda {
   }
 
   static eliminarSlotsDesactualizados(medico, slotsDisponibles) {
-  const slotsEliminados = [];
+    const slotsEliminados = [];
 
-  for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
-    const slot = slotsDisponibles[i];
+    for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
+      const slot = slotsDisponibles[i];
 
-    const sigueSiendoValido = medico.disponibilidades.some((disp) =>
-      estaEnDisponibilidad(slot.diaSemana, slot.horaInicio, disp)
-    );
+      const sigueSiendoValido = medico.disponibilidades.some((disp) =>
+        estaEnDisponibilidad(slot.diaSemana, slot.horaInicio, disp),
+      );
 
-    if (!sigueSiendoValido) {
-      slotsEliminados.push(slot);
-    }
-  }
-  return slotsEliminados;
-}
-
-  static generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
-
-  const slotsNuevos = [];
-  const offset = duracionSlot;
-
-  const slotsOcupados = slotsTotales.filter(s => s.estado !== 'DISPONIBLE');
-  const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
-
-  for (const disponibilidad of medico.disponibilidades) {
-    const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
-    const diaDeseadoNumero = Agenda.parsearDiaSemanaANumero(disponibilidad.diaSemana);
-
-    const diasHastaPrimerDia = Agenda.fechaMasCercanaConDiaSemana(diaDeseadoNumero, new Date(), 0);
-
-    for (let i = 0; i < semanasMaxGeneracionSlots; i++) {
-      let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
-
-      const fechaSlot = new Date();
-      fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + (7 * i));
-      const fechaSlotStr = fechaSlot.toISOString().split('T')[0];
-
-      while (actualMinutos + offset <= tiempoLimite) {
-        const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
-
-        const yaEstaReservado = slotsOcupados.some(s => 
-          s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
-        );
-
-        if (yaEstaReservado) {
-          actualMinutos += offset;
-          continue;
-        }
-
-        const yaExistePrecalculado = slotsDisponibles.some(s =>
-          s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
-        );
-
-        if (yaExistePrecalculado) {
-          actualMinutos += offset;
-          continue;
-        }
-
-        const slot = new Slot(
-          medico,
-          fechaSlotStr,
-          horaInicioStr,
-          duracionSlot,
-        );
-
-        slotsNuevos.push(slot);
-        actualMinutos += offset;
+      if (!sigueSiendoValido) {
+        slotsEliminados.push(slot);
       }
     }
+    return slotsEliminados;
   }
-  return slotsNuevos;
-}
+
+  static generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
+    const slotsNuevos = [];
+    const offset = duracionSlot;
+
+    const slotsOcupados = slotsTotales.filter((s) => s.estado !== 'DISPONIBLE');
+    const slotsDisponibles = slotsTotales.filter((s) => s.estado === 'DISPONIBLE');
+
+    for (const disponibilidad of medico.disponibilidades) {
+      const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
+      const diaDeseadoNumero = Agenda.parsearDiaSemanaANumero(disponibilidad.diaSemana);
+
+      const diasHastaPrimerDia = Agenda.fechaMasCercanaConDiaSemana(
+        diaDeseadoNumero,
+        new Date(),
+        0,
+      );
+
+      for (let i = 0; i < semanasMaxGeneracionSlots; i++) {
+        let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
+
+        const fechaSlot = new Date();
+        fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + 7 * i);
+        const fechaSlotStr = fechaSlot.toISOString().split('T')[0];
+
+        while (actualMinutos + offset <= tiempoLimite) {
+          const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
+
+          const yaEstaReservado = slotsOcupados.some(
+            (s) => s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr,
+          );
+
+          if (yaEstaReservado) {
+            actualMinutos += offset;
+            continue;
+          }
+
+          const yaExistePrecalculado = slotsDisponibles.some(
+            (s) => s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr,
+          );
+
+          if (yaExistePrecalculado) {
+            actualMinutos += offset;
+            continue;
+          }
+
+          const slot = new Slot(medico, fechaSlotStr, horaInicioStr, duracionSlot);
+
+          slotsNuevos.push(slot);
+          actualMinutos += offset;
+        }
+      }
+    }
+    return slotsNuevos;
+  }
 
   static refrescarSlots(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
-
-    const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
+    const slotsDisponibles = slotsTotales.filter((s) => s.estado === 'DISPONIBLE');
 
     const slotsEliminados = this.eliminarSlotsDesactualizados(medico, slotsDisponibles);
-    
-    const slotsNuevos = this.generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots);
-    
+
+    const slotsNuevos = this.generarSlotsNuevos(
+      medico,
+      slotsTotales,
+      duracionSlot,
+      semanasMaxGeneracionSlots,
+    );
+
     return { slotsEliminados, slotsNuevos };
   }
 
   static parsearDiaSemanaANumero(diaSemana) {
-  switch(diaSemana.toUpperCase()){
-    case 'DOMINGO': return 0;
-    case 'LUNES': return 1;
-    case 'MARTES': return 2;
-    case 'MIERCOLES': return 3;
-    case 'JUEVES': return 4;
-    case 'VIERNES': return 5;
-    case 'SABADO': return 6;
-    default: throw new Error(`Día de la semana inválido: ${diaSemana}`);
+    switch (diaSemana.toUpperCase()) {
+      case 'DOMINGO':
+        return 0;
+      case 'LUNES':
+        return 1;
+      case 'MARTES':
+        return 2;
+      case 'MIERCOLES':
+        return 3;
+      case 'JUEVES':
+        return 4;
+      case 'VIERNES':
+        return 5;
+      case 'SABADO':
+        return 6;
+      default:
+        throw new Error(`Día de la semana inválido: ${diaSemana}`);
+    }
   }
-}
 
   static fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar) {
-  const fechaTentativa = new Date(fechaBase);
-  fechaTentativa.setDate(fechaTentativa.getDate() + diasASumar);
+    const fechaTentativa = new Date(fechaBase);
+    fechaTentativa.setDate(fechaTentativa.getDate() + diasASumar);
 
-  if (fechaTentativa.getDay() === diaSemanaDeseado) {
-    return diasASumar;  
-  } else {
-    return Agenda.fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar + 1);
+    if (fechaTentativa.getDay() === diaSemanaDeseado) {
+      return diasASumar;
+    } else {
+      return Agenda.fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar + 1);
+    }
   }
-}
 
   static sumarDias(fechaBase, diasASumar, diasNoLaborales) {
-  const copiaFecha = new Date(fechaBase);
-  
-  const diasFinales = Agenda.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
+    const copiaFecha = new Date(fechaBase);
 
-  copiaFecha.setDate(copiaFecha.getDate() + diasFinales);
-  
-  const offset = copiaFecha.getTimezoneOffset() * 60000;
-  const fechaLocal = new Date(copiaFecha.getTime() - offset);
+    const diasFinales = Agenda.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
 
-  return { fechaSlot: fechaLocal.toISOString().split('T')[0] , diasTotales: diasFinales };
-}
+    copiaFecha.setDate(copiaFecha.getDate() + diasFinales);
+
+    const offset = copiaFecha.getTimezoneOffset() * 60000;
+    const fechaLocal = new Date(copiaFecha.getTime() - offset);
+
+    return { fechaSlot: fechaLocal.toISOString().split('T')[0], diasTotales: diasFinales };
+  }
 
   static saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales) {
-
     const fechaDestinoTentativa = new Date(fechaBase);
 
     fechaDestinoTentativa.setDate(fechaDestinoTentativa.getDate() + diasASumar);
-    
-    if(diasNoLaborales.includes(fechaDestinoTentativa.getDay())){
-    diasASumar += 1;
-    
-    return this.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
-  }
 
-  return diasASumar;
-  }
+    if (diasNoLaborales.includes(fechaDestinoTentativa.getDay())) {
+      diasASumar += 1;
 
+      return this.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
+    }
+
+    return diasASumar;
+  }
 
   static refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema) {
     logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
@@ -263,7 +271,6 @@ export class Agenda {
     return fechaCandidata;
   }
 
-  
   static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
     if (!diaSemanaDeseado || !horaInicioStr) {
       console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
