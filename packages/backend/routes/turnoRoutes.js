@@ -271,6 +271,67 @@ turnoRouter
 
 /**
  * @swagger
+ * /turnos/medico/{id_usuario}/slots:
+ *   get:
+ *     summary: Obtener todos los slots de un médico
+ *     description: Retorna todos los slots (unidades de tiempo de la agenda) asociados a un médico específico, independientemente de su estado.
+ *     tags:
+ *       - Turnos
+ *     parameters:
+ *       - name: id_usuario
+ *         in: path
+ *         required: true
+ *         description: ID del usuario médico (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Slots obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_slot:
+ *                         type: string
+ *                       id_medico:
+ *                         type: string
+ *                       fecha:
+ *                         type: string
+ *                         example: "2026-05-20"
+ *                       horaInicio:
+ *                         type: string
+ *                         example: "09:00"
+ *                       duracionMins:
+ *                         type: number
+ *                         example: 30
+ *                       estado:
+ *                         type: string
+ *                         enum: [DISPONIBLE, RESERVADO, OCUPADO]
+ *                       id_turno_asociado:
+ *                         type: string
+ *                         nullable: true
+ *       400:
+ *         description: ID mal formado
+ *       404:
+ *         description: Médico no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+turnoRouter
+  .route('/medico/:id_usuario/slots')
+  .get((req, res, next) => turnoController.obtenerSlotsMedico(req, res, next));
+
+/**
+ * @swagger
  * /turnos/{id_usuario}/realizado/{id_turno}:
  *   patch:
  *     summary: Marcar turno como realizado

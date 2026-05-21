@@ -133,6 +133,22 @@ export class TurnoController {
     }
   };
 
+  obtenerSlotsMedico = async (req, res, next) => {
+    try {
+      const idMedico = req.params.id_usuario;
+      ValidadorId.validarIds(idMedico);
+
+      const slots = await this.turnoService.obtenerSlotsMedico(idMedico);
+
+      return res.status(200).json({
+        status: 'success',
+        data: slots,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   getAll = async (req, res, next) => {
     try {
       const turnos = await this.turnoService.getAll();

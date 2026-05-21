@@ -3,6 +3,7 @@ import { usuarioRepository } from '../infrastructure/repositories/UsuarioReposit
 import { notificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { slotRepository } from '../infrastructure/repositories/SlotRepository.js';
 import { Reservado } from '../domain/notificacion/estado-turno/Reservado.js';
 import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
@@ -23,12 +24,14 @@ export class TurnoService {
     notificacionRepository: notificacionRepo = notificacionRepository,
     medicoRepository: medicoRepo = medicoRepository,
     pacienteRepository: pacienteRepo = pacienteRepository,
+    slotRepository: slotRepo = slotRepository,
   } = {}) {
     this.turnoRepository = turnoRepo;
     this.usuarioRepository = usuarioRepo;
     this.notificacionRepository = notificacionRepo;
     this.medicoRepository = medicoRepo;
     this.pacienteRepository = pacienteRepo;
+    this.slotRepository = slotRepo;
   }
 
   async reservarTurno(dtoReserva) {
@@ -308,6 +311,8 @@ export class TurnoService {
 
               const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
 
+              console.log("MEDICO: " + medico.nombre);
+
               const {slotsEliminados, slotsNuevos} = Agenda.refrescarSlots(
                 medico,
                 slotsTotales,
@@ -316,11 +321,11 @@ export class TurnoService {
               );
 
               for (const slot of slotsEliminados) {
-                await this.slotsRepository.delete(slot.id || slot._id);
+                await this.slotRepository.delete(slot.id || slot._id);
               }
 
               for (const slot of slotsNuevos) {
-                await this.slotsRepository.save(slot);
+                await this.slotRepository.save(slot);
               }
 
               metricas.procesados++;
@@ -348,6 +353,18 @@ export class TurnoService {
       console.error('[BATCH CRITICAL ERROR] Fallo general del proceso:', error);
       throw error;
     }
+  }
+
+  async obtenerSlotsMedico(id_usuario) {
+    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
+
+    if (medico == null) {
+      throw new NotFoundError('Médico no encontrado');
+    }
+
+    const slots = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
+
+    return slots.map((s) => this._mapearSlot(s));
   }
 
   async obtenerTurnosMedico(id_usuario) {
@@ -389,6 +406,20 @@ export class TurnoService {
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,
+    };
+  }
+
+  _mapearSlot(s) {
+    return {
+      id_slot: s.id || s._id,
+      id_medico: s.medico ? s.medico.toString() : 'N/A',
+      fecha: s.fecha,
+      horaInicio: s.horaInicio,
+      duracionMins: s.duracionMins,
+      estado: s.estado,
+      id_turno_asociado: s.turnoAsociado
+        ? s.turnoAsociado.id || s.turnoAsociado._id || s.turnoAsociado
+        : null,
     };
   }
 }

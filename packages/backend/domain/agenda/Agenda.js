@@ -9,6 +9,18 @@ import {
 } from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
+import { Slot } from '../turno/Slot.js';
+
+/**
+ * Convierte un objeto Date a string 'YYYY-MM-DD' usando la fecha LOCAL del servidor,
+ * evitando el desfase de zona horaria que produce toISOString() (que usa UTC).
+ */
+function fechaLocalAString(date) {
+  const anio = date.getFullYear();
+  const mes = String(date.getMonth() + 1).padStart(2, '0');
+  const dia = String(date.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
 
 export class Agenda {
   static generarTurno(servicio, medico, disponibilidadesLibres, usuarioSistema) {
@@ -43,142 +55,186 @@ export class Agenda {
   }
 
   static eliminarSlotsDesactualizados(medico, slotsDisponibles) {
-  const slotsEliminados = [];
+    const slotsEliminados = [];
 
-  for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
-    const slot = slotsDisponibles[i];
+    for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
+      const slot = slotsDisponibles[i];
 
-    const sigueSiendoValido = medico.disponibilidades.some((disp) =>
-      estaEnDisponibilidad(slot.diaSemana, slot.horaInicio, disp)
-    );
+      const sigueSiendoValido = medico.disponibilidades.some((disp) =>
+        estaEnDisponibilidad(slot.diaSemana, slot.horaInicio, disp)
+      );
 
-    if (!sigueSiendoValido) {
-      slotsEliminados.push(slot);
-    }
-  }
-  return slotsEliminados;
-}
-
-  static generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
-
-  const slotsNuevos = [];
-  const offset = duracionSlot;
-
-  const slotsOcupados = slotsTotales.filter(s => s.estado !== 'DISPONIBLE');
-  const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
-
-  for (const disponibilidad of medico.disponibilidades) {
-    const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
-    const diaDeseadoNumero = Agenda.parsearDiaSemanaANumero(disponibilidad.diaSemana);
-
-    const diasHastaPrimerDia = Agenda.fechaMasCercanaConDiaSemana(diaDeseadoNumero, new Date(), 0);
-
-    for (let i = 0; i < semanasMaxGeneracionSlots; i++) {
-      let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
-
-      const fechaSlot = new Date();
-      fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + (7 * i));
-      const fechaSlotStr = fechaSlot.toISOString().split('T')[0];
-
-      while (actualMinutos + offset <= tiempoLimite) {
-        const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
-
-        const yaEstaReservado = slotsOcupados.some(s => 
-          s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
-        );
-
-        if (yaEstaReservado) {
-          actualMinutos += offset;
-          continue;
-        }
-
-        const yaExistePrecalculado = slotsDisponibles.some(s =>
-          s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
-        );
-
-        if (yaExistePrecalculado) {
-          actualMinutos += offset;
-          continue;
-        }
-
-        const slot = new Slot(
-          medico,
-          fechaSlotStr,
-          horaInicioStr,
-          duracionSlot,
-        );
-
-        slotsNuevos.push(slot);
-        actualMinutos += offset;
+      if (!sigueSiendoValido) {
+        slotsEliminados.push(slot);
       }
     }
+    return slotsEliminados;
   }
-  return slotsNuevos;
-}
+
+  static generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
+    const slotsNuevos = [];
+    const offset = duracionSlot;
+
+    const slotsOcupados = slotsTotales.filter(s => s.estado !== 'DISPONIBLE');
+    const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
+
+    for (const disponibilidad of medico.disponibilidades) {
+      const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
+      const diaDeseadoNumero = Agenda.parsearDiaSemanaANumero(disponibilidad.diaSemana);
+
+      // Se pasa horaDesde para que, si hoy coincide con el día de disponibilidad,
+      // se valide que el horario de inicio aún no haya pasado.
+      const diasHastaPrimerDia = Agenda.fechaMasCercanaConDiaSemana(
+        diaDeseadoNumero,
+        new Date(),
+        0,
+        disponibilidad.horaDesde,
+      );
+
+      for (let i = 0; i < semanasMaxGeneracionSlots; i++) {
+        let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
+
+        const fechaSlot = new Date();
+        fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + (7 * i));
+        const fechaSlotStr = fechaLocalAString(fechaSlot);
+
+        while (actualMinutos + offset <= tiempoLimite) {
+          const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
+
+          const yaEstaReservado = slotsOcupados.some(s =>
+            s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
+          );
+
+          if (yaEstaReservado) {
+            actualMinutos += offset;
+            continue;
+          }
+
+          const yaExistePrecalculado = slotsDisponibles.some(s =>
+            s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
+          );
+
+          if (yaExistePrecalculado) {
+            actualMinutos += offset;
+            continue;
+          }
+
+          const slot = new Slot(
+            medico,
+            fechaSlotStr,
+            horaInicioStr,
+            duracionSlot,
+          );
+
+          slotsNuevos.push(slot);
+          actualMinutos += offset;
+        }
+      }
+    }
+    return slotsNuevos;
+  }
 
   static refrescarSlots(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
-
     const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
 
     const slotsEliminados = this.eliminarSlotsDesactualizados(medico, slotsDisponibles);
-    
+
     const slotsNuevos = this.generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots);
-    
+
     return { slotsEliminados, slotsNuevos };
   }
 
   static parsearDiaSemanaANumero(diaSemana) {
-  switch(diaSemana.toUpperCase()){
-    case 'DOMINGO': return 0;
-    case 'LUNES': return 1;
-    case 'MARTES': return 2;
-    case 'MIERCOLES': return 3;
-    case 'JUEVES': return 4;
-    case 'VIERNES': return 5;
-    case 'SABADO': return 6;
-    default: throw new Error(`Día de la semana inválido: ${diaSemana}`);
+    switch(diaSemana.toUpperCase()){
+      case 'DOMINGO': return 0;
+      case 'LUNES': return 1;
+      case 'MARTES': return 2;
+      case 'MIERCOLES': return 3;
+      case 'JUEVES': return 4;
+      case 'VIERNES': return 5;
+      case 'SABADO': return 6;
+      default: throw new Error(`Día de la semana inválido: ${diaSemana}`);
+    }
   }
-}
 
-  static fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar) {
-  const fechaTentativa = new Date(fechaBase);
-  fechaTentativa.setDate(fechaTentativa.getDate() + diasASumar);
+  /**
+   * Devuelve cuántos días hay que sumar a fechaBase para llegar al próximo
+   * día de la semana deseado que sea válido para generar slots.
+   *
+   * Cuando la fecha candidata resulta ser HOY (mismo año/mes/día local que fechaBase),
+   * verifica que la hora actual local sea estrictamente menor que horaDesdeStr.
+   * Si ya pasó ese horario, descarta hoy y busca la siguiente semana.
+   *
+   * @param {number} diaSemanaDeseado  - Número 0-6 (domingo=0)
+   * @param {Date}   fechaBase         - Fecha desde la cual buscar (normalmente new Date())
+   * @param {number} diasASumar        - Acumulador recursivo, iniciar en 0
+   * @param {string} horaDesdeStr      - Horario de inicio de la disponibilidad ('HH:MM')
+   */
+  static fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar = 0, horaDesdeStr) {
+    const fechaTentativa = new Date(fechaBase);
+    fechaTentativa.setDate(fechaTentativa.getDate() + diasASumar);
 
-  if (fechaTentativa.getDay() === diaSemanaDeseado) {
-    return diasASumar;  
-  } else {
-    return Agenda.fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar + 1);
+    if (fechaTentativa.getDay() === diaSemanaDeseado) {
+      // Comprueba si la fecha tentativa es el mismo día local que fechaBase
+      const esHoy =
+        fechaTentativa.getFullYear() === fechaBase.getFullYear() &&
+        fechaTentativa.getMonth()    === fechaBase.getMonth()    &&
+        fechaTentativa.getDate()     === fechaBase.getDate();
+
+      if (esHoy && horaDesdeStr) {
+        const ahoraEnMinutos =
+        fechaBase.getHours() * 60 + fechaBase.getMinutes();
+        const horaInicioEnMinutos = horaAMinutos(horaDesdeStr);
+
+        // Si la hora actual ya superó el inicio de la disponibilidad,
+        // este día no sirve: saltamos a la siguiente semana.
+        if (ahoraEnMinutos >= horaInicioEnMinutos) {
+
+          console.log("AHORA: " + calcularHoraDesdeMinutos(ahoraEnMinutos));
+          console.log("HORA INICIO DISPONIBILIDAD: " + horaDesdeStr);
+
+          return Agenda.fechaMasCercanaConDiaSemana(
+            diaSemanaDeseado,
+            fechaBase,
+            diasASumar + 1,
+            horaDesdeStr,
+          );
+        }
+      }
+
+      return diasASumar;
+    }
+
+    return Agenda.fechaMasCercanaConDiaSemana(
+      diaSemanaDeseado,
+      fechaBase,
+      diasASumar + 1,
+      horaDesdeStr,
+    );
   }
-}
 
   static sumarDias(fechaBase, diasASumar, diasNoLaborales) {
-  const copiaFecha = new Date(fechaBase);
-  
-  const diasFinales = Agenda.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
+    const copiaFecha = new Date(fechaBase);
 
-  copiaFecha.setDate(copiaFecha.getDate() + diasFinales);
-  
-  const offset = copiaFecha.getTimezoneOffset() * 60000;
-  const fechaLocal = new Date(copiaFecha.getTime() - offset);
+    const diasFinales = Agenda.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
 
-  return { fechaSlot: fechaLocal.toISOString().split('T')[0] , diasTotales: diasFinales };
-}
+    copiaFecha.setDate(copiaFecha.getDate() + diasFinales);
+
+    return { fechaSlot: fechaLocalAString(copiaFecha), diasTotales: diasFinales };
+  }
 
   static saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales) {
-
     const fechaDestinoTentativa = new Date(fechaBase);
 
     fechaDestinoTentativa.setDate(fechaDestinoTentativa.getDate() + diasASumar);
-    
-    if(diasNoLaborales.includes(fechaDestinoTentativa.getDay())){
-    diasASumar += 1;
-    
-    return this.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
-  }
 
-  return diasASumar;
-  }
+    if (diasNoLaborales.includes(fechaDestinoTentativa.getDay())) {
+      diasASumar += 1;
+      return this.saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales);
+    }
 
+    return diasASumar;
+  }
 
   static refrescarTurnosSegunDisponibilidadDe(medico, usuarioSistema) {
     logger.debug(`Refrescando turnos para médico ${medico.nombre}`);
@@ -263,7 +319,6 @@ export class Agenda {
     return fechaCandidata;
   }
 
-  
   static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
     if (!diaSemanaDeseado || !horaInicioStr) {
       console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
@@ -301,18 +356,16 @@ export class Agenda {
   }
 
   static obtenerSlotsContiguosParaDuracion(slots, duracionTurnoEnMins) {
-    
     let tiempoTotal = 0;
 
     const slotsOcupados = [];
 
-    for(const slot of slots) {
-
+    for (const slot of slots) {
       let duracionMins = slot.duracionMins;
 
       tiempoTotal += duracionMins;
 
-      if(tiempoTotal > duracionTurnoEnMins) {
+      if (tiempoTotal > duracionTurnoEnMins) {
         break;
       }
 
