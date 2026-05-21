@@ -22,7 +22,6 @@ export class MedicoController {
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,
         turnos: m.turnosActualesYFuturos
-          .filter((t) => t.estado instanceof Disponible)
           .map((turno) => ({
             id: turno.id || turno._id,
             fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]

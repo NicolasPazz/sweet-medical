@@ -35,7 +35,6 @@ const turnoSchema = new mongoose.Schema(
       _id: { type: mongoose.Schema.Types.ObjectId },
       nombre: { type: String, trim: true, maxlength: 100 },
     },
-    diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
     fechaHora: { type: Date },
     estado: {
@@ -52,6 +51,7 @@ const turnoSchema = new mongoose.Schema(
       },
     },
     costo: { type: Number, required: true, min: 0 },
+    slotsAsociados: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Slot', default: [] }],
     historialEstados: [cambioEstadoTurnoSchema],
   },
   { collection: 'turnos' },
@@ -59,7 +59,7 @@ const turnoSchema = new mongoose.Schema(
 
 turnoSchema.pre(/^find/, function (next) {
   if (this.options?._populatingFromMedico) return next();
-  this.populate('medico').populate('paciente').populate({ path: 'historialEstados.usuario' });
+  this.populate('medico').populate('paciente').populate('slotsAsociados').populate({ path: 'historialEstados.usuario' });
   next();
 });
 

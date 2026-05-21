@@ -15,6 +15,7 @@ import { Rol } from '../domain/usuario/Rol.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
 import { Turno } from '../domain/turno/Turno.js';
+import { estaEnDisponibilidad } from '../utils/functions.js';
 
 export class TurnoService {
   turnoRepository;
@@ -109,11 +110,14 @@ export class TurnoService {
       throw new BadRequestError('El médico no ofrece el servicio solicitado');
     }
 
-    const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(slots, servicio.duracionMins);
+    const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(slots, servicio.duracionTurnoEnMins);
 
     const tiempoRecolectado = slotsAOcupar.reduce((acc, s) => acc + s.duracionMins, 0);
 
-    if (tiempoRecolectado < servicio.duracionMins) {
+    console.log('TIEMPO RECOLECTADO: ', tiempoRecolectado);
+    console.log('DURACION SERVICIO: ', servicio.duracionTurnoEnMins);
+
+    if (tiempoRecolectado < servicio.duracionTurnoEnMins) {
       throw new BadRequestError('Los slots provistos no son suficientes para cubrir la duración del servicio.');
     }
 
@@ -125,17 +129,19 @@ export class TurnoService {
 
     const turno = new Turno(medico, paciente, fechaTurno, horaInicioTurno, null, servicio, servicio.costo);
 
-    turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
+    turno.slotsAsociados.push(...slotsAOcupar);
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
-    await this.turnoRepository.save(turno);
+    const turnoGuardado = await this.turnoRepository.save(turno);
+
+    const turnoId = turnoGuardado.id || turnoGuardado._id;
 
     for (const slotAOcupar of slotsAOcupar) {
-      slotAOcupar.turnoAsociado = turno;
+      slotAOcupar.turnoAsociado = turnoId;
       await this.slotRepository.save(slotAOcupar);
     }
 
@@ -143,20 +149,31 @@ export class TurnoService {
   }
 
   async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
+    const usuario = await this.usuarioRepository.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
     const turno = await this.turnoRepository.findById(id_turno);
-
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
 
     if (!(turno.estado instanceof Reservado) && !(turno.estado instanceof Confirmado)) {
       throw new ConflictError('No se puede cancelar el turno en este estado');
+    }
+
+    // Validación: el turno no puede cancelarse si su fecha ya pasó
+    if (Date.now() > turno.fechaHora.getTime()) {
+      throw new ConflictError('No se puede cancelar un turno que ya ha pasado su fecha y hora programada');
+    }
+
+    // Validación: no cancelar con menos de 1 hora de antelación
+    const unaHoraEnMs = 1000 * 60 * 60;
+    if (turno.fechaHora.getTime() - Date.now() < unaHoraEnMs) {
+      throw new ConflictError('Un turno no puede cancelarse con menos de 1 hora de antelación');
     }
 
     if (!esMedico) {
@@ -177,11 +194,6 @@ export class TurnoService {
       }
     }
 
-    const unaHoraEnMs = 1000 * 60 * 60;
-    if (turno.fechaHora - Date.now() < unaHoraEnMs) {
-      throw new ConflictError('Un turno no puede cancelarse con menos de 1 hora de antelación');
-    }
-
     const notificacion = turno.actualizarEstado(usuario, new Cancelado(turno), motivo);
 
     if (notificacion) {
@@ -189,6 +201,24 @@ export class TurnoService {
     }
 
     await this.turnoRepository.save(turno);
+
+    // Liberar o eliminar los slots según si la disponibilidad del médico sigue vigente
+    for (const slot of turno.slotsAsociados) {
+      const [anio, mes, dia] = slot.fecha.split('-').map(Number);
+      const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
+
+      const sigueSiendoValido = turno.medico.disponibilidades.some((disp) =>
+        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp)
+      );
+
+      if (sigueSiendoValido) {
+        slot.estado = 'DISPONIBLE';
+        slot.turnoAsociado = null;
+        await this.slotRepository.save(slot);
+      } else {
+        await this.slotRepository.delete(slot.id || slot._id);
+      }
+    }
 
     return turno;
   }
@@ -438,9 +468,7 @@ export class TurnoService {
       horaInicio: s.horaInicio,
       duracionMins: s.duracionMins,
       estado: s.estado,
-      id_turno_asociado: s.turnoAsociado
-        ? s.turnoAsociado.id || s.turnoAsociado._id || s.turnoAsociado
-        : null,
+      id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
     };
   }
 }

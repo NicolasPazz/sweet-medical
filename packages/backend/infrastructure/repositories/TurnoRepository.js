@@ -44,6 +44,7 @@ export class TurnoRepository {
     }
 
     const nuevoTurno = new this.model(turno);
+    nuevoTurno.slotsAsociados = (turno.slotsAsociados || []).map(s => s._id || s.id || s);
     return await nuevoTurno.save();
   }
 
@@ -60,6 +61,7 @@ export class TurnoRepository {
       : { ...datosActualizados };
 
     payload.estado = estadoLimpio;
+    payload.slotsAsociados = (datosActualizados.slotsAsociados || []).map(s => s._id || s.id || s);
 
     return await this.model.findByIdAndUpdate(id, payload, { new: true });
   }

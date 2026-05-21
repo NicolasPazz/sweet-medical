@@ -40,11 +40,16 @@ export class SlotRepository {
 
   // ACTUALIZAR
   async update(id, datosActualizados) {
-    const payload = datosActualizados._doc
-      ? { ...datosActualizados._doc }
-      : { ...datosActualizados };
-
-    return await this.model.findByIdAndUpdate(id, payload, { new: true });
+    return await this.model.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          estado: datosActualizados.estado,
+          turnoAsociado: datosActualizados.turnoAsociado ?? null,
+        },
+      },
+      { new: true },
+    );
   }
 
   // ELIMINAR

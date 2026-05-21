@@ -1,5 +1,4 @@
 import { CambioEstadoTurno } from './CambioEstadoTurno.js';
-import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 
@@ -13,8 +12,8 @@ export class Turno {
   estado;
   historialEstados;
   costo;
-  diaSemana;
   hora;
+  slotsAsociados;
 
   constructor(medico, paciente, fecha, horaInicio, sede, servicio, costo) {
     this.medico = medico;
@@ -25,8 +24,9 @@ export class Turno {
     this.servicio = servicio?.costo ? servicio : null;
     this.historialEstados = [];
     this.costo = costo;
+    this.slotsAsociados = [];
   }
-
+  
   actualizarEstado(quien, nuevoEstado, motivo) {
     console.log('QUIEN LLAMA? ', quien);
 

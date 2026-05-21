@@ -55,13 +55,18 @@ export class Agenda {
   }
 
   static eliminarSlotsDesactualizados(medico, slotsDisponibles) {
+    const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
     const slotsEliminados = [];
 
     for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
       const slot = slotsDisponibles[i];
 
+      // Los slots ya no tienen diaSemana — se deriva desde la fecha
+      const [anio, mes, dia] = slot.fecha.split('-').map(Number);
+      const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
+
       const sigueSiendoValido = medico.disponibilidades.some((disp) =>
-        estaEnDisponibilidad(slot.diaSemana, slot.horaInicio, disp)
+        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp)
       );
 
       if (!sigueSiendoValido) {
@@ -138,6 +143,8 @@ export class Agenda {
     const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
 
     const slotsEliminados = this.eliminarSlotsDesactualizados(medico, slotsDisponibles);
+
+    slotsEliminados.forEach(slot => console.log(`Slot eliminado: ${slot.fecha} ${slot.horaInicio}`));
 
     const slotsNuevos = this.generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots);
 
@@ -361,13 +368,12 @@ export class Agenda {
     const slotsOcupados = [];
 
     for (const slot of slots) {
-      let duracionMins = slot.duracionMins;
 
-      tiempoTotal += duracionMins;
-
-      if (tiempoTotal > duracionTurnoEnMins) {
+      if (tiempoTotal >= duracionTurnoEnMins) {
         break;
       }
+
+      tiempoTotal += slot.duracionMins;
 
       slotsOcupados.push(slot);
     }
