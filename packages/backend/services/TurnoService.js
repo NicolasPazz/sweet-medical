@@ -4,15 +4,17 @@ import { notificacionRepository } from '../infrastructure/repositories/Notificac
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { slotRepository } from '../infrastructure/repositories/SlotRepository.js';
+import { servicioRepository } from '../infrastructure/repositories/ServicioRepository.js';
 import { Reservado } from '../domain/notificacion/estado-turno/Reservado.js';
 import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
 import { Realizado } from '../domain/notificacion/estado-turno/Realizado.js';
 import { Agenda } from '../domain/agenda/Agenda.js';
-import { ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
 import { Rol } from '../domain/usuario/Rol.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
+import { Turno } from '../domain/turno/Turno.js';
 
 export class TurnoService {
   turnoRepository;
@@ -25,6 +27,7 @@ export class TurnoService {
     medicoRepository: medicoRepo = medicoRepository,
     pacienteRepository: pacienteRepo = pacienteRepository,
     slotRepository: slotRepo = slotRepository,
+    servicioRepository: servicioRepo = servicioRepository,
   } = {}) {
     this.turnoRepository = turnoRepo;
     this.usuarioRepository = usuarioRepo;
@@ -32,6 +35,7 @@ export class TurnoService {
     this.medicoRepository = medicoRepo;
     this.pacienteRepository = pacienteRepo;
     this.slotRepository = slotRepo;
+    this.servicioRepository = servicioRepo;
   }
 
   async reservarTurno(dtoReserva) {
@@ -71,20 +75,42 @@ export class TurnoService {
       slots.push(slot);
     }
 
+    // Validación 1: todos los slots deben pertenecer al mismo médico
+    const idMedicoDelPrimerSlot = String(slots[0].medico?._id || slots[0].medico);
+    const todosMismoMedico = slots.every(
+      (s) => String(s.medico?._id || s.medico) === idMedicoDelPrimerSlot
+    );
+    if (!todosMismoMedico) {
+      throw new BadRequestError('Todos los slots deben pertenecer al mismo médico');
+    }
+
     slots = ordenarSlots(slots);
-    
-    if(!validarSlotsContiguos(slots)) {
+
+    if (!validarSlotsContiguos(slots)) {
       throw new BadRequestError('Los slots seleccionados deben ser contiguos');
     }
 
     const slot = slots[0];
-
     const fechaTurno = slot.fecha;
     const horaInicioTurno = slot.horaInicio;
-    const medico = await this.medicoRepository.findById(slot.idMedico);
+    const medico = await this.medicoRepository.findById(idMedicoDelPrimerSlot);
+
+    if (medico == null) {
+      throw new NotFoundError('Médico asociado a los slots no encontrado');
+    }
+
+    // Validación 2: el médico debe tener el servicio solicitado como especialidad o práctica
+    const idServicio = String(dtoReserva.id_servicio);
+    const tieneServicio =
+      medico.especialidades.some((e) => String(e._id || e) === idServicio) ||
+      medico.practicas.some((p) => String(p._id || p) === idServicio);
+
+    if (!tieneServicio) {
+      throw new BadRequestError('El médico no ofrece el servicio solicitado');
+    }
 
     const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(slots, servicio.duracionMins);
-    
+
     const tiempoRecolectado = slotsAOcupar.reduce((acc, s) => acc + s.duracionMins, 0);
 
     if (tiempoRecolectado < servicio.duracionMins) {
@@ -102,13 +128,13 @@ export class TurnoService {
     turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
-    
+
     if (notificacion) {
       await this.notificacionRepository.save(notificacion);
     }
     await this.turnoRepository.save(turno);
 
-    for(const slotAOcupar of slotsAOcupar) {
+    for (const slotAOcupar of slotsAOcupar) {
       slotAOcupar.turnoAsociado = turno;
       await this.slotRepository.save(slotAOcupar);
     }
@@ -291,7 +317,6 @@ export class TurnoService {
     console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
-      // 1. Obtener todos los médicos
       const medicos = await this.medicoRepository.findAll();
       metricas.total = medicos?.length || 0;
 
@@ -300,15 +325,12 @@ export class TurnoService {
         return;
       }
 
-      // 2. Procesamiento por lotes (Chunks)
       for (let i = 0; i < medicos.length; i += TAMANO_LOTE) {
         const loteActual = medicos.slice(i, i + TAMANO_LOTE);
 
-        // Procesamos el lote actual en paralelo
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-
               const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
 
               console.log("MEDICO: " + medico.nombre);
@@ -341,7 +363,6 @@ export class TurnoService {
         );
       }
 
-      // 3. Reporte final
       console.log(`
         --- RESUMEN DEL PROCESO BATCH ---
         Finalizado: ${new Date().toISOString()}

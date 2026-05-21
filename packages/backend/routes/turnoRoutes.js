@@ -54,7 +54,7 @@ const turnoRouter = express.Router();
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/paciente/:id_usuario/reserva/:id_turno')
+  .route('/paciente/reserva')
   .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
 
 /**
