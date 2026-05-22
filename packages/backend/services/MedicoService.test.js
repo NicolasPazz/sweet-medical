@@ -28,7 +28,6 @@ describe('MedicoService', () => {
     jest.restoreAllMocks();
   });
 
-
   it('actualiza disponibilidad con mayúsculas y espera el guardado del médico (await)', async () => {
     const medicoExistente = { id: 'm-1', disponibilidades: [] };
     mockMedicoRepository.findById.mockResolvedValue(medicoExistente);
@@ -53,7 +52,6 @@ describe('MedicoService', () => {
 
     await expect(service.actualizarDisponibilidad('m-1', [])).rejects.toThrow(NotFoundError);
   });
-
 
   it('crea un médico nuevo con usuario si no existe matrícula duplicada', async () => {
     const datos = {
@@ -105,13 +103,15 @@ describe('MedicoService', () => {
     const datosMinimos = {
       usuario: { nombreUsuario: 'doctor-min', contrasena: 'root', email: 'min@test.com' },
       matricula: '9999',
-      nombre: 'Dr. Mínimo'
+      nombre: 'Dr. Mínimo',
       // Omitimos especialidades, practicas y sedes de forma intencional
     };
 
     mockMedicoRepository.findByMatricula.mockResolvedValue(null);
     mockUsuarioRepository.save.mockResolvedValue({ _id: 'u-2' });
-    mockMedicoRepository.crear.mockImplementation((medicoRecibido) => Promise.resolve(medicoRecibido));
+    mockMedicoRepository.crear.mockImplementation((medicoRecibido) =>
+      Promise.resolve(medicoRecibido),
+    );
 
     const resultado = await service.crearMedico(datosMinimos);
 

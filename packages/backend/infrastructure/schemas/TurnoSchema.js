@@ -55,11 +55,11 @@ const turnoSchema = new mongoose.Schema(
     },
     costo: { type: Number, required: true, min: 0 },
     historialEstados: [cambioEstadoTurnoSchema],
-    
+
     propuestaCambio: {
       nuevaFechaHora: { type: Date, default: null },
       motivo: { type: String, default: null },
-      proponenteId: { type: String, default: null }
+      proponenteId: { type: String, default: null },
     },
   },
   { collection: 'turnos' },

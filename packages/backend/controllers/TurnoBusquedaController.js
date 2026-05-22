@@ -1,15 +1,12 @@
 import { BadRequestError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
 import { PacienteModel } from '../infrastructure/schemas/PacienteSchema.js';
-import { turnoBusquedaService } from "../services/TurnoBusquedaService.js";
+import { turnoBusquedaService } from '../services/TurnoBusquedaService.js';
 
 export class TurnoBusquedaController {
-
-  constructor({
-        turnoBusquedaService: turnoService = turnoBusquedaService,
-      } = {}) {
-        this.turnoBusquedaService = turnoService;
-      }
+  constructor({ turnoBusquedaService: turnoService = turnoBusquedaService } = {}) {
+    this.turnoBusquedaService = turnoService;
+  }
 
   crear() {
     return async (req, res, next) => {
@@ -89,7 +86,11 @@ export class TurnoBusquedaController {
         }
 
         // Llamada al service
-        const resultado = await this.turnoBusquedaService.buscarTurnos(filtros, paciente, paginacion);
+        const resultado = await this.turnoBusquedaService.buscarTurnos(
+          filtros,
+          paciente,
+          paginacion,
+        );
 
         // Response OK
         return res.status(200).json({

@@ -1,7 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't'
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
 
 export class Confirmado {
   id;
@@ -29,8 +29,8 @@ export class Confirmado {
         servicio: servicio,
         fecha: this.turno.fechaHora?.toLocaleDateString() || '',
         sede: this.turno.sede.nombre,
-        medico: this.turno.medico.nombre
-      })
+        medico: this.turno.medico.nombre,
+      }),
     );
   }
 }

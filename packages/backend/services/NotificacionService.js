@@ -54,20 +54,18 @@ export class NotificacionService {
     return await this.notificacionRepository.save(notificacion);
   }
 
-  async generarNotificacionesRecordatorias(turnosDeManiana, usuario){
+  async generarNotificacionesRecordatorias(turnosDeManiana, usuario) {
     let notificaciones = [];
-    for (const t of turnosDeManiana){
+    for (const t of turnosDeManiana) {
       // Crear recordatorio tanto para el médico como para el paciente
       notificaciones = FactoryNotificacion.crearRecordatoriosActores(usuario, t);
-      for (let n of notificaciones){
+      for (let n of notificaciones) {
         this.notificacionRepository.save(n);
       }
     }
 
     return notificaciones.length;
-
   }
-
 }
 
 export const notificacionService = new NotificacionService();

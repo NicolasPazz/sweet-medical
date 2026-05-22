@@ -190,14 +190,16 @@ export class TurnoController {
       const { aceptado } = req.body;
 
       if (aceptado === undefined || typeof aceptado !== 'boolean') {
-        throw new BadRequestError('Debe indicar si la propuesta fue aceptada (true/false) en el body');
+        throw new BadRequestError(
+          'Debe indicar si la propuesta fue aceptada (true/false) en el body',
+        );
       }
 
       // Delegamos la resolución al Service
       await this.turnoService.responderReprogramacion(idUsuario, idTurno, aceptado);
 
-      const mensajeFinal = aceptado 
-        ? 'El turno ha sido reprogramado con éxito' 
+      const mensajeFinal = aceptado
+        ? 'El turno ha sido reprogramado con éxito'
         : 'La propuesta de reprogramación fue rechazada';
 
       return res.status(200).json({

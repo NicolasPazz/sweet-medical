@@ -159,7 +159,6 @@ describe('ServicioService', () => {
     expect(resultado.codigo).toBeUndefined();
   });
 
-
   it('lanza NotFoundError al modificar un servicio inexistente', async () => {
     const id = '507f1f77bcf86cd799439011';
     mockUsuarioRepository.findById.mockResolvedValue({
@@ -220,7 +219,11 @@ describe('ServicioService', () => {
       nombre: 'Ecografía Vieja',
       codigo: 'ECO-01',
     });
-    mockServicioRepository.update.mockResolvedValue({ id, nombre: 'Ecografía Nueva', codigo: 'ECO-01' });
+    mockServicioRepository.update.mockResolvedValue({
+      id,
+      nombre: 'Ecografía Nueva',
+      codigo: 'ECO-01',
+    });
 
     const resultado = await service.modificar('507f1f77bcf86cd799439011', id, {
       nombre: 'Ecografía Nueva',
@@ -229,7 +232,6 @@ describe('ServicioService', () => {
     expect(resultado.nombre).toBe('Ecografía Nueva');
     expect(mockServicioRepository.update).toHaveBeenCalledWith(id, { nombre: 'Ecografía Nueva' });
   });
-
 
   it('elimina un servicio existente correctamente', async () => {
     const id = '507f1f77bcf86cd799439011';

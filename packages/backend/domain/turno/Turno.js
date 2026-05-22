@@ -5,7 +5,6 @@ import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 import { Usuario } from '../usuario/Usuario.js';
 
-
 export class Turno {
   id;
   medico;
@@ -53,13 +52,13 @@ export class Turno {
     this.propuestaCambio = {
       nuevaFechaHora,
       motivo,
-      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id
+      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id,
     };
 
     const notificacion = this.actualizarEstado(
       usuarioQueLlama,
       new PendienteReprogramacion(this),
-      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`
+      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
     );
 
     return notificacion;

@@ -11,7 +11,6 @@ import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Usuario } from '../usuario/Usuario.js';
 
-
 export class Agenda {
   static generarTurno(servicio, medico, disponibilidadesLibres, usuarioSistema) {
     logger.debug(`Generando turnos para especialidad ${servicio.nombre} y médico ${medico.nombre}`);

@@ -55,14 +55,16 @@ describe('PacienteService', () => {
     expect(mockTurnoRepository.findAllByPatientId).toHaveBeenCalledWith('p-1');
     expect(resultado[0].servicio).toBe('RX-001 - Resonancia');
     expect(resultado[0].cobertura).toBe(NivelCobertura.TOTAL);
-    
+
     // Verificamos que al motor le llegó configurado como práctica
     expect(spyCalcular).toHaveBeenCalledWith(
-      expect.objectContaining({ practica: { codigo: 'RX-001', nombre: 'Resonancia', costo: 2000 }, especialidad: null }),
-      paciente
+      expect.objectContaining({
+        practica: { codigo: 'RX-001', nombre: 'Resonancia', costo: 2000 },
+        especialidad: null,
+      }),
+      paciente,
     );
   });
-
 
   it('obtiene historial de turnos y mapea como ESPECIALIDAD si el servicio no tiene código', async () => {
     const paciente = { id: 'p-1', nombre: 'Pepito' };
@@ -89,11 +91,14 @@ describe('PacienteService', () => {
 
     expect(resultado[0].servicio).toBe('Pediatría'); // No agrega el prefijo del código
     expect(resultado[0].cobertura).toBe(NivelCobertura.PARCIAL);
-    
+
     // Verificamos que al motor le llegó correctamente mapeado como especialidad
     expect(spyCalcular).toHaveBeenCalledWith(
-      expect.objectContaining({ practica: null, especialidad: { nombre: 'Pediatría', costo: 1000 } }),
-      paciente
+      expect.objectContaining({
+        practica: null,
+        especialidad: { nombre: 'Pediatría', costo: 1000 },
+      }),
+      paciente,
     );
   });
 
@@ -104,8 +109,8 @@ describe('PacienteService', () => {
       {
         id: 't-3',
         servicio: { nombre: 'Guardia' },
-        estado: 'CONFIRMADO'
-      }
+        estado: 'CONFIRMADO',
+      },
     ]);
 
     // Simulamos que el motor de costos explota por el aire
@@ -120,7 +125,6 @@ describe('PacienteService', () => {
     expect(resultado[0].cobertura).toBeUndefined();
   });
 
-  
   it('asigna "N/A" a las propiedades del turno que vengan nulas o indefinidas', async () => {
     mockPacienteRepository.findByIdUsuario.mockResolvedValue({ id: 'p-1' });
     mockTurnoRepository.findAllByPatientId.mockResolvedValue([
@@ -130,8 +134,8 @@ describe('PacienteService', () => {
         medico: null,
         servicio: null,
         sede: null,
-        estado: null
-      }
+        estado: null,
+      },
     ]);
 
     jest.spyOn(MotorCostos.prototype, 'calcularPara').mockReturnValue({ tipoCobertura: null });

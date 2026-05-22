@@ -1,6 +1,6 @@
-import { logger } from "../../../utils/logger.js"; 
-import { Notificacion } from "../Notificacion.js";
-import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't' para unificar
+import { logger } from '../../../utils/logger.js';
+import { Notificacion } from '../Notificacion.js';
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Disponible {
@@ -18,7 +18,7 @@ export class Disponible {
     logger.debug(
       `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado?.getEstadoNombre() || 'Disponible'}.`,
     );
-    
+
     return null;
   }
 }

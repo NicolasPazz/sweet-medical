@@ -4,13 +4,11 @@ import { notificacionService } from '../services/NotificacionService.js';
 import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
 import { logger } from '../utils/logger.js';
 
-
 // Todos los días a las 3AM
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 3 * * *', async () => {
   try {
     logger.info('Inicio cronjob generación de notificaciones de aviso a médicos y pacientes');
 
-    
     const turnosDeManiana = await turnoService.obtenerTurnosParaManiana();
 
     if (turnosDeManiana.length === 0) {
@@ -26,6 +24,9 @@ cron.schedule('* * * * *', async () => {
 
     logger.info(`Cronjob finalizado. Se generaron ${cantidad} notificaciones de recordatorio.`);
   } catch (error) {
-    logger.error('Error en la generación de notificaciones de recordatorio a médicos y pacientes:', error);
+    logger.error(
+      'Error en la generación de notificaciones de recordatorio a médicos y pacientes:',
+      error,
+    );
   }
 });

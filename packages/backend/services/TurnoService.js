@@ -368,9 +368,10 @@ export class TurnoService {
     }
 
     // 1. Validamos de forma segura el string del estado para evitar fallas de instanceof
-    const nombreEstado = typeof turno.estado.getEstadoNombre === 'function' 
-      ? turno.estado.getEstadoNombre().toUpperCase() 
-      : String(turno.estado).toUpperCase();
+    const nombreEstado =
+      typeof turno.estado.getEstadoNombre === 'function'
+        ? turno.estado.getEstadoNombre().toUpperCase()
+        : String(turno.estado).toUpperCase();
 
     if (nombreEstado !== 'RESERVADO' && nombreEstado !== 'CONFIRMADO') {
       throw new ConflictError('No se puede solicitar la reprogramación de un turno en este estado');
@@ -384,13 +385,17 @@ export class TurnoService {
     const esMedicoDelTurno = String(idUsuarioDelMedico) === String(usuario.id || usuario._id);
 
     if (!esPacienteDelTurno && !esMedicoDelTurno) {
-      throw new ForbiddenError('No tiene permisos sobre este turno para solicitar una reprogramación');
+      throw new ForbiddenError(
+        'No tiene permisos sobre este turno para solicitar una reprogramación',
+      );
     }
 
     // 3. Regla de negocio: Cambios con al menos 1 hora de anticipación
     const unaHoraEnMs = 1000 * 60 * 60;
     if (turno.fechaHora - Date.now() < unaHoraEnMs) {
-      throw new ConflictError('No se puede proponer una modificación con menos de 1 hora de antelación');
+      throw new ConflictError(
+        'No se puede proponer una modificación con menos de 1 hora de antelación',
+      );
     }
 
     // 4. Buscamos el bache físico de destino y validamos que esté disponible
@@ -398,24 +403,31 @@ export class TurnoService {
     const turnoDestino = await this.turnoRepository.findByMedicFechaHora(idMedico, nuevaFechaHora);
 
     if (!turnoDestino) {
-      throw new ConflictError('El horario propuesto no se encuentra disponible para este profesional');
+      throw new ConflictError(
+        'El horario propuesto no se encuentra disponible para este profesional',
+      );
     }
 
-    const estadoDestino = typeof turnoDestino.estado.getEstadoNombre === 'function'
-      ? turnoDestino.estado.getEstadoNombre().toUpperCase()
-      : String(turnoDestino.estado).toUpperCase();
+    const estadoDestino =
+      typeof turnoDestino.estado.getEstadoNombre === 'function'
+        ? turnoDestino.estado.getEstadoNombre().toUpperCase()
+        : String(turnoDestino.estado).toUpperCase();
 
     if (estadoDestino !== 'DISPONIBLE') {
-      throw new ConflictError('El horario propuesto no se encuentra disponible para este profesional');
+      throw new ConflictError(
+        'El horario propuesto no se encuentra disponible para este profesional',
+      );
     }
 
     // 5. Validamos que el bache de destino sea de la misma especialidad/servicio
     const idServicioOriginal = String(turno.servicio?._id || turno.servicio?.id || turno.servicio);
-    const idServicioDestino = String(turnoDestino.servicio?._id || turnoDestino.servicio?.id || turnoDestino.servicio);
+    const idServicioDestino = String(
+      turnoDestino.servicio?._id || turnoDestino.servicio?.id || turnoDestino.servicio,
+    );
 
     if (idServicioOriginal !== idServicioDestino) {
       throw new ConflictError(
-        `No se puede reprogramar: El horario seleccionado corresponde al servicio de "${turnoDestino.servicio?.nombre || 'otra especialidad'}" y su turno original es de "${turno.servicio?.nombre}"`
+        `No se puede reprogramar: El horario seleccionado corresponde al servicio de "${turnoDestino.servicio?.nombre || 'otra especialidad'}" y su turno original es de "${turno.servicio?.nombre}"`,
       );
     }
 
@@ -462,7 +474,9 @@ export class TurnoService {
     const esMedicoDelTurno = String(idUsuarioDelMedico) === idRespondedor;
 
     if (!esPacienteDelTurno && !esMedicoDelTurno) {
-      throw new ForbiddenError('No tiene permisos para responder a la reprogramación de este turno');
+      throw new ForbiddenError(
+        'No tiene permisos para responder a la reprogramación de este turno',
+      );
     }
 
     // 4. Procesamos la decisión
@@ -474,9 +488,9 @@ export class TurnoService {
       // Transicionamos de vuelta al estado Reservado mediante el dominio
       // CAMBIO: Pasamos el objeto 'usuario' como el remitente/actor
       const notificacion = turno.actualizarEstado(
-        usuario, 
-        new Reservado(turno), 
-        'Propuesta de reprogramación aceptada con éxito'
+        usuario,
+        new Reservado(turno),
+        'Propuesta de reprogramación aceptada con éxito',
       );
 
       if (notificacion) {
@@ -488,7 +502,7 @@ export class TurnoService {
       const notificacion = turno.actualizarEstado(
         usuario,
         new Reservado(turno),
-        'Propuesta de reprogramación rechazada por la contraparte'
+        'Propuesta de reprogramación rechazada por la contraparte',
       );
 
       if (notificacion) {
@@ -502,20 +516,19 @@ export class TurnoService {
     return turno;
   }
 
-  obtenerHoraInicio(fecha){
+  obtenerHoraInicio(fecha) {
     const inicioDeMañana = new Date(fecha);
     inicioDeMañana.setDate(fecha.getDate() + 1);
     return inicioDeMañana.setHours(0, 0, 0, 0);
   }
 
-  obtenerHoraFin(fecha){
+  obtenerHoraFin(fecha) {
     const finDeMañana = new Date(fecha);
     finDeMañana.setDate(fecha.getDate() + 1);
     return finDeMañana.setHours(23, 59, 59, 999);
   }
 
-
-  async obtenerTurnosParaManiana(){
+  async obtenerTurnosParaManiana() {
     const hoy = new Date();
 
     const horaInicioManiana = this.obtenerHoraInicio(hoy);
@@ -523,7 +536,6 @@ export class TurnoService {
 
     return this.turnoRepository.findAllForTomorrow(horaInicioManiana, horaFinManiana);
   }
-
 }
 
 export const turnoService = new TurnoService();

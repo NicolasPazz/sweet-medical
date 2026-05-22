@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
-import { t } from "../../../utils/i18n/i18n.js"; // <-- Cambiado a 't' para unificar
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
 
 export class PendienteReprogramacion {
   id;
@@ -15,13 +15,13 @@ export class PendienteReprogramacion {
   notificar(remitente) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
-    
+
     const actorId = actor?.id || actor?._id;
     const pacienteUsuarioId = this.turno.paciente?.usuario?.id || this.turno.paciente?.usuario?._id;
     const medicoUsuarioId = this.turno.medico?.usuario?.id || this.turno.medico?.usuario?._id;
 
     const prop = this.turno.propuestaCambio;
-    const fechaFormateada = prop 
+    const fechaFormateada = prop
       ? `${new Date(prop.nuevaFechaHora).toLocaleDateString('es-AR')} a las ${new Date(prop.nuevaFechaHora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`
       : 'una nueva fecha';
 
@@ -37,7 +37,7 @@ export class PendienteReprogramacion {
           nombre: this.turno.paciente.nombre,
           servicio,
           fecha: fechaFormateada,
-          motivo
+          motivo,
         }),
       );
     }
@@ -52,12 +52,10 @@ export class PendienteReprogramacion {
           nombre: this.turno.medico.nombre,
           servicio,
           fecha: fechaFormateada,
-          motivo
+          motivo,
         }),
       );
-    }
-
-    else {
+    } else {
       logger.debug(`Solicitud de reprogramación iniciada por el sistema.`);
       return null;
     }

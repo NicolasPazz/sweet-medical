@@ -10,8 +10,8 @@ i18next.init({
   fallbackLng: 'es',
   resources: {
     es: { translation: negocioEs },
-    en: { translation: negocioEn }
-  }
+    en: { translation: negocioEn },
+  },
 });
 
 // Función única para traducir mensajes del negocio (notificaciones, errores, etc.)

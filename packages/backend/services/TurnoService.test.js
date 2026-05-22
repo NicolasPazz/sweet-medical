@@ -512,7 +512,7 @@ describe('TurnoService', () => {
 
       usuarioPaciente = { id: 'u-paciente', _id: 'u-paciente', roles: [Rol.PACIENTE] };
       usuarioMedico = { id: 'u-medico', _id: 'u-medico', roles: [Rol.MEDICO] };
-      
+
       paciente = { id: 'p-1', _id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Sebastián' };
       medico = { id: 'm-1', _id: 'm-1', usuario: { _id: 'u-medico' }, nombre: 'Dr. House' };
 
@@ -523,12 +523,12 @@ describe('TurnoService', () => {
         '13:00',
         { nombre: 'Sede Central' },
         { _id: 's-cardio', nombre: 'Cardiología', codigo: 'CARD-01' },
-        1500
+        1500,
       );
       turnoOriginal.id = 't-original';
       turnoOriginal.estado = { getEstadoNombre: () => 'RESERVADO' }; // Mockeo simple de string
       turnoOriginal.fechaHora = new Date('2026-05-17T13:00:00Z'); // 3 horas en el futuro (VÁLIDO)
-      
+
       // Mock de método de dominio para simular transición
       turnoOriginal.solicitarReprogramacion = jest.fn().mockReturnValue({ id: 'notif-proponer' });
       turnoOriginal.actualizarEstado = jest.fn().mockReturnValue({ id: 'notif-responder' });
@@ -543,7 +543,7 @@ describe('TurnoService', () => {
       const turnoDestinoBache = {
         id: 't-bache',
         servicio: { _id: 's-cardio', nombre: 'Cardiología' },
-        estado: { getEstadoNombre: () => 'DISPONIBLE' }
+        estado: { getEstadoNombre: () => 'DISPONIBLE' },
       };
 
       turnoOriginal.servicio = { _id: 's-cardio', nombre: 'Cardiología' };
@@ -552,10 +552,22 @@ describe('TurnoService', () => {
       mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
       mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(turnoDestinoBache);
 
-      const resultado = await service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Fuerza mayor');
+      const resultado = await service.proponerReprogramacion(
+        'u-paciente',
+        't-original',
+        fechaFuturaValida,
+        'Fuerza mayor',
+      );
 
-      expect(mockTurnoRepository.findByMedicFechaHora).toHaveBeenCalledWith('m-1', fechaFuturaValida);
-      expect(turnoOriginal.solicitarReprogramacion).toHaveBeenCalledWith(usuarioPaciente, fechaFuturaValida, 'Fuerza mayor');
+      expect(mockTurnoRepository.findByMedicFechaHora).toHaveBeenCalledWith(
+        'm-1',
+        fechaFuturaValida,
+      );
+      expect(turnoOriginal.solicitarReprogramacion).toHaveBeenCalledWith(
+        usuarioPaciente,
+        fechaFuturaValida,
+        'Fuerza mayor',
+      );
       expect(mockNotificacionRepository.save).toHaveBeenCalled();
       expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
       expect(resultado).toBe(turnoOriginal);
@@ -570,9 +582,9 @@ describe('TurnoService', () => {
       mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
 
       await expect(
-        service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Tarde')
+        service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Tarde'),
       ).rejects.toThrow(ConflictError);
-      
+
       expect(mockTurnoRepository.save).not.toHaveBeenCalled();
     });
 
@@ -581,7 +593,7 @@ describe('TurnoService', () => {
       const bacheOcupado = {
         id: 't-ocupado',
         servicio: { _id: 's-cardio', nombre: 'Cardiología' },
-        estado: { getEstadoNombre: () => 'RESERVADO' } // <-- No disponible!
+        estado: { getEstadoNombre: () => 'RESERVADO' }, // <-- No disponible!
       };
 
       mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
@@ -589,7 +601,12 @@ describe('TurnoService', () => {
       mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(bacheOcupado);
 
       await expect(
-        service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Permutación')
+        service.proponerReprogramacion(
+          'u-paciente',
+          't-original',
+          fechaFuturaValida,
+          'Permutación',
+        ),
       ).rejects.toThrow(ConflictError);
     });
 
@@ -598,7 +615,7 @@ describe('TurnoService', () => {
       const bacheDePediatria = {
         id: 't-pediatria',
         servicio: { _id: 's-pediatria', nombre: 'Pediatría' }, // <-- Especialidad distinta
-        estado: { getEstadoNombre: () => 'DISPONIBLE' }
+        estado: { getEstadoNombre: () => 'DISPONIBLE' },
       };
 
       mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
@@ -606,7 +623,12 @@ describe('TurnoService', () => {
       mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(bacheDePediatria);
 
       await expect(
-        service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Error especialidad')
+        service.proponerReprogramacion(
+          'u-paciente',
+          't-original',
+          fechaFuturaValida,
+          'Error especialidad',
+        ),
       ).rejects.toThrow(ConflictError);
     });
 
@@ -615,7 +637,7 @@ describe('TurnoService', () => {
       // Seteamos una propuesta previa en el turno original
       turnoOriginal.propuestaCambio = {
         nuevaFechaHora: fechaFuturaValida,
-        proponenteId: 'u-paciente' // Propuso el paciente
+        proponenteId: 'u-paciente', // Propuso el paciente
       };
 
       mockUsuarioRepository.findById.mockResolvedValue(usuarioMedico); // Responde el médico (VÁLIDO)
@@ -625,7 +647,12 @@ describe('TurnoService', () => {
 
       expect(resultado.fechaHora).toEqual(new Date(fechaFuturaValida));
       expect(resultado.propuestaCambio).toBeNull(); // Se limpió
-      expect(turnoOriginal.actualizarEstado).toHaveBeenCalledWith(usuarioMedico, 'RESERVADO', usuarioMedico, expect.any(String));
+      expect(turnoOriginal.actualizarEstado).toHaveBeenCalledWith(
+        usuarioMedico,
+        'RESERVADO',
+        usuarioMedico,
+        expect.any(String),
+      );
       expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
     });
 
@@ -633,14 +660,14 @@ describe('TurnoService', () => {
     it('falla si el mismo usuario que propuso el cambio intenta responder la propuesta', async () => {
       turnoOriginal.propuestaCambio = {
         nuevaFechaHora: fechaFuturaValida,
-        proponenteId: 'u-paciente'
+        proponenteId: 'u-paciente',
       };
 
       mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente); // Intenta responder el mismo paciente
       mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
 
       await expect(
-        service.responderReprogramacion('u-paciente', 't-original', true)
+        service.responderReprogramacion('u-paciente', 't-original', true),
       ).rejects.toThrow(ConflictError);
 
       expect(mockTurnoRepository.save).not.toHaveBeenCalled();

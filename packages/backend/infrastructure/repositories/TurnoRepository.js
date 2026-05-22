@@ -31,14 +31,14 @@ export class TurnoRepository {
     });
   }
 
-  async findAllForTomorrow(horaInicioManiana, horaFinManiana){
+  async findAllForTomorrow(horaInicioManiana, horaFinManiana) {
     return await this.model.find({
       estado: 'RESERVADO',
       fechaHora: {
         $gte: horaInicioManiana,
         $lte: horaFinManiana,
       },
-  });
+    });
   }
 
   async findAllByPatientId(pacienteId) {
@@ -46,11 +46,11 @@ export class TurnoRepository {
   }
 
   async findByMedicFechaHora(medicId, fechaHora) {
-  return await this.model.findOne({
-    medico: medicId,
-    fechaHora: fechaHora
-  });
-}
+    return await this.model.findOne({
+      medico: medicId,
+      fechaHora: fechaHora,
+    });
+  }
 
   // CREAR
   async save(turno) {

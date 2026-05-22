@@ -51,7 +51,6 @@ describe('NotificacionService', () => {
     expect(result).toEqual([{ id: '2', leida: false }]);
   });
 
-
   it('marca una notificación como leída cuando el destinatario coincide (vía id directo)', async () => {
     mockNotificacionRepository.findById.mockResolvedValue({
       id: validObjectId,
@@ -101,14 +100,13 @@ describe('NotificacionService', () => {
     );
   });
 
-
   it('guarda una nueva notificación correctamente e instancia la clase de Dominio', async () => {
     const datosNotificacion = {
       destinatario: validObjectId,
       remitente: validObjectId,
       mensaje: 'Hola',
     };
-    
+
     mockNotificacionRepository.save.mockImplementation((instancia) => {
       return Promise.resolve({ id: '5', ...instancia });
     });
@@ -121,7 +119,6 @@ describe('NotificacionService', () => {
     expect(result.mensaje).toBe('Hola');
     expect(result.leida).toBe(false);
   });
-
 
   it('lanza un error si se le pasa un ID inválido a obtenerLeidas', async () => {
     await expect(service.obtenerLeidas('id-invalido-123')).rejects.toThrow();
