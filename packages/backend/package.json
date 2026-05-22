@@ -5,15 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development node --watch index.js",
-    "start": "node index.js",
     "build": "node -e \"console.log('[@sweet-medical/backend] Listo para producción (sin compilación). Definir MONGODB_URI, MONGODB_DB_NAME y NODE_ENV en el entorno.')\"",
-    "lint": "eslint . --fix",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage",
-    "test:notificaciones": "jest --runInBand tests/notificaciones.test.js",
-    "test:servicios": "jest --runInBand tests/servicios.test.js",
-    "test:datosIniciales": "jest --runInBand tests/datosIniciales.test.js",
-    "test:turnosMedicosPacientes": "jest --runInBand tests/turnosMedicosPacientes.test.js"
+    "start": "node index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest --runInBand"
   },
   "keywords": [],
   "author": "",
