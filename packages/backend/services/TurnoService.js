@@ -16,6 +16,7 @@ import { ValidadorId } from '../utils/ValidadorId.js';
 import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
 import { Turno } from '../domain/turno/Turno.js';
 import { estaEnDisponibilidad } from '../utils/functions.js';
+import { logger } from '../utils/logger.js';
 
 export class TurnoService {
   turnoRepository;
@@ -318,13 +319,16 @@ export class TurnoService {
     throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
   }
 
-  // --- LÓGICA DE RESTRICCIÓN DE SEDE ---
+  // --- LÓGICA DE RESTRICCIÓN DE SEDE UTILIZANDO SLOT REPOSITORY ---
   const idMedico = turno.medico?.id || turno.medico?._id || turno.medico;
   
-  // Usamos el método específico que me pasaste para traer los slots del médico
   const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
   
   const fechaTurnoTarget = new Date(turno.fechaHora).toDateString();
+
+  logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
+  logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
+  logger.debug(`[CONFIRMAR TURNO] Total de slots recuperados para el médico: ${slotsDelMedico?.length || 0}`);
 
   // 1. Validar si ya existe otro slot en ese mismo día que tenga una sede asignada
   const yaTieneSedeAsignada = slotsDelMedico.some((s) => {
@@ -335,46 +339,67 @@ export class TurnoService {
     return esMismoDia && tieneSede && esDiferenteTurno;
   });
 
+  logger.debug(`[CONFIRMAR TURNO] ¿Ya tiene sede asignada en el día?: ${yaTieneSedeAsignada}`);
+
   if (yaTieneSedeAsignada) {
-    // Si ya había una sede en el día, verificamos que coincida con la que viene por parámetro
     const slotConSedeExistente = slotsDelMedico.find((s) => 
       new Date(s.fechaHora).toDateString() === fechaTurnoTarget && s.sede != null
     );
 
     const idSedeExistente = slotConSedeExistente.sede?.id || slotConSedeExistente.sede?._id || slotConSedeExistente.sede;
+    
+    logger.debug(`[CONFIRMAR TURNO] Sede existente encontrada en la DB para este día: ${idSedeExistente}`);
+    logger.debug(`[CONFIRMAR TURNO] Sede solicitada en el parámetro: ${id_sede}`);
 
     if (String(idSedeExistente) !== String(id_sede)) {
+      logger.debug(`[CONFIRMAR TURNO] CONFLICTO: Las sedes no coinciden. Lanzando ConflictError.`);
       throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
     }
+    logger.debug(`[CONFIRMAR TURNO] ÉXITO: La sede coincide con la que ya estaba asignada en el día.`);
   } else {
-    // 2. Es el primer turno con sede del día: propagamos la sede a todos los slots DISPONIBLES de la fecha
+    logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día. Filtrando slots disponibles para propagar...`);
+
     const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
-      const esMismoDia = new Date(s.fechaHora).toDateString() === fechaTurnoTarget;
-      const estaDisponible = typeof s.estado?.getItemsNombre === 'function' 
-        ? s.estado.getItemsNombre() === 'Disponible' // O el método de estado que usen en los slots
-        : s.estado === 'Disponible';
+      // CORRECCIÓN: Usamos s.fecha en lugar de s.fechaHora
+      const fechaSlotStr = new Date(s.fecha).toDateString();
+      const esMismoDia = fechaSlotStr === fechaTurnoTarget;
+      
+      const valorEstado = typeof s.estado?.getItemsNombre === 'function' 
+        ? s.estado.getItemsNombre() 
+        : s.estado;
+
+      const estaDisponible = String(valorEstado).toLowerCase() === 'disponible';
+
+      logger.debug(`[CONFIRMAR TURNO] Evaluando Slot ID: ${s._id || s.id} -> Fecha Slot: "${fechaSlotStr}" (Matchea: ${esMismoDia}), Estado: "${valorEstado}"`);
 
       return esMismoDia && estaDisponible;
     });
-    // TODO: ver si asigna bien la sede
+
+    logger.debug(`[CONFIRMAR TURNO] Cantidad de slots encontrados para propagar sede: ${slotsDisponiblesDelDia.length}`);
+
     for (const slot of slotsDisponiblesDelDia) {
+      logger.debug(`[CONFIRMAR TURNO] Propagando sede ${id_sede} al Slot ID: ${slot._id || slot.id}`);
       slot.sede = id_sede;
-      await this.slotRepository.save(slot); // Impactamos cada slot de disponibilidad en la DB
+      await this.slotRepository.save(slot);
     }
   }
 
-  // Asignamos la sede al turno actual que se está confirmando
+  logger.debug(`[CONFIRMAR TURNO] Asignando sede ${id_sede} al documento del Turno actual: ${id_turno}`);
   turno.sede = id_sede;
   // -----------------------------------------------------------------
 
-  // TODO: Revisar lógica de actualizacion de estado y notificación. 
-
+  logger.debug(`[CONFIRMAR TURNO] Actualizando estado del turno a CONFIRMADO...`);
   const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
+  
   if (notificacion) {
+    logger.debug(`[CONFIRMAR TURNO] Notificación generada. Guardando en repositorio...`);
     await this.notificacionRepository.save(notificacion);
+  } else {
+    logger.debug(`[CONFIRMAR TURNO] No se generó ninguna notificación para este cambio de estado.`);
   }
 
   await this.turnoRepository.save(turno);
+  logger.debug(`[CONFIRMAR TURNO] Proceso finalizado con éxito. Turno guardado.`);
   return turno;
 }
 
