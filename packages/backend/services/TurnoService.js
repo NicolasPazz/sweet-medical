@@ -356,7 +356,7 @@ export class TurnoService {
 
       return esMismoDia && estaDisponible;
     });
-
+    // TODO: ver si asigna bien la sede
     for (const slot of slotsDisponiblesDelDia) {
       slot.sede = id_sede;
       await this.slotRepository.save(slot); // Impactamos cada slot de disponibilidad en la DB
@@ -366,6 +366,8 @@ export class TurnoService {
   // Asignamos la sede al turno actual que se está confirmando
   turno.sede = id_sede;
   // -----------------------------------------------------------------
+
+  // TODO: Revisar lógica de actualizacion de estado y notificación. 
 
   const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
   if (notificacion) {
