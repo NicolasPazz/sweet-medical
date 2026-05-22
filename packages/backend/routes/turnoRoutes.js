@@ -174,10 +174,10 @@ turnoRouter
 
 /**
  * @swagger
- * /turnos/medico/{id_usuario}/confirmar/{id_turno}:
+ * /turnos/medico/{id_usuario}/confirmar/{id_turno}/sede/{id_sede}:
  *   patch:
  *     summary: Confirmar un turno como médico
- *     description: Permite a un médico confirmar/aceptar un turno que ha sido reservado por un paciente. El turno pasa a estado CONFIRMADO.
+ *     description: Permite a un médico confirmar un turno reservado por un paciente. Al ser el primer turno del día, congelará la sede para el resto de los slots libres de esa fecha. El turno pasa a estado CONFIRMADO
  *     tags:
  *       - Turnos
  *     parameters:
@@ -193,9 +193,15 @@ turnoRouter
  *         description: ID del turno a confirmar (MongoDB ObjectId)
  *         schema:
  *           type: string
+ *       - name: id_sede
+ *         in: path
+ *         required: true
+ *         description: ID de la sede donde se realizará la atención (MongoDB ObjectId)
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Turno confirmado exitosamente
+ *         description: Turno confirmado exitosamente y sede propagada en el día
  *         content:
  *           application/json:
  *             schema:
@@ -208,19 +214,19 @@ turnoRouter
  *                   type: string
  *                   example: "Turno aceptado exitosamente"
  *       400:
- *         description: IDs mal formados o turno no puede ser confirmado
+ *         description: IDs mal formados o conflicto con otra sede ya asignada en el día
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
- *         description: Turno no encontrado
+ *         description:  Turno o médico no encontrado
  *       500:
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/medico/:id_usuario/confirmar/:id_turno')
-  .patch((req, res, next) => turnoController.aceptarTurno(req, res, next));
+  .route('/medico/:id_usuario/confirmar/:id_turno/sede/:id_sede')
+  .patch((req, res, next) => turnoController.confirmarTurno(req, res, next));
 
 /**
  * @swagger

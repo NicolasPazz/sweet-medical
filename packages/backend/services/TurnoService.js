@@ -286,41 +286,90 @@ export class TurnoService {
     return turno;
   }
 
-  async aceptarTurno(id_usuario, id_turno) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+  async confirmarTurno(id_usuario, id_turno, id_sede) {
+  const usuario = await this.usuarioRepository.findById(id_usuario);
 
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
-
-    if (!usuario.roles.includes(Rol.MEDICO)) {
-      throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
-    }
-
-    const turno = await this.turnoRepository.findById(id_turno);
-
-    if (turno == null) {
-      throw new NotFoundError('Turno no encontrado');
-    }
-
-    const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
-
-    if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
-      throw new ConflictError('El turno no pertenece al medico');
-    }
-
-    if (!(turno.estado instanceof Reservado)) {
-      throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
-    }
-
-    const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
-    if (notificacion) {
-      await this.notificacionRepository.save(notificacion);
-    }
-
-    await this.turnoRepository.save(turno);
-    return turno;
+  if (usuario == null) {
+    throw new NotFoundError('Usuario no encontrado');
   }
+
+  if (!usuario.roles.includes(Rol.MEDICO)) {
+    throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
+  }
+
+  const turno = await this.turnoRepository.findById(id_turno);
+
+  if (turno == null) {
+    throw new NotFoundError('Turno no encontrado');
+  }
+
+  const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
+
+  if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
+    throw new ConflictError('El turno no pertenece al medico');
+  }
+
+  if (!(turno.estado instanceof Reservado)) {
+    throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
+  }
+
+  // --- LÓGICA DE RESTRICCIÓN DE SEDE ---
+  const idMedico = turno.medico?.id || turno.medico?._id || turno.medico;
+  
+  // Usamos el método específico que me pasaste para traer los slots del médico
+  const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
+  
+  const fechaTurnoTarget = new Date(turno.fechaHora).toDateString();
+
+  // 1. Validar si ya existe otro slot en ese mismo día que tenga una sede asignada
+  const yaTieneSedeAsignada = slotsDelMedico.some((s) => {
+    const esMismoDia = new Date(s.fechaHora).toDateString() === fechaTurnoTarget;
+    const tieneSede = s.sede != null;
+    const esDiferenteTurno = String(s.id || s._id) !== String(id_turno);
+
+    return esMismoDia && tieneSede && esDiferenteTurno;
+  });
+
+  if (yaTieneSedeAsignada) {
+    // Si ya había una sede en el día, verificamos que coincida con la que viene por parámetro
+    const slotConSedeExistente = slotsDelMedico.find((s) => 
+      new Date(s.fechaHora).toDateString() === fechaTurnoTarget && s.sede != null
+    );
+
+    const idSedeExistente = slotConSedeExistente.sede?.id || slotConSedeExistente.sede?._id || slotConSedeExistente.sede;
+
+    if (String(idSedeExistente) !== String(id_sede)) {
+      throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
+    }
+  } else {
+    // 2. Es el primer turno con sede del día: propagamos la sede a todos los slots DISPONIBLES de la fecha
+    const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
+      const esMismoDia = new Date(s.fechaHora).toDateString() === fechaTurnoTarget;
+      const estaDisponible = typeof s.estado?.getItemsNombre === 'function' 
+        ? s.estado.getItemsNombre() === 'Disponible' // O el método de estado que usen en los slots
+        : s.estado === 'Disponible';
+
+      return esMismoDia && estaDisponible;
+    });
+
+    for (const slot of slotsDisponiblesDelDia) {
+      slot.sede = id_sede;
+      await this.slotRepository.save(slot); // Impactamos cada slot de disponibilidad en la DB
+    }
+  }
+
+  // Asignamos la sede al turno actual que se está confirmando
+  turno.sede = id_sede;
+  // -----------------------------------------------------------------
+
+  const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
+  if (notificacion) {
+    await this.notificacionRepository.save(notificacion);
+  }
+
+  await this.turnoRepository.save(turno);
+  return turno;
+}
 
   async obtenerDisponibilidad(id_usuario, id_servicio) {
     const medico = await this.medicoRepository.findByIdUsuario(id_usuario);

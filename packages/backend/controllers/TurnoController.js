@@ -84,20 +84,23 @@ export class TurnoController {
     }
   };
 
-  aceptarTurno = async (req, res, next) => {
-    try {
-      const idUsuario = req.params.id_usuario;
-      ValidadorId.validarIds(idUsuario);
-      const idTurno = req.params.id_turno;
-      ValidadorId.validarIds(idTurno);
+  confirmarTurno = async (req, res, next) => {
+  try {
+    const idUsuario = req.params.id_usuario;
+    ValidadorId.validarIds(idUsuario);
+    const idTurno = req.params.id_turno;
+    ValidadorId.validarIds(idTurno);
+    
+    const idSede = req.params.id_sede;
+    ValidadorId.validarIds(idSede);
 
-      await this.turnoService.aceptarTurno(idUsuario, idTurno);
+    await this.turnoService.confirmarTurno(idUsuario, idTurno, idSede);
 
-      return res.status(200).json({ status: 'success', message: 'Turno aceptado exitosamente' });
-    } catch (error) {
-      return next(error);
-    }
-  };
+    return res.status(200).json({ status: 'success', message: 'Turno confirmado exitosamente' });
+  } catch (error) {
+    return next(error);
+  }
+};
 
   obtenerDisponibilidad = async (req, res, next) => {
     try {
