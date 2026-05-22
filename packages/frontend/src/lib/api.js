@@ -1,7 +1,11 @@
-const DEFAULT_API_URL = 'http://localhost:3001';
+const DEV_FALLBACK_API_URL = 'http://localhost:3001';
 
 export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL;
+  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+  return DEV_FALLBACK_API_URL;
 }
 
 export function apiUrl(path) {

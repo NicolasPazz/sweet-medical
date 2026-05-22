@@ -4,9 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
     "start": "node index.js",
-    "dev": "node --watch index.js",
-    "build": "echo \"Backend: sin paso de build\"",
+    "build": "node -e \"console.log('[@sweet-medical/backend] Listo para producción (sin compilación). Definir MONGODB_URI, MONGODB_DB_NAME y NODE_ENV en el entorno.')\"",
     "lint": "eslint . --fix",
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",

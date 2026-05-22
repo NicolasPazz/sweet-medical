@@ -1,4 +1,8 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { getPort, getPublicBaseUrl } from './utils/serverConfig.js';
+
+const port = getPort();
+const publicBaseUrl = getPublicBaseUrl(port);
 
 const options = {
   definition: {
@@ -15,12 +19,9 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3001}`,
-        description: 'Development Server',
-      },
-      {
-        url: 'https://api.sweetmedical.com',
-        description: 'Production Server',
+        url: publicBaseUrl,
+        description:
+          process.env.NODE_ENV === 'production' ? 'Production Server' : 'Configured Server',
       },
     ],
     components: {

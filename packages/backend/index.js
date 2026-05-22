@@ -2,10 +2,11 @@ import 'dotenv/config';
 import server from './app.js';
 import { MongoDBClient } from './infrastructure/config/database.js';
 import { logger } from './utils/logger.js';
+import { getPort } from './utils/serverConfig.js';
 import { usuarioRepository } from './infrastructure/repositories/UsuarioRepository.js';
 import { Usuario } from './domain/usuario/Usuario.js';
 
-const PORT = process.env.PORT || 3001;
+const PORT = getPort();
 
 const start = async () => {
   try {

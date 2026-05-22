@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const DEFAULT_API_URL = 'http://localhost:3001';
+import { getApiBaseUrl } from '@/lib/api';
 
 const TOKEN_KEY = 'token';
 
@@ -16,7 +15,7 @@ function getAuthToken() {
 }
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
