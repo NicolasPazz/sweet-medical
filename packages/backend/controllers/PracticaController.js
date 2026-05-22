@@ -45,7 +45,11 @@ export class PracticaController {
       const { idUsuario } = req.body;
       ValidadorId.validarIds(id, idUsuario);
       const datosActualizados = this._validarCuerpoModificacion(req.body);
-      const practicaModificada = await this.practicaService.modificar(idUsuario, id, datosActualizados);
+      const practicaModificada = await this.practicaService.modificar(
+        idUsuario,
+        id,
+        datosActualizados,
+      );
       return res.status(200).json({ status: 'success', data: practicaModificada });
     } catch (error) {
       return next(error);

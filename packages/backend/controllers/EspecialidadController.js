@@ -32,7 +32,10 @@ export class EspecialidadController {
       const { idUsuario } = req.body;
       ValidadorId.validarIds(idUsuario);
       const datosEspecialidad = this._validarCuerpoCreacion(req.body);
-      const especialidadAgregada = await this.especialidadService.agregar(idUsuario, datosEspecialidad);
+      const especialidadAgregada = await this.especialidadService.agregar(
+        idUsuario,
+        datosEspecialidad,
+      );
       return res.status(201).json({ status: 'created', data: especialidadAgregada });
     } catch (error) {
       return next(error);
@@ -45,7 +48,11 @@ export class EspecialidadController {
       const { idUsuario } = req.body;
       ValidadorId.validarIds(id, idUsuario);
       const datosActualizados = this._validarCuerpoModificacion(req.body);
-      const especialidadModificada = await this.especialidadService.modificar(idUsuario, id, datosActualizados);
+      const especialidadModificada = await this.especialidadService.modificar(
+        idUsuario,
+        id,
+        datosActualizados,
+      );
       return res.status(200).json({ status: 'success', data: especialidadModificada });
     } catch (error) {
       return next(error);
