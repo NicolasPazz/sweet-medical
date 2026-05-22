@@ -1,6 +1,5 @@
 export class GeneradorDisponibilidad {
   static actualizarDisponibilidad(nuevaDisponibilidad, disponibilidades) {
-    
     let colisionados = disponibilidades.filter(
       (d) =>
         d.diaSemana === nuevaDisponibilidad.diaSemana && this.hayColision(d, nuevaDisponibilidad),

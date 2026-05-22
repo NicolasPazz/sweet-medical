@@ -7,6 +7,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorLogger } from './middlewares/errorLogger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { logger } from './utils/logger.js';
+import { getHost, getPort, getPublicBaseUrl } from './utils/serverConfig.js';
 import '../backend/cronjobs/generadorSlots.js';
 
 const app = express();
@@ -57,12 +58,15 @@ app.use(errorHandler);
 
 // --- Método de Lanzamiento ---
 app.launch = function () {
-  const portToUse = this.port || process.env.PORT || 3001;
+  const portToUse = this.port || getPort();
+  const host = getHost();
+  const baseUrl = getPublicBaseUrl(portToUse);
 
-  this.listen(portToUse, async () => {
-    logger.info(`Servidor listo en http://localhost:${portToUse}`);
-    logger.info(`Health check: http://localhost:${portToUse}/health`);
-    logger.info(`Documentación Swagger: http://localhost:${portToUse}/api-docs`);
+  this.listen(portToUse, host, async () => {
+    logger.info(`Servidor escuchando en ${host}:${portToUse}`);
+    logger.info(`URL pública configurada: ${baseUrl}`);
+    logger.info(`Health check: ${baseUrl}/health`);
+    logger.info(`Documentación Swagger: ${baseUrl}/api-docs`);
 
     try {
       /*logger.info('Ejecutando carga automática...');

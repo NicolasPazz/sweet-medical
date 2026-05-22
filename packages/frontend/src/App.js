@@ -5,7 +5,7 @@ const HealthCheck = () => {
   const [healthData, setHealthData] = useState(null);
 
   useEffect(() => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:3001';
     fetch(`${apiUrl}/health`)
       .then((res) => res.json())
       .then((data) => setHealthData(data))
