@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Linting
@@ -19,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Run Lint
-        run: npm run lint:all
+        run: npm run lint
 
   test-backend:
     name: Test Backend
