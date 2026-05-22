@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getApiBaseUrl } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/api-utils';
 
 export default function Home() {
   return (

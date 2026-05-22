@@ -23,7 +23,7 @@
     "lint:backend": "npm -w @sweet-medical/backend run lint",
     "lint:frontend": "npm -w @sweet-medical/frontend run lint",
     "fix:all": "npm run format && npm run lint",
-    "test": "npm run test:backend && npm run test:frontend",
+    "test": "npm test --workspace=@sweet-medical/backend -- --silent --ci && npm test --workspace=@sweet-medical/frontend -- --silent --ci",
     "test:backend": "npm test --workspace=@sweet-medical/backend -- --verbose",
     "test:frontend": "npm test --workspace=@sweet-medical/frontend -- --verbose"
   },
