@@ -7,28 +7,26 @@ export class FactoryNotificacion {
     return turno.estado.notificar(usuarioQueLlama);
   }
 
-  // Esto se ejecutará desde un cron
-  static crearRecordatoriosDiaPrevio(turno, usuarioSistema) {
-    const remitenteId = usuarioSistema?.id || usuarioSistema?._id;
+  static crearRecordatoriosActores(usuarioQueLlama, turno){
 
-    const medicoUsuarioId = turno.medico.usuario.id || turno.medico.usuario._id;
-    const pacienteUsuarioId = turno.paciente.usuario.id || turno.paciente.usuario._id;
+    const notificaciones = [];
 
-    return [
-      new Notificacion(
-        medicoUsuarioId,
-        remitenteId,
-        t('RECORDATORIO_MEDICO', {
-          nombre: turno.paciente.nombre 
-        }),
-      ),
-      new Notificacion(
-        pacienteUsuarioId,
-        remitenteId,
-        t('RECORDATORIO_PACIENTE', {
-          nombre: turno.medico.nombre 
-        }),
-      ),
-    ];
+    const notificacionPaciente = new Notificacion(
+      turno.paciente.usuario,
+      usuarioQueLlama,
+      t('RECORDATORIO_PACIENTE', {
+        nombre: turno.medico.nombre
+      })
+    );
+    const notificacionMedico = new Notificacion(
+      turno.medico.usuario,
+      usuarioQueLlama,
+      t('RECORDATORIO_MEDICO', {
+        nombre: turno.paciente.nombre
+      })
+    );
+    notificaciones.push(notificacionPaciente, notificacionMedico);
+    return notificaciones;
   }
+
 }

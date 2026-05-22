@@ -5,7 +5,7 @@ import { logger } from '../utils/logger.js';
 // Se ejecuta todos los días a las 02:00 AM
 cron.schedule('0 2 * * *', async () => {
   try {
-    logger.info('Inicio cronjob');
+    logger.info('Inicio cronjob generación turnos');
 
     await turnoService.refrescarTurnos();
   } catch (error) {

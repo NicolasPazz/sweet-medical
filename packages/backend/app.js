@@ -8,6 +8,7 @@ import { errorLogger } from './middlewares/errorLogger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { logger } from './utils/logger.js';
 import '../backend/cronjobs/generadorTurnos.js';
+import '../backend/cronjobs/GeneradorNotificacionesAviso.js';
 
 const app = express();
 

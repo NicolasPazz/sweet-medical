@@ -475,8 +475,7 @@ export class TurnoService {
       // CAMBIO: Pasamos el objeto 'usuario' como el remitente/actor
       const notificacion = turno.actualizarEstado(
         usuario, 
-        'RESERVADO', 
-        usuario,
+        new Reservado(turno), 
         'Propuesta de reprogramación aceptada con éxito'
       );
 
@@ -488,8 +487,7 @@ export class TurnoService {
       // CAMBIO: Pasamos el objeto 'usuario' como el remitente/actor
       const notificacion = turno.actualizarEstado(
         usuario,
-        'RESERVADO',
-        usuario,
+        new Reservado(turno),
         'Propuesta de reprogramación rechazada por la contraparte'
       );
 
@@ -503,6 +501,29 @@ export class TurnoService {
     await this.turnoRepository.save(turno);
     return turno;
   }
+
+  obtenerHoraInicio(fecha){
+    const inicioDeMañana = new Date(fecha);
+    inicioDeMañana.setDate(fecha.getDate() + 1);
+    return inicioDeMañana.setHours(0, 0, 0, 0);
+  }
+
+  obtenerHoraFin(fecha){
+    const finDeMañana = new Date(fecha);
+    finDeMañana.setDate(fecha.getDate() + 1);
+    return finDeMañana.setHours(23, 59, 59, 999);
+  }
+
+
+  async obtenerTurnosParaManiana(){
+    const hoy = new Date();
+
+    const horaInicioManiana = this.obtenerHoraInicio(hoy);
+    const horaFinManiana = this.obtenerHoraFin(hoy);
+
+    return this.turnoRepository.findAllForTomorrow(horaInicioManiana, horaFinManiana);
+  }
+
 }
 
 export const turnoService = new TurnoService();
