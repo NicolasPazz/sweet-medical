@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getApiBaseUrl } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/api-utils';
 
 const TOKEN_KEY = 'token';
 

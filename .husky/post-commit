@@ -4,4 +4,4 @@
 #echo "===================================================="
 #echo "Corriendo resumen de tests en backend..."
 #echo "===================================================="
-#(npm run test:coverage:backend) || true
+#(npm run test) || true

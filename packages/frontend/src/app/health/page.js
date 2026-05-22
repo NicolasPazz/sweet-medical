@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiUrl } from '@/lib/api';
+import { apiUrl } from '@/lib/api-utils';
 
 export default function HealthPage() {
   const [healthData, setHealthData] = useState(null);
