@@ -380,4 +380,26 @@ export class Agenda {
 
     return slotsOcupados;
   }
+
+  /**
+   * Agrupa una lista de slots en sublistas, una por cada fecha distinta,
+   * ordenadas cronológicamente.
+   * @param {Slot[]} slots
+   * @returns {Slot[][]}
+   */
+  static agruparSlotsPorFecha(slots) {
+    const mapa = new Map();
+
+    for (const slot of slots) {
+      const fecha = slot.fecha;
+      if (!mapa.has(fecha)) {
+        mapa.set(fecha, []);
+      }
+      mapa.get(fecha).push(slot);
+    }
+
+    return Array.from(mapa.entries())
+      .sort(([fechaA], [fechaB]) => fechaA.localeCompare(fechaB))
+      .map(([, slotsDelDia]) => slotsDelDia);
+  }
 }

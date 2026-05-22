@@ -270,6 +270,11 @@ export class TurnoService {
 
     turno.actualizarEstado(usuario, new Realizado(turno), 'Turno finalizado');
 
+    for(const slot of turno.slotsAsociados) {
+      slot.estado = 'FINALIZADO';
+      await this.slotRepository.save(slot);
+    }
+
     if (Array.isArray(turno.medico?.turnosActualesYFuturos)) {
       const indice = turno.medico.turnosActualesYFuturos.findIndex(
         (t) => String(t._id || t.id) === String(turno.id),
@@ -378,12 +383,26 @@ export class TurnoService {
       throw new NotFoundError('Médico no encontrado');
     }
 
-    const turnosDelServicio = await this.turnoRepository.findDisponiblesByMedicIdAndServicioId(
-      medico.id || medico._id,
-      id_servicio,
-    );
+    const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
 
-    return turnosDelServicio.map((t) => this._mapearTurno(t));
+    const servicio = await this.servicioRepository.findById(id_servicio);
+
+    if (servicio == null) {
+      throw new NotFoundError('Servicio no encontrado');
+    }
+
+    const idServicio = String(id_servicio);
+    const tieneServicio =
+      medico.especialidades.some((e) => String(e._id || e) === idServicio) ||
+      medico.practicas.some((p) => String(p._id || p) === idServicio);
+
+    if (!tieneServicio) {
+      throw new BadRequestError('El médico no ofrece el servicio solicitado');
+    }
+
+    const turnosDelServicio = this.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+
+    return turnosDelServicio.map((t) => this.mapearTurnoDisponibles(t));
   }
 
   async refrescarSlots() {
@@ -484,10 +503,28 @@ export class TurnoService {
     return turnos.map((t) => this._mapearTurno(t));
   }
 
+  mapearTurnoDisponibles(t){
+    return {
+      id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
+      nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
+      fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
+
+      servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
+      servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : 'N/A') : 'N/A',
+
+      costo: t.costo,
+      hora: t.hora,
+      fecha: t.fechaHora ? t.fechaHora : 'N/A',
+
+      slotsAsociados: t.slotsAsociados ? t.slotsAsociados.map(s => s.id || s._id) : []
+    };
+  }
+
   _mapearTurno(t) {
     return {
       id_turno: t.id || t._id,
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
+      nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
       sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
@@ -520,6 +557,57 @@ export class TurnoService {
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
     };
   }
+
+  generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
+    const turnosGenerados = [];
+
+    const slotsDisponibles = slots.filter(s => s.estado === 'DISPONIBLE');
+    const slotsOrdenados = ordenarSlots(slotsDisponibles);
+    const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
+    const duracionTurno = servicio.duracionTurnoEnMins;
+
+    for (const slotsDelDia of slotsPorFecha) {
+      let i = 0;
+
+      while (i < slotsDelDia.length) {
+        const slotsParaTurno = [slotsDelDia[i]];
+        let minutosAcumulados = slotsDelDia[i].duracionMins;
+
+        // Extender con slots contiguos hasta cubrir la duración
+        let j = i + 1;
+        while (j < slotsDelDia.length && minutosAcumulados < duracionTurno) {
+          const ultimoSlot = slotsParaTurno[slotsParaTurno.length - 1];
+          if (!validarSlotsContiguos([ultimoSlot, slotsDelDia[j]])) break;
+
+          slotsParaTurno.push(slotsDelDia[j]);
+          minutosAcumulados += slotsDelDia[j].duracionMins;
+          j++;
+        }
+
+        if (minutosAcumulados >= duracionTurno) {
+          // Turno válido: avanzar i hasta después del último slot usado
+          const turno = new Turno(
+            medico,
+            null,
+            slotsParaTurno[0].fecha,
+            slotsParaTurno[0].horaInicio,
+            null,
+            servicio,
+            servicio.costo,
+          );
+          turno.slotsAsociados.push(...slotsParaTurno);
+          turnosGenerados.push(turno);
+          i = j; // saltar al slot siguiente al último consumido
+        } else {
+          // No se pudo armar un turno desde este slot (hueco o fin de lista)
+          i++;
+        }
+      }
+    }
+
+    return turnosGenerados;
+  }
+
 }
 
 export const turnoService = new TurnoService();
