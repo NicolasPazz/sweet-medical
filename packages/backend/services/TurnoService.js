@@ -501,7 +501,6 @@ export class TurnoService {
     // 5. Limpiamos la propuesta ya resuelta y guardamos todo
     turno.propuestaCambio = null;
     await this.turnoRepository.save(turno);
-
     return turno;
   }
 }
