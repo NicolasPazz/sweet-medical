@@ -1,0 +1,6 @@
+node_modules
+packages/frontend/.next
+packages/frontend/out
+coverage
+build
+dist

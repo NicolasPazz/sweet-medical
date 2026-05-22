@@ -1,26 +1,30 @@
 {
-  "name": "dds-repo-base",
+  "name": "sweet-medical",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "start:backend": "npm start --workspace=backend",
-    "dev:backend": "npm run dev --workspace=backend",
-    "test:backend": "npm test --workspace=backend -- --verbose",
-    "start:frontend": "npm start --workspace=frontend",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "start:dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "format": "prettier --write \"packages/**/*.js\"",
-    "lint": "eslint --fix \"packages/**/*.js\"",
-    "fix:all": "npm run format && npm run lint",
-    "test:coverage:backend": "npm run test:backend -- --coverage"
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --workspace=@sweet-medical/backend\" \"npm run dev --workspace=@sweet-medical/frontend\"",
+    "start": "concurrently -n backend,frontend -c blue,green \"npm start --workspace=@sweet-medical/backend\" \"npm start --workspace=@sweet-medical/frontend\"",
+    "build": "npm run build --workspace=@sweet-medical/frontend",
+    "dev:backend": "npm run dev --workspace=@sweet-medical/backend",
+    "dev:frontend": "npm run dev --workspace=@sweet-medical/frontend",
+    "start:backend": "npm start --workspace=@sweet-medical/backend",
+    "start:frontend": "npm start --workspace=@sweet-medical/frontend",
+    "test:backend": "npm test --workspace=@sweet-medical/backend -- --verbose",
+    "test:coverage:backend": "npm run test:backend -- --coverage",
+    "lint:backend": "npm -w @sweet-medical/backend run lint",
+    "lint:frontend": "npm -w @sweet-medical/frontend run lint",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "format": "prettier --write \"packages/backend/**/*.{js,mjs,cjs}\" \"packages/frontend/**/*.{js,jsx,mjs,cjs}\"",
+    "fix:all": "npm run format && npm run lint"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Sweet Medical — monorepo de gestión médica",
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "concurrently": "^9.2.0",
@@ -36,7 +40,6 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.6.2",
-    "swagger": "^0.7.5",
     "zod": "^4.3.6"
   },
   "lint-staged": {
