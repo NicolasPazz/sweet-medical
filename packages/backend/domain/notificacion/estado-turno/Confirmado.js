@@ -1,6 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
 
 export class Confirmado {
   id;
@@ -14,14 +15,22 @@ export class Confirmado {
 
   generarNotificacion(remitente) {
     const servicio = this.turno.obtenerNombreServicio();
-    // Al aceptar un turno, se notifica al paciente.
+
+    // LOG: Registro técnico en consola
     logger.debug(
       `Creando notificación para turno ${this.turno.id} en estado CONFIRMADO por profesional ${this.turno.medico.nombre} para servicio ${servicio}.`,
     );
+
+    // NOTIFICACIÓN: Mensaje traducido dinámicamente para el paciente
     return new Notificacion(
       this.turno.paciente.usuario,
       remitente,
-      `Su turno para ${servicio} el dia ${this.turno.fechaHora} en ${this.turno.sede.nombre} con el Dr/a. ${this.turno.medico.nombre} ha sido confirmado.`,
+      t('CONFIRMACION_TURNO_DETALLADA', {
+        servicio: servicio,
+        fecha: this.turno.fechaHora?.toLocaleDateString() || '',
+        sede: this.turno.sede.nombre,
+        medico: this.turno.medico.nombre,
+      }),
     );
   }
 }

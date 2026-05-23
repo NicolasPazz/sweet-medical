@@ -1,16 +1,14 @@
 import { FiltroBusquedaSpecification } from '../domain/busqueda/FiltroBusquedaSpecification.js';
 import { BadRequestError } from '../errors/AppError.js';
-import { busquedaTurnosRepository } from "../infrastructure/repositories/BusquedaTurnosRepository.js";
+import { busquedaTurnosRepository } from '../infrastructure/repositories/BusquedaTurnosRepository.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 const MAX_RESULTADOS_COSTO = 500;
 
 export class TurnoBusquedaService {
-  constructor({
-      turnoBusquedaRepository: turnoRepo = busquedaTurnosRepository,
-    } = {}) {
-      this.turnoRepository = turnoRepo;
-    }
+  constructor({ turnoBusquedaRepository: turnoRepo = busquedaTurnosRepository } = {}) {
+    this.turnoRepository = turnoRepo;
+  }
 
   async buscarTurnos(filtros, paciente, paginacion) {
     const spec = new FiltroBusquedaSpecification(filtros);
@@ -35,7 +33,7 @@ export class TurnoBusquedaService {
           'Demasiados resultados para ordenar por costo. Aplicá más filtros.',
         );
       }
-      
+
       resultadosDomain = allMatches.data;
       totalItems = allMatches.total;
     }

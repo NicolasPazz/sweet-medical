@@ -1,4 +1,5 @@
 import { CambioEstadoTurno } from './CambioEstadoTurno.js';
+import { PendienteReprogramacion } from '../notificacion/estado-turno/PendienteReprogramacion.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 
@@ -14,6 +15,7 @@ export class Turno {
   costo;
   hora;
   slotsAsociados;
+  propuestaCambio = null;
 
   constructor(medico, paciente, fecha, horaInicio, sede, servicio, costo) {
     this.medico = medico;
@@ -37,6 +39,22 @@ export class Turno {
     this.estado = nuevoEstado;
 
     const notificacion = FactoryNotificacion.crearSegunEstadoTurno(quien, this);
+    return notificacion;
+  }
+
+  solicitarReprogramacion(usuarioQueLlama, nuevaFechaHora, motivo) {
+    this.propuestaCambio = {
+      nuevaFechaHora,
+      motivo,
+      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id,
+    };
+
+    const notificacion = this.actualizarEstado(
+      usuarioQueLlama,
+      new PendienteReprogramacion(this),
+      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
+    );
+
     return notificacion;
   }
 

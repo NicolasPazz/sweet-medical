@@ -35,13 +35,16 @@ const medicoSchema = new mongoose.Schema(
 );
 
 medicoSchema.virtual('turnosActualesYFuturos', {
-  ref: 'Turno', // El modelo con el que se va a enlazar
-  localField: '_id', // El campo origen en este esquema
-  foreignField: 'medico', // El campo destino en el esquema de Turno
+  ref: 'Turno',
+  localField: '_id',
+  foreignField: 'medico',
 });
 
 medicoSchema.pre(/^find/, function (next) {
-  this.populate('usuario').populate('especialidades').populate('practicas').populate('sedes');
+  this.populate('usuario')
+    .populate({ path: 'especialidades', match: { activo: true } })
+    .populate({ path: 'practicas', match: { activo: true } })
+    .populate('sedes');
   next();
 });
 

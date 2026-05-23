@@ -26,7 +26,11 @@ describe('ServicioService', () => {
     });
   });
 
-  it('verifica que el usuario sistema sea el único autorizado', async () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('verificar que el usuario sistema sea el único autorizado', async () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
@@ -79,6 +83,11 @@ describe('ServicioService', () => {
     await expect(service.obtenerPorId(id)).rejects.toThrow(NotFoundError);
   });
 
+  it('lanza error si el ID provisto a obtenerPorId es inválido según ValidadorId', async () => {
+    // Verifica que la capa interceptora de ID funcione correctamente ante strings corruptos
+    await expect(service.obtenerPorId('id-invalido')).rejects.toThrow();
+  });
+
   it('agrega una práctica nueva cuando datos incluyen código', async () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
@@ -100,6 +109,24 @@ describe('ServicioService', () => {
     expect(mockServicioRepository.save).toHaveBeenCalled();
   });
 
+  it('instancia correctamente la clase Practica al agregar con código', async () => {
+    mockUsuarioRepository.findById.mockResolvedValue({
+      nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
+    });
+    // Forzamos al mock a retornar la misma instancia de dominio recibida para evaluar su tipo
+    mockServicioRepository.save.mockImplementation((obj) => Promise.resolve(obj));
+
+    const resultado = await service.agregar('507f1f77bcf86cd799439011', {
+      codigo: 'P-01',
+      nombre: 'Radiografía',
+      duracionTurnoEnMins: 20,
+      costo: 1500,
+    });
+
+    expect(resultado.constructor.name).toBe('Practica');
+    expect(resultado.codigo).toBe('P-01');
+  });
+
   it('agrega una especialidad cuando no tiene código', async () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
@@ -114,6 +141,22 @@ describe('ServicioService', () => {
 
     expect(resultado).toEqual({ id: 's-2', nombre: 'Especialidad' });
     expect(mockServicioRepository.save).toHaveBeenCalled();
+  });
+
+  it('instancia correctamente la clase Especialidad al agregar sin código', async () => {
+    mockUsuarioRepository.findById.mockResolvedValue({
+      nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
+    });
+    mockServicioRepository.save.mockImplementation((obj) => Promise.resolve(obj));
+
+    const resultado = await service.agregar('507f1f77bcf86cd799439011', {
+      nombre: 'Nutrición',
+      duracionTurnoEnMins: 30,
+      costo: 1200,
+    });
+
+    expect(resultado.constructor.name).toBe('Especialidad');
+    expect(resultado.codigo).toBeUndefined();
   });
 
   it('lanza NotFoundError al modificar un servicio inexistente', async () => {
@@ -144,7 +187,7 @@ describe('ServicioService', () => {
     ).rejects.toThrow(BadRequestError);
   });
 
-  it('modifica un servicio existente exitosamente', async () => {
+  it('modifica una Especialidad existente exitosamente', async () => {
     const id = '507f1f77bcf86cd799439011';
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
@@ -164,6 +207,30 @@ describe('ServicioService', () => {
     expect(mockServicioRepository.update).toHaveBeenCalledWith(id, {
       nombre: 'Especialidad modificada',
     });
+  });
+
+  it('modifica una Práctica existente exitosamente manteniendo su estructura', async () => {
+    const id = '507f1f77bcf86cd799439011';
+    mockUsuarioRepository.findById.mockResolvedValue({
+      nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
+    });
+    mockServicioRepository.findById.mockResolvedValue({
+      id,
+      nombre: 'Ecografía Vieja',
+      codigo: 'ECO-01',
+    });
+    mockServicioRepository.update.mockResolvedValue({
+      id,
+      nombre: 'Ecografía Nueva',
+      codigo: 'ECO-01',
+    });
+
+    const resultado = await service.modificar('507f1f77bcf86cd799439011', id, {
+      nombre: 'Ecografía Nueva',
+    });
+
+    expect(resultado.nombre).toBe('Ecografía Nueva');
+    expect(mockServicioRepository.update).toHaveBeenCalledWith(id, { nombre: 'Ecografía Nueva' });
   });
 
   it('elimina un servicio existente correctamente', async () => {

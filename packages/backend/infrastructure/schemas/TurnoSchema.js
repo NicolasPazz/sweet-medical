@@ -7,6 +7,7 @@ import { Reservado } from '../../domain/notificacion/estado-turno/Reservado.js';
 import { Confirmado } from '../../domain/notificacion/estado-turno/Confirmado.js';
 import { Cancelado } from '../../domain/notificacion/estado-turno/Cancelado.js';
 import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
+import { PendienteReprogramacion } from '../../domain/notificacion/estado-turno/PendienteReprogramacion.js';
 
 const cambioEstadoTurnoSchema = new mongoose.Schema(
   {
@@ -46,6 +47,7 @@ const turnoSchema = new mongoose.Schema(
         return mapearAClaseEstado(val, this);
       },
       set: function (val) {
+        if (val && typeof val.getEstadNombre === 'function') return val.getEstadoNombre();
         if (val && typeof val.getEstadoNombre === 'function') return val.getEstadoNombre();
         return val;
       },
@@ -53,6 +55,12 @@ const turnoSchema = new mongoose.Schema(
     costo: { type: Number, required: true, min: 0 },
     slotsAsociados: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Slot', default: [] }],
     historialEstados: [cambioEstadoTurnoSchema],
+
+    propuestaCambio: {
+      nuevaFechaHora: { type: Date, default: null },
+      motivo: { type: String, default: null },
+      proponenteId: { type: String, default: null },
+    },
   },
   { collection: 'turnos' },
 );
@@ -75,6 +83,8 @@ function mapearAClaseEstado(estadoValor, turno) {
       return new Cancelado(turno);
     case 'REALIZADO':
       return new Realizado(turno);
+    case 'PENDIENTE_REPROGRAMACION':
+      return new PendienteReprogramacion(turno);
     default:
       return estadoValor;
   }

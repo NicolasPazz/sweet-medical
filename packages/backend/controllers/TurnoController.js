@@ -164,4 +164,70 @@ export class TurnoController {
       return next(error);
     }
   };
+
+  proponerReprogramacion = async (req, res, next) => {
+    try {
+      const idUsuario = req.params.id_usuario;
+      ValidadorId.validarIds(idUsuario);
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+
+      const { fecha, hora, motivo } = req.body;
+
+      if (!fecha || !hora || !motivo) {
+        throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
+      }
+
+      // Convertimos fecha y hora a un objeto Date
+      const [dia, mes, anio] = fecha.split('/').map(Number);
+      const [horas, minutos] = hora.split(':').map(Number);
+      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+
+      // Validamos que el formateo haya dado una fecha coherente
+      if (isNaN(nuevaFechaHora.getTime())) {
+        throw new BadRequestError('El formato de fecha u hora es inválido. Use DD/MM/AAAA y HH:MM');
+      }
+
+      // Delegamos la lógica al Service
+      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Propuesta de reprogramación registrada y notificación enviada',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  responderReprogramacion = async (req, res, next) => {
+    try {
+      const idUsuario = req.params.id_usuario;
+      ValidadorId.validarIds(idUsuario);
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+
+      const { aceptado } = req.body;
+
+      if (aceptado === undefined || typeof aceptado !== 'boolean') {
+        throw new BadRequestError(
+          'Debe indicar si la propuesta fue aceptada (true/false) en el body',
+        );
+      }
+
+      // Delegamos la resolución al Service
+      await this.turnoService.responderReprogramacion(idUsuario, idTurno, aceptado);
+
+      const mensajeFinal = aceptado
+        ? 'El turno ha sido reprogramado con éxito'
+        : 'La propuesta de reprogramación fue rechazada';
+
+      return res.status(200).json({
+        status: 'success',
+        message: mensajeFinal,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
 }

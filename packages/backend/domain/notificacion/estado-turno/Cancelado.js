@@ -1,6 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
 
 export class Cancelado {
   id;
@@ -29,7 +30,10 @@ export class Cancelado {
       return new Notificacion(
         this.turno.medico.usuario,
         remitente,
-        `El paciente ${this.turno.paciente.nombre} ha cancelado su turno para ${servicio}.`,
+        t('CANCELACION_A_MEDICO', {
+          nombre: this.turno.paciente.nombre,
+          servicio,
+        }),
       );
     } else {
       if (this.turno.paciente) {
@@ -37,7 +41,10 @@ export class Cancelado {
         return new Notificacion(
           this.turno.paciente.usuario,
           remitente,
-          `El profesional ha cancelado su turno del dia ${this.turno.fechaHora} para ${servicio}.`,
+          t('CANCELACION_A_PACIENTE', {
+            fecha: this.turno.fechaHora?.toLocaleDateString() || '',
+            servicio,
+          }),
         );
       } else {
         logger.debug(

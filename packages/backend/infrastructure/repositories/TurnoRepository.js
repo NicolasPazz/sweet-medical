@@ -31,8 +31,25 @@ export class TurnoRepository {
     });
   }
 
+  async findAllForTomorrow(horaInicioManiana, horaFinManiana) {
+    return await this.model.find({
+      estado: 'RESERVADO',
+      fechaHora: {
+        $gte: horaInicioManiana,
+        $lte: horaFinManiana,
+      },
+    });
+  }
+
   async findAllByPatientId(pacienteId) {
     return await this.model.find({ paciente: pacienteId });
+  }
+
+  async findByMedicFechaHora(medicId, fechaHora) {
+    return await this.model.findOne({
+      medico: medicId,
+      fechaHora: fechaHora,
+    });
   }
 
   // CREAR

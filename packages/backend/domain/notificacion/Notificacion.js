@@ -2,9 +2,7 @@ import { logger } from '../../utils/logger.js';
 
 export class Notificacion {
   // MongoDB va a agregar _id al documento cuando lo insertes, no necesitás anticiparlo en la clase.
-
   // De ser necesario el acceso a ids en métodos de las clases del dominio, ahí se declara:
-  // _id = null;
   id;
   destinatario;
   remitente;
@@ -25,6 +23,9 @@ export class Notificacion {
   marcarComoLeida() {
     this.leida = true;
     this.fechaHoraLeida = new Date();
-    logger.debug(`Notificación ${this.id} marcada como leída el: ${this.fechaHoraLeida}`);
+
+    logger.debug(
+      `Notificación ${this.id || 'sin ID'} marcada como leída el: ${this.fechaHoraLeida.toLocaleString('es-AR')}`,
+    );
   }
 }

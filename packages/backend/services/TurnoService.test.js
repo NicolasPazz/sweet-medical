@@ -22,6 +22,7 @@ const mockTurnoRepository = {
   findAllByPatientId: jest.fn(),
   findDisponiblesByMedicIdAndServicioId: jest.fn(),
   findAllByMedicId: jest.fn(),
+  findByMedicFechaHora: jest.fn(),
   save: jest.fn(),
   findAll: jest.fn(),
 };
@@ -499,5 +500,177 @@ describe('TurnoService', () => {
     expect(mockTurnoRepository.save).toHaveBeenCalledTimes(2);
     expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoEliminado);
     expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoNuevo);
+  });
+
+  describe('Lógica de Reprogramación', () => {
+    let usuarioPaciente, usuarioMedico, paciente, medico, turnoOriginal;
+    const fechaFuturaValida = new Date('2026-05-17T15:00:00Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-05-17T10:00:00Z')); // Fijamos hora de ejecución
+
+      usuarioPaciente = { id: 'u-paciente', _id: 'u-paciente', roles: [Rol.PACIENTE] };
+      usuarioMedico = { id: 'u-medico', _id: 'u-medico', roles: [Rol.MEDICO] };
+
+      paciente = { id: 'p-1', _id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Sebastián' };
+      medico = { id: 'm-1', _id: 'm-1', usuario: { _id: 'u-medico' }, nombre: 'Dr. House' };
+
+      turnoOriginal = new Turno(
+        medico,
+        paciente,
+        'LUNES',
+        '13:00',
+        { nombre: 'Sede Central' },
+        { _id: 's-cardio', nombre: 'Cardiología', codigo: 'CARD-01' },
+        1500,
+      );
+      turnoOriginal.id = 't-original';
+      turnoOriginal.estado = { getEstadoNombre: () => 'RESERVADO' }; // Mockeo simple de string
+      turnoOriginal.fechaHora = new Date('2026-05-17T13:00:00Z'); // 3 horas en el futuro (VÁLIDO)
+
+      // Mock de método de dominio para simular transición
+      turnoOriginal.solicitarReprogramacion = jest.fn().mockReturnValue({ id: 'notif-proponer' });
+      turnoOriginal.actualizarEstado = jest.fn().mockReturnValue({ id: 'notif-responder' });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    // --- TEST 1: CAMINO FELIZ PROPUESTA ---
+    it('propone una reprogramación con éxito si hay bache disponible y coincide la especialidad', async () => {
+      const turnoDestinoBache = {
+        id: 't-bache',
+        servicio: { _id: 's-cardio', nombre: 'Cardiología' },
+        estado: { getEstadoNombre: () => 'DISPONIBLE' },
+      };
+
+      turnoOriginal.servicio = { _id: 's-cardio', nombre: 'Cardiología' };
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+      mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(turnoDestinoBache);
+
+      const resultado = await service.proponerReprogramacion(
+        'u-paciente',
+        't-original',
+        fechaFuturaValida,
+        'Fuerza mayor',
+      );
+
+      expect(mockTurnoRepository.findByMedicFechaHora).toHaveBeenCalledWith(
+        'm-1',
+        fechaFuturaValida,
+      );
+      expect(turnoOriginal.solicitarReprogramacion).toHaveBeenCalledWith(
+        usuarioPaciente,
+        fechaFuturaValida,
+        'Fuerza mayor',
+      );
+      expect(mockNotificacionRepository.save).toHaveBeenCalled();
+      expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
+      expect(resultado).toBe(turnoOriginal);
+    });
+
+    // --- TEST 2: ERROR DE ANTICIPACIÓN ---
+    it('falla al proponer una reprogramación con menos de 1 hora de antelación', async () => {
+      // Modificamos el turno original para que falten solo 30 minutos
+      turnoOriginal.fechaHora = new Date('2026-05-17T10:30:00Z');
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+
+      await expect(
+        service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Tarde'),
+      ).rejects.toThrow(ConflictError);
+
+      expect(mockTurnoRepository.save).not.toHaveBeenCalled();
+    });
+
+    // --- TEST 3: ERROR BACHE OCUPADO ---
+    it('falla al proponer si el bache horario físico de destino no está DISPONIBLE', async () => {
+      const bacheOcupado = {
+        id: 't-ocupado',
+        servicio: { _id: 's-cardio', nombre: 'Cardiología' },
+        estado: { getEstadoNombre: () => 'RESERVADO' }, // <-- No disponible!
+      };
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+      mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(bacheOcupado);
+
+      await expect(
+        service.proponerReprogramacion(
+          'u-paciente',
+          't-original',
+          fechaFuturaValida,
+          'Permutación',
+        ),
+      ).rejects.toThrow(ConflictError);
+    });
+
+    // --- TEST 4: ERROR SERVICIOS DISTINTOS ---
+    it('falla al proponer si el bache destino corresponde a otra especialidad', async () => {
+      const bacheDePediatria = {
+        id: 't-pediatria',
+        servicio: { _id: 's-pediatria', nombre: 'Pediatría' }, // <-- Especialidad distinta
+        estado: { getEstadoNombre: () => 'DISPONIBLE' },
+      };
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+      mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(bacheDePediatria);
+
+      await expect(
+        service.proponerReprogramacion(
+          'u-paciente',
+          't-original',
+          fechaFuturaValida,
+          'Error especialidad',
+        ),
+      ).rejects.toThrow(ConflictError);
+    });
+
+    // --- TEST 5: CAMINO FELIZ RESPUESTA (ACEPTAR) ---
+    it('acepta la propuesta de reprogramación, actualiza la fecha y limpia la propuesta', async () => {
+      // Seteamos una propuesta previa en el turno original
+      turnoOriginal.propuestaCambio = {
+        nuevaFechaHora: fechaFuturaValida,
+        proponenteId: 'u-paciente', // Propuso el paciente
+      };
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioMedico); // Responde el médico (VÁLIDO)
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+
+      const resultado = await service.responderReprogramacion('u-medico', 't-original', true);
+
+      expect(resultado.fechaHora).toEqual(new Date(fechaFuturaValida));
+      expect(resultado.propuestaCambio).toBeNull(); // Se limpió
+      expect(turnoOriginal.actualizarEstado).toHaveBeenCalledWith(
+        usuarioMedico,
+        'RESERVADO',
+        usuarioMedico,
+        expect.any(String),
+      );
+      expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
+    });
+
+    // --- TEST 6: ERROR AUTO-RESPONDERSE ---
+    it('falla si el mismo usuario que propuso el cambio intenta responder la propuesta', async () => {
+      turnoOriginal.propuestaCambio = {
+        nuevaFechaHora: fechaFuturaValida,
+        proponenteId: 'u-paciente',
+      };
+
+      mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente); // Intenta responder el mismo paciente
+      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+
+      await expect(
+        service.responderReprogramacion('u-paciente', 't-original', true),
+      ).rejects.toThrow(ConflictError);
+
+      expect(mockTurnoRepository.save).not.toHaveBeenCalled();
+    });
   });
 });
