@@ -174,10 +174,10 @@ turnoRouter
 
 /**
  * @swagger
- * /turnos/medico/{id_usuario}/confirmar/{id_turno}/sede/{id_sede}:
+ * /turnos/medico/{id_usuario}/confirmar/{id_turno}:
  *   patch:
  *     summary: Confirmar un turno como médico
- *     description: Permite a un médico confirmar un turno reservado por un paciente. Al ser el primer turno del día, congelará la sede para el resto de los slots libres de esa fecha. El turno pasa a estado CONFIRMADO
+ *     description: Permite a un médico confirmar un turno reservado. Si es el primer turno del día, es obligatorio mandar la sede por el body para congelarla en el resto de los slots libres de esa fecha. En turnos posteriores del mismo día, el body es opcional y se heredará la sede automáticamente.
  *     tags:
  *       - Turnos
  *     parameters:
@@ -193,15 +193,21 @@ turnoRouter
  *         description: ID del turno a confirmar (MongoDB ObjectId)
  *         schema:
  *           type: string
- *       - name: id_sede
- *         in: path
- *         required: true
- *         description: ID de la sede donde se realizará la atención (MongoDB ObjectId)
- *         schema:
- *           type: string
+ *     requestBody:
+ *       required: false
+ *       description: ID de la sede (Obligatorio solo en el primer turno del día)
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id_sede:
+ *                 type: string
+ *                 description: ID de la sede donde se realizará la atención (MongoDB ObjectId)
+ *                 example: "6a10e90bf6a9c4f70dc4e0c4"
  *     responses:
  *       200:
- *         description: Turno confirmado exitosamente y sede propagada en el día
+ *         description: Turno confirmado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -214,18 +220,24 @@ turnoRouter
  *                   type: string
  *                   example: "Turno aceptado exitosamente"
  *       400:
- *         description: IDs mal formados o conflicto con otra sede ya asignada en el día
+ *         description: IDs mal formados o falta de id_sede en el primer turno del día
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
- *         description:  Turno o médico no encontrado
+ *         description: Turno o médico no encontrado
+ *       409:
+ *         description: Conflicto con otra sede ya asignada en el día
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/medico/:id_usuario/confirmar/:id_turno/sede/:id_sede')
+  .route('/medico/:id_usuario/confirmar/:id_turno')
   .patch((req, res, next) => turnoController.confirmarTurno(req, res, next));
 
 /**

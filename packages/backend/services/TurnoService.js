@@ -324,51 +324,63 @@ export class TurnoService {
   
   const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
   
-  const fechaTurnoTarget = new Date(turno.fechaHora).toDateString();
+  // Función interna para formatear de forma segura cualquier variante de fecha de la DB
+  const parsearFechaSegura = (fechaInput) => {
+    if (!fechaInput) return new Date(NaN);
+    if (fechaInput instanceof Date) return fechaInput;
+    if (typeof fechaInput === 'string' && fechaInput.includes('/')) {
+      const partes = fechaInput.split('/');
+      return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
+    }
+    return new Date(fechaInput);
+  };
+
+  const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha).toDateString();
 
   logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
   logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
   logger.debug(`[CONFIRMAR TURNO] Total de slots recuperados para el médico: ${slotsDelMedico?.length || 0}`);
 
-  // 1. Validar si ya existe otro slot en ese mismo día que tenga una sede asignada
-  const yaTieneSedeAsignada = slotsDelMedico.some((s) => {
-    const esMismoDia = new Date(s.fechaHora).toDateString() === fechaTurnoTarget;
-    const tieneSede = s.sede != null;
-    const esDiferenteTurno = String(s.id || s._id) !== String(id_turno);
-
-    return esMismoDia && tieneSede && esDiferenteTurno;
+  // 1. Buscamos si algún slot de ese día ya tiene guardada una sede
+  const slotConSedeExistente = slotsDelMedico.find((s) => {
+    const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+    return fechaSlotStr === fechaTurnoTarget && s.sede != null;
   });
 
+  const yaTieneSedeAsignada = !!slotConSedeExistente;
   logger.debug(`[CONFIRMAR TURNO] ¿Ya tiene sede asignada en el día?: ${yaTieneSedeAsignada}`);
 
-  if (yaTieneSedeAsignada) {
-    const slotConSedeExistente = slotsDelMedico.find((s) => 
-      new Date(s.fechaHora).toDateString() === fechaTurnoTarget && s.sede != null
-    );
+  let sedeFinal = id_sede;
 
+  if (yaTieneSedeAsignada) {
     const idSedeExistente = slotConSedeExistente.sede?.id || slotConSedeExistente.sede?._id || slotConSedeExistente.sede;
     
     logger.debug(`[CONFIRMAR TURNO] Sede existente encontrada en la DB para este día: ${idSedeExistente}`);
-    logger.debug(`[CONFIRMAR TURNO] Sede solicitada en el parámetro: ${id_sede}`);
+    logger.debug(`[CONFIRMAR TURNO] Sede solicitada en el body: ${id_sede || 'Ninguna (Heredará automática)'}`);
 
-    if (String(idSedeExistente) !== String(id_sede)) {
-      logger.debug(`[CONFIRMAR TURNO] CONFLICTO: Las sedes no coinciden. Lanzando ConflictError.`);
+    // Si mandó una sede por body, verificamos que coincida con la que ya se congeló antes
+    if (id_sede && String(idSedeExistente) !== String(id_sede)) {
+      logger.debug(`[CONFIRMAR TURNO] CONFLICTO: Intentó cambiar la sede del día. Lanzando ConflictError.`);
       throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
     }
-    logger.debug(`[CONFIRMAR TURNO] ÉXITO: La sede coincide con la que ya estaba asignada en el día.`);
+    
+    // Si no mandó nada, le asignamos de forma transparente la sede que ya estaba guardada en el día
+    sedeFinal = idSedeExistente;
+    logger.debug(`[CONFIRMAR TURNO] ÉXITO: Se utilizará la sede preexistente: ${sedeFinal}`);
   } else {
-    logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día. Filtrando slots disponibles para propagar...`);
+    logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día.`);
 
+    // Si es el primer turno y no mandó sede en el body, pateamos la petición
+    if (!id_sede) {
+      throw new BadRequestError('Debe especificar una sede en el body para el primer turno del día.');
+    }
+
+    logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
     const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
-      // CORRECCIÓN: Usamos s.fecha en lugar de s.fechaHora
-      const fechaSlotStr = new Date(s.fecha).toDateString();
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
       const esMismoDia = fechaSlotStr === fechaTurnoTarget;
-      
-      const valorEstado = typeof s.estado?.getItemsNombre === 'function' 
-        ? s.estado.getItemsNombre() 
-        : s.estado;
-
-      const estaDisponible = String(valorEstado).toLowerCase() === 'disponible';
+      const valorEstado = s.estado;
+      const estaDisponible = valorEstado === 'DISPONIBLE';
 
       logger.debug(`[CONFIRMAR TURNO] Evaluando Slot ID: ${s._id || s.id} -> Fecha Slot: "${fechaSlotStr}" (Matchea: ${esMismoDia}), Estado: "${valorEstado}"`);
 
@@ -384,8 +396,8 @@ export class TurnoService {
     }
   }
 
-  logger.debug(`[CONFIRMAR TURNO] Asignando sede ${id_sede} al documento del Turno actual: ${id_turno}`);
-  turno.sede = id_sede;
+  logger.debug(`[CONFIRMAR TURNO] Asignando sede ${sedeFinal} al documento del Turno actual: ${id_turno}`);
+  turno.sede = sedeFinal;
   // -----------------------------------------------------------------
 
   logger.debug(`[CONFIRMAR TURNO] Actualizando estado del turno a CONFIRMADO...`);

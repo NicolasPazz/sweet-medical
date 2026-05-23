@@ -91,8 +91,11 @@ export class TurnoController {
     const idTurno = req.params.id_turno;
     ValidadorId.validarIds(idTurno);
     
-    const idSede = req.params.id_sede;
-    ValidadorId.validarIds(idSede);
+    const idSede = req.body.id_sede;
+  
+    if (idSede) {
+      ValidadorId.validarIds(idSede);
+    }
 
     await this.turnoService.confirmarTurno(idUsuario, idTurno, idSede);
 
