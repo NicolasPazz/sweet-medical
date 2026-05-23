@@ -690,22 +690,21 @@ export class TurnoService {
       );
     }
 
-    // 4. Buscamos el bache físico de destino y validamos que esté disponible
+    // 4. Convertimos la fecha/hora en el Service y buscamos el SLOT físico
     const idMedico = turno.medico?._id || turno.medico?.id || turno.medico;
-    const turnoDestino = await this.turnoRepository.findByMedicFechaHora(idMedico, nuevaFechaHora);
+    
+    // Hacemos la magia del formateo acá en la capa de servicio
+    const dateObj = new Date(nuevaFechaHora);
+    const fechaBuscada = dateObj.toISOString().split('T')[0]; // "2026-05-23"
+    
+    const horas = String(dateObj.getUTCHours()).padStart(2, '0');
+    const minutos = String(dateObj.getUTCMinutes()).padStart(2, '0');
+    const horaBuscada = `${horas}:${minutos}`; // "08:00"
 
-    if (!turnoDestino) {
-      throw new ConflictError(
-        'El horario propuesto no se encuentra disponible para este profesional',
-      );
-    }
+    // Pasamos los parámetros ya masticados al repositorio
+    const slotDestino = await this.slotRepository.findByMedicFechaHora(idMedico, fechaBuscada, horaBuscada);
 
-    const estadoDestino =
-      typeof turnoDestino.estado.getEstadoNombre === 'function'
-        ? turnoDestino.estado.getEstadoNombre().toUpperCase()
-        : String(turnoDestino.estado).toUpperCase();
-
-    if (estadoDestino !== 'DISPONIBLE') {
+    if (!slotDestino) {
       throw new ConflictError(
         'El horario propuesto no se encuentra disponible para este profesional',
       );
@@ -714,12 +713,12 @@ export class TurnoService {
     // 5. Validamos que el bache de destino sea de la misma especialidad/servicio
     const idServicioOriginal = String(turno.servicio?._id || turno.servicio?.id || turno.servicio);
     const idServicioDestino = String(
-      turnoDestino.servicio?._id || turnoDestino.servicio?.id || turnoDestino.servicio,
+      slotDestino.servicio?._id || slotDestino.servicio?.id || slotDestino.servicio,
     );
 
     if (idServicioOriginal !== idServicioDestino) {
       throw new ConflictError(
-        `No se puede reprogramar: El horario seleccionado corresponde al servicio de "${turnoDestino.servicio?.nombre || 'otra especialidad'}" y su turno original es de "${turno.servicio?.nombre}"`,
+        `No se puede reprogramar: El horario seleccionado corresponde al servicio de "${slotDestino.servicio?.nombre || 'otra especialidad'}" y su turno original es de "${turno.servicio?.nombre}"`,
       );
     }
 
@@ -772,13 +771,48 @@ export class TurnoService {
     }
 
     // 4. Procesamos la decisión
-    // 4. Procesamos la decisión
     if (aceptado) {
-      // Efectuamos el cambio de fecha físico usando la propuesta guardada
-      turno.fechaHora = new Date(turno.propuestaCambio.nuevaFechaHora);
+      const idMedico = turno.medico?._id || turno.medico?.id || turno.medico;
 
-      // Transicionamos de vuelta al estado Reservado mediante el dominio
-      // CAMBIO: Pasamos el objeto 'usuario' como el remitente/actor
+      // --- PASO A: LIBERAR SLOT VIEJO ---
+      // Desglosamos la fecha/hora actual del turno (antes de modificarla)
+      const dateVieja = new Date(turno.fechaHora);
+      const fechaViejaStr = dateVieja.toISOString().split('T')[0];
+      const horaViejaStr = `${String(dateVieja.getUTCHours()).padStart(2, '0')}:${String(dateVieja.getUTCMinutes()).padStart(2, '0')}`;
+
+      // Buscamos el slot actual del turno (Ojo: este no filtramos por 'DISPONIBLE' porque está ocupado)
+      const slotViejo = await this.slotRepository.model.findOne({
+        medico: idMedico,
+        fecha: fechaViejaStr,
+        horaInicio: horaViejaStr
+      });
+
+      if (slotViejo) {
+        slotViejo.estado = 'DISPONIBLE';
+        slotViejo.turnoAsociado = null;
+        await this.slotRepository.save(slotViejo);
+      }
+
+      // --- PASO B: RESERVAR SLOT NUEVO ---
+      // Desglosamos la nueva fecha/hora propuesta
+      const dateNueva = new Date(turno.propuestaCambio.nuevaFechaHora);
+      const fechaNuevaStr = dateNueva.toISOString().split('T')[0];
+      const horaNuevaStr = `${String(dateNueva.getUTCHours()).padStart(2, '0')}:${String(dateNueva.getUTCMinutes()).padStart(2, '0')}`;
+
+      // Usamos el método limpio que definimos antes
+      const slotNuevo = await this.slotRepository.findByMedicFechaHora(idMedico, fechaNuevaStr, horaNuevaStr);
+
+      if (!slotNuevo) {
+        throw new ConflictError('El horario de la propuesta ya no se encuentra disponible.');
+      }
+
+      slotNuevo.estado = 'RESERVADO';
+      slotNuevo.turnoAsociado = turno.id || turno._id;
+      await this.slotRepository.save(slotNuevo);
+
+      // --- PASO C: EFECTUAR CAMBIO EN EL TURNO ---
+      turno.fechaHora = dateNueva;
+
       const notificacion = turno.actualizarEstado(
         usuario,
         new Reservado(turno),
@@ -788,9 +822,9 @@ export class TurnoService {
       if (notificacion) {
         await this.notificacionRepository.save(notificacion);
       }
+
     } else {
-      // Si se rechaza, vuelve a RESERVADO con su fecha vieja intacta
-      // CAMBIO: Pasamos el objeto 'usuario' como el remitente/actor
+      // Si se rechaza, vuelve a RESERVADO con su fecha vieja intacta y no tocamos ningún slot
       const notificacion = turno.actualizarEstado(
         usuario,
         new Reservado(turno),
@@ -805,6 +839,7 @@ export class TurnoService {
     // 5. Limpiamos la propuesta ya resuelta y guardamos todo
     turno.propuestaCambio = null;
     await this.turnoRepository.save(turno);
+    
     return turno;
   }
 

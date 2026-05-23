@@ -22,6 +22,15 @@ export class SlotRepository {
     return await this.model.find({ medico: medicoId, estado });
   }
 
+  async findByMedicFechaHora(medicoId, fecha, horaInicio) {
+    return await this.model.findOne({
+      medico: medicoId,
+      fecha: fecha,
+      horaInicio: horaInicio,
+      estado: 'DISPONIBLE'
+    });
+  }
+
   // CREAR / ACTUALIZAR
   async save(slot) {
     const id = slot.id || slot._id;
