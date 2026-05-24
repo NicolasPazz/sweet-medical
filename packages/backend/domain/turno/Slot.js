@@ -7,6 +7,7 @@ export class Slot{
     horaInicio;
     duracionMins;
     estado;
+    sede;
     turnoAsociado;
 
     constructor(medico, fecha, horaInicio, duracionMins){

@@ -47,14 +47,22 @@ export class SlotRepository {
     return await this.model.insertMany(slots);
   }
 
-  // ACTUALIZAR
   async update(id, datosActualizados) {
+    let sedeUpdate = null;
+    if (datosActualizados.sede) {
+      sedeUpdate = {
+        _id: datosActualizados.sede._id || datosActualizados.sede.id_sede || null,
+        nombre: datosActualizados.sede.nombre || null
+      };
+    }
+
     return await this.model.findByIdAndUpdate(
       id,
       {
         $set: {
           estado: datosActualizados.estado,
           turnoAsociado: datosActualizados.turnoAsociado ?? null,
+          sede: sedeUpdate
         },
       },
       { new: true },

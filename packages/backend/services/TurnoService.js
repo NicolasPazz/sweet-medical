@@ -17,6 +17,7 @@ import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
 import { Turno } from '../domain/turno/Turno.js';
 import { estaEnDisponibilidad } from '../utils/functions.js';
 import { logger } from '../utils/logger.js';
+import util from 'util';
 
 export class TurnoService {
   turnoRepository;
@@ -293,8 +294,10 @@ export class TurnoService {
   }
 
   async confirmarTurno(id_usuario, id_turno, id_sede) {
-  const usuario = await this.usuarioRepository.findById(id_usuario);
+  logger.debug(`[CONFIRMAR TURNO] Iniciando proceso para Turno ID: ${id_turno}`);
 
+  // 1. Validaciones iniciales de existencia y permisos del Usuario
+  const usuario = await this.usuarioRepository.findById(id_usuario);
   if (usuario == null) {
     throw new NotFoundError('Usuario no encontrado');
   }
@@ -303,25 +306,23 @@ export class TurnoService {
     throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
   }
 
+  // 2. Validaciones de existencia y estado del Turno
   const turno = await this.turnoRepository.findById(id_turno);
-
   if (turno == null) {
     throw new NotFoundError('Turno no encontrado');
   }
 
   const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
-
   if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
     throw new ConflictError('El turno no pertenece al medico');
   }
 
-  if (!(turno.estado instanceof Reservado)) {
+  if (!(turno.estado.getEstadoNombre() === 'RESERVADO')) {
     throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
   }
 
   // --- LÓGICA DE RESTRICCIÓN DE SEDE UTILIZANDO SLOT REPOSITORY ---
   const idMedico = turno.medico?.id || turno.medico?._id || turno.medico;
-  
   const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
   
   // Función interna para formatear de forma segura cualquier variante de fecha de la DB
@@ -341,10 +342,10 @@ export class TurnoService {
   logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
   logger.debug(`[CONFIRMAR TURNO] Total de slots recuperados para el médico: ${slotsDelMedico?.length || 0}`);
 
-  // 1. Buscamos si algún slot de ese día ya tiene guardada una sede
+  // CORRECCIÓN RESTRICCIÓN: Evaluamos que realmente exista una sede física grabada (con _id válido)
   const slotConSedeExistente = slotsDelMedico.find((s) => {
     const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
-    return fechaSlotStr === fechaTurnoTarget && s.sede != null;
+    return fechaSlotStr === fechaTurnoTarget && s.sede && s.sede._id !== null && s.sede._id !== undefined;
   });
 
   const yaTieneSedeAsignada = !!slotConSedeExistente;
@@ -352,54 +353,93 @@ export class TurnoService {
 
   let sedeFinal = id_sede;
 
+  // UBICACIÓN ESTRATÉGICA: Buscamos y declaramos los datos de la sede médica completa antes de usarla
+  const buscarSedeCompleta = (idBuscar) => {
+    return turno.medico?.sedes?.find(s => String(s._id || s.id) === String(idBuscar));
+  };
+
   if (yaTieneSedeAsignada) {
-    const idSedeExistente = slotConSedeExistente.sede?.id || slotConSedeExistente.sede?._id || slotConSedeExistente.sede;
+    const idSedeExistente = slotConSedeExistente.sede?._id || slotConSedeExistente.sede?.id || slotConSedeExistente.sede;
     
     logger.debug(`[CONFIRMAR TURNO] Sede existente encontrada en la DB para este día: ${idSedeExistente}`);
     logger.debug(`[CONFIRMAR TURNO] Sede solicitada en el body: ${id_sede || 'Ninguna (Heredará automática)'}`);
 
-    // Si mandó una sede por body, verificamos que coincida con la que ya se congeló antes
+    // Si mandó una sede por body, verificamos que coincida con la que ya rige en el día
     if (id_sede && String(idSedeExistente) !== String(id_sede)) {
       logger.debug(`[CONFIRMAR TURNO] CONFLICTO: Intentó cambiar la sede del día. Lanzando ConflictError.`);
       throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
     }
     
-    // Si no mandó nada, le asignamos de forma transparente la sede que ya estaba guardada en el día
+    // Si no mandó nada, hereda la del día
     sedeFinal = idSedeExistente;
     logger.debug(`[CONFIRMAR TURNO] ÉXITO: Se utilizará la sede preexistente: ${sedeFinal}`);
   } else {
     logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día.`);
 
-    // Si es el primer turno y no mandó sede en el body, pateamos la petición
     if (!id_sede) {
       throw new BadRequestError('Debe especificar una sede en el body para el primer turno del día.');
+    }
+
+    // Buscamos la info de la sede solicitada en el médico para poder propagarla con estructura
+    const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal);
+    if (!sedeMedicaCompleta) {
+      throw new BadRequestError('La sede especificada no corresponde a las sedes habilitadas del profesional.');
     }
 
     logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
     const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
       const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
-      const esMismoDia = fechaSlotStr === fechaTurnoTarget;
-      const valorEstado = s.estado;
-      const estaDisponible = valorEstado === 'DISPONIBLE';
-
-      logger.debug(`[CONFIRMAR TURNO] Evaluando Slot ID: ${s._id || s.id} -> Fecha Slot: "${fechaSlotStr}" (Matchea: ${esMismoDia}), Estado: "${valorEstado}"`);
-
-      return esMismoDia && estaDisponible;
+      return fechaSlotStr === fechaTurnoTarget && s.estado === 'DISPONIBLE';
     });
 
     logger.debug(`[CONFIRMAR TURNO] Cantidad de slots encontrados para propagar sede: ${slotsDisponiblesDelDia.length}`);
 
+    // Propagación estructurada a todos los slots libres del día
     for (const slot of slotsDisponiblesDelDia) {
-      logger.debug(`[CONFIRMAR TURNO] Propagando sede ${id_sede} al Slot ID: ${slot._id || slot.id}`);
-      slot.sede = id_sede;
+      logger.debug(`[CONFIRMAR TURNO] Propagando sede estructurada ${sedeMedicaCompleta.nombre} al Slot ID: ${slot._id || slot.id}`);
+      slot.sede = {
+        _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
+        nombre: sedeMedicaCompleta.nombre
+      };
       await this.slotRepository.save(slot);
     }
   }
 
+  // 3. Asignación final estructurada de la Sede al Turno
   logger.debug(`[CONFIRMAR TURNO] Asignando sede ${sedeFinal} al documento del Turno actual: ${id_turno}`);
-  turno.sede = sedeFinal;
-  // -----------------------------------------------------------------
+  const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal) || slotConSedeExistente?.sede;
 
+  if (sedeMedicaCompleta) {
+    logger.debug(`[CONFIRMAR TURNO] Estructura de sede definida. Asignando subdocumento completo.`);
+    turno.sede = {
+      _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
+      nombre: sedeMedicaCompleta.nombre
+    };
+  } else {
+    logger.warn(`[CONFIRMAR TURNO] No se encontró la sede en el listado del médico. Usando fallback básico.`);
+    turno.sede = {
+      _id: new mongoose.Types.ObjectId(sedeFinal),
+      nombre: "Sede Asignada"
+    };
+  }
+
+  // 4. Actualizamos el slot físico exacto que pertenece al horario de este turno
+  const slotActual = slotsDelMedico.find(s => {
+    const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+    return fechaSlotStr === fechaTurnoTarget && s.horaInicio === turno.hora;
+  });
+
+  if (slotActual) {
+    logger.debug(`[CONFIRMAR TURNO] Actualizando slot de la cita actual (${turno.hora}) a RESERVADO con su sede.`);
+    slotActual.sede = {
+      _id: turno.sede._id,
+      nombre: turno.sede.nombre
+    };
+    slotActual.estado = 'RESERVADO';
+    await this.slotRepository.save(slotActual);
+  }
+
+  // 5. Flujo de Transición de Estados y Notificaciones
   logger.debug(`[CONFIRMAR TURNO] Actualizando estado del turno a CONFIRMADO...`);
   const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
   
@@ -410,8 +450,10 @@ export class TurnoService {
     logger.debug(`[CONFIRMAR TURNO] No se generó ninguna notificación para este cambio de estado.`);
   }
 
+  // 6. Guardado final del documento del Turno
   await this.turnoRepository.save(turno);
   logger.debug(`[CONFIRMAR TURNO] Proceso finalizado con éxito. Turno guardado.`);
+  
   return turno;
 }
 
@@ -560,19 +602,26 @@ export class TurnoService {
   }
 
   _mapearTurno(t) {
+    const tieneSedeValida = t.sede && (t.sede._id !== null && t.sede._id !== undefined || t.sede.nombre);
+
     return {
       id_turno: t.id || t._id,
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
       nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
-      sede: t.sede ? t.sede.nombre || t.sede : 'N/A',
+      
+      // Contrato unificado: misma estructura exacta que el slot
+      sede: tieneSedeValida ? {
+        id_sede: t.sede._id ? t.sede._id.toString() : null,
+        nombre: t.sede.nombre || 'N/A'
+      } : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
       servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : 'N/A') : 'N/A',
-
+      
       estado: t.estado ? t.estado.getEstadoNombre() : 'N/A',
-
+      
       historialEstados: t.historialEstados.map((e) => ({
         fechaHoraCambio: e.fechaHoraIngreso,
         estado: e.estado,
@@ -586,6 +635,8 @@ export class TurnoService {
   }
 
   _mapearSlot(s) {
+    const tieneSedeValida = s.sede && (s.sede._id !== null && s.sede._id !== undefined || s.sede.nombre);
+
     return {
       id_slot: s.id || s._id,
       id_medico: s.medico ? s.medico.toString() : 'N/A',
@@ -593,6 +644,11 @@ export class TurnoService {
       horaInicio: s.horaInicio,
       duracionMins: s.duracionMins,
       estado: s.estado,
+      sede: tieneSedeValida ? {
+        id_sede: s.sede._id ? s.sede._id.toString() : null,
+        nombre: s.sede.nombre || 'N/A'
+      } : null,
+      
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
     };
   }

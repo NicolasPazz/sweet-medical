@@ -14,6 +14,10 @@ const slotSchema = new mongoose.Schema(
       enum: ['DISPONIBLE', 'RESERVADO', 'OCUPADO'],
       default: 'DISPONIBLE',
     },
+    sede: {
+      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', default: null },
+      nombre: { type: String, trim: true, maxlength: 100, default: null },
+    },
     turnoAsociado: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Turno',
@@ -23,8 +27,10 @@ const slotSchema = new mongoose.Schema(
   { collection: 'slots' },
 );
 
+// Índices optimizados para las consultas recurrentes
 slotSchema.index({ medico: 1, estado: 1 });
 slotSchema.index({ medico: 1, fecha: 1, horaInicio: 1 }, { unique: true });
+slotSchema.index({ 'sede.nombre': 1 }); // Índice extra útil si luego querés filtrar slots por clínica
 
 slotSchema.loadClass(Slot);
 

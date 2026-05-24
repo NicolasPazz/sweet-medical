@@ -33,7 +33,7 @@ const turnoSchema = new mongoose.Schema(
       duracionTurnoEnMins: { type: Number, required: true, min: 1 },
     },
     sede: {
-      _id: { type: mongoose.Schema.Types.ObjectId },
+      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede' },
       nombre: { type: String, trim: true, maxlength: 100 },
     },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
@@ -47,7 +47,6 @@ const turnoSchema = new mongoose.Schema(
         return mapearAClaseEstado(val, this);
       },
       set: function (val) {
-        if (val && typeof val.getEstadNombre === 'function') return val.getEstadoNombre();
         if (val && typeof val.getEstadoNombre === 'function') return val.getEstadoNombre();
         return val;
       },
