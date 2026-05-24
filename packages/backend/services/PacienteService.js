@@ -20,8 +20,6 @@ export class PacienteService {
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
 
-    const motorCostos = new MotorCostos();
-
     return turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       const turnoAdaptado = {
@@ -32,7 +30,7 @@ export class PacienteService {
 
       let cobertura;
       try {
-        const resultado = motorCostos.calcularPara(turnoAdaptado, paciente);
+        const resultado = MotorCostos.calcularPara(turnoAdaptado, paciente);
         cobertura = resultado.tipoCobertura;
       } catch (error) {
         console.log('Error calculando cobertura para turno', t.id || t._id, ':', error.message);

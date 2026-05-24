@@ -1,11 +1,11 @@
 import { BadRequestError } from '../errors/AppError.js';
 import { logger } from '../utils/logger.js';
 import { PacienteModel } from '../infrastructure/schemas/PacienteSchema.js';
-import { turnoBusquedaService } from '../services/TurnoBusquedaService.js';
+import { turnoService } from '../services/TurnoService.js';
 
 export class TurnoBusquedaController {
-  constructor({ turnoBusquedaService: turnoService = turnoBusquedaService } = {}) {
-    this.turnoBusquedaService = turnoService;
+  constructor({ turnoService: service = turnoService } = {}) {
+    this.turnoService = service;
   }
 
   crear() {
@@ -86,7 +86,7 @@ export class TurnoBusquedaController {
         }
 
         // Llamada al service
-        const resultado = await this.turnoBusquedaService.buscarTurnos(
+        const resultado = await this.turnoService.buscarTurnos(
           filtros,
           paciente,
           paginacion,
@@ -103,4 +103,53 @@ export class TurnoBusquedaController {
       }
     };
   }
+
+  obtenerFechasDisponibles() {
+    return async (req, res, next) => {
+      try {
+        const { especialidad, practica, profesionalId } = req.query;
+        
+        const filtros = { especialidad, practica, profesionalId };
+        
+        const resultado = await this.turnoService.buscarFechasDisponibles(filtros);
+        
+        return res.status(200).json({
+          status: 'success',
+          data: resultado.fechas
+        });
+      } catch (error) {
+        logger.error(error.message);
+        return next(error);
+      }
+    };
+  }
+
+  obtenerHorariosDisponibles() {
+    return async (req, res, next) => {
+      try {
+        const { especialidad, practica, profesionalId, fecha } = req.query;
+        
+        if (!fecha) throw new BadRequestError('Falta el parámetro fecha');
+
+        const filtros = { 
+          especialidad, 
+          practica, 
+          profesionalId,
+          fechaDesde: fecha,
+          fechaHasta: fecha
+        };
+        
+        const resultado = await this.turnoService.buscarHorariosDisponibles(filtros);
+        
+        return res.status(200).json({
+          status: 'success',
+          data: resultado.horarios
+        });
+      } catch (error) {
+        logger.error(error.message);
+        return next(error);
+      }
+    };
+  }
 }
+

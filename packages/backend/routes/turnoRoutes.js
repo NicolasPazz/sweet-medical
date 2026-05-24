@@ -1,10 +1,10 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
 import { TurnoBusquedaController } from '../controllers/TurnoBusquedaController.js';
-import { turnoBusquedaService } from '../services/TurnoBusquedaService.js';
+import { turnoService } from '../services/TurnoService.js';
 
 const turnoController = new TurnoController();
-const turnoBusquedaController = new TurnoBusquedaController();
+const turnoBusquedaController = new TurnoBusquedaController({ turnoService });
 const turnoRouter = express.Router();
 
 /**
@@ -697,6 +697,10 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  *       500:
  *         description: Error interno del servidor
  */
-turnoRouter.route('/disponibles').get(turnoBusquedaController.crear(turnoBusquedaService));
+turnoRouter.route('/disponibles').get(turnoBusquedaController.crear());
+
+turnoRouter.route('/disponibilidad/fechas').get(turnoBusquedaController.obtenerFechasDisponibles());
+
+turnoRouter.route('/disponibilidad/horarios').get(turnoBusquedaController.obtenerHorariosDisponibles());
 
 export default turnoRouter;
