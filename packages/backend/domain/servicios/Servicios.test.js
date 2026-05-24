@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../app.js';
 import { usuarioRepository } from '../../infrastructure/repositories/UsuarioRepository.js';
+import { servicioRepository } from '../../infrastructure/repositories/ServicioRepository.js';
 import { Usuario } from '../usuario/Usuario.js';
 
 // Para los endpoints de ABM de servicios, el service valida que el usuario
@@ -12,7 +13,10 @@ let idSistema;
 // beforeAll corre una sola vez antes de todos los tests del archivo.
 // Acá registramos al usuario Sistema en el repo para que los tests puedan usarlo.
 beforeAll(async () => {
-  const usuarioSistema = new Usuario('SISTEMA', null);
+  await usuarioRepository.deleteAll();
+  await servicioRepository.especialidadRepository.deleteAll();
+  await servicioRepository.practicaRepository.deleteAll();
+  const usuarioSistema = new Usuario('SISTEMA', 'password123');
   const guardado = await usuarioRepository.save(usuarioSistema);
   idSistema = guardado.id;
 });
@@ -34,7 +38,7 @@ describe('POST /servicios (agregar)', () => {
       duracionTurnoEnMins: 30,
       costo: 5000,
     });
-    expect(res.body.data.id).toBeDefined();
+    expect(res.body.data._id || res.body.data.id).toBeDefined();
   });
 
   it('crea una Práctica con datos válidos', async () => {
@@ -56,7 +60,7 @@ describe('POST /servicios (agregar)', () => {
 
   it('falla si el usuario no es Sistema', async () => {
     // Creamos un usuario cualquiera
-    const otroUsuario = new Usuario('juan', '1234');
+    const otroUsuario = new Usuario('juan', 'password123');
     const guardado = await usuarioRepository.save(otroUsuario);
 
     const res = await request(app).post('/servicios').send({
@@ -130,7 +134,7 @@ describe('PATCH /servicios/:id (modificar)', () => {
       duracionTurnoEnMins: 25,
       costo: 3500,
     });
-    idServicio = res.body.data.id;
+    idServicio = res.body.data?._id || res.body.data?.id;
   });
 
   it('modifica el servicio con datos válidos', async () => {
@@ -147,7 +151,7 @@ describe('PATCH /servicios/:id (modificar)', () => {
   });
 
   it('falla si el servicio no existe', async () => {
-    const res = await request(app).patch('/servicios/99999').send({
+    const res = await request(app).patch('/servicios/6a131f02df0a55e17123865b').send({
       idUsuario: idSistema,
       tipo: 'ESPECIALIDAD',
       nombre: 'Cualquiera',
@@ -159,7 +163,7 @@ describe('PATCH /servicios/:id (modificar)', () => {
   });
 
   it('falla si el usuario no es Sistema', async () => {
-    const otroUsuario = new Usuario('pedro', 'pass');
+    const otroUsuario = new Usuario('pedro', 'password123');
     const guardado = await usuarioRepository.save(otroUsuario);
 
     const res = await request(app).patch(`/servicios/${idServicio}`).send({
@@ -185,7 +189,7 @@ describe('DELETE /servicios/:id (eliminar)', () => {
       duracionTurnoEnMins: 20,
       costo: 1000,
     });
-    idServicio = res.body.data.id;
+    idServicio = res.body.data._id || res.body.data.id;
   });
 
   it('elimina el servicio (baja lógica)', async () => {
@@ -203,7 +207,7 @@ describe('DELETE /servicios/:id (eliminar)', () => {
   });
 
   it('falla al eliminar un servicio que no existe', async () => {
-    const res = await request(app).delete('/servicios/99999').send({ idUsuario: idSistema });
+    const res = await request(app).delete('/servicios/6a131f02df0a55e17123865b').send({ idUsuario: idSistema });
 
     expect(res.status).toBe(404);
   });
@@ -228,7 +232,7 @@ describe('GET /servicios/:id', () => {
       duracionTurnoEnMins: 40,
       costo: 6000,
     });
-    const id = crearRes.body.data.id;
+    const id = crearRes.body.data._id || crearRes.body.data.id;
 
     const res = await request(app).get(`/servicios/${id}`);
     expect(res.status).toBe(200);
@@ -236,7 +240,7 @@ describe('GET /servicios/:id', () => {
   });
 
   it('falla si el servicio no existe', async () => {
-    const res = await request(app).get('/servicios/99999');
+    const res = await request(app).get('/servicios/6a131f02df0a55e17123865b');
     expect(res.status).toBe(404);
   });
 });

@@ -44,7 +44,7 @@ describe('PacienteService', () => {
       },
     ]);
 
-    const spyCalcular = jest.spyOn(MotorCostos.prototype, 'calcularPara').mockReturnValue({
+    const spyCalcular = jest.spyOn(MotorCostos, 'calcularPara').mockReturnValue({
       tipoCobertura: NivelCobertura.TOTAL,
       costoEstimado: 1500,
     });
@@ -83,7 +83,7 @@ describe('PacienteService', () => {
       },
     ]);
 
-    const spyCalcular = jest.spyOn(MotorCostos.prototype, 'calcularPara').mockReturnValue({
+    const spyCalcular = jest.spyOn(MotorCostos, 'calcularPara').mockReturnValue({
       tipoCobertura: NivelCobertura.PARCIAL,
     });
 
@@ -114,7 +114,7 @@ describe('PacienteService', () => {
     ]);
 
     // Simulamos que el motor de costos explota por el aire
-    jest.spyOn(MotorCostos.prototype, 'calcularPara').mockImplementation(() => {
+    jest.spyOn(MotorCostos, 'calcularPara').mockImplementation(() => {
       throw new Error('Reglas de negocio corruptas o incompatibles');
     });
 
@@ -138,7 +138,7 @@ describe('PacienteService', () => {
       },
     ]);
 
-    jest.spyOn(MotorCostos.prototype, 'calcularPara').mockReturnValue({ tipoCobertura: null });
+    jest.spyOn(MotorCostos, 'calcularPara').mockReturnValue({ tipoCobertura: null });
 
     const resultado = await service.obtenerHistorialTurnos('u-paciente');
 

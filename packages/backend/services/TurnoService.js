@@ -17,6 +17,9 @@ import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
 import { Turno } from '../domain/turno/Turno.js';
 import { estaEnDisponibilidad } from '../utils/functions.js';
 import { logger } from '../utils/logger.js';
+import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
+import { TurnoMapper } from '../domain/turno/dtos/TurnoMapper.js';
+import { DateUtil } from '../utils/DateUtil.js';
 
 export class TurnoService {
   turnoRepository;
@@ -588,7 +591,12 @@ export class TurnoService {
   generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
     const turnosGenerados = [];
 
-    const slotsDisponibles = slots.filter(s => s.estado === 'DISPONIBLE');
+    const slotsDisponibles = slots.filter(s => {
+      const estadoStr = typeof s.estado?.getItemsNombre === 'function' 
+        ? s.estado.getItemsNombre() 
+        : s.estado;
+      return String(estadoStr).toUpperCase() === 'DISPONIBLE';
+    });
     const slotsOrdenados = ordenarSlots(slotsDisponibles);
     const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
     const duracionTurno = servicio.duracionTurnoEnMins;
@@ -597,8 +605,20 @@ export class TurnoService {
       let i = 0;
 
       while (i < slotsDelDia.length) {
-        const slotsParaTurno = [slotsDelDia[i]];
-        let minutosAcumulados = slotsDelDia[i].duracionMins;
+        const slotInicio = slotsDelDia[i];
+
+        // 1. Validar Alineación de Grilla Fija
+        const [horaStr, minStr] = slotInicio.horaInicio.split(':');
+        const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
+
+        if (minutoInicio % duracionTurno !== 0) {
+          // No está alineado a la grilla
+          i++;
+          continue;
+        }
+
+        const slotsParaTurno = [slotInicio];
+        let minutosAcumulados = slotInicio.duracionMins;
 
         // Extender con slots contiguos hasta cubrir la duración
         let j = i + 1;
@@ -612,17 +632,23 @@ export class TurnoService {
         }
 
         if (minutosAcumulados >= duracionTurno) {
+          // Resolver Sede
+          const sedeVirtual = slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
+
           // Turno válido: avanzar i hasta después del último slot usado
           const turno = new Turno(
             medico,
             null,
-            slotsParaTurno[0].fecha,
+            `${slotsParaTurno[0].fecha}T${slotsParaTurno[0].horaInicio}:00Z`,
             slotsParaTurno[0].horaInicio,
-            null,
+            sedeVirtual,
             servicio,
             servicio.costo,
           );
           turno.slotsAsociados.push(...slotsParaTurno);
+          turno.id = `virtual_${slotsParaTurno.map(s => s.id || s._id).join('_')}`;
+          turno.estado = 'DISPONIBLE';
+
           turnosGenerados.push(turno);
           i = j; // saltar al slot siguiente al último consumido
         } else {
@@ -815,6 +841,145 @@ export class TurnoService {
     const horaFinManiana = this.obtenerHoraFin(hoy);
 
     return this.turnoRepository.findAllForTomorrow(horaInicioManiana, horaFinManiana);
+  }
+
+  async buscarTurnos(filtros, paciente, paginacion = {}, options = { paginar: true }) {
+    const { page = 1, limit = 10, sortBy = 'fecha', sortOrder = 'asc' } = paginacion;
+
+    if (!filtros.especialidad && !filtros.practica) {
+      throw new BadRequestError('Debe especificar una especialidad o práctica para calcular la disponibilidad.');
+    }
+
+    const servicio = await this._obtenerServicio(filtros);
+    const medicoIds = await this._filtrarMedicosValidos(filtros);
+    if (medicoIds.length === 0) {
+      return options.paginar ? { data: [], total: 0, page, limit, totalPages: 0 } : [];
+    }
+    filtros.medicoIds = medicoIds;
+
+    const maxRangoDias = parseInt(process.env.MAX_RANGO_BUSQUEDA_DIAS || '30', 10);
+    const fechaDesdeStr = DateUtil.toYYYYMMDD(filtros.fechaDesde || new Date());
+    const fechaHastaStr = filtros.fechaHasta 
+      ? DateUtil.toYYYYMMDD(filtros.fechaHasta) 
+      : DateUtil.addDaysToYYYYMMDD(fechaDesdeStr, maxRangoDias);
+
+    const limitesFechas = { fechaDesde: fechaDesdeStr, fechaHasta: fechaHastaStr };
+
+    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(filtros, limitesFechas);
+
+    // Agrupamiento por médico
+    const slotsPorMedico = slotsCrudos.reduce((acc, slot) => {
+      const medicoId = slot.medico && slot.medico._id ? slot.medico._id.toString() : slot.medico.toString();
+      if (!acc[medicoId]) acc[medicoId] = [];
+      acc[medicoId].push(slot);
+      return acc;
+    }, {});
+
+    const turnosVirtuales = [];
+    for (const medicoId in slotsPorMedico) {
+      const slotsDelMedico = slotsPorMedico[medicoId];
+      const medico = slotsDelMedico[0].medico; 
+      const turnosDelMedico = this.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+      turnosVirtuales.push(...turnosDelMedico);
+    }
+
+    let turnosFiltrados = turnosVirtuales;
+    if (filtros.sede) {
+      turnosFiltrados = turnosFiltrados.filter(t => t.sede && (t.sede._id?.toString() === filtros.sede || t.sede.id === filtros.sede));
+    }
+
+    const dtosMapeados = turnosFiltrados.map((turno) => {
+      const esPractica = turno.servicio?.tipo === 'PRACTICA';
+      const turnoAdaptado = {
+        ...turno,
+        practica: esPractica ? turno.servicio : null,
+        especialidad: !esPractica ? turno.servicio : null,
+      };
+
+      const calculoCosto = MotorCostos.calcularPara(turnoAdaptado, paciente);
+      return TurnoMapper.toResponseDTO(turnoAdaptado, calculoCosto);
+    });
+
+    dtosMapeados.sort((a, b) => {
+      if (sortBy === 'costo') {
+        return sortOrder === 'desc' ? b.costoEstimado - a.costoEstimado : a.costoEstimado - b.costoEstimado;
+      } else {
+        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`).getTime();
+        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`).getTime();
+        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+      }
+    });
+
+    if (!options.paginar) {
+      return dtosMapeados;
+    }
+
+    const totalItems = dtosMapeados.length;
+    const startIndex = (page - 1) * limit;
+    const paginatedResults = dtosMapeados.slice(startIndex, startIndex + limit);
+
+    return {
+      data: paginatedResults,
+      total: totalItems,
+      page,
+      limit,
+      totalPages: Math.ceil(totalItems / limit)
+    };
+  }
+
+  async buscarFechasDisponibles(filtros) {
+    if (!filtros.especialidad && !filtros.practica) {
+      throw new BadRequestError('Debe especificar una especialidad o práctica.');
+    }
+
+    const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
+    const fechas = [...new Set(turnosDisponibles.map(t => t.fecha))].filter(f => f);
+    return { fechas };
+  }
+
+  async buscarHorariosDisponibles(filtros) {
+    if (!filtros.especialidad && !filtros.practica) {
+      throw new BadRequestError('Debe especificar una especialidad o práctica.');
+    }
+    if (!filtros.fechaDesde || !filtros.fechaHasta) {
+      throw new BadRequestError('Debe especificar una fecha (fechaDesde y fechaHasta iguales).');
+    }
+
+    const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
+
+    const horarios = turnosDisponibles.map(t => ({
+      hora: t.hora,
+      medico: t.medico,
+      sede: t.sede
+    }));
+
+    return { horarios };
+  }
+
+  async _obtenerServicio(filtros) {
+    const id = filtros.practica || filtros.especialidad;
+    const servicio = await this.servicioRepository.findById(id);
+    if (!servicio) throw new NotFoundError('Servicio no encontrado');
+    
+    const obj = servicio.toObject ? servicio.toObject() : servicio;
+    obj.tipo = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
+    return obj;
+  }
+
+  async _filtrarMedicosValidos(filtros) {
+    if (filtros.profesionalId) return [filtros.profesionalId];
+
+    const medicos = await this.medicoRepository.findAll();
+    const medicosValidos = medicos.filter(m => {
+      if (filtros.practica) {
+        return m.practicas?.some(p => p.id === filtros.practica || p._id?.toString() === filtros.practica);
+      }
+      if (filtros.especialidad) {
+        return m.especialidades?.some(e => e.id === filtros.especialidad || e._id?.toString() === filtros.especialidad);
+      }
+      return false;
+    });
+    return medicosValidos.map(m => m.id || m._id);
   }
 }
 

@@ -9,6 +9,9 @@ const mockServicioRepository = {
   save: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+  findByIdAndTipoServicio: jest.fn(),
+  updateEspecialidad: jest.fn(),
+  updatePractica: jest.fn(),
 };
 
 const mockUsuarioRepository = {
@@ -164,9 +167,9 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue(null);
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue(null);
 
-    await expect(service.modificar('507f1f77bcf86cd799439011', id, {})).rejects.toThrow(
+    await expect(service.modificar('507f1f77bcf86cd799439011', id, {}, 'ESPECIALIDAD')).rejects.toThrow(
       NotFoundError,
     );
   });
@@ -176,14 +179,14 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue({
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue({
       id,
       nombre: 'Especialidad',
       codigo: undefined,
     });
 
     await expect(
-      service.modificar('507f1f77bcf86cd799439011', id, { codigo: 'NEW' }),
+      service.modificar('507f1f77bcf86cd799439011', id, { codigo: 'NEW' }, 'ESPECIALIDAD'),
     ).rejects.toThrow(BadRequestError);
   });
 
@@ -192,19 +195,19 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue({
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue({
       id,
       nombre: 'Especialidad',
       codigo: undefined,
     });
-    mockServicioRepository.update.mockResolvedValue({ id, nombre: 'Especialidad modificada' });
+    mockServicioRepository.updateEspecialidad.mockResolvedValue({ id, nombre: 'Especialidad modificada' });
 
     const resultado = await service.modificar('507f1f77bcf86cd799439011', id, {
       nombre: 'Especialidad modificada',
-    });
+    }, 'ESPECIALIDAD');
 
     expect(resultado).toEqual({ id, nombre: 'Especialidad modificada' });
-    expect(mockServicioRepository.update).toHaveBeenCalledWith(id, {
+    expect(mockServicioRepository.updateEspecialidad).toHaveBeenCalledWith(id, {
       nombre: 'Especialidad modificada',
     });
   });
@@ -214,12 +217,12 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue({
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue({
       id,
       nombre: 'Ecografía Vieja',
       codigo: 'ECO-01',
     });
-    mockServicioRepository.update.mockResolvedValue({
+    mockServicioRepository.updatePractica.mockResolvedValue({
       id,
       nombre: 'Ecografía Nueva',
       codigo: 'ECO-01',
@@ -227,10 +230,10 @@ describe('ServicioService', () => {
 
     const resultado = await service.modificar('507f1f77bcf86cd799439011', id, {
       nombre: 'Ecografía Nueva',
-    });
+    }, 'PRACTICA');
 
     expect(resultado.nombre).toBe('Ecografía Nueva');
-    expect(mockServicioRepository.update).toHaveBeenCalledWith(id, { nombre: 'Ecografía Nueva' });
+    expect(mockServicioRepository.updatePractica).toHaveBeenCalledWith(id, { nombre: 'Ecografía Nueva' });
   });
 
   it('elimina un servicio existente correctamente', async () => {
@@ -238,13 +241,13 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue({ id });
-    mockServicioRepository.delete.mockResolvedValue({ deleted: true });
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue({ id });
+    mockServicioRepository.updateEspecialidad.mockResolvedValue({ deleted: true });
 
-    const resultado = await service.eliminar('507f1f77bcf86cd799439011', id);
+    const resultado = await service.eliminar('507f1f77bcf86cd799439011', id, 'ESPECIALIDAD');
 
     expect(resultado).toEqual({ deleted: true });
-    expect(mockServicioRepository.delete).toHaveBeenCalledWith(id);
+    expect(mockServicioRepository.updateEspecialidad).toHaveBeenCalledWith(id, { activo: false });
   });
 
   it('lanza NotFoundError al eliminar un servicio inexistente', async () => {
@@ -252,8 +255,8 @@ describe('ServicioService', () => {
     mockUsuarioRepository.findById.mockResolvedValue({
       nombreUsuario: Usuario.USUARIO_SISTEMA.nombreUsuario,
     });
-    mockServicioRepository.findById.mockResolvedValue(null);
+    mockServicioRepository.findByIdAndTipoServicio.mockResolvedValue(null);
 
-    await expect(service.eliminar('507f1f77bcf86cd799439011', id)).rejects.toThrow(NotFoundError);
+    await expect(service.eliminar('507f1f77bcf86cd799439011', id, 'ESPECIALIDAD')).rejects.toThrow(NotFoundError);
   });
 });

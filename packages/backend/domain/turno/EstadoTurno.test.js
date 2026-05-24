@@ -8,6 +8,7 @@ describe('EstadoTurno', () => {
       CONFIRMADO: 'CONFIRMADO',
       CANCELADO: 'CANCELADO',
       REALIZADO: 'REALIZADO',
+      PENDIENTE_REPROGRAMACION: 'PENDIENTE_REPROGRAMACION',
     });
   });
 

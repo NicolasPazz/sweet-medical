@@ -60,6 +60,29 @@ export class SlotRepository {
   async deleteAll() {
     await this.model.deleteMany({});
   }
+
+  async buscarSlotsDisponibles(filtros, limitesFechas) {
+    const query = { estado: 'DISPONIBLE' };
+
+    if (limitesFechas?.fechaDesde || limitesFechas?.fechaHasta) {
+      query.fecha = {};
+      if (limitesFechas.fechaDesde) query.fecha.$gte = limitesFechas.fechaDesde;
+      if (limitesFechas.fechaHasta) query.fecha.$lte = limitesFechas.fechaHasta;
+    }
+
+    if (filtros?.profesionalId) {
+      query.medico = filtros.profesionalId;
+    }
+    
+    if (filtros?.medicoIds && filtros.medicoIds.length > 0) {
+      query.medico = { $in: filtros.medicoIds };
+    }
+
+    return await this.model.find(query)
+      .populate('medico')
+      .sort({ medico: 1, fecha: 1, horaInicio: 1 })
+      .lean();
+  }
 }
 
 export const slotRepository = new SlotRepository();

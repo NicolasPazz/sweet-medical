@@ -22,10 +22,14 @@ export class ServicioRepository {
   }
 
   async findByIdAndTipoServicio(id, tipoServicio) {
-    if (tipoServicio == 'ESPECIALIDAD') return await this.especialidadRepository.findById(id);
-    if (tipoServicio == 'PRACTICA') return await this.practicaRepository.findById(id);
-    logger.debug('SOY UN ESTORBO');
-    throw new NotFoundError('Servicio no encontrado');
+    if (tipoServicio === 'ESPECIALIDAD') return await this.especialidadRepository.findById(id);
+    if (tipoServicio === 'PRACTICA') return await this.practicaRepository.findById(id);
+    
+    try {
+      return await this.findById(id);
+    } catch (e) {
+      throw new NotFoundError('Servicio no encontrado');
+    }
   }
 
   async findAll() {
