@@ -87,10 +87,6 @@ export class SlotRepository {
       if (limitesFechas.fechaHasta) query.fecha.$lte = limitesFechas.fechaHasta;
     }
 
-    if (filtros?.profesionalId) {
-      query.medico = filtros.profesionalId;
-    }
-    
     if (filtros?.medicoIds && filtros.medicoIds.length > 0) {
       query.medico = { $in: filtros.medicoIds };
     }

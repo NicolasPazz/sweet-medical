@@ -879,14 +879,23 @@ export class TurnoService {
       throw new BadRequestError('Debe especificar una especialidad o práctica para calcular la disponibilidad.');
     }
 
-    const servicio = await this._obtenerServicio(filtros);
-    const medicoIds = await this._filtrarMedicosValidos(filtros);
-
-    if (medicoIds.length === 0) {
-      return options.paginar ? { data: [], total: 0, page, limit, totalPages: 0 } : [];
+    if (filtros.especialidad && filtros.practica) {
+      throw new BadRequestError('No se puede especificar una especialidad y una práctica al mismo tiempo.');
     }
 
-    filtros.medicoIds = medicoIds;
+    const servicioTipo = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
+
+    const servicio = filtros.practica ? await this.servicioRepository.findById(filtros.practica) : ( filtros.especialidad ? await this.servicioRepository.findById(filtros.especialidad) : null);
+
+    if(servicio == null) {
+      throw new NotFoundError('El servicio especificado no existe');
+    }
+
+    const medicos = await this._filtrarMedicosValidos(filtros.profesionalId, servicio, servicioTipo);
+
+    if (medicos.length === 0) {
+      return options.paginar ? { data: [], total: 0, page, limit, totalPages: 0 } : [];
+    }
 
     const maxRangoDias = parseInt(process.env.MAX_RANGO_BUSQUEDA_DIAS || '30', 10);
 
@@ -1004,23 +1013,23 @@ export class TurnoService {
     return obj;
   }
 
-  async _filtrarMedicosValidos(filtros) {
-    if (filtros.profesionalId) {
+  async _filtrarMedicosValidos(profesional_id, servicio, servicioTipo) {
+    if (profesional_id) {
       // Si se especificó un médico concreto, validamos que ofrezca el servicio solicitado
-      const medico = await this.medicoRepository.findById(filtros.profesionalId);
+      const medico = await this.medicoRepository.findById(profesional_id);
       if (!medico) throw new NotFoundError('El profesional especificado no existe');
 
-      const id = filtros.practica || filtros.especialidad;
-      const tieneServicio = filtros.practica
+      const id = servicio._id;
+      const tieneServicio = servicioTipo === 'PRACTICA'
         ? medico.practicas?.some(p => p.id === id || p._id?.toString() === id)
         : medico.especialidades?.some(e => e.id === id || e._id?.toString() === id);
 
       if (!tieneServicio) {
-        const label = filtros.practica ? 'práctica' : 'especialidad';
+        const label = servicioTipo === 'PRACTICA' ? 'práctica' : 'especialidad';
         throw new BadRequestError(`El profesional especificado no ofrece la ${label} solicitada`);
       }
 
-      return [filtros.profesionalId];
+      return [medico];
     }
 
     const medicos = await this.medicoRepository.findAll();
@@ -1033,7 +1042,7 @@ export class TurnoService {
       }
       return false;
     });
-    return medicosValidos.map(m => m.id || m._id);
+    return medicosValidos;
   }
 }
 
