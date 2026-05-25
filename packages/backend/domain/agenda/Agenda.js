@@ -6,6 +6,7 @@ import {
   obtenerDisponibilidadesLibres,
   calcularHoraDesdeMinutos,
   horarioIncluido,
+  ordenarSlots
 } from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
@@ -401,5 +402,78 @@ export class Agenda {
     return Array.from(mapa.entries())
       .sort(([fechaA], [fechaB]) => fechaA.localeCompare(fechaB))
       .map(([, slotsDelDia]) => slotsDelDia);
+  }
+
+  static generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
+      const turnosGenerados = [];
+  
+      const slotsDisponibles = slots.filter(s => {
+        const estadoStr = typeof s.estado?.getItemsNombre === 'function' 
+          ? s.estado.getItemsNombre() 
+          : s.estado;
+        return String(estadoStr).toUpperCase() === 'DISPONIBLE';
+      });
+      const slotsOrdenados = ordenarSlots(slotsDisponibles);
+      const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
+      const duracionTurno = servicio.duracionTurnoEnMins;
+  
+      for (const slotsDelDia of slotsPorFecha) {
+        let i = 0;
+  
+        while (i < slotsDelDia.length) {
+          const slotInicio = slotsDelDia[i];
+  
+          // 1. Validar Alineación de Grilla Fija
+          const [horaStr, minStr] = slotInicio.horaInicio.split(':');
+          const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
+  
+          if (minutoInicio % duracionTurno !== 0) {
+            // No está alineado a la grilla
+            i++;
+            continue;
+          }
+  
+          const slotsParaTurno = [slotInicio];
+          let minutosAcumulados = slotInicio.duracionMins;
+  
+          // Extender con slots contiguos hasta cubrir la duración
+          let j = i + 1;
+          while (j < slotsDelDia.length && minutosAcumulados < duracionTurno) {
+            const ultimoSlot = slotsParaTurno[slotsParaTurno.length - 1];
+            if (!validarSlotsContiguos([ultimoSlot, slotsDelDia[j]])) break;
+  
+            slotsParaTurno.push(slotsDelDia[j]);
+            minutosAcumulados += slotsDelDia[j].duracionMins;
+            j++;
+          }
+  
+          if (minutosAcumulados >= duracionTurno) {
+            // Resolver Sede
+            const sedeVirtual = slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
+  
+            // Turno válido: avanzar i hasta después del último slot usado
+            const turno = new Turno(
+              medico,
+              null,
+              `${slotsParaTurno[0].fecha}T${slotsParaTurno[0].horaInicio}:00Z`,
+              slotsParaTurno[0].horaInicio,
+              sedeVirtual,
+              servicio,
+              servicio.costo,
+            );
+            turno.slotsAsociados.push(...slotsParaTurno);
+            turno.id = `virtual_${slotsParaTurno.map(s => s.id || s._id).join('_')}`;
+            turno.estado = 'DISPONIBLE';
+  
+            turnosGenerados.push(turno);
+            i = j; // saltar al slot siguiente al último consumido
+          } else {
+            // No se pudo armar un turno desde este slot (hueco o fin de lista)
+            i++;
+          }
+        }
+      }
+  
+      return turnosGenerados;
   }
 }

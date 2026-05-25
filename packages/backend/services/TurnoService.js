@@ -484,7 +484,7 @@ export class TurnoService {
       throw new BadRequestError('El médico no ofrece el servicio solicitado');
     }
 
-    const turnosDelServicio = this.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+    const turnosDelServicio = Agenda.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
 
     return turnosDelServicio.map((t) => this.mapearTurnoDisponibles(t));
   }
@@ -655,80 +655,6 @@ export class TurnoService {
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
     };
   }
-
-  generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
-    const turnosGenerados = [];
-
-    const slotsDisponibles = slots.filter(s => {
-      const estadoStr = typeof s.estado?.getItemsNombre === 'function' 
-        ? s.estado.getItemsNombre() 
-        : s.estado;
-      return String(estadoStr).toUpperCase() === 'DISPONIBLE';
-    });
-    const slotsOrdenados = ordenarSlots(slotsDisponibles);
-    const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
-    const duracionTurno = servicio.duracionTurnoEnMins;
-
-    for (const slotsDelDia of slotsPorFecha) {
-      let i = 0;
-
-      while (i < slotsDelDia.length) {
-        const slotInicio = slotsDelDia[i];
-
-        // 1. Validar Alineación de Grilla Fija
-        const [horaStr, minStr] = slotInicio.horaInicio.split(':');
-        const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
-
-        if (minutoInicio % duracionTurno !== 0) {
-          // No está alineado a la grilla
-          i++;
-          continue;
-        }
-
-        const slotsParaTurno = [slotInicio];
-        let minutosAcumulados = slotInicio.duracionMins;
-
-        // Extender con slots contiguos hasta cubrir la duración
-        let j = i + 1;
-        while (j < slotsDelDia.length && minutosAcumulados < duracionTurno) {
-          const ultimoSlot = slotsParaTurno[slotsParaTurno.length - 1];
-          if (!validarSlotsContiguos([ultimoSlot, slotsDelDia[j]])) break;
-
-          slotsParaTurno.push(slotsDelDia[j]);
-          minutosAcumulados += slotsDelDia[j].duracionMins;
-          j++;
-        }
-
-        if (minutosAcumulados >= duracionTurno) {
-          // Resolver Sede
-          const sedeVirtual = slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
-
-          // Turno válido: avanzar i hasta después del último slot usado
-          const turno = new Turno(
-            medico,
-            null,
-            `${slotsParaTurno[0].fecha}T${slotsParaTurno[0].horaInicio}:00Z`,
-            slotsParaTurno[0].horaInicio,
-            sedeVirtual,
-            servicio,
-            servicio.costo,
-          );
-          turno.slotsAsociados.push(...slotsParaTurno);
-          turno.id = `virtual_${slotsParaTurno.map(s => s.id || s._id).join('_')}`;
-          turno.estado = 'DISPONIBLE';
-
-          turnosGenerados.push(turno);
-          i = j; // saltar al slot siguiente al último consumido
-        } else {
-          // No se pudo armar un turno desde este slot (hueco o fin de lista)
-          i++;
-        }
-      }
-    }
-
-    return turnosGenerados;
-  }
-
 
   async proponerReprogramacion(id_usuario, id_turno, nuevaFechaHora, motivo) {
     const usuario = await this.usuarioRepository.findById(id_usuario);
@@ -947,7 +873,7 @@ export class TurnoService {
   }
 
   async buscarTurnos(filtros, paciente, paginacion = {}, options = { paginar: true }) {
-    const { page = 1, limit = 10, sortBy = 'fecha', sortOrder = 'asc' } = paginacion;
+    const { page = 1, limit = 10, sortBy = 'costo', sortOrder = 'asc' } = paginacion;
 
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError('Debe especificar una especialidad o práctica para calcular la disponibilidad.');
@@ -955,13 +881,17 @@ export class TurnoService {
 
     const servicio = await this._obtenerServicio(filtros);
     const medicoIds = await this._filtrarMedicosValidos(filtros);
+
     if (medicoIds.length === 0) {
       return options.paginar ? { data: [], total: 0, page, limit, totalPages: 0 } : [];
     }
+
     filtros.medicoIds = medicoIds;
 
     const maxRangoDias = parseInt(process.env.MAX_RANGO_BUSQUEDA_DIAS || '30', 10);
+
     const fechaDesdeStr = DateUtil.toYYYYMMDD(filtros.fechaDesde || new Date());
+    
     const fechaHastaStr = filtros.fechaHasta 
       ? DateUtil.toYYYYMMDD(filtros.fechaHasta) 
       : DateUtil.addDaysToYYYYMMDD(fechaDesdeStr, maxRangoDias);
@@ -982,7 +912,7 @@ export class TurnoService {
     for (const medicoId in slotsPorMedico) {
       const slotsDelMedico = slotsPorMedico[medicoId];
       const medico = slotsDelMedico[0].medico; 
-      const turnosDelMedico = this.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+      const turnosDelMedico = Agenda.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
       turnosVirtuales.push(...turnosDelMedico);
     }
 
@@ -1060,17 +990,38 @@ export class TurnoService {
   }
 
   async _obtenerServicio(filtros) {
+    const tipoEsperado = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
     const id = filtros.practica || filtros.especialidad;
-    const servicio = await this.servicioRepository.findById(id);
-    if (!servicio) throw new NotFoundError('Servicio no encontrado');
-    
+
+    const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoEsperado);
+    if (!servicio) {
+      const label = tipoEsperado === 'PRACTICA' ? 'práctica' : 'especialidad';
+      throw new NotFoundError(`No se encontró ninguna ${label} con el ID proporcionado`);
+    }
+
     const obj = servicio.toObject ? servicio.toObject() : servicio;
-    obj.tipo = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
+    obj.tipo = tipoEsperado;
     return obj;
   }
 
   async _filtrarMedicosValidos(filtros) {
-    if (filtros.profesionalId) return [filtros.profesionalId];
+    if (filtros.profesionalId) {
+      // Si se especificó un médico concreto, validamos que ofrezca el servicio solicitado
+      const medico = await this.medicoRepository.findById(filtros.profesionalId);
+      if (!medico) throw new NotFoundError('El profesional especificado no existe');
+
+      const id = filtros.practica || filtros.especialidad;
+      const tieneServicio = filtros.practica
+        ? medico.practicas?.some(p => p.id === id || p._id?.toString() === id)
+        : medico.especialidades?.some(e => e.id === id || e._id?.toString() === id);
+
+      if (!tieneServicio) {
+        const label = filtros.practica ? 'práctica' : 'especialidad';
+        throw new BadRequestError(`El profesional especificado no ofrece la ${label} solicitada`);
+      }
+
+      return [filtros.profesionalId];
+    }
 
     const medicos = await this.medicoRepository.findAll();
     const medicosValidos = medicos.filter(m => {

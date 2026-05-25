@@ -1,10 +1,13 @@
 import { BadRequestError } from '../errors/AppError.js';
 import { TurnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
+import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { logger } from '../utils/Logger.js';
 
 export class TurnoController {
   constructor({ turnoService = new TurnoService() } = {}) {
     this.turnoService = turnoService;
+    this.pacienteRepository = pacienteRepository;
   }
 
   reservarTurno = async (req, res, next) => {
@@ -233,4 +236,152 @@ export class TurnoController {
       return next(error);
     }
   };
+
+  buscarTurnos() {
+    return async (req, res, next) => {
+      try {
+        const {
+          profesionalId,
+          especialidad,
+          practica,
+          sede,
+          fechaDesde,
+          fechaHasta,
+          page = '1',
+          limit = '10',
+          sortBy = 'costo',
+          sortOrder = 'asc',
+          pacienteId,
+        } = req.query;
+
+        // Parseo
+        const pageInt = parseInt(page, 10);
+        const limitInt = parseInt(limit, 10);
+
+        // Validaciones - Errores de usuario
+        if (isNaN(pageInt) || pageInt < 1) {
+          throw new BadRequestError('Page debe ser numérico mayor a 0');
+        }
+
+        if (isNaN(limitInt) || limitInt <= 0) {
+          throw new BadRequestError('Limit debe ser numérico mayor a 0');
+        }
+
+        const sortOrderNormalized = sortOrder.toLowerCase();
+        if (!['asc', 'desc'].includes(sortOrderNormalized)) {
+          throw new BadRequestError('sortOrder debe ser asc o desc');
+        }
+
+        const sortByNormalized = sortBy.toLowerCase();
+        if (!['fecha', 'costo'].includes(sortByNormalized)) {
+          throw new BadRequestError('sortBy debe ser fecha o costo');
+        }
+
+        if (fechaDesde && isNaN(new Date(fechaDesde).getTime())) {
+          throw new BadRequestError('fechaDesde no es una fecha válida');
+        }
+
+        if (fechaHasta && isNaN(new Date(fechaHasta).getTime())) {
+          throw new BadRequestError('fechaHasta no es una fecha válida');
+        }
+
+        if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+          throw new BadRequestError('fechaDesde no puede ser posterior a fechaHasta');
+        }
+
+        // Armado de objetos
+        const filtros = {
+          profesionalId,
+          especialidad,
+          practica,
+          sede,
+          fechaDesde,
+          fechaHasta,
+        };
+
+        const paginacion = {
+          page: pageInt,
+          limit: limitInt,
+          sortBy: sortByNormalized,
+          sortOrder: sortOrderNormalized,
+        };
+
+        let paciente = req.user?.paciente ?? null;
+
+        if (!paciente && pacienteId) {
+          paciente = await this.pacienteRepository.findById(pacienteId);
+
+          if (!paciente) {
+            throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
+          }
+        }
+
+        // Llamada al service
+        const resultado = await this.turnoService.buscarTurnos(
+          filtros,
+          paciente,
+          paginacion,
+        );
+
+        // Response OK
+        return res.status(200).json({
+          status: 'success',
+          ...resultado,
+        });
+      } catch (error) {
+        logger.error(error.message);
+        return next(error);
+      }
+    };
+  }
+
+  obtenerFechasDisponibles() {
+    return async (req, res, next) => {
+      try {
+        const { especialidad, practica, profesionalId } = req.query;
+        
+        const filtros = { especialidad, practica, profesionalId };
+        
+        const resultado = await this.turnoService.buscarFechasDisponibles(filtros);
+        
+        return res.status(200).json({
+          status: 'success',
+          data: resultado.fechas
+        });
+      } catch (error) {
+        logger.error(error.message);
+        return next(error);
+      }
+    };
+  }
+
+  obtenerHorariosDisponibles() {
+    return async (req, res, next) => {
+      try {
+        const { especialidad, practica, profesionalId, fecha } = req.query;
+        
+        if (!fecha) throw new BadRequestError('Falta el parámetro fecha');
+
+        const filtros = { 
+          especialidad, 
+          practica, 
+          profesionalId,
+          fechaDesde: fecha,
+          fechaHasta: fecha
+        };
+        
+        const resultado = await this.turnoService.buscarHorariosDisponibles(filtros);
+        
+        return res.status(200).json({
+          status: 'success',
+          data: resultado.horarios
+        });
+      } catch (error) {
+        logger.error(error.message);
+        return next(error);
+      }
+    };
+  }
+
+
 }
