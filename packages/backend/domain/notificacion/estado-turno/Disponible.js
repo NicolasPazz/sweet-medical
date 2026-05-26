@@ -1,4 +1,6 @@
 import { logger } from '../../../utils/logger.js';
+import { Notificacion } from '../Notificacion.js';
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class Disponible {
@@ -11,11 +13,12 @@ export class Disponible {
     return EstadoTurno.DISPONIBLE;
   }
 
-  notificar() {
+  generarNotificacion() {
     // Si el estado es DISPONIBLE o REALIZADO, no hay notificación
     logger.debug(
-      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado.constructor.name}.`,
+      `No se crea notificación para turno ${this.turno.id} en estado ${this.turno.estado?.getEstadoNombre() || 'Disponible'}.`,
     );
+
     return null;
   }
 }

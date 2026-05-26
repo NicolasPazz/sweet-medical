@@ -21,8 +21,7 @@ describe('POST /notificaciones', () => {
       mensaje: 'Turno confirmado',
       leida: false,
     });
-    // El id lo asigna el repo, solo verificamos que exista
-    expect(res.body.data.id).toBeDefined();
+    expect(res.body.data._id || res.body.data.id).toBeDefined();
   });
 
   it('falla si falta el destinatario', async () => {
@@ -110,7 +109,7 @@ describe('PATCH /notificaciones/:id_notificacion/:id_destinatario (marcar como l
       remitente: '507f1f77bcf86cd799439099',
       mensaje: 'Para marcar como leída',
     });
-    idNotificacion = res.body.data.id;
+    idNotificacion = res.body.data._id || res.body.data.id;
   });
 
   it('marca la notificación como leída', async () => {
@@ -126,9 +125,9 @@ describe('PATCH /notificaciones/:id_notificacion/:id_destinatario (marcar como l
     const crearRes = await request(app).post('/notificaciones').send({
       destinatario: ID_USUARIO,
       remitente: '507f1f77bcf86cd799439099',
-      mensaje: 'Otra',
+      mensaje: 'Otra notificacion',
     });
-    const otroId = crearRes.body.data.id;
+    const otroId = crearRes.body.data._id || crearRes.body.data.id;
 
     // Intentamos marcarla con un usuario distinto (pero que sea un ObjectId válido)
     const idUsuarioFalso = '507f1f77bcf86cd799439099';

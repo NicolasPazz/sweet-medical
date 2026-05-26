@@ -1,0 +1,18 @@
+import express from 'express';
+import { PracticaController } from '../controllers/PracticaController.js';
+
+const practicaController = new PracticaController();
+const router = express.Router();
+
+router
+  .route('/')
+  .get((req, res, next) => practicaController.obtenerTodos(req, res, next))
+  .post((req, res, next) => practicaController.agregar(req, res, next));
+
+router
+  .route('/:id')
+  .get((req, res, next) => practicaController.obtenerPorId(req, res, next))
+  .patch((req, res, next) => practicaController.modificar(req, res, next))
+  .delete((req, res, next) => practicaController.eliminar(req, res, next));
+
+export default router;

@@ -31,8 +31,25 @@ export class TurnoRepository {
     });
   }
 
+  async findAllForTomorrow(horaInicioManiana, horaFinManiana) {
+    return await this.model.find({
+      estado: 'RESERVADO',
+      fechaHora: {
+        $gte: horaInicioManiana,
+        $lte: horaFinManiana,
+      },
+    });
+  }
+
   async findAllByPatientId(pacienteId) {
     return await this.model.find({ paciente: pacienteId });
+  }
+
+  async findByMedicFechaHora(medicId, fechaHora) {
+    return await this.model.findOne({
+      medico: medicId,
+      fechaHora: fechaHora,
+    });
   }
 
   // CREAR
@@ -44,6 +61,7 @@ export class TurnoRepository {
     }
 
     const nuevoTurno = new this.model(turno);
+    nuevoTurno.slotsAsociados = (turno.slotsAsociados || []).map(s => s._id || s.id || s);
     return await nuevoTurno.save();
   }
 
@@ -60,6 +78,7 @@ export class TurnoRepository {
       : { ...datosActualizados };
 
     payload.estado = estadoLimpio;
+    payload.slotsAsociados = (datosActualizados.slotsAsociados || []).map(s => s._id || s.id || s);
 
     return await this.model.findByIdAndUpdate(id, payload, { new: true });
   }

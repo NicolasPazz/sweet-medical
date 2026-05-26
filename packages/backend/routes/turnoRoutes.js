@@ -1,10 +1,7 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
-import { TurnoBusquedaController } from '../controllers/TurnoBusquedaController.js';
-import { turnoBusquedaService } from '../services/TurnoBusquedaService.js';
 
 const turnoController = new TurnoController();
-const turnoBusquedaController = new TurnoBusquedaController();
 const turnoRouter = express.Router();
 
 /**
@@ -54,7 +51,7 @@ const turnoRouter = express.Router();
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/paciente/:id_usuario/reserva/:id_turno')
+  .route('/paciente/reserva')
   .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
 
 /**
@@ -177,7 +174,7 @@ turnoRouter
  * /turnos/medico/{id_usuario}/confirmar/{id_turno}:
  *   patch:
  *     summary: Confirmar un turno como médico
- *     description: Permite a un médico confirmar/aceptar un turno que ha sido reservado por un paciente. El turno pasa a estado CONFIRMADO.
+ *     description: Permite a un médico confirmar un turno reservado. Si es el primer turno del día, es obligatorio mandar la sede por el body para congelarla en el resto de los slots libres de esa fecha. En turnos posteriores del mismo día, el body es opcional y se heredará la sede automáticamente.
  *     tags:
  *       - Turnos
  *     parameters:
@@ -193,6 +190,18 @@ turnoRouter
  *         description: ID del turno a confirmar (MongoDB ObjectId)
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: false
+ *       description: ID de la sede (Obligatorio solo en el primer turno del día)
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id_sede:
+ *                 type: string
+ *                 description: ID de la sede donde se realizará la atención (MongoDB ObjectId)
+ *                 example: "6a10e90bf6a9c4f70dc4e0c4"
  *     responses:
  *       200:
  *         description: Turno confirmado exitosamente
@@ -208,19 +217,25 @@ turnoRouter
  *                   type: string
  *                   example: "Turno aceptado exitosamente"
  *       400:
- *         description: IDs mal formados o turno no puede ser confirmado
+ *         description: IDs mal formados o falta de id_sede en el primer turno del día
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
- *         description: Turno no encontrado
+ *         description: Turno o médico no encontrado
+ *       409:
+ *         description: Conflicto con otra sede ya asignada en el día
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Error interno del servidor
  */
 turnoRouter
   .route('/medico/:id_usuario/confirmar/:id_turno')
-  .patch((req, res, next) => turnoController.aceptarTurno(req, res, next));
+  .patch((req, res, next) => turnoController.confirmarTurno(req, res, next));
 
 /**
  * @swagger
@@ -271,6 +286,67 @@ turnoRouter
 
 /**
  * @swagger
+ * /turnos/medico/{id_usuario}/slots:
+ *   get:
+ *     summary: Obtener todos los slots de un médico
+ *     description: Retorna todos los slots (unidades de tiempo de la agenda) asociados a un médico específico, independientemente de su estado.
+ *     tags:
+ *       - Turnos
+ *     parameters:
+ *       - name: id_usuario
+ *         in: path
+ *         required: true
+ *         description: ID del usuario médico (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Slots obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_slot:
+ *                         type: string
+ *                       id_medico:
+ *                         type: string
+ *                       fecha:
+ *                         type: string
+ *                         example: "2026-05-20"
+ *                       horaInicio:
+ *                         type: string
+ *                         example: "09:00"
+ *                       duracionMins:
+ *                         type: number
+ *                         example: 30
+ *                       estado:
+ *                         type: string
+ *                         enum: [DISPONIBLE, RESERVADO, OCUPADO]
+ *                       id_turno_asociado:
+ *                         type: string
+ *                         nullable: true
+ *       400:
+ *         description: ID mal formado
+ *       404:
+ *         description: Médico no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+turnoRouter
+  .route('/medico/:id_usuario/slots')
+  .get((req, res, next) => turnoController.obtenerSlotsMedico(req, res, next));
+
+/**
+ * @swagger
  * /turnos/{id_usuario}/realizado/{id_turno}:
  *   patch:
  *     summary: Marcar turno como realizado
@@ -311,9 +387,145 @@ turnoRouter
  *       500:
  *         description: Error interno del servidor
  */
+
 turnoRouter
   .route('/:id_usuario/realizado/:id_turno')
   .patch((req, res, next) => turnoController.finalizarTurno(req, res, next));
+
+/**
+ * @swagger
+ * /turnos/{id_usuario}/propuesta-reprogramacion/{id_turno}:
+ *   patch:
+ *     summary: Proponer reprogramación de un turno
+ *     description: Permite a un médico o paciente proponer una nueva fecha y hora para reprogramar un turno existente. El turno pasa a estado PENDIENTE_REPROGRAMACION hasta que la otra parte responda.
+ *     tags:
+ *       - Turnos
+ *     parameters:
+ *       - name: id_usuario
+ *         in: path
+ *         required: true
+ *         description: ID del usuario que propone la reprogramación (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *       - name: id_turno
+ *         in: path
+ *         required: true
+ *         description: ID del turno a reprogramar (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nueva_fecha
+ *             properties:
+ *               nueva_fecha:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Nueva fecha y hora propuesta para el turno
+ *                 example: "2025-08-15T10:30:00.000Z"
+ *               motivo:
+ *                 type: string
+ *                 description: Motivo de la solicitud de reprogramación
+ *                 example: "Conflicto de horario"
+ *     responses:
+ *       200:
+ *         description: Propuesta de reprogramación enviada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: "Propuesta de reprogramación enviada exitosamente"
+ *       400:
+ *         description: IDs mal formados, fecha inválida, o el turno no puede ser reprogramado en su estado actual
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Turno no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+turnoRouter
+  .route('/:id_usuario/propuesta-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.proponerReprogramacion(req, res, next));
+
+/**
+ * @swagger
+ * /turnos/{id_usuario}/responder-reprogramacion/{id_turno}:
+ *   patch:
+ *     summary: Responder a una propuesta de reprogramación
+ *     description: Permite al destinatario de una propuesta de reprogramación aceptarla o rechazarla. Si se acepta, el turno queda reprogramado a la nueva fecha. Si se rechaza, el turno vuelve a su estado anterior.
+ *     tags:
+ *       - Turnos
+ *     parameters:
+ *       - name: id_usuario
+ *         in: path
+ *         required: true
+ *         description: ID del usuario que responde la propuesta (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *       - name: id_turno
+ *         in: path
+ *         required: true
+ *         description: ID del turno con propuesta de reprogramación pendiente (MongoDB ObjectId)
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - aceptar
+ *             properties:
+ *               aceptar:
+ *                 type: boolean
+ *                 description: true para aceptar la reprogramación, false para rechazarla
+ *                 example: true
+ *               motivo:
+ *                 type: string
+ *                 description: Motivo del rechazo (recomendado si aceptar es false)
+ *                 example: "La nueva fecha no me es conveniente"
+ *     responses:
+ *       200:
+ *         description: Respuesta a la reprogramación procesada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: "Reprogramación aceptada exitosamente"
+ *       400:
+ *         description: IDs mal formados, o el turno no tiene una propuesta de reprogramación pendiente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Turno no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+turnoRouter
+  .route('/:id_usuario/responder-reprogramacion/:id_turno')
+  .patch((req, res, next) => turnoController.responderReprogramacion(req, res, next));
 
 /**
  * @swagger
@@ -482,6 +694,10 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  *       500:
  *         description: Error interno del servidor
  */
-turnoRouter.route('/disponibles').get(turnoBusquedaController.crear(turnoBusquedaService));
+turnoRouter.route('/disponibles').get(turnoController.buscarTurnos());
+
+turnoRouter.route('/disponibilidad/fechas').get(turnoController.obtenerFechasDisponibles());
+
+turnoRouter.route('/disponibilidad/horarios').get(turnoController.obtenerHorariosDisponibles());
 
 export default turnoRouter;

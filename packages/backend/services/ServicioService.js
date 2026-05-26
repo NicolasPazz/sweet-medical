@@ -75,9 +75,11 @@ export class ServicioService {
     if (servicio.codigo === undefined && datosActualizados.codigo !== undefined) {
       throw new BadRequestError('No se puede modificar ni asignar un código a una Especialidad.');
     }
-    if (tipoServicio == 'ESPECIALIDAD')
+    
+    const actualTipo = tipoServicio || (servicio.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD');
+    if (actualTipo == 'ESPECIALIDAD')
       return await this.servicioRepository.updateEspecialidad(id, datosActualizados);
-    else if (tipoServicio == 'PRACTICA')
+    else if (actualTipo == 'PRACTICA')
       return await this.servicioRepository.updatePractica(id, datosActualizados);
 
     throw new NotFoundError('Servicio no encontrado');
@@ -91,10 +93,11 @@ export class ServicioService {
     if (!servicio) {
       throw new NotFoundError('Servicio no encontrado');
     }
+    const actualTipo = tipoServicio || (servicio.codigo !== undefined ? 'PRACTICA' : 'ESPECIALIDAD');
     const data = { activo: false };
-    if (tipoServicio == 'ESPECIALIDAD')
+    if (actualTipo == 'ESPECIALIDAD')
       return await this.servicioRepository.updateEspecialidad(id, data);
-    else if (tipoServicio == 'PRACTICA')
+    else if (actualTipo == 'PRACTICA')
       return await this.servicioRepository.updatePractica(id, data);
   }
 }

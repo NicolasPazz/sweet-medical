@@ -3,6 +3,7 @@ import { usuarioRepository } from '../infrastructure/repositories/UsuarioReposit
 import { Notificacion } from '../domain/notificacion/Notificacion.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
+import { FactoryNotificacion } from '../domain/notificacion/FactoryNotificacion.js';
 
 export class NotificacionService {
   constructor({
@@ -52,4 +53,19 @@ export class NotificacionService {
     );
     return await this.notificacionRepository.save(notificacion);
   }
+
+  async generarNotificacionesRecordatorias(turnosDeManiana, usuario) {
+    let notificaciones = [];
+    for (const t of turnosDeManiana) {
+      // Crear recordatorio tanto para el médico como para el paciente
+      notificaciones = FactoryNotificacion.crearRecordatoriosActores(usuario, t);
+      for (let n of notificaciones) {
+        this.notificacionRepository.save(n);
+      }
+    }
+
+    return notificaciones.length;
+  }
 }
+
+export const notificacionService = new NotificacionService();

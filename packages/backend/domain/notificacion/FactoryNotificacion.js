@@ -1,28 +1,31 @@
 import { Notificacion } from './Notificacion.js';
+import { Usuario } from '../usuario/Usuario.js';
+import { t } from '../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
 
 export class FactoryNotificacion {
+  
   static crearSegunEstadoTurno(usuarioQueLlama, turno) {
-    return turno.estado.notificar(usuarioQueLlama);
+    return turno.estado.generarNotificacion(usuarioQueLlama);
   }
 
-  // Esto se ejecutará desde un cron
-  static crearRecordatoriosDiaPrevio(turno, usuarioSistema) {
-    const remitenteId = usuarioSistema?.id || usuarioSistema?._id;
+  static crearRecordatoriosActores(usuarioQueLlama, turno) {
+    const notificaciones = [];
 
-    const medicoUsuarioId = turno.medico.usuario.id || turno.medico.usuario._id;
-    const pacienteUsuarioId = turno.paciente.usuario.id || turno.paciente.usuario._id;
-
-    return [
-      new Notificacion(
-        medicoUsuarioId,
-        remitenteId,
-        `Recordatorio: Mañana tiene un turno con ${turno.paciente.nombre}.`,
-      ),
-      new Notificacion(
-        pacienteUsuarioId,
-        remitenteId,
-        `Recordatorio: Mañana es su turno con el Dr/a. ${turno.medico.nombre}.`,
-      ),
-    ];
+    const notificacionPaciente = new Notificacion(
+      turno.paciente.usuario,
+      usuarioQueLlama,
+      t('RECORDATORIO_PACIENTE', {
+        nombre: turno.medico.nombre,
+      }),
+    );
+    const notificacionMedico = new Notificacion(
+      turno.medico.usuario,
+      usuarioQueLlama,
+      t('RECORDATORIO_MEDICO', {
+        nombre: turno.paciente.nombre,
+      }),
+    );
+    notificaciones.push(notificacionPaciente, notificacionMedico);
+    return notificaciones;
   }
 }

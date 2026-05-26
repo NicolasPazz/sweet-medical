@@ -1,10 +1,9 @@
+import { DateUtil } from '../../../utils/DateUtil.js';
+
 export class TurnoMapper {
   static toResponseDTO(turno, costoCalculado) {
-    const fechaObj = new Date(turno.fechaHora);
-    const fecha = isNaN(fechaObj.getTime()) ? null : fechaObj.toISOString().split('T')[0];
-    const hora = isNaN(fechaObj.getTime())
-      ? null
-      : fechaObj.toISOString().split('T')[1].substring(0, 5);
+    const fecha = DateUtil.toYYYYMMDD(turno.fechaHora || turno.fecha);
+    const hora = DateUtil.toHHMM(turno.fechaHora || turno.hora);
 
     return {
       id: turno.id || turno._id,

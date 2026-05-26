@@ -10,6 +10,8 @@ export {
   configurarFecha,
   calcularHoraDesdeMinutos,
   horarioIncluido,
+  ordenarSlots,
+  validarSlotsContiguos
 };
 
 /**
@@ -227,4 +229,62 @@ function horarioIncluido(turno1, turno2) {
     minutosTurno1 < minutosTurno2 + turno2.servicio.duracionTurnoEnMins &&
     minutosTurno2 < minutosTurno1 + turno1.servicio.duracionTurnoEnMins
   );
+}
+
+/**
+ * FUNCIÓN 2: Ordena una lista de slots basándose puramente en su hora de inicio.
+ * @param {Slot[]} listaSlots - Array de objetos de la clase Slot
+ * @returns {Slot[]} Un NUEVO array ordenado cronológicamente por horario
+ */
+function ordenarSlots(listaSlots) {
+  if (!listaSlots || listaSlots.length <= 1) return listaSlots;
+
+  // Clonamos el array para mantener el principio de inmutabilidad de DDS
+  return [...listaSlots].sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+}
+
+/**
+ * FUNCIÓN 1: Valida que una lista de slots pertenezcan a la MISMA FECHA y sean contiguos
+ * @param {Slot[]} listaSlots - Array de objetos de la clase Slot
+ * @returns {boolean} true si cumplen todas las condiciones, false si cambian de fecha o tienen baches
+ */
+function validarSlotsContiguos(listaSlots) {
+  // Caso base: 0 o 1 slot siempre se consideran válidos por definición
+  if (!listaSlots || listaSlots.length <= 1) {
+    return true; 
+  }
+
+  // 1. BLINDAJE CRÍTICO: Validamos que absolutamente TODOS los slots pertenezcan a la misma fecha.
+  // Tomamos la fecha del primer slot como referencia
+  const fechaReferencia = listaSlots[0].fecha;
+  const todosMismaFecha = listaSlots.every(slot => slot.fecha === fechaReferencia);
+
+  if (!todosMismaFecha) {
+    console.error("[VALIDACIÓN ERROR] Intento de reserva unificando slots de distintas fechas físicas.");
+    return false; // Corta de una request maliciosa o corrupta
+  }
+
+  // 2. Ordenamos cronológicamente usando nuestra Función 2 (puramente por horario)
+  const slotsOrdenados = ordenarSlots(listaSlots);
+
+  // 3. Recorremos la lista comparando la ventana deslizante (actual vs siguiente)
+  for (let i = 0; i < slotsOrdenados.length - 1; i++) {
+    const slotActual = slotsOrdenados[i];
+    const slotSiguiente = slotsOrdenados[i + 1];
+
+    // 4. Convertimos la hora de inicio del actual a minutos y le sumamos su duración
+    const minutosInicioActual = horaAMinutos(slotActual.horaInicio);
+    const minutosFinActual = minutosInicioActual + slotActual.duracionMins;
+
+    // 5. Convertimos el inicio del siguiente slot a minutos
+    const minutosInicioSiguiente = horaAMinutos(slotSiguiente.horaInicio);
+
+    // 6. Validación de Contigüidad Horaria: El fin del actual debe calzar exacto con el inicio del próximo
+    if (minutosFinActual !== minutosInicioSiguiente) {
+      return false; // Existe un bache o una superposición inválida
+    }
+  }
+
+  // Si pasa el control de fecha unificada y el loop de contigüidad, el bloque es 100% válido
+  return true;
 }

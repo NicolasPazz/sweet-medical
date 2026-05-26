@@ -7,6 +7,7 @@ import { Reservado } from '../../domain/notificacion/estado-turno/Reservado.js';
 import { Confirmado } from '../../domain/notificacion/estado-turno/Confirmado.js';
 import { Cancelado } from '../../domain/notificacion/estado-turno/Cancelado.js';
 import { Realizado } from '../../domain/notificacion/estado-turno/Realizado.js';
+import { PendienteReprogramacion } from '../../domain/notificacion/estado-turno/PendienteReprogramacion.js';
 
 const cambioEstadoTurnoSchema = new mongoose.Schema(
   {
@@ -32,10 +33,9 @@ const turnoSchema = new mongoose.Schema(
       duracionTurnoEnMins: { type: Number, required: true, min: 1 },
     },
     sede: {
-      _id: { type: mongoose.Schema.Types.ObjectId },
+      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede' },
       nombre: { type: String, trim: true, maxlength: 100 },
     },
-    diaSemana: { type: String, required: true, trim: true, maxlength: 20 },
     hora: { type: String, required: true, trim: true, maxlength: 10 },
     fechaHora: { type: Date },
     estado: {
@@ -52,14 +52,21 @@ const turnoSchema = new mongoose.Schema(
       },
     },
     costo: { type: Number, required: true, min: 0 },
+    slotsAsociados: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Slot', default: [] }],
     historialEstados: [cambioEstadoTurnoSchema],
+
+    propuestaCambio: {
+      nuevaFechaHora: { type: Date, default: null },
+      motivo: { type: String, default: null },
+      proponenteId: { type: String, default: null },
+    },
   },
   { collection: 'turnos' },
 );
 
 turnoSchema.pre(/^find/, function (next) {
   if (this.options?._populatingFromMedico) return next();
-  this.populate('medico').populate('paciente').populate({ path: 'historialEstados.usuario' });
+  this.populate('medico').populate('paciente').populate('slotsAsociados').populate({ path: 'historialEstados.usuario' });
   next();
 });
 
@@ -75,6 +82,8 @@ function mapearAClaseEstado(estadoValor, turno) {
       return new Cancelado(turno);
     case 'REALIZADO':
       return new Realizado(turno);
+    case 'PENDIENTE_REPROGRAMACION':
+      return new PendienteReprogramacion(turno);
     default:
       return estadoValor;
   }

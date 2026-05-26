@@ -48,7 +48,7 @@ export class ServicioController {
       ValidadorId.validarIds(id, idUsuario);
 
       const datosActualizados = this.validarCuerpoModificacion(req.body);
-      const tipoServicio = req.body.tipoServicio;
+      const tipoServicio = req.body.tipoServicio || req.body.tipo;
       const servicioModificado = await this.servicioService.modificar(
         idUsuario,
         id,
@@ -65,8 +65,8 @@ export class ServicioController {
     try {
       const id = req.params.id;
       const idUsuario = req.body.idUsuario;
-      const tipoServicio = req.body.tipoServicio;
-      this.validarTipoServicio(tipoServicio);
+      const tipoServicio = req.body.tipoServicio || req.body.tipo;
+      this.validarTipoServicio(req.body);
       ValidadorId.validarIds(id, idUsuario);
       await this.servicioService.eliminar(idUsuario, id, tipoServicio);
       return res.status(204).send();
@@ -76,6 +76,14 @@ export class ServicioController {
   };
 
   validarCuerpoCreacion(body) {
+    if (body.tipo !== 'ESPECIALIDAD' && body.tipo !== 'PRACTICA') {
+      throw new BadRequestError('El tipo de servicio debe ser ESPECIALIDAD o PRACTICA');
+    }
+
+    if (body.tipo === 'PRACTICA' && (body.codigo === undefined || typeof body.codigo !== 'string' || body.codigo.trim().length === 0)) {
+      throw new BadRequestError('El código es obligatorio para una Práctica');
+    }
+
     if (typeof body.nombre !== 'string' || body.nombre.trim().length === 0) {
       throw new BadRequestError('El nombre no puede estar vacío');
     }
@@ -145,11 +153,13 @@ export class ServicioController {
   }
 
   validarTipoServicio(body) {
-    if (body.tipoServicio !== undefined) {
-      if (typeof body.tipoServicio !== 'string' || body.tipoServicio.trim().length === 0) {
+    if (!body) return;
+    const tipo = body.tipoServicio || body.tipo;
+    if (tipo !== undefined) {
+      if (typeof tipo !== 'string' || tipo.trim().length === 0) {
         throw new BadRequestError('El tipo de servicio no puede estar vacío');
       }
-      if (body.tipoServicio !== 'ESPECIALIDAD' && body.tipoServicio !== 'PRACTICA') {
+      if (tipo !== 'ESPECIALIDAD' && tipo !== 'PRACTICA') {
         throw new BadRequestError('El tipo de servicio debe ser ESPECIALIDAD o PRACTICA');
       }
     }

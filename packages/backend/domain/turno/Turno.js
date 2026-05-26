@@ -1,5 +1,5 @@
 import { CambioEstadoTurno } from './CambioEstadoTurno.js';
-import { Disponible } from '../notificacion/estado-turno/Disponible.js';
+import { PendienteReprogramacion } from '../notificacion/estado-turno/PendienteReprogramacion.js';
 import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
 import { logger } from '../../utils/logger.js';
 
@@ -13,35 +13,48 @@ export class Turno {
   estado;
   historialEstados;
   costo;
-  diaSemana;
   hora;
+  slotsAsociados;
+  propuestaCambio = null;
 
-  constructor(medico, paciente, diaSemana, hora, sede, servicio, costo, usuarioSistema) {
+  constructor(medico, paciente, fecha, horaInicio, sede, servicio, costo) {
     this.medico = medico;
     this.paciente = paciente;
-    this.diaSemana = diaSemana;
-    this.hora = hora;
+    this.fechaHora = new Date(fecha);
+    this.hora = horaInicio;
     this.sede = sede;
     this.servicio = servicio?.costo ? servicio : null;
     this.historialEstados = [];
     this.costo = costo;
-
-    this.actualizarEstado(usuarioSistema, new Disponible(this), 'Turno generado');
+    this.slotsAsociados = [];
   }
-
+  
   actualizarEstado(quien, nuevoEstado, motivo) {
     console.log('QUIEN LLAMA? ', quien);
 
-    const estadoEnum =
-      typeof nuevoEstado.getEstadoNombre === 'function'
-        ? nuevoEstado.getEstadoNombre()
-        : nuevoEstado.constructor.name.toUpperCase();
+    const estadoEnum = typeof nuevoEstado.getEstadoNombre === 'function' ? nuevoEstado.getEstadoNombre() : nuevoEstado.constructor.name.toUpperCase();
 
     const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
     const notificacion = FactoryNotificacion.crearSegunEstadoTurno(quien, this);
+    return notificacion;
+  }
+
+  solicitarReprogramacion(usuarioQueLlama, nuevaFechaHora, motivo) {
+    this.propuestaCambio = {
+      nuevaFechaHora,
+      motivo,
+      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id,
+    };
+
+    const notificacion = this.actualizarEstado(
+      usuarioQueLlama,
+      new PendienteReprogramacion(this),
+      `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
+    );
+
     return notificacion;
   }
 
