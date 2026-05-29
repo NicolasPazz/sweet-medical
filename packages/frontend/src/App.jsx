@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Header from './components/header/header';
 
 const HealthCheck = () => {
   const [healthData, setHealthData] = useState(null);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+    const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3001';
     fetch(`${apiUrl}/health`)
       .then((res) => res.json())
       .then((data) => setHealthData(data))
@@ -50,7 +51,12 @@ function App() {
     return <HealthCheck />;
   }
 
-  return <Home />;
+  return (
+    <>
+      <Header />
+      <Home />
+    </>
+  );
 }
 
 export default App;
