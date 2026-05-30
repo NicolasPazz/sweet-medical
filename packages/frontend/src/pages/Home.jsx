@@ -1,28 +1,26 @@
 import { Link } from 'react-router-dom';
 import { getApiBaseUrl } from '@/lib/api-utils';
+import TurnoSearchBar from '../components/turnoSearchBar/TurnoSearchBar.jsx';
+import './Home.css';
 
 export default function Home() {
+  const manejarBusqueda = (termino) => {
+    console.log('Buscando turnos para:', termino);
+    // fetch(`/api/turnos?q=${termino}`)
+  };
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-24 dark:bg-black">
-      <main className="flex w-full max-w-lg flex-col items-center gap-6 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Sweet Medical
-        </h1>
-        <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+    <div className="home-container">
+      <main className="home-main">
+        <h1 className="home-title">Sweet Medical</h1>
+
+        <p className="home-subtitle">
           Plataforma para la gestión de turnos, profesionales y servicios de salud.
         </p>
-        <p className="text-sm text-zinc-500">
-          API en{' '}
-          <code className="rounded bg-zinc-200 px-2 py-0.5 text-xs dark:bg-zinc-800">
-            {getApiBaseUrl()}
-          </code>
-        </p>
-        <Link
-          to="/health"
-          className="text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
-        >
-          Ver estado del backend (/health)
-        </Link>
+
+        <div className="search-wrapper">
+          <TurnoSearchBar onSearch={manejarBusqueda} />
+        </div>
       </main>
     </div>
   );

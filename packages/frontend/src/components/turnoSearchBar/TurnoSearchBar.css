@@ -1,0 +1,93 @@
+.turno-search {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #271f92;
+  box-shadow: 0 0 0 2px rgba(39, 31, 146, 0.1);
+}
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  padding: 12px 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  color: #334155;
+  width: 100%;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #271f92;
+  color: #ffffff;
+  border: none;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  height: 42px;
+}
+
+.search-button:hover {
+  background-color: #0f0775;
+}
+
+.search-button:active {
+  transform: scale(0.97);
+}
