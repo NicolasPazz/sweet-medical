@@ -16,9 +16,24 @@ export default function Home() {
           Plataforma para la gestión de turnos, profesionales y servicios de salud.
         </p>
 
-        <div className="search-wrapper">
-          <TurnoSearchBar onSearch={manejarBusqueda} />
-        </div>
+        <nav className="options-nav">
+          <ul>
+            <li>
+              <a href="/servicio" className="option-link">
+                <img src="/Servicio.png" alt="Servicio" className="option-image" />
+                <span className="option-title">Ver Servicios</span>
+                <span className="descripcion">Ver la lista de servicios disponibles</span>
+              </a>
+            </li>
+            <li>
+              <a href="/solicitar-turno" className="option-link">
+                <img src="/fotoTurno.png" alt="Turno" className="option-image" />
+                <span className="option-title">Solicitar Turno</span>
+                <span className="descripcion">Agendar un turno según un servicio y médico</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </main>
     </div>
   );
