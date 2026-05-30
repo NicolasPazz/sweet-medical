@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+.agendar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px 80px;
+  font-family: 'Roboto Mono', monospace;
+  min-height: 100%;
+}
+
+/* ── Header ── */
+.agendar-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.agendar-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.agendar-subtitle {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+/* ── Estados ── */
+.agendar-estado {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.agendar-estado.error {
+  color: #ef4444;
+}
+
+/* ── Lista de servicios ── */
+.servicios-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.servicio-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 16px;
+  cursor: pointer;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.servicio-item:hover {
+  border-color: #271f92;
+  box-shadow: 0 4px 14px rgba(39, 31, 146, 0.08);
+}
+
+.servicio-item.seleccionado {
+  border-color: #271f92;
+  background-color: #f5f4ff;
+  box-shadow: 0 4px 14px rgba(39, 31, 146, 0.12);
+}
+
+.servicio-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.servicio-nombre {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.servicio-detalles {
+  display: flex;
+  gap: 8px;
+}
+
+.servicio-tag {
+  font-size: 11px;
+  color: #6b7280;
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Radio visual ── */
+.servicio-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.servicio-radio.activo {
+  border-color: #271f92;
+  background-color: #271f92;
+  box-shadow: inset 0 0 0 3px #f5f4ff;
+}
+
+/* ── Botón continuar ── */
+.btn-continuar {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #271f92;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
+}
+
+.btn-continuar:hover:not(:disabled) {
+  background-color: #0f0775;
+}
+
+.btn-continuar:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-continuar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

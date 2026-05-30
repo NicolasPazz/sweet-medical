@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import TurnoSearchBar from '../components/turnoSearchBar/TurnoSearchBar.jsx';
 import './Home.css';
 
@@ -19,18 +20,18 @@ export default function Home() {
         <nav className="options-nav">
           <ul>
             <li>
-              <a href="/servicio" className="option-link">
+              <Link to="/servicio" className="option-link">
                 <img src="/Servicio.png" alt="Servicio" className="option-image" />
                 <span className="option-title">Ver Servicios</span>
                 <span className="descripcion">Ver la lista de servicios disponibles</span>
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/solicitar-turno" className="option-link">
+              <Link to="/solicitar-turno" className="option-link">
                 <img src="/fotoTurno.png" alt="Turno" className="option-image" />
-                <span className="option-title">Solicitar Turno</span>
+                <span className="option-title">Agendar Turno</span>
                 <span className="descripcion">Agendar un turno según un servicio y médico</span>
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

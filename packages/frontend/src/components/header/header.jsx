@@ -14,9 +14,9 @@ const Header = () => {
 
             <nav>
             <ul>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/about">Agendar Turno</a></li>
-                <li><a href="/contact">Contacto</a></li>
+                <li><Link to="/">Inicio</Link></li>
+                <li><Link to="/solicitar-turno">Agendar Turno</Link></li>
+                <li><Link to="/contact">Contacto</Link></li>
             </ul>
             </nav>
 
