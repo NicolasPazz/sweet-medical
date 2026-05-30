@@ -12,7 +12,6 @@ export class TurnoController {
 
   reservarTurno = async (req, res, next) => {
     try {
-
       const dtoReserva = req.body;
 
       ValidadorId.validarIds(dtoReserva.id_usuario);
@@ -88,25 +87,25 @@ export class TurnoController {
   };
 
   confirmarTurno = async (req, res, next) => {
-  try {
-    const idUsuario = req.params.id_usuario;
-    ValidadorId.validarIds(idUsuario);
-    const idTurno = req.params.id_turno;
-    ValidadorId.validarIds(idTurno);
-    
-    const idSede = req.body.id_sede;
-  
-    if (idSede) {
-      ValidadorId.validarIds(idSede);
+    try {
+      const idUsuario = req.params.id_usuario;
+      ValidadorId.validarIds(idUsuario);
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+
+      const idSede = req.body.id_sede;
+
+      if (idSede) {
+        ValidadorId.validarIds(idSede);
+      }
+
+      await this.turnoService.confirmarTurno(idUsuario, idTurno, idSede);
+
+      return res.status(200).json({ status: 'success', message: 'Turno confirmado exitosamente' });
+    } catch (error) {
+      return next(error);
     }
-
-    await this.turnoService.confirmarTurno(idUsuario, idTurno, idSede);
-
-    return res.status(200).json({ status: 'success', message: 'Turno confirmado exitosamente' });
-  } catch (error) {
-    return next(error);
-  }
-};
+  };
 
   obtenerDisponibilidad = async (req, res, next) => {
     try {
@@ -317,11 +316,7 @@ export class TurnoController {
         }
 
         // Llamada al service
-        const resultado = await this.turnoService.buscarTurnos(
-          filtros,
-          paciente,
-          paginacion,
-        );
+        const resultado = await this.turnoService.buscarTurnos(filtros, paciente, paginacion);
 
         // Response OK
         return res.status(200).json({
@@ -339,14 +334,14 @@ export class TurnoController {
     return async (req, res, next) => {
       try {
         const { especialidad, practica, profesionalId } = req.query;
-        
+
         const filtros = { especialidad, practica, profesionalId };
-        
+
         const resultado = await this.turnoService.buscarFechasDisponibles(filtros);
-        
+
         return res.status(200).json({
           status: 'success',
-          data: resultado.fechas
+          data: resultado.fechas,
         });
       } catch (error) {
         logger.error(error.message);
@@ -359,22 +354,22 @@ export class TurnoController {
     return async (req, res, next) => {
       try {
         const { especialidad, practica, profesionalId, fecha } = req.query;
-        
+
         if (!fecha) throw new BadRequestError('Falta el parámetro fecha');
 
-        const filtros = { 
-          especialidad, 
-          practica, 
+        const filtros = {
+          especialidad,
+          practica,
           profesionalId,
           fechaDesde: fecha,
-          fechaHasta: fecha
+          fechaHasta: fecha,
         };
-        
+
         const resultado = await this.turnoService.buscarHorariosDisponibles(filtros);
-        
+
         return res.status(200).json({
           status: 'success',
-          data: resultado.horarios
+          data: resultado.horarios,
         });
       } catch (error) {
         logger.error(error.message);
@@ -382,6 +377,4 @@ export class TurnoController {
       }
     };
   }
-
-
 }

@@ -1,14 +1,12 @@
-
-export class Slot{
-
-    _id;
-    medico;
-    fecha;
-    horaInicio;
-    duracionMins;
-    estado;
-    sede;
-    turnoAsociado;
+export class Slot {
+  _id;
+  medico;
+  fecha;
+  horaInicio;
+  duracionMins;
+  estado;
+  sede;
+  turnoAsociado;
 
   constructor(medico, fecha, horaInicio, duracionMins) {
     this.medico = medico;

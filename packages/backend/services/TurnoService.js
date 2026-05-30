@@ -10,7 +10,12 @@ import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
 import { Realizado } from '../domain/notificacion/estado-turno/Realizado.js';
 import { Agenda } from '../domain/agenda/Agenda.js';
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../errors/AppError.js';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '../errors/AppError.js';
 import { Rol } from '../domain/usuario/Rol.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { ordenarSlots, validarSlotsContiguos } from '../utils/functions.js';
@@ -20,7 +25,6 @@ import { logger } from '../utils/logger.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { TurnoMapper } from '../domain/turno/dtos/TurnoMapper.js';
 import { DateUtil } from '../utils/DateUtil.js';
-
 
 export class TurnoService {
   turnoRepository;
@@ -45,7 +49,6 @@ export class TurnoService {
   }
 
   async reservarTurno(dtoReserva) {
-
     const usuario = await this.usuarioRepository.findById(dtoReserva.id_usuario);
 
     if (usuario == null) {
@@ -63,7 +66,11 @@ export class TurnoService {
       throw new NotFoundError('Servicio no encontrado');
     }
 
-    if (dtoReserva.slotsIds == null || !Array.isArray(dtoReserva.slotsIds) || dtoReserva.slotsIds.length === 0) {
+    if (
+      dtoReserva.slotsIds == null ||
+      !Array.isArray(dtoReserva.slotsIds) ||
+      dtoReserva.slotsIds.length === 0
+    ) {
       throw new BadRequestError('Debe proporcionar una lista de IDs de slots para reservar');
     }
 
@@ -84,7 +91,7 @@ export class TurnoService {
     // Validación 1: todos los slots deben pertenecer al mismo médico
     const idMedicoDelPrimerSlot = String(slots[0].medico?._id || slots[0].medico);
     const todosMismoMedico = slots.every(
-      (s) => String(s.medico?._id || s.medico) === idMedicoDelPrimerSlot
+      (s) => String(s.medico?._id || s.medico) === idMedicoDelPrimerSlot,
     );
     if (!todosMismoMedico) {
       throw new BadRequestError('Todos los slots deben pertenecer al mismo médico');
@@ -115,7 +122,10 @@ export class TurnoService {
       throw new BadRequestError('El médico no ofrece el servicio solicitado');
     }
 
-    const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(slots, servicio.duracionTurnoEnMins);
+    const slotsAOcupar = Agenda.obtenerSlotsContiguosParaDuracion(
+      slots,
+      servicio.duracionTurnoEnMins,
+    );
 
     const tiempoRecolectado = slotsAOcupar.reduce((acc, s) => acc + s.duracionMins, 0);
 
@@ -123,16 +133,28 @@ export class TurnoService {
     console.log('DURACION SERVICIO: ', servicio.duracionTurnoEnMins);
 
     if (tiempoRecolectado < servicio.duracionTurnoEnMins) {
-      throw new BadRequestError('Los slots provistos no son suficientes para cubrir la duración del servicio.');
+      throw new BadRequestError(
+        'Los slots provistos no son suficientes para cubrir la duración del servicio.',
+      );
     }
 
     if (slotsAOcupar.length === 0) {
-      throw new ConflictError('No hay suficientes slots contiguos disponibles para la duración del servicio');
+      throw new ConflictError(
+        'No hay suficientes slots contiguos disponibles para la duración del servicio',
+      );
     }
 
-    slotsAOcupar.forEach((s) => s.estado = 'RESERVADO');
+    slotsAOcupar.forEach((s) => (s.estado = 'RESERVADO'));
 
-    const turno = new Turno(medico, paciente, fechaTurno, horaInicioTurno, null, servicio, servicio.costo);
+    const turno = new Turno(
+      medico,
+      paciente,
+      fechaTurno,
+      horaInicioTurno,
+      null,
+      servicio,
+      servicio.costo,
+    );
 
     turno.slotsAsociados.push(...slotsAOcupar);
 
@@ -172,7 +194,9 @@ export class TurnoService {
 
     // Validación: el turno no puede cancelarse si su fecha ya pasó
     if (Date.now() > turno.fechaHora.getTime()) {
-      throw new ConflictError('No se puede cancelar un turno que ya ha pasado su fecha y hora programada');
+      throw new ConflictError(
+        'No se puede cancelar un turno que ya ha pasado su fecha y hora programada',
+      );
     }
 
     // Validación: no cancelar con menos de 1 hora de antelación
@@ -213,7 +237,7 @@ export class TurnoService {
       const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
 
       const sigueSiendoValido = turno.medico.disponibilidades.some((disp) =>
-        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp)
+        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp),
       );
 
       if (sigueSiendoValido) {
@@ -275,7 +299,7 @@ export class TurnoService {
 
     turno.actualizarEstado(usuario, new Realizado(turno), 'Turno finalizado');
 
-    for(const slot of turno.slotsAsociados) {
+    for (const slot of turno.slotsAsociados) {
       slot.estado = 'FINALIZADO';
       await this.slotRepository.save(slot);
     }
@@ -297,168 +321,202 @@ export class TurnoService {
   }
 
   async confirmarTurno(id_usuario, id_turno, id_sede) {
-  logger.debug(`[CONFIRMAR TURNO] Iniciando proceso para Turno ID: ${id_turno}`);
+    logger.debug(`[CONFIRMAR TURNO] Iniciando proceso para Turno ID: ${id_turno}`);
 
-  // 1. Validaciones iniciales de existencia y permisos del Usuario
-  const usuario = await this.usuarioRepository.findById(id_usuario);
-  if (usuario == null) {
-    throw new NotFoundError('Usuario no encontrado');
-  }
-
-  if (!usuario.roles.includes(Rol.MEDICO)) {
-    throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
-  }
-
-  // 2. Validaciones de existencia y estado del Turno
-  const turno = await this.turnoRepository.findById(id_turno);
-  if (turno == null) {
-    throw new NotFoundError('Turno no encontrado');
-  }
-
-  const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
-  if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
-    throw new ConflictError('El turno no pertenece al medico');
-  }
-
-  if (!(turno.estado.getEstadoNombre() === 'RESERVADO')) {
-    throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
-  }
-
-  // --- LÓGICA DE RESTRICCIÓN DE SEDE UTILIZANDO SLOT REPOSITORY ---
-  const idMedico = turno.medico?.id || turno.medico?._id || turno.medico;
-  const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
-  
-  // Función interna para formatear de forma segura cualquier variante de fecha de la DB
-  const parsearFechaSegura = (fechaInput) => {
-    if (!fechaInput) return new Date(NaN);
-    if (fechaInput instanceof Date) return fechaInput;
-    if (typeof fechaInput === 'string' && fechaInput.includes('/')) {
-      const partes = fechaInput.split('/');
-      return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
-    }
-    return new Date(fechaInput);
-  };
-
-  const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha).toDateString();
-
-  logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
-  logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
-  logger.debug(`[CONFIRMAR TURNO] Total de slots recuperados para el médico: ${slotsDelMedico?.length || 0}`);
-
-  // CORRECCIÓN RESTRICCIÓN: Evaluamos que realmente exista una sede física grabada (con _id válido)
-  const slotConSedeExistente = slotsDelMedico.find((s) => {
-    const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
-    return fechaSlotStr === fechaTurnoTarget && s.sede && s.sede._id !== null && s.sede._id !== undefined;
-  });
-
-  const yaTieneSedeAsignada = !!slotConSedeExistente;
-  logger.debug(`[CONFIRMAR TURNO] ¿Ya tiene sede asignada en el día?: ${yaTieneSedeAsignada}`);
-
-  let sedeFinal = id_sede;
-
-  // UBICACIÓN ESTRATÉGICA: Buscamos y declaramos los datos de la sede médica completa antes de usarla
-  const buscarSedeCompleta = (idBuscar) => {
-    return turno.medico?.sedes?.find(s => String(s._id || s.id) === String(idBuscar));
-  };
-
-  if (yaTieneSedeAsignada) {
-    const idSedeExistente = slotConSedeExistente.sede?._id || slotConSedeExistente.sede?.id || slotConSedeExistente.sede;
-    
-    logger.debug(`[CONFIRMAR TURNO] Sede existente encontrada en la DB para este día: ${idSedeExistente}`);
-    logger.debug(`[CONFIRMAR TURNO] Sede solicitada en el body: ${id_sede || 'Ninguna (Heredará automática)'}`);
-
-    // Si mandó una sede por body, verificamos que coincida con la que ya rige en el día
-    if (id_sede && String(idSedeExistente) !== String(id_sede)) {
-      logger.debug(`[CONFIRMAR TURNO] CONFLICTO: Intentó cambiar la sede del día. Lanzando ConflictError.`);
-      throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
-    }
-    
-    // Si no mandó nada, hereda la del día
-    sedeFinal = idSedeExistente;
-    logger.debug(`[CONFIRMAR TURNO] ÉXITO: Se utilizará la sede preexistente: ${sedeFinal}`);
-  } else {
-    logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día.`);
-
-    if (!id_sede) {
-      throw new BadRequestError('Debe especificar una sede en el body para el primer turno del día.');
+    // 1. Validaciones iniciales de existencia y permisos del Usuario
+    const usuario = await this.usuarioRepository.findById(id_usuario);
+    if (usuario == null) {
+      throw new NotFoundError('Usuario no encontrado');
     }
 
-    // Buscamos la info de la sede solicitada en el médico para poder propagarla con estructura
-    const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal);
-    if (!sedeMedicaCompleta) {
-      throw new BadRequestError('La sede especificada no corresponde a las sedes habilitadas del profesional.');
+    if (!usuario.roles.includes(Rol.MEDICO)) {
+      throw new ForbiddenError('No tiene permiso para realizar esta acción, no es médico');
     }
 
-    logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
-    const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
+    // 2. Validaciones de existencia y estado del Turno
+    const turno = await this.turnoRepository.findById(id_turno);
+    if (turno == null) {
+      throw new NotFoundError('Turno no encontrado');
+    }
+
+    const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
+    if (String(idUsuarioDelMedico) !== String(usuario.id || usuario._id)) {
+      throw new ConflictError('El turno no pertenece al medico');
+    }
+
+    if (!(turno.estado.getEstadoNombre() === 'RESERVADO')) {
+      throw new ConflictError('Solo se pueden confirmar turnos que están reservados');
+    }
+
+    // --- LÓGICA DE RESTRICCIÓN DE SEDE UTILIZANDO SLOT REPOSITORY ---
+    const idMedico = turno.medico?.id || turno.medico?._id || turno.medico;
+    const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
+
+    // Función interna para formatear de forma segura cualquier variante de fecha de la DB
+    const parsearFechaSegura = (fechaInput) => {
+      if (!fechaInput) return new Date(NaN);
+      if (fechaInput instanceof Date) return fechaInput;
+      if (typeof fechaInput === 'string' && fechaInput.includes('/')) {
+        const partes = fechaInput.split('/');
+        return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
+      }
+      return new Date(fechaInput);
+    };
+
+    const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha).toDateString();
+
+    logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
+    logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
+    logger.debug(
+      `[CONFIRMAR TURNO] Total de slots recuperados para el médico: ${slotsDelMedico?.length || 0}`,
+    );
+
+    // CORRECCIÓN RESTRICCIÓN: Evaluamos que realmente exista una sede física grabada (con _id válido)
+    const slotConSedeExistente = slotsDelMedico.find((s) => {
       const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
-      return fechaSlotStr === fechaTurnoTarget && s.estado === 'DISPONIBLE';
+      return (
+        fechaSlotStr === fechaTurnoTarget &&
+        s.sede &&
+        s.sede._id !== null &&
+        s.sede._id !== undefined
+      );
     });
 
-    logger.debug(`[CONFIRMAR TURNO] Cantidad de slots encontrados para propagar sede: ${slotsDisponiblesDelDia.length}`);
+    const yaTieneSedeAsignada = !!slotConSedeExistente;
+    logger.debug(`[CONFIRMAR TURNO] ¿Ya tiene sede asignada en el día?: ${yaTieneSedeAsignada}`);
 
-    // Propagación estructurada a todos los slots libres del día
-    for (const slot of slotsDisponiblesDelDia) {
-      logger.debug(`[CONFIRMAR TURNO] Propagando sede estructurada ${sedeMedicaCompleta.nombre} al Slot ID: ${slot._id || slot.id}`);
-      slot.sede = {
-        _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
-        nombre: sedeMedicaCompleta.nombre
-      };
-      await this.slotRepository.save(slot);
+    let sedeFinal = id_sede;
+
+    // UBICACIÓN ESTRATÉGICA: Buscamos y declaramos los datos de la sede médica completa antes de usarla
+    const buscarSedeCompleta = (idBuscar) => {
+      return turno.medico?.sedes?.find((s) => String(s._id || s.id) === String(idBuscar));
+    };
+
+    if (yaTieneSedeAsignada) {
+      const idSedeExistente =
+        slotConSedeExistente.sede?._id ||
+        slotConSedeExistente.sede?.id ||
+        slotConSedeExistente.sede;
+
+      logger.debug(
+        `[CONFIRMAR TURNO] Sede existente encontrada en la DB para este día: ${idSedeExistente}`,
+      );
+      logger.debug(
+        `[CONFIRMAR TURNO] Sede solicitada en el body: ${id_sede || 'Ninguna (Heredará automática)'}`,
+      );
+
+      // Si mandó una sede por body, verificamos que coincida con la que ya rige en el día
+      if (id_sede && String(idSedeExistente) !== String(id_sede)) {
+        logger.debug(
+          `[CONFIRMAR TURNO] CONFLICTO: Intentó cambiar la sede del día. Lanzando ConflictError.`,
+        );
+        throw new ConflictError('El médico ya tiene asignada otra sede para este día.');
+      }
+
+      // Si no mandó nada, hereda la del día
+      sedeFinal = idSedeExistente;
+      logger.debug(`[CONFIRMAR TURNO] ÉXITO: Se utilizará la sede preexistente: ${sedeFinal}`);
+    } else {
+      logger.debug(`[CONFIRMAR TURNO] Primer turno con sede del día.`);
+
+      if (!id_sede) {
+        throw new BadRequestError(
+          'Debe especificar una sede en el body para el primer turno del día.',
+        );
+      }
+
+      // Buscamos la info de la sede solicitada en el médico para poder propagarla con estructura
+      const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal);
+      if (!sedeMedicaCompleta) {
+        throw new BadRequestError(
+          'La sede especificada no corresponde a las sedes habilitadas del profesional.',
+        );
+      }
+
+      logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
+      const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
+        const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+        return fechaSlotStr === fechaTurnoTarget && s.estado === 'DISPONIBLE';
+      });
+
+      logger.debug(
+        `[CONFIRMAR TURNO] Cantidad de slots encontrados para propagar sede: ${slotsDisponiblesDelDia.length}`,
+      );
+
+      // Propagación estructurada a todos los slots libres del día
+      for (const slot of slotsDisponiblesDelDia) {
+        logger.debug(
+          `[CONFIRMAR TURNO] Propagando sede estructurada ${sedeMedicaCompleta.nombre} al Slot ID: ${slot._id || slot.id}`,
+        );
+        slot.sede = {
+          _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
+          nombre: sedeMedicaCompleta.nombre,
+        };
+        await this.slotRepository.save(slot);
+      }
     }
+
+    // 3. Asignación final estructurada de la Sede al Turno
+    logger.debug(
+      `[CONFIRMAR TURNO] Asignando sede ${sedeFinal} al documento del Turno actual: ${id_turno}`,
+    );
+    const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal) || slotConSedeExistente?.sede;
+
+    if (sedeMedicaCompleta) {
+      logger.debug(
+        `[CONFIRMAR TURNO] Estructura de sede definida. Asignando subdocumento completo.`,
+      );
+      turno.sede = {
+        _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
+        nombre: sedeMedicaCompleta.nombre,
+      };
+    } else {
+      logger.warn(
+        `[CONFIRMAR TURNO] No se encontró la sede en el listado del médico. Usando fallback básico.`,
+      );
+      turno.sede = {
+        _id: new mongoose.Types.ObjectId(sedeFinal),
+        nombre: 'Sede Asignada',
+      };
+    }
+
+    // 4. Actualizamos el slot físico exacto que pertenece al horario de este turno
+    const slotActual = slotsDelMedico.find((s) => {
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+      return fechaSlotStr === fechaTurnoTarget && s.horaInicio === turno.hora;
+    });
+
+    if (slotActual) {
+      logger.debug(
+        `[CONFIRMAR TURNO] Actualizando slot de la cita actual (${turno.hora}) a RESERVADO con su sede.`,
+      );
+      slotActual.sede = {
+        _id: turno.sede._id,
+        nombre: turno.sede.nombre,
+      };
+      slotActual.estado = 'RESERVADO';
+      await this.slotRepository.save(slotActual);
+    }
+
+    // 5. Flujo de Transición de Estados y Notificaciones
+    logger.debug(`[CONFIRMAR TURNO] Actualizando estado del turno a CONFIRMADO...`);
+    const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
+
+    if (notificacion) {
+      logger.debug(`[CONFIRMAR TURNO] Notificación generada. Guardando en repositorio...`);
+      await this.notificacionRepository.save(notificacion);
+    } else {
+      logger.debug(
+        `[CONFIRMAR TURNO] No se generó ninguna notificación para este cambio de estado.`,
+      );
+    }
+
+    // 6. Guardado final del documento del Turno
+    await this.turnoRepository.save(turno);
+    logger.debug(`[CONFIRMAR TURNO] Proceso finalizado con éxito. Turno guardado.`);
+
+    return turno;
   }
-
-  // 3. Asignación final estructurada de la Sede al Turno
-  logger.debug(`[CONFIRMAR TURNO] Asignando sede ${sedeFinal} al documento del Turno actual: ${id_turno}`);
-  const sedeMedicaCompleta = buscarSedeCompleta(sedeFinal) || slotConSedeExistente?.sede;
-
-  if (sedeMedicaCompleta) {
-    logger.debug(`[CONFIRMAR TURNO] Estructura de sede definida. Asignando subdocumento completo.`);
-    turno.sede = {
-      _id: sedeMedicaCompleta._id || sedeMedicaCompleta.id,
-      nombre: sedeMedicaCompleta.nombre
-    };
-  } else {
-    logger.warn(`[CONFIRMAR TURNO] No se encontró la sede en el listado del médico. Usando fallback básico.`);
-    turno.sede = {
-      _id: new mongoose.Types.ObjectId(sedeFinal),
-      nombre: "Sede Asignada"
-    };
-  }
-
-  // 4. Actualizamos el slot físico exacto que pertenece al horario de este turno
-  const slotActual = slotsDelMedico.find(s => {
-    const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
-    return fechaSlotStr === fechaTurnoTarget && s.horaInicio === turno.hora;
-  });
-
-  if (slotActual) {
-    logger.debug(`[CONFIRMAR TURNO] Actualizando slot de la cita actual (${turno.hora}) a RESERVADO con su sede.`);
-    slotActual.sede = {
-      _id: turno.sede._id,
-      nombre: turno.sede.nombre
-    };
-    slotActual.estado = 'RESERVADO';
-    await this.slotRepository.save(slotActual);
-  }
-
-  // 5. Flujo de Transición de Estados y Notificaciones
-  logger.debug(`[CONFIRMAR TURNO] Actualizando estado del turno a CONFIRMADO...`);
-  const notificacion = turno.actualizarEstado(usuario, new Confirmado(turno), 'Turno confirmado');
-  
-  if (notificacion) {
-    logger.debug(`[CONFIRMAR TURNO] Notificación generada. Guardando en repositorio...`);
-    await this.notificacionRepository.save(notificacion);
-  } else {
-    logger.debug(`[CONFIRMAR TURNO] No se generó ninguna notificación para este cambio de estado.`);
-  }
-
-  // 6. Guardado final del documento del Turno
-  await this.turnoRepository.save(turno);
-  logger.debug(`[CONFIRMAR TURNO] Proceso finalizado con éxito. Turno guardado.`);
-  
-  return turno;
-}
 
   async obtenerDisponibilidad(id_usuario, id_servicio) {
     const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
@@ -484,7 +542,11 @@ export class TurnoService {
       throw new BadRequestError('El médico no ofrece el servicio solicitado');
     }
 
-    const turnosDelServicio = Agenda.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+    const turnosDelServicio = Agenda.generarTurnosSegunMedicoYServicio(
+      medico,
+      slotsDelMedico,
+      servicio,
+    );
 
     return turnosDelServicio.map((t) => this.mapearTurnoDisponibles(t));
   }
@@ -512,11 +574,13 @@ export class TurnoService {
         await Promise.all(
           loteActual.map(async (medico) => {
             try {
-              const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
+              const slotsTotales = await this.slotRepository.findAllSlotsByMedicId(
+                medico.id || medico._id,
+              );
 
-              console.log("MEDICO: " + medico.nombre);
+              console.log('MEDICO: ' + medico.nombre);
 
-              const {slotsEliminados, slotsNuevos} = Agenda.refrescarSlots(
+              const { slotsEliminados, slotsNuevos } = Agenda.refrescarSlots(
                 medico,
                 slotsTotales,
                 duracionSlot,
@@ -586,7 +650,7 @@ export class TurnoService {
     return turnos.map((t) => this._mapearTurno(t));
   }
 
-  mapearTurnoDisponibles(t){
+  mapearTurnoDisponibles(t) {
     return {
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
       nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
@@ -599,12 +663,13 @@ export class TurnoService {
       hora: t.hora,
       fecha: t.fechaHora ? t.fechaHora : 'N/A',
 
-      slotsAsociados: t.slotsAsociados ? t.slotsAsociados.map(s => s.id || s._id) : []
+      slotsAsociados: t.slotsAsociados ? t.slotsAsociados.map((s) => s.id || s._id) : [],
     };
   }
 
   _mapearTurno(t) {
-    const tieneSedeValida = t.sede && (t.sede._id !== null && t.sede._id !== undefined || t.sede.nombre);
+    const tieneSedeValida =
+      t.sede && ((t.sede._id !== null && t.sede._id !== undefined) || t.sede.nombre);
 
     return {
       id_turno: t.id || t._id,
@@ -612,18 +677,20 @@ export class TurnoService {
       nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
-      
+
       // Contrato unificado: misma estructura exacta que el slot
-      sede: tieneSedeValida ? {
-        id_sede: t.sede._id ? t.sede._id.toString() : null,
-        nombre: t.sede.nombre || 'N/A'
-      } : null,
+      sede: tieneSedeValida
+        ? {
+            id_sede: t.sede._id ? t.sede._id.toString() : null,
+            nombre: t.sede.nombre || 'N/A',
+          }
+        : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
       servicio_nombre: t.servicio ? (t.servicio.nombre ? t.servicio.nombre : 'N/A') : 'N/A',
-      
+
       estado: t.estado ? t.estado.getEstadoNombre() : 'N/A',
-      
+
       historialEstados: t.historialEstados.map((e) => ({
         fechaHoraCambio: e.fechaHoraIngreso,
         estado: e.estado,
@@ -637,7 +704,8 @@ export class TurnoService {
   }
 
   _mapearSlot(s) {
-    const tieneSedeValida = s.sede && (s.sede._id !== null && s.sede._id !== undefined || s.sede.nombre);
+    const tieneSedeValida =
+      s.sede && ((s.sede._id !== null && s.sede._id !== undefined) || s.sede.nombre);
 
     return {
       id_slot: s.id || s._id,
@@ -646,11 +714,13 @@ export class TurnoService {
       horaInicio: s.horaInicio,
       duracionMins: s.duracionMins,
       estado: s.estado,
-      sede: tieneSedeValida ? {
-        id_sede: s.sede._id ? s.sede._id.toString() : null,
-        nombre: s.sede.nombre || 'N/A'
-      } : null,
-      
+      sede: tieneSedeValida
+        ? {
+            id_sede: s.sede._id ? s.sede._id.toString() : null,
+            nombre: s.sede.nombre || 'N/A',
+          }
+        : null,
+
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
     };
   }
@@ -699,17 +769,21 @@ export class TurnoService {
 
     // 4. Convertimos la fecha/hora en el Service y buscamos el SLOT físico
     const idMedico = turno.medico?._id || turno.medico?.id || turno.medico;
-    
+
     // Hacemos la magia del formateo acá en la capa de servicio
     const dateObj = new Date(nuevaFechaHora);
     const fechaBuscada = dateObj.toISOString().split('T')[0]; // "2026-05-23"
-    
+
     const horas = String(dateObj.getUTCHours()).padStart(2, '0');
     const minutos = String(dateObj.getUTCMinutes()).padStart(2, '0');
     const horaBuscada = `${horas}:${minutos}`; // "08:00"
 
     // Pasamos los parámetros ya masticados al repositorio
-    const slotDestino = await this.slotRepository.findByMedicFechaHora(idMedico, fechaBuscada, horaBuscada);
+    const slotDestino = await this.slotRepository.findByMedicFechaHora(
+      idMedico,
+      fechaBuscada,
+      horaBuscada,
+    );
 
     if (!slotDestino) {
       throw new ConflictError(
@@ -791,7 +865,7 @@ export class TurnoService {
       const slotViejo = await this.slotRepository.model.findOne({
         medico: idMedico,
         fecha: fechaViejaStr,
-        horaInicio: horaViejaStr
+        horaInicio: horaViejaStr,
       });
 
       if (slotViejo) {
@@ -807,7 +881,11 @@ export class TurnoService {
       const horaNuevaStr = `${String(dateNueva.getUTCHours()).padStart(2, '0')}:${String(dateNueva.getUTCMinutes()).padStart(2, '0')}`;
 
       // Usamos el método limpio que definimos antes
-      const slotNuevo = await this.slotRepository.findByMedicFechaHora(idMedico, fechaNuevaStr, horaNuevaStr);
+      const slotNuevo = await this.slotRepository.findByMedicFechaHora(
+        idMedico,
+        fechaNuevaStr,
+        horaNuevaStr,
+      );
 
       if (!slotNuevo) {
         throw new ConflictError('El horario de la propuesta ya no se encuentra disponible.');
@@ -829,7 +907,6 @@ export class TurnoService {
       if (notificacion) {
         await this.notificacionRepository.save(notificacion);
       }
-
     } else {
       // Si se rechaza, vuelve a RESERVADO con su fecha vieja intacta y no tocamos ningún slot
       const notificacion = turno.actualizarEstado(
@@ -846,7 +923,7 @@ export class TurnoService {
     // 5. Limpiamos la propuesta ya resuelta y guardamos todo
     turno.propuestaCambio = null;
     await this.turnoRepository.save(turno);
-    
+
     return turno;
   }
 
@@ -875,22 +952,34 @@ export class TurnoService {
     const { page = 1, limit = 10, sortBy = 'costo', sortOrder = 'asc' } = paginacion;
 
     if (!filtros.especialidad && !filtros.practica) {
-      throw new BadRequestError('Debe especificar una especialidad o práctica para calcular la disponibilidad.');
+      throw new BadRequestError(
+        'Debe especificar una especialidad o práctica para calcular la disponibilidad.',
+      );
     }
 
     if (filtros.especialidad && filtros.practica) {
-      throw new BadRequestError('No se puede especificar una especialidad y una práctica al mismo tiempo.');
+      throw new BadRequestError(
+        'No se puede especificar una especialidad y una práctica al mismo tiempo.',
+      );
     }
 
     const servicioTipo = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
 
-    const servicio = filtros.practica ? await this.servicioRepository.findById(filtros.practica) : ( filtros.especialidad ? await this.servicioRepository.findById(filtros.especialidad) : null);
+    const servicio = filtros.practica
+      ? await this.servicioRepository.findById(filtros.practica)
+      : filtros.especialidad
+        ? await this.servicioRepository.findById(filtros.especialidad)
+        : null;
 
-    if(servicio == null) {
+    if (servicio == null) {
       throw new NotFoundError('El servicio especificado no existe');
     }
 
-    const medicos = await this._filtrarMedicosValidos(filtros.profesionalId, servicio, servicioTipo);
+    const medicos = await this._filtrarMedicosValidos(
+      filtros.profesionalId,
+      servicio,
+      servicioTipo,
+    );
 
     if (medicos.length === 0) {
       return options.paginar ? { data: [], total: 0, page, limit, totalPages: 0 } : [];
@@ -899,9 +988,9 @@ export class TurnoService {
     const maxRangoDias = parseInt(process.env.MAX_RANGO_BUSQUEDA_DIAS || '30', 10);
 
     const fechaDesdeStr = DateUtil.toYYYYMMDD(filtros.fechaDesde || new Date());
-    
-    const fechaHastaStr = filtros.fechaHasta 
-      ? DateUtil.toYYYYMMDD(filtros.fechaHasta) 
+
+    const fechaHastaStr = filtros.fechaHasta
+      ? DateUtil.toYYYYMMDD(filtros.fechaHasta)
       : DateUtil.addDaysToYYYYMMDD(fechaDesdeStr, maxRangoDias);
 
     const limitesFechas = { fechaDesde: fechaDesdeStr, fechaHasta: fechaHastaStr };
@@ -910,7 +999,8 @@ export class TurnoService {
 
     // Agrupamiento por médico
     const slotsPorMedico = slotsCrudos.reduce((acc, slot) => {
-      const medicoId = slot.medico && slot.medico._id ? slot.medico._id.toString() : slot.medico.toString();
+      const medicoId =
+        slot.medico && slot.medico._id ? slot.medico._id.toString() : slot.medico.toString();
       if (!acc[medicoId]) acc[medicoId] = [];
       acc[medicoId].push(slot);
       return acc;
@@ -919,14 +1009,20 @@ export class TurnoService {
     const turnosVirtuales = [];
     for (const medicoId in slotsPorMedico) {
       const slotsDelMedico = slotsPorMedico[medicoId];
-      const medico = slotsDelMedico[0].medico; 
-      const turnosDelMedico = Agenda.generarTurnosSegunMedicoYServicio(medico, slotsDelMedico, servicio);
+      const medico = slotsDelMedico[0].medico;
+      const turnosDelMedico = Agenda.generarTurnosSegunMedicoYServicio(
+        medico,
+        slotsDelMedico,
+        servicio,
+      );
       turnosVirtuales.push(...turnosDelMedico);
     }
 
     let turnosFiltrados = turnosVirtuales;
     if (filtros.sede) {
-      turnosFiltrados = turnosFiltrados.filter(t => t.sede && (t.sede._id?.toString() === filtros.sede || t.sede.id === filtros.sede));
+      turnosFiltrados = turnosFiltrados.filter(
+        (t) => t.sede && (t.sede._id?.toString() === filtros.sede || t.sede.id === filtros.sede),
+      );
     }
 
     const dtosMapeados = turnosFiltrados.map((turno) => {
@@ -943,7 +1039,9 @@ export class TurnoService {
 
     dtosMapeados.sort((a, b) => {
       if (sortBy === 'costo') {
-        return sortOrder === 'desc' ? b.costoEstimado - a.costoEstimado : a.costoEstimado - b.costoEstimado;
+        return sortOrder === 'desc'
+          ? b.costoEstimado - a.costoEstimado
+          : a.costoEstimado - b.costoEstimado;
       } else {
         const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`).getTime();
         const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`).getTime();
@@ -964,7 +1062,7 @@ export class TurnoService {
       total: totalItems,
       page,
       limit,
-      totalPages: Math.ceil(totalItems / limit)
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
@@ -974,7 +1072,7 @@ export class TurnoService {
     }
 
     const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
-    const fechas = [...new Set(turnosDisponibles.map(t => t.fecha))].filter(f => f);
+    const fechas = [...new Set(turnosDisponibles.map((t) => t.fecha))].filter((f) => f);
     return { fechas };
   }
 
@@ -988,10 +1086,10 @@ export class TurnoService {
 
     const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
 
-    const horarios = turnosDisponibles.map(t => ({
+    const horarios = turnosDisponibles.map((t) => ({
       hora: t.hora,
       medico: t.medico,
-      sede: t.sede
+      sede: t.sede,
     }));
 
     return { horarios };
@@ -1019,9 +1117,10 @@ export class TurnoService {
       if (!medico) throw new NotFoundError('El profesional especificado no existe');
 
       const id = servicio._id;
-      const tieneServicio = servicioTipo === 'PRACTICA'
-        ? medico.practicas?.some(p => p.id === id || p._id?.toString() === id)
-        : medico.especialidades?.some(e => e.id === id || e._id?.toString() === id);
+      const tieneServicio =
+        servicioTipo === 'PRACTICA'
+          ? medico.practicas?.some((p) => p.id === id || p._id?.toString() === id)
+          : medico.especialidades?.some((e) => e.id === id || e._id?.toString() === id);
 
       if (!tieneServicio) {
         const label = servicioTipo === 'PRACTICA' ? 'práctica' : 'especialidad';
@@ -1032,12 +1131,16 @@ export class TurnoService {
     }
 
     const medicos = await this.medicoRepository.findAll();
-    const medicosValidos = medicos.filter(m => {
+    const medicosValidos = medicos.filter((m) => {
       if (filtros.practica) {
-        return m.practicas?.some(p => p.id === filtros.practica || p._id?.toString() === filtros.practica);
+        return m.practicas?.some(
+          (p) => p.id === filtros.practica || p._id?.toString() === filtros.practica,
+        );
       }
       if (filtros.especialidad) {
-        return m.especialidades?.some(e => e.id === filtros.especialidad || e._id?.toString() === filtros.especialidad);
+        return m.especialidades?.some(
+          (e) => e.id === filtros.especialidad || e._id?.toString() === filtros.especialidad,
+        );
       }
       return false;
     });

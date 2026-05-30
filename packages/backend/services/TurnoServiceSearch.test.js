@@ -6,7 +6,7 @@ import { NivelCobertura } from '../domain/cobertura/NivelCobertura.js';
 
 describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
   let service;
-  
+
   const mockSlotRepository = {
     buscarSlotsDisponibles: jest.fn(),
   };
@@ -41,7 +41,7 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
     };
 
     mockMedicoRepository.findAll.mockResolvedValue([medico]);
-    
+
     // Especialidad de Cardiología con duración de 20 mins
     mockServicioRepository.findById.mockResolvedValue({
       _id: 'esp-cardio',
@@ -55,9 +55,33 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
     // 09:20 - 09:30 (10 mins) -> ALINEADO (9*60+20 = 560 % 20 === 0)
     // 09:30 - 09:40 (10 mins) -> Contiguo a 09:20 (forma bloque de 20 mins)
     const slots = [
-      { _id: 's1', id: 's1', medico, fecha: '2026-05-24', horaInicio: '09:10', duracionMins: 10, estado: 'DISPONIBLE' },
-      { _id: 's2', id: 's2', medico, fecha: '2026-05-24', horaInicio: '09:20', duracionMins: 10, estado: 'DISPONIBLE' },
-      { _id: 's3', id: 's3', medico, fecha: '2026-05-24', horaInicio: '09:30', duracionMins: 10, estado: 'DISPONIBLE' },
+      {
+        _id: 's1',
+        id: 's1',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '09:10',
+        duracionMins: 10,
+        estado: 'DISPONIBLE',
+      },
+      {
+        _id: 's2',
+        id: 's2',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '09:20',
+        duracionMins: 10,
+        estado: 'DISPONIBLE',
+      },
+      {
+        _id: 's3',
+        id: 's3',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '09:30',
+        duracionMins: 10,
+        estado: 'DISPONIBLE',
+      },
     ];
     mockSlotRepository.buscarSlotsDisponibles.mockResolvedValue(slots);
 
@@ -66,7 +90,12 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
       costoEstimado: 0,
     });
 
-    const resultado = await service.buscarTurnos({ especialidad: especialidadId }, null, {}, { paginar: false });
+    const resultado = await service.buscarTurnos(
+      { especialidad: especialidadId },
+      null,
+      {},
+      { paginar: false },
+    );
 
     // Debería generar exactamente 1 turno a las 09:20
     expect(resultado.length).toBe(1);
@@ -85,7 +114,7 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
     };
 
     mockMedicoRepository.findAll.mockResolvedValue([medico]);
-    
+
     mockServicioRepository.findById.mockResolvedValue({
       _id: 'esp-cardio',
       nombre: 'Cardiología',
@@ -95,9 +124,33 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
 
     // Slots disponibles de 30 mins
     const slots = [
-      { _id: 's1', id: 's1', medico, fecha: '2026-05-24', horaInicio: '09:00', duracionMins: 30, estado: 'DISPONIBLE' },
-      { _id: 's2', id: 's2', medico, fecha: '2026-05-24', horaInicio: '09:30', duracionMins: 30, estado: 'DISPONIBLE' },
-      { _id: 's3', id: 's3', medico, fecha: '2026-05-24', horaInicio: '10:00', duracionMins: 30, estado: 'DISPONIBLE' },
+      {
+        _id: 's1',
+        id: 's1',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '09:00',
+        duracionMins: 30,
+        estado: 'DISPONIBLE',
+      },
+      {
+        _id: 's2',
+        id: 's2',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '09:30',
+        duracionMins: 30,
+        estado: 'DISPONIBLE',
+      },
+      {
+        _id: 's3',
+        id: 's3',
+        medico,
+        fecha: '2026-05-24',
+        horaInicio: '10:00',
+        duracionMins: 30,
+        estado: 'DISPONIBLE',
+      },
     ];
     mockSlotRepository.buscarSlotsDisponibles.mockResolvedValue(slots);
 
@@ -110,7 +163,11 @@ describe('TurnoService - Búsqueda Global y Grid Alignment', () => {
 
     // Paginación: traer página 1, límite 2, ordenado por costo ascendente
     const paginacion = { page: 1, limit: 2, sortBy: 'costo', sortOrder: 'asc' };
-    const resultado = await service.buscarTurnos({ especialidad: especialidadId }, null, paginacion);
+    const resultado = await service.buscarTurnos(
+      { especialidad: especialidadId },
+      null,
+      paginacion,
+    );
 
     expect(resultado.total).toBe(3);
     expect(resultado.data.length).toBe(2);

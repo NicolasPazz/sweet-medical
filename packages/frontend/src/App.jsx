@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import HealthPage from './pages/HealthPage';
 import NotFound from './pages/NotFound';
 import { Servicio } from './pages/Servicio';
+import { GestionServicio } from './pages/GestionServicio.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import './App.css';
 
@@ -16,7 +17,8 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="health" element={<HealthPage />} />
-            <Route path="servicio" element={<Servicio/>}/>
+            <Route path="servicio" element={<GestionServicio />} />
+            {/*<Route path="servicio" element={<Servicio/>}/>*/}
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

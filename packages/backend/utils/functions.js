@@ -11,7 +11,7 @@ export {
   calcularHoraDesdeMinutos,
   horarioIncluido,
   ordenarSlots,
-  validarSlotsContiguos
+  validarSlotsContiguos,
 };
 
 /**
@@ -251,16 +251,18 @@ function ordenarSlots(listaSlots) {
 function validarSlotsContiguos(listaSlots) {
   // Caso base: 0 o 1 slot siempre se consideran válidos por definición
   if (!listaSlots || listaSlots.length <= 1) {
-    return true; 
+    return true;
   }
 
   // 1. BLINDAJE CRÍTICO: Validamos que absolutamente TODOS los slots pertenezcan a la misma fecha.
   // Tomamos la fecha del primer slot como referencia
   const fechaReferencia = listaSlots[0].fecha;
-  const todosMismaFecha = listaSlots.every(slot => slot.fecha === fechaReferencia);
+  const todosMismaFecha = listaSlots.every((slot) => slot.fecha === fechaReferencia);
 
   if (!todosMismaFecha) {
-    console.error("[VALIDACIÓN ERROR] Intento de reserva unificando slots de distintas fechas físicas.");
+    console.error(
+      '[VALIDACIÓN ERROR] Intento de reserva unificando slots de distintas fechas físicas.',
+    );
     return false; // Corta de una request maliciosa o corrupta
   }
 
