@@ -11,11 +11,13 @@ function App() {
   return (
     <BrowserRouter>
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/health" element={<HealthPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/health" element={<HealthPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
       <Footer year={new Date().getFullYear()} />
     </BrowserRouter>
   );

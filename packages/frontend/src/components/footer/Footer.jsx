@@ -1,10 +1,14 @@
 import './Footer.css';
 
-const Footer = (props) => {
+const Footer = ({ year }) => {
   return (
     <footer className="footer">
-      <div className="container">
-        <p>&copy; {props.year} Sweet Medical. Todos los derechos reservados.</p>
+      <div className="footer-content">
+        <p className="footer-text">&copy; {year} Sweet Medical. Todos los derechos reservados.</p>
+        <div className="footer-links">
+          <a href="/privacidad">Privacidad</a>
+          <a href="/terminos">Términos</a>
+        </div>
       </div>
     </footer>
   );

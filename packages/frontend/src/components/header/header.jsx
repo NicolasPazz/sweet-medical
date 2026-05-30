@@ -1,27 +1,34 @@
-import './header.css';
+import { Link } from 'react-router-dom';
+import './Header.css'; // Usando tu archivo CSS actual
 
 const Header = () => {
   return (
     <header className="header">
-      <img src="/logoSweetMedical.png" alt="Logo" />
+      <div className="navbar-section left">
+        <Link to="/">
+          <img src="/logo.png" alt="Logo" />
+        </Link>
+      </div>
 
-      <nav>
+      <nav className="navbar-section center">
         <ul>
           <li>
-            <a href="/">Inicio</a>
+            <Link to="/">Inicio</Link>
           </li>
           <li>
-            <a href="/about">Agendar Turno</a>
+            <Link to="/agendar">Agendar Turno</Link>
           </li>
           <li>
-            <a href="/contact">Contacto</a>
+            <Link to="/contacto">Contacto</Link>
           </li>
         </ul>
       </nav>
 
-      <a id="iniciar-sesion" href="/login">
-        Iniciar sesión
-      </a>
+      <div className="navbar-section right">
+        <Link id="iniciar-sesion" to="/login">
+          Iniciar sesión
+        </Link>
+      </div>
     </header>
   );
 };
