@@ -20,10 +20,10 @@ export default function Home() {
         <nav className="options-nav">
           <ul>
             <li>
-              <Link to="/servicio" className="option-link">
-                <img src="/Servicio.png" alt="Servicio" className="option-image" />
-                <span className="option-title">Ver Servicios</span>
-                <span className="descripcion">Ver la lista de servicios disponibles</span>
+              <Link to="/historial-medico" className="option-link">
+                <img src="/HistorialMedico.png" alt="Listado" className="option-image" />
+                <span className="option-title">Ver historial médico</span>
+                <span className="descripcion">Visualizar historial de turnos realizados</span>
               </Link>
             </li>
             <li>
