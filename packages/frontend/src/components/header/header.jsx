@@ -16,7 +16,8 @@ const Header = () => {
             <ul>
                 <li><Link to="/">Inicio</Link></li>
                 <li><Link to="/solicitar-turno">Agendar Turno</Link></li>
-                <li><Link to="/historial">Mis Turnos</Link></li>
+                <li><Link to="/historial-medico">Historial Médico</Link></li>
+                <li><Link to="/servicio">Gestión de Servicios</Link></li>
                 <li><Link to="/contact">Contacto</Link></li>
             </ul>
             </nav>
