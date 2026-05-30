@@ -1,6 +1,12 @@
 import "./header.css";
+import { FaShoppingCart } from 'react-icons/fa';
+import { useCart } from '../../context/CartContext.jsx';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
+
+    const { summary } = useCart();
+
     return (
         <header className="header">
             
@@ -14,7 +20,16 @@ const Header = () => {
             </ul>
             </nav>
 
-            <a id="iniciar-sesion" href="/login">Iniciar sesión</a>
+            <div className="header-section right">
+                <button className="cart-btn" aria-label="Ver carrito">
+                    <FaShoppingCart className="cart-icon" />
+                {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+                </button>
+
+                <Link id="iniciar-sesion" to="/login">
+                Iniciar sesión
+                </Link>
+            </div>
 
         </header>
     )

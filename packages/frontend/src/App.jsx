@@ -1,61 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './pages/Layout';
+import Home from './pages/Home';
+import HealthPage from './pages/HealthPage';
+import NotFound from './pages/NotFound';
+import { Servicio } from './pages/Servicio';
+import { CartProvider } from './context/CartContext.jsx';
 import './App.css';
-import Header from './components/header/header';
-
-const HealthCheck = () => {
-  const [healthData, setHealthData] = useState(null);
-
-  useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3001';
-    fetch(`${apiUrl}/health`)
-      .then((res) => res.json())
-      .then((data) => setHealthData(data))
-      .catch(() => setHealthData({ status: 'error', message: 'Backend inalcanzable' }));
-  }, []);
-
-  return (
-    <pre
-      style={{
-        padding: '20px',
-        backgroundColor: '#282c34',
-        color: 'white',
-        margin: 0,
-        height: '100vh',
-      }}
-    >
-      {healthData ? JSON.stringify(healthData, null, 2) : 'Cargando estado...'}
-    </pre>
-  );
-};
-
-const Home = () => {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Sweet Medical</h1>
-        <p>
-          Revisar estado en:{' '}
-          <a href="/health" style={{ color: '#61dafb' }}>
-            /health
-          </a>
-        </p>
-      </header>
-    </div>
-  );
-};
 
 function App() {
-  const currentPath = window.location.pathname;
-
-  if (currentPath === '/health') {
-    return <HealthCheck />;
-  }
-
   return (
-    <>
-      <Header />
-      <Home />
-    </>
+    <CartProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="health" element={<HealthPage />} />
+            <Route path="servicio" element={<Servicio/>}/>
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
   );
 }
 
