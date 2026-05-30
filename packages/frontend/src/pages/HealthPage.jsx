@@ -1,7 +1,5 @@
-'use client';
-
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { apiUrl } from '@/lib/api-utils';
 
 export default function HealthPage() {
@@ -16,7 +14,7 @@ export default function HealthPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-zinc-900 p-6 text-zinc-100">
-      <Link href="/" className="mb-4 text-sm text-blue-400 hover:underline">
+      <Link to="/" className="mb-4 text-sm text-blue-400 hover:underline">
         ← Volver al inicio
       </Link>
       <pre className="flex-1 overflow-auto rounded-lg bg-zinc-800 p-4 text-sm">

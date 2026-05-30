@@ -5,7 +5,20 @@ import { defineConfig } from 'eslint/config';
 import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default defineConfig([
-  // Configuración para el Backend (Node + Jest)
+  // Configuración para el Backend
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.next/**',
+      '**/*.test.js',
+      '**/*.test.jsx',
+      '**/*.spec.js',
+      '**/*.spec.jsx',
+    ],
+  },
+  js.configs.recommended,
   {
     files: ['packages/backend/**/*.{js,mjs,cjs,jsx}'],
     plugins: { js },
@@ -21,9 +34,9 @@ export default defineConfig([
       'no-unused-vars': 'warn',
     },
   },
-  // Configuración para el Frontend (React + Browser + Jest)
+  // Configuración para el Frontend
   {
-    files: ['packages/frontend/src/**/*.{js,jsx,mjs,cjs}'],
+    files: ['packages/frontend/**/*.{js,jsx,mjs,cjs}'],
     plugins: {
       react: pluginReact,
     },
@@ -32,6 +45,7 @@ export default defineConfig([
       sourceType: 'module',
       globals: {
         ...globals.browser,
+        ...globals.node,
         ...globals.jest,
       },
       parserOptions: {

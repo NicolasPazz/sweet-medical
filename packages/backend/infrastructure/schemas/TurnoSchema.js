@@ -66,7 +66,10 @@ const turnoSchema = new mongoose.Schema(
 
 turnoSchema.pre(/^find/, function (next) {
   if (this.options?._populatingFromMedico) return next();
-  this.populate('medico').populate('paciente').populate('slotsAsociados').populate({ path: 'historialEstados.usuario' });
+  this.populate('medico')
+    .populate('paciente')
+    .populate('slotsAsociados')
+    .populate({ path: 'historialEstados.usuario' });
   next();
 });
 

@@ -21,24 +21,23 @@ export class MedicoController {
         especialidades: m.especialidades,
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,
-        turnos: m.turnosActualesYFuturos
-          .map((turno) => ({
-            id: turno.id || turno._id,
-            fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]
-            medico: turno.medico.nombre,
-            servicio: turno.servicio
-              ? {
-                  nombre: turno.servicio.nombre,
-                  codigo: turno.servicio.codigo || 'N/A',
-                  id: turno.servicio ? turno.servicio._id : 'N/A',
-                }
-              : 'N/A',
-            sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
-            estado: turno.estado ? turno.estado.constructor.name : 'N/A',
-            costoPaciente: turno.costo, // Monto ya calculado según el plan [cite: 2337]
-            horario: turno.hora,
-            diaSemana: turno.diaSemana,
-          })),
+        turnos: m.turnosActualesYFuturos.map((turno) => ({
+          id: turno.id || turno._id,
+          fecha: turno.fechaHora ? turno.fechaHora : 'N/A', // El objeto Date completo [cite: 1145]
+          medico: turno.medico.nombre,
+          servicio: turno.servicio
+            ? {
+                nombre: turno.servicio.nombre,
+                codigo: turno.servicio.codigo || 'N/A',
+                id: turno.servicio ? turno.servicio._id : 'N/A',
+              }
+            : 'N/A',
+          sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
+          estado: turno.estado ? turno.estado.constructor.name : 'N/A',
+          costoPaciente: turno.costo, // Monto ya calculado según el plan [cite: 2337]
+          horario: turno.hora,
+          diaSemana: turno.diaSemana,
+        })),
       }));
 
       return res.status(200).json({

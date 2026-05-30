@@ -1,10 +1,12 @@
 const DEV_FALLBACK_API_URL = 'http://localhost:3001';
 
 export function getApiBaseUrl() {
-  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+  const configured = import.meta.env.VITE_API_URL?.trim();
+
   if (configured) {
     return configured.replace(/\/$/, '');
   }
+
   return DEV_FALLBACK_API_URL;
 }
 

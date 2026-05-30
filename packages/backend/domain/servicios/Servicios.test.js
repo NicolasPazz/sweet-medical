@@ -207,7 +207,9 @@ describe('DELETE /servicios/:id (eliminar)', () => {
   });
 
   it('falla al eliminar un servicio que no existe', async () => {
-    const res = await request(app).delete('/servicios/6a131f02df0a55e17123865b').send({ idUsuario: idSistema });
+    const res = await request(app)
+      .delete('/servicios/6a131f02df0a55e17123865b')
+      .send({ idUsuario: idSistema });
 
     expect(res.status).toBe(404);
   });

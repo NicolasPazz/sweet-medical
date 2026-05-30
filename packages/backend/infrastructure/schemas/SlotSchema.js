@@ -4,8 +4,8 @@ import { Slot } from '../../domain/turno/Slot.js';
 const slotSchema = new mongoose.Schema(
   {
     medico: { type: mongoose.Schema.Types.ObjectId, ref: 'Medico', required: true },
-    fecha: { type: String, required: true, trim: true },       // 'YYYY-MM-DD'
-    horaInicio: { type: String, required: true, trim: true },  // 'HH:MM'
+    fecha: { type: String, required: true, trim: true }, // 'YYYY-MM-DD'
+    horaInicio: { type: String, required: true, trim: true }, // 'HH:MM'
     duracionMins: { type: Number, required: true, min: 1 },
     estado: {
       type: String,

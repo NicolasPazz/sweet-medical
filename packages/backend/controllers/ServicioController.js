@@ -80,7 +80,12 @@ export class ServicioController {
       throw new BadRequestError('El tipo de servicio debe ser ESPECIALIDAD o PRACTICA');
     }
 
-    if (body.tipo === 'PRACTICA' && (body.codigo === undefined || typeof body.codigo !== 'string' || body.codigo.trim().length === 0)) {
+    if (
+      body.tipo === 'PRACTICA' &&
+      (body.codigo === undefined ||
+        typeof body.codigo !== 'string' ||
+        body.codigo.trim().length === 0)
+    ) {
       throw new BadRequestError('El código es obligatorio para una Práctica');
     }
 

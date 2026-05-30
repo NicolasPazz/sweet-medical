@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Linting
+  backend-lint:
+    name: Backend Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,11 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Run Lint
-        run: npm run lint
+        run: npm run lint:backend
 
   test-backend:
     name: Test Backend
-    needs: lint
+    needs: backend-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,11 +38,25 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Run Backend Tests
-        run: npm test --workspace=@sweet-medical/backend
+        run: npm run test:backend
+
+  frontend-lint:
+    name: Frontend Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Lint
+        run: npm run lint:frontend
 
   test-frontend:
     name: Test Frontend
-    needs: lint
+    needs: frontend-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,4 +67,4 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Run Frontend Tests
-        run: npm test --workspace=@sweet-medical/frontend
+        run: npm run test:frontend

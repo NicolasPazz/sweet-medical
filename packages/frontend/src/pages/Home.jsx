@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { getApiBaseUrl } from '@/lib/api-utils';
 
 export default function Home() {
@@ -18,7 +18,7 @@ export default function Home() {
           </code>
         </p>
         <Link
-          href="/health"
+          to="/health"
           className="text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
         >
           Ver estado del backend (/health)

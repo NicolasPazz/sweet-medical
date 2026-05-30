@@ -8,7 +8,7 @@ export class DateUtil {
    */
   static toYYYYMMDD(dateInput) {
     if (!dateInput) return null;
-    
+
     // Si ya es un string YYYY-MM-DD, lo retornamos tal cual (previniendo cortes)
     if (typeof dateInput === 'string') {
       const match = dateInput.match(/^\d{4}-\d{2}-\d{2}/);
@@ -49,14 +49,14 @@ export class DateUtil {
   /**
    * Calcula el límite superior (fechaHasta) sumando N días a una fecha base.
    * Retorna formato YYYY-MM-DD.
-   * @param {string|Date} baseDate 
-   * @param {number} daysToAdd 
+   * @param {string|Date} baseDate
+   * @param {number} daysToAdd
    * @returns {string}
    */
   static addDaysToYYYYMMDD(baseDate, daysToAdd) {
     const d = new Date(baseDate);
     if (isNaN(d.getTime())) return null;
-    
+
     d.setDate(d.getDate() + daysToAdd);
     return this.toYYYYMMDD(d);
   }

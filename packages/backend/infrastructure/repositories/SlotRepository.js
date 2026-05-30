@@ -27,7 +27,7 @@ export class SlotRepository {
       medico: medicoId,
       fecha: fecha,
       horaInicio: horaInicio,
-      estado: 'DISPONIBLE'
+      estado: 'DISPONIBLE',
     });
   }
 
@@ -52,7 +52,7 @@ export class SlotRepository {
     if (datosActualizados.sede) {
       sedeUpdate = {
         _id: datosActualizados.sede._id || datosActualizados.sede.id_sede || null,
-        nombre: datosActualizados.sede.nombre || null
+        nombre: datosActualizados.sede.nombre || null,
       };
     }
 
@@ -62,7 +62,7 @@ export class SlotRepository {
         $set: {
           estado: datosActualizados.estado,
           turnoAsociado: datosActualizados.turnoAsociado ?? null,
-          sede: sedeUpdate
+          sede: sedeUpdate,
         },
       },
       { new: true },
@@ -91,7 +91,8 @@ export class SlotRepository {
       query.medico = { $in: filtros.medicoIds };
     }
 
-    return await this.model.find(query)
+    return await this.model
+      .find(query)
       .populate('medico')
       .sort({ medico: 1, fecha: 1, horaInicio: 1 })
       .lean();

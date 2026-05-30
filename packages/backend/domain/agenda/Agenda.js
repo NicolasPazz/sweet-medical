@@ -6,7 +6,7 @@ import {
   obtenerDisponibilidadesLibres,
   calcularHoraDesdeMinutos,
   horarioIncluido,
-  ordenarSlots
+  ordenarSlots,
 } from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
@@ -67,7 +67,7 @@ export class Agenda {
       const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
 
       const sigueSiendoValido = medico.disponibilidades.some((disp) =>
-        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp)
+        estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp),
       );
 
       if (!sigueSiendoValido) {
@@ -81,8 +81,8 @@ export class Agenda {
     const slotsNuevos = [];
     const offset = duracionSlot;
 
-    const slotsOcupados = slotsTotales.filter(s => s.estado !== 'DISPONIBLE');
-    const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
+    const slotsOcupados = slotsTotales.filter((s) => s.estado !== 'DISPONIBLE');
+    const slotsDisponibles = slotsTotales.filter((s) => s.estado === 'DISPONIBLE');
 
     for (const disponibilidad of medico.disponibilidades) {
       const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
@@ -101,14 +101,14 @@ export class Agenda {
         let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
 
         const fechaSlot = new Date();
-        fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + (7 * i));
+        fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + 7 * i);
         const fechaSlotStr = fechaLocalAString(fechaSlot);
 
         while (actualMinutos + offset <= tiempoLimite) {
           const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
 
-          const yaEstaReservado = slotsOcupados.some(s =>
-            s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
+          const yaEstaReservado = slotsOcupados.some(
+            (s) => s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr,
           );
 
           if (yaEstaReservado) {
@@ -116,8 +116,8 @@ export class Agenda {
             continue;
           }
 
-          const yaExistePrecalculado = slotsDisponibles.some(s =>
-            s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr
+          const yaExistePrecalculado = slotsDisponibles.some(
+            (s) => s.fecha === fechaSlotStr && s.horaInicio === horaInicioStr,
           );
 
           if (yaExistePrecalculado) {
@@ -125,12 +125,7 @@ export class Agenda {
             continue;
           }
 
-          const slot = new Slot(
-            medico,
-            fechaSlotStr,
-            horaInicioStr,
-            duracionSlot,
-          );
+          const slot = new Slot(medico, fechaSlotStr, horaInicioStr, duracionSlot);
 
           slotsNuevos.push(slot);
           actualMinutos += offset;
@@ -141,27 +136,42 @@ export class Agenda {
   }
 
   static refrescarSlots(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
-    const slotsDisponibles = slotsTotales.filter(s => s.estado === 'DISPONIBLE');
+    const slotsDisponibles = slotsTotales.filter((s) => s.estado === 'DISPONIBLE');
 
     const slotsEliminados = this.eliminarSlotsDesactualizados(medico, slotsDisponibles);
 
-    slotsEliminados.forEach(slot => console.log(`Slot eliminado: ${slot.fecha} ${slot.horaInicio}`));
+    slotsEliminados.forEach((slot) =>
+      console.log(`Slot eliminado: ${slot.fecha} ${slot.horaInicio}`),
+    );
 
-    const slotsNuevos = this.generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots);
+    const slotsNuevos = this.generarSlotsNuevos(
+      medico,
+      slotsTotales,
+      duracionSlot,
+      semanasMaxGeneracionSlots,
+    );
 
     return { slotsEliminados, slotsNuevos };
   }
 
   static parsearDiaSemanaANumero(diaSemana) {
-    switch(diaSemana.toUpperCase()){
-      case 'DOMINGO': return 0;
-      case 'LUNES': return 1;
-      case 'MARTES': return 2;
-      case 'MIERCOLES': return 3;
-      case 'JUEVES': return 4;
-      case 'VIERNES': return 5;
-      case 'SABADO': return 6;
-      default: throw new Error(`Día de la semana inválido: ${diaSemana}`);
+    switch (diaSemana.toUpperCase()) {
+      case 'DOMINGO':
+        return 0;
+      case 'LUNES':
+        return 1;
+      case 'MARTES':
+        return 2;
+      case 'MIERCOLES':
+        return 3;
+      case 'JUEVES':
+        return 4;
+      case 'VIERNES':
+        return 5;
+      case 'SABADO':
+        return 6;
+      default:
+        throw new Error(`Día de la semana inválido: ${diaSemana}`);
     }
   }
 
@@ -186,20 +196,18 @@ export class Agenda {
       // Comprueba si la fecha tentativa es el mismo día local que fechaBase
       const esHoy =
         fechaTentativa.getFullYear() === fechaBase.getFullYear() &&
-        fechaTentativa.getMonth()    === fechaBase.getMonth()    &&
-        fechaTentativa.getDate()     === fechaBase.getDate();
+        fechaTentativa.getMonth() === fechaBase.getMonth() &&
+        fechaTentativa.getDate() === fechaBase.getDate();
 
       if (esHoy && horaDesdeStr) {
-        const ahoraEnMinutos =
-        fechaBase.getHours() * 60 + fechaBase.getMinutes();
+        const ahoraEnMinutos = fechaBase.getHours() * 60 + fechaBase.getMinutes();
         const horaInicioEnMinutos = horaAMinutos(horaDesdeStr);
 
         // Si la hora actual ya superó el inicio de la disponibilidad,
         // este día no sirve: saltamos a la siguiente semana.
         if (ahoraEnMinutos >= horaInicioEnMinutos) {
-
-          console.log("AHORA: " + calcularHoraDesdeMinutos(ahoraEnMinutos));
-          console.log("HORA INICIO DISPONIBILIDAD: " + horaDesdeStr);
+          console.log('AHORA: ' + calcularHoraDesdeMinutos(ahoraEnMinutos));
+          console.log('HORA INICIO DISPONIBILIDAD: ' + horaDesdeStr);
 
           return Agenda.fechaMasCercanaConDiaSemana(
             diaSemanaDeseado,
@@ -369,7 +377,6 @@ export class Agenda {
     const slotsOcupados = [];
 
     for (const slot of slots) {
-
       if (tiempoTotal >= duracionTurnoEnMins) {
         break;
       }
@@ -405,75 +412,75 @@ export class Agenda {
   }
 
   static generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
-      const turnosGenerados = [];
-  
-      const slotsDisponibles = slots.filter(s => {
-        const estadoStr = typeof s.estado?.getItemsNombre === 'function' 
-          ? s.estado.getItemsNombre() 
-          : s.estado;
-        return String(estadoStr).toUpperCase() === 'DISPONIBLE';
-      });
-      const slotsOrdenados = ordenarSlots(slotsDisponibles);
-      const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
-      const duracionTurno = servicio.duracionTurnoEnMins;
-  
-      for (const slotsDelDia of slotsPorFecha) {
-        let i = 0;
-  
-        while (i < slotsDelDia.length) {
-          const slotInicio = slotsDelDia[i];
-  
-          // 1. Validar Alineación de Grilla Fija
-          const [horaStr, minStr] = slotInicio.horaInicio.split(':');
-          const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
-  
-          if (minutoInicio % duracionTurno !== 0) {
-            // No está alineado a la grilla
-            i++;
-            continue;
-          }
-  
-          const slotsParaTurno = [slotInicio];
-          let minutosAcumulados = slotInicio.duracionMins;
-  
-          // Extender con slots contiguos hasta cubrir la duración
-          let j = i + 1;
-          while (j < slotsDelDia.length && minutosAcumulados < duracionTurno) {
-            const ultimoSlot = slotsParaTurno[slotsParaTurno.length - 1];
-            if (!validarSlotsContiguos([ultimoSlot, slotsDelDia[j]])) break;
-  
-            slotsParaTurno.push(slotsDelDia[j]);
-            minutosAcumulados += slotsDelDia[j].duracionMins;
-            j++;
-          }
-  
-          if (minutosAcumulados >= duracionTurno) {
-            // Resolver Sede
-            const sedeVirtual = slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
-  
-            // Turno válido: avanzar i hasta después del último slot usado
-            const turno = new Turno(
-              medico,
-              null,
-              `${slotsParaTurno[0].fecha}T${slotsParaTurno[0].horaInicio}:00Z`,
-              slotsParaTurno[0].horaInicio,
-              sedeVirtual,
-              servicio,
-              servicio.costo,
-            );
-            turno.slotsAsociados.push(...slotsParaTurno);
-            turno.id = `virtual_${slotsParaTurno.map(s => s.id || s._id).join('_')}`;
-            turno.estado = 'DISPONIBLE';
-  
-            turnosGenerados.push(turno);
-            i = j; // saltar al slot siguiente al último consumido
-          } else {
-            // No se pudo armar un turno desde este slot (hueco o fin de lista)
-            i++;
-          }
+    const turnosGenerados = [];
+
+    const slotsDisponibles = slots.filter((s) => {
+      const estadoStr =
+        typeof s.estado?.getItemsNombre === 'function' ? s.estado.getItemsNombre() : s.estado;
+      return String(estadoStr).toUpperCase() === 'DISPONIBLE';
+    });
+    const slotsOrdenados = ordenarSlots(slotsDisponibles);
+    const slotsPorFecha = Agenda.agruparSlotsPorFecha(slotsOrdenados);
+    const duracionTurno = servicio.duracionTurnoEnMins;
+
+    for (const slotsDelDia of slotsPorFecha) {
+      let i = 0;
+
+      while (i < slotsDelDia.length) {
+        const slotInicio = slotsDelDia[i];
+
+        // 1. Validar Alineación de Grilla Fija
+        const [horaStr, minStr] = slotInicio.horaInicio.split(':');
+        const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
+
+        if (minutoInicio % duracionTurno !== 0) {
+          // No está alineado a la grilla
+          i++;
+          continue;
+        }
+
+        const slotsParaTurno = [slotInicio];
+        let minutosAcumulados = slotInicio.duracionMins;
+
+        // Extender con slots contiguos hasta cubrir la duración
+        let j = i + 1;
+        while (j < slotsDelDia.length && minutosAcumulados < duracionTurno) {
+          const ultimoSlot = slotsParaTurno[slotsParaTurno.length - 1];
+          if (!validarSlotsContiguos([ultimoSlot, slotsDelDia[j]])) break;
+
+          slotsParaTurno.push(slotsDelDia[j]);
+          minutosAcumulados += slotsDelDia[j].duracionMins;
+          j++;
+        }
+
+        if (minutosAcumulados >= duracionTurno) {
+          // Resolver Sede
+          const sedeVirtual =
+            slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
+
+          // Turno válido: avanzar i hasta después del último slot usado
+          const turno = new Turno(
+            medico,
+            null,
+            `${slotsParaTurno[0].fecha}T${slotsParaTurno[0].horaInicio}:00Z`,
+            slotsParaTurno[0].horaInicio,
+            sedeVirtual,
+            servicio,
+            servicio.costo,
+          );
+          turno.slotsAsociados.push(...slotsParaTurno);
+          turno.id = `virtual_${slotsParaTurno.map((s) => s.id || s._id).join('_')}`;
+          turno.estado = 'DISPONIBLE';
+
+          turnosGenerados.push(turno);
+          i = j; // saltar al slot siguiente al último consumido
+        } else {
+          // No se pudo armar un turno desde este slot (hueco o fin de lista)
+          i++;
         }
       }
-  
-      return turnosGenerados;
+    }
+
+    return turnosGenerados;
   }
 }
