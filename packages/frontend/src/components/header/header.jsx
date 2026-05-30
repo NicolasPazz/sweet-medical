@@ -9,15 +9,15 @@ const Header = () => {
 
     return (
         <header className="header">
-
+            
             <img src="/logoSweetMedical.png" alt="Logo"/>
 
             <nav>
             <ul>
                 <li><Link to="/">Inicio</Link></li>
                 <li><Link to="/solicitar-turno">Agendar Turno</Link></li>
+                <li><Link to="/historial">Mis Turnos</Link></li>
                 <li><Link to="/contact">Contacto</Link></li>
-                <li><Link to="/servicio">Gestión de servicios</Link></li>
             </ul>
             </nav>
 
