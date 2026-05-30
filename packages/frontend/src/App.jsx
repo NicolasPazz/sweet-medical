@@ -6,6 +6,7 @@ import HealthPage from './pages/HealthPage';
 import NotFound from './pages/NotFound';
 import { Servicio } from './pages/Servicio';
 import { GestionServicio } from './pages/GestionServicio.jsx';
+import AgendarTurno from './pages/AgendarTurno';
 import { CartProvider } from './context/CartContext.jsx';
 import './App.css';
 
@@ -19,6 +20,8 @@ function App() {
             <Route path="health" element={<HealthPage />} />
             <Route path="servicio" element={<GestionServicio />} />
             {/*<Route path="servicio" element={<Servicio/>}/>*/}
+            <Route path="solicitar-turno" element={<AgendarTurno />} />
+            <Route path="solicitar-turno/:idServicio" element={<AgendarTurno />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

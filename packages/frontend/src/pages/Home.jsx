@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import TurnoSearchBar from '../components/turnoSearchBar/TurnoSearchBar.jsx';
 import './Home.css';
 
@@ -16,9 +17,24 @@ export default function Home() {
           Plataforma para la gestión de turnos, profesionales y servicios de salud.
         </p>
 
-        <div className="search-wrapper">
-          <TurnoSearchBar onSearch={manejarBusqueda} />
-        </div>
+        <nav className="options-nav">
+          <ul>
+            <li>
+              <Link to="/servicio" className="option-link">
+                <img src="/Servicio.png" alt="Servicio" className="option-image" />
+                <span className="option-title">Ver Servicios</span>
+                <span className="descripcion">Ver la lista de servicios disponibles</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/solicitar-turno" className="option-link">
+                <img src="/fotoTurno.png" alt="Turno" className="option-image" />
+                <span className="option-title">Agendar Turno</span>
+                <span className="descripcion">Agendar un turno según un servicio y médico</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </main>
     </div>
   );
