@@ -1,44 +1,15 @@
-import { useState, useEffect } from 'react';
-import {
-  especialidadesMock,
-  practicasMock,
-  generarIdEspecialidad,
-  generarIdPractica,
-} from '../mockdata/servicios.js';
+import { useState } from 'react';
+import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../mockdata/servicios.js';
 import './GestionServicio.css';
 
-// ─── Persistencia en localStorage ─────────────────────────────────────────
-const LS_ESP = 'sm_especialidades';
-const LS_PRA = 'sm_practicas';
+// El back tiene /especialidades y /practicas como endpoints separados.
+// Acá mantenemos dos arrays en estado para reflejar esa separación.
+// La UI los unifica con un campo `tipo` solo para mostrar y filtrar.
 
-function cargarDesdeStorage(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : [...fallback];
-  } catch {
-    return [...fallback];
-  }
-}
-
-function guardarEnStorage(key, valor) {
-  try {
-    localStorage.setItem(key, JSON.stringify(valor));
-  } catch {
-    // localStorage lleno o bloqueado: no rompe la app
-  }
-}
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
 // Agrega `tipo` solo para renderizar; ese campo NO se persiste en los arrays
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
-const EMPTY_FORM = () => ({
-  tipo: 'ESPECIALIDAD',
-  nombre: '',
-  duracionTurnoEnMins: '',
-  costo: '',
-  codigo: '',
-});
+const EMPTY_FORM = () => ({ tipo: 'ESPECIALIDAD', nombre: '', duracionTurnoEnMins: '', costo: '', codigo: '' });
 
 // ─── Modal crear / editar ──────────────────────────────────────────────────
 function ServicioModal({ servicio, onClose, onSaved }) {
@@ -63,12 +34,9 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   const handleSubmit = () => {
     setError('');
 
-    if (!form.nombre.trim()) return setError('El nombre es obligatorio.');
-    if (
-      !form.duracionTurnoEnMins ||
-      !Number.isInteger(Number(form.duracionTurnoEnMins)) ||
-      Number(form.duracionTurnoEnMins) <= 0
-    )
+    if (!form.nombre.trim())
+      return setError('El nombre es obligatorio.');
+    if (!form.duracionTurnoEnMins || !Number.isInteger(Number(form.duracionTurnoEnMins)) || Number(form.duracionTurnoEnMins) <= 0)
       return setError('La duración debe ser un entero positivo.');
     if (form.costo === '' || isNaN(Number(form.costo)) || Number(form.costo) < 0)
       return setError('El costo debe ser un número no negativo.');
@@ -76,11 +44,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
       return setError('El código es obligatorio para una Práctica.');
 
     const servicioGuardado = {
-      id: esEdicion
-        ? servicio.id
-        : tipoFinal === 'ESPECIALIDAD'
-          ? generarIdEspecialidad()
-          : generarIdPractica(),
+      id: esEdicion ? servicio.id : (tipoFinal === 'ESPECIALIDAD' ? generarIdEspecialidad() : generarIdPractica()),
       tipo: tipoFinal,
       nombre: form.nombre.trim(),
       duracionTurnoEnMins: Number(form.duracionTurnoEnMins),
@@ -94,9 +58,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title">
-          {esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}
-        </div>
+        <div className="gs-modal-title">{esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}</div>
 
         {error && <div className="gs-error">{error}</div>}
 
@@ -111,12 +73,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
         )}
 
         <label className="gs-label">Nombre</label>
-        <input
-          className="gs-input"
-          value={form.nombre}
-          onChange={set('nombre')}
-          placeholder="Ej: Cardiología"
-        />
+        <input className="gs-input" value={form.nombre} onChange={set('nombre')} placeholder="Ej: Cardiología" />
 
         <label className="gs-label">Duración del turno (minutos)</label>
         <input
@@ -153,9 +110,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
         )}
 
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>
-            Cancelar
-          </button>
+          <button className="gs-btn-secondary" onClick={onClose}>Cancelar</button>
           <button className="gs-btn-primary" onClick={handleSubmit}>
             {esEdicion ? 'Guardar cambios' : 'Crear servicio'}
           </button>
@@ -172,16 +127,11 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
       <div className="gs-modal">
         <div className="gs-modal-title">🗑️ Eliminar servicio</div>
         <p className="gs-modal-body">
-          ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se
-          puede deshacer.
+          ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se puede deshacer.
         </p>
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>
-            Cancelar
-          </button>
-          <button className="gs-btn-primary gs-btn-danger" onClick={onDeleted}>
-            Sí, eliminar
-          </button>
+          <button className="gs-btn-secondary" onClick={onClose}>Cancelar</button>
+          <button className="gs-btn-primary gs-btn-danger" onClick={onDeleted}>Sí, eliminar</button>
         </div>
       </div>
     </div>
@@ -190,8 +140,7 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
 
 // ─── Tarjeta de servicio ───────────────────────────────────────────────────
 function ServicioCard({ servicio, onEdit, onDelete }) {
-  const badgeClass =
-    servicio.tipo === 'ESPECIALIDAD' ? 'gs-badge--especialidad' : 'gs-badge--practica';
+  const badgeClass = servicio.tipo === 'ESPECIALIDAD' ? 'gs-badge--especialidad' : 'gs-badge--practica';
   return (
     <div className="gs-card">
       <div className="gs-card-left">
@@ -204,12 +153,8 @@ function ServicioCard({ servicio, onEdit, onDelete }) {
         </div>
       </div>
       <div className="gs-card-actions">
-        <button className="gs-btn-edit" onClick={() => onEdit(servicio)}>
-          Editar
-        </button>
-        <button className="gs-btn-delete" onClick={() => onDelete(servicio)}>
-          Eliminar
-        </button>
+        <button className="gs-btn-edit" onClick={() => onEdit(servicio)}>Editar</button>
+        <button className="gs-btn-delete" onClick={() => onDelete(servicio)}>Eliminar</button>
       </div>
     </div>
   );
@@ -222,24 +167,14 @@ function Toast({ msg, type }) {
 
 // ─── Página principal ──────────────────────────────────────────────────────
 export function GestionServicio() {
-  const [especialidades, setEspecialidades] = useState(() =>
-    cargarDesdeStorage(LS_ESP, especialidadesMock),
-  );
-  const [practicas, setPracticas] = useState(() => cargarDesdeStorage(LS_PRA, practicasMock));
+  const [especialidades, setEspecialidades] = useState([...especialidadesMock]);
+  const [practicas, setPracticas]           = useState([...practicasMock]);
 
-  const [modalCrear, setModalCrear] = useState(false);
-  const [modalEditar, setModalEditar] = useState(null);
+  const [modalCrear, setModalCrear]       = useState(false);
+  const [modalEditar, setModalEditar]     = useState(null);
   const [modalEliminar, setModalEliminar] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [filtro, setFiltro] = useState('TODOS');
-
-  // Sincroniza localStorage cada vez que cambian los arrays
-  useEffect(() => {
-    guardarEnStorage(LS_ESP, especialidades);
-  }, [especialidades]);
-  useEffect(() => {
-    guardarEnStorage(LS_PRA, practicas);
-  }, [practicas]);
+  const [toast, setToast]                 = useState(null);
+  const [filtro, setFiltro]               = useState('TODOS');
 
   const mostrarToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -250,8 +185,6 @@ export function GestionServicio() {
   const serviciosFiltrados = todos.filter((s) => filtro === 'TODOS' || s.tipo === filtro);
 
   const handleSaved = (servicioGuardado, esEdicion) => {
-    // servicioGuardado incluye `tipo` para saber a qué array va;
-    // lo removemos antes de persistir porque los arrays del back no lo tienen
     const { tipo, ...sinTipo } = servicioGuardado;
 
     if (tipo === 'ESPECIALIDAD') {
@@ -266,9 +199,7 @@ export function GestionServicio() {
 
     setModalCrear(false);
     setModalEditar(null);
-    mostrarToast(
-      esEdicion ? 'Servicio actualizado correctamente.' : 'Servicio creado correctamente.',
-    );
+    mostrarToast(esEdicion ? 'Servicio actualizado correctamente.' : 'Servicio creado correctamente.');
   };
 
   const handleDeleted = () => {
@@ -285,6 +216,7 @@ export function GestionServicio() {
   return (
     <div className="gs-page">
       <div className="gs-container">
+
         <div className="gs-header">
           <div>
             <h1 className="gs-title">Gestión de Servicios</h1>
@@ -329,7 +261,9 @@ export function GestionServicio() {
         )}
       </div>
 
-      {modalCrear && <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} />}
+      {modalCrear && (
+        <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} />
+      )}
       {modalEditar && (
         <ServicioModal
           servicio={modalEditar}

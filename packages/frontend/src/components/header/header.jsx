@@ -21,6 +21,9 @@ const Header = () => {
           <li>
             <a href="/contact">Contacto</a>
           </li>
+          <li>
+            <Link to="/servicio">Gestionar servicios</Link>
+          </li>
         </ul>
       </nav>
 
