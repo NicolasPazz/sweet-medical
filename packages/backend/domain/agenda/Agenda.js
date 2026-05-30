@@ -11,6 +11,7 @@ import {
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Slot } from '../turno/Slot.js';
+import { validarSlotsContiguos } from '../../utils/validaciones.js';
 
 /**
  * Convierte un objeto Date a string 'YYYY-MM-DD' usando la fecha LOCAL del servidor,

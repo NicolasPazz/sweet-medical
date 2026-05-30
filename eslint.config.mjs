@@ -11,7 +11,7 @@ export default defineConfig([
       '**/node_modules/**',
       '**/dist/**',
       '**/build/**',
-      '**/.next/**',
+      '**/coverage/**',
       '**/*.test.js',
       '**/*.test.jsx',
       '**/*.spec.js',

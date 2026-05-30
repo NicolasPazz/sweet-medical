@@ -3,6 +3,7 @@ import { medicoRepository } from '../infrastructure/repositories/MedicoRepositor
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
+import { BadRequestError } from '../errors/AppError.js';
 
 export class MedicoController {
   constructor({ medicoService = new MedicoService() } = {}) {
