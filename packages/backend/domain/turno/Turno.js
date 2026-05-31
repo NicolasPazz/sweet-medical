@@ -32,10 +32,7 @@ export class Turno {
   actualizarEstado(quien, nuevoEstado, motivo) {
     console.log('QUIEN LLAMA? ', quien);
 
-    const estadoEnum =
-      typeof nuevoEstado.getEstadoNombre === 'function'
-        ? nuevoEstado.getEstadoNombre()
-        : nuevoEstado.constructor.name.toUpperCase();
+    const estadoEnum = nuevoEstado.getEstadoNombre();
 
     const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, quien, motivo);
     this.historialEstados.push(nuevoCambio);

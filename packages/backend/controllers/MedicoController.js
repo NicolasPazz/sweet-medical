@@ -33,7 +33,7 @@ export class MedicoController {
               }
             : 'N/A',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
-          estado: turno.estado ? turno.estado.constructor.name : 'N/A',
+          estado: turno.estado ? turno.estado.getEstadoNombre() : 'N/A',
           costoPaciente: turno.costo, // Monto ya calculado según el plan [cite: 2337]
           horario: turno.hora,
           diaSemana: turno.diaSemana,

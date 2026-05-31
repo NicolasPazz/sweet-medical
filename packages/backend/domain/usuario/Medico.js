@@ -14,12 +14,6 @@ export class Medico {
   turnosActualesYFuturos;
 
   constructor(usuario, matricula, nombre) {
-    /*if (usuario && typeof usuario === 'object' && !usuario.constructor.name.includes('ObjectId')) {
-      Object.assign(this, usuario);
-      this.id = this.id || this._id;
-      return;
-    }*/
-
     this.usuario = usuario;
     this.matricula = matricula;
     this.nombre = nombre;
