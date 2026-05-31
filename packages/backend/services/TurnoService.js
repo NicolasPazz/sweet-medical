@@ -25,6 +25,7 @@ import { logger } from '../utils/logger.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { TurnoMapper } from '../domain/turno/dtos/TurnoMapper.js';
 import { DateUtil } from '../utils/DateUtil.js';
+import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 
 export class TurnoService {
   turnoRepository;
@@ -188,7 +189,8 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    if (!(turno.estado instanceof Reservado) && !(turno.estado instanceof Confirmado)) {
+    const estadoActual = turno.estado.getEstadoNombre();
+    if (estadoActual !== EstadoTurno.RESERVADO && estadoActual !== EstadoTurno.CONFIRMADO){
       throw new ConflictError('No se puede cancelar el turno en este estado');
     }
 
@@ -293,7 +295,7 @@ export class TurnoService {
       throw new ConflictError('El turno no pertenece al medico');
     }
 
-    if (!(turno.estado instanceof Confirmado)) {
+    if (turno.estado.getEstadoNombre() !== EstadoTurno.CONFIRMADO) {
       throw new ConflictError('El turno no está en estado confirmado');
     }
 
