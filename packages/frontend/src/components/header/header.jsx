@@ -2,6 +2,7 @@ import "./header.css";
 import { FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link } from 'react-router-dom';
+import NotificationBell from '../notification/NotificationBell.jsx';
 
 const Header = () => {
 
@@ -27,7 +28,7 @@ const Header = () => {
                     <FaShoppingCart className="cart-icon" />
                 {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
                 </button>
-
+                <NotificationBell></NotificationBell>
                 <Link id="iniciar-sesion" to="/login">
                 Iniciar sesión
                 </Link>
