@@ -9,6 +9,7 @@ import AgendarTurno from './pages/AgendarTurno';
 import HistorialTurnos from './pages/HistorialTurnos';
 import { CartProvider } from './context/CartContext.jsx';
 import Perfil from './pages/Perfil';
+import Login from './pages/Login';
 import './App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="solicitar-turno/:idServicio" element={<AgendarTurno />} />
             <Route path="historial-medico" element={<HistorialTurnos />} />
             <Route path="perfil" element={<Perfil />} />
+            <Route path="login" element= {<Login />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

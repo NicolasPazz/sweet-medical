@@ -1,0 +1,122 @@
+
+.inicioSesion-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1e1757 0%, #2f2686 100%);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+}
+
+.form-container {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    margin-top: -70px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    width: 100%;
+    max-width: 420px; 
+    box-sizing: border-box; 
+}
+
+.form-container h1 {
+    font-family: 'Roboto Mono', monospace;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #2f2686;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 20px; 
+}
+
+.login-form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.login-form input {
+    padding: 12px 16px; 
+    font-size: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    background-color: #f8fafc; 
+    transition: all 0.3s ease; 
+    color: #1e293b;
+}
+
+.login-form input:focus {
+    border-color: #2f2686;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(47, 38, 134, 0.15); 
+}
+
+.login-form button {
+    margin-top: 10px;
+    padding: 14px;
+    background-color: #2f2686;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(47, 38, 134, 0.2);
+}
+
+.login-form button:hover {
+    background-color: #1c155c; 
+    transform: translateY(-1px); 
+    box-shadow: 0 6px 12px rgba(47, 38, 134, 0.3);
+}
+
+.login-form button:active {
+    transform: translateY(2px); 
+}
+
+.registro-link {
+    text-align: center;
+    margin-top: 30px; 
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+
+.registro-link p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.registro-link a {
+    color: #2f2686; 
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.registro-link a:hover {
+    color: #1c155c;
+    text-decoration: underline;
+}
