@@ -1,0 +1,262 @@
+.perfil-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenedor principal en la pantalla */
+  padding: 30px 20px;
+  background-color: #f8fafc; /* Un fondo gris extra claro muy sutil para toda la página */
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  border-bottom: 2px solid #f1f5f9; /* Línea inferior más moderna y sutil */
+  width: 100%;
+  max-width: 1100px;
+  padding-bottom: 20px;
+  margin-bottom: 35px;
+}
+
+.header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b; /* Un slate oscuro en vez de gris puro se ve más premium */
+  font-family: 'Roboto Mono', monospace;
+  margin: 0 0 0 10px;
+}
+
+.user-name {
+  font-size: 22px;
+  font-weight: 500;
+  color: #64748b;
+  font-family: 'Roboto Mono', monospace;
+  margin: 0 20px 0 auto; /* Empuja el nombre a la derecha */
+}
+
+.user-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  border: 2px solid #e2e8f0;
+  background-color: #e2e8f0; /* Color de respaldo si no carga la imagen */
+}
+
+/* Contenedor de las dos columnas */
+.profile-container {
+  display: flex;
+  flex-direction: row;
+  gap: 50px; /* Más espacio entre columnas para que respire */
+  width: 100%;
+  max-width: 1100px;
+  align-items: flex-start;
+}
+
+.left-section, .right-section {
+  flex: 1;
+  background: #ffffff; /* Fondos blancos tipo "tarjeta" */
+  padding: 25px;
+  border-radius: 12px; /* Esquinas suavizadas */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+/* --- ESTILOS DE TABLAS MODERNIZADOS --- */
+
+.medical-table, .personal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Tabla Médica (Izquierda) */
+.medical-table th {
+  background-color: #f8fafc; /* Fondo más limpio para el encabezado */
+  color: #475569;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.medical-table td {
+  padding: 14px 12px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9; /* Chau bordes duros verticales, solo líneas abajo */
+}
+
+.medical-table tr:last-child td {
+  border-bottom: none; /* Saca la última línea para que no choque con la tarjeta */
+}
+
+.medical-table ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.medical-table li {
+  margin-bottom: 4px;
+  color: #475569;
+}
+
+/* Tabla Personal (Derecha) */
+.personal-table td {
+  padding: 14px 0;
+  border-bottom: 1px solid #f8fafc;
+  color: #334155;
+}
+
+.personal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.personal-table td.label {
+  width: 110px;
+  color: #64748b; /* Las etiquetas quedan en un tono más tenue */
+  font-weight: 500;
+}
+
+/* --- SECCIÓN DISPONIBILIDAD HORARIA (CONTENEDOR INDEPENDIENTE) --- */
+
+.availability-section {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 35px; /* Separación limpia del contenedor superior */
+  box-sizing: border-box;
+}
+
+.availability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.availability-section .section-title {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.availability-help {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+.btn-disponibilidad {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-disponibilidad:hover {
+  background-color: #2563eb;
+}
+
+/* Contenedor con scroll horizontal para soportar las 24 columnas */
+.calendar-grid-container {
+  overflow-x: auto; 
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1200px; /* Asegura que las horas mantengan un tamaño cómodo */
+}
+
+/* Columnas de Horas (Encabezados) */
+.calendar-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 8px;
+  font-size: 0.8rem;
+  border-bottom: 2px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  text-align: center;
+  min-width: 45px;
+}
+
+/* Fila/Celda estática para el texto "Día" en la esquina superior izquierda */
+.day-header-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc !important;
+  z-index: 5;
+  border-right: 2px solid #e2e8f0 !important;
+  width: 100px;
+}
+
+
+
+/* Celdas fijas de los Días (Columna izquierda) */
+.day-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #39557e;
+  text-align: left;
+  padding: 14px 12px;
+  font-size: 0.9rem;
+  border-right: 2px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 2;
+  width: 100px;
+}
+
+/* Celdas interactivas horarias */
+.slot-cell {
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.slot-cell:last-child {
+  border-right: none;
+}
+
+/* Color verde sutil si atiende */
+.slot-available {
+  background-color: #dcfce7;
+  border-right: 1px solid #bbf7d0;
+  border-bottom: 1px solid #bbf7d0;
+}
+
+.slot-available:hover {
+  background-color: #bbf7d0;
+}
+
+/* Color blanco si no atiende */
+.slot-unavailable {
+  background-color: #ffffff;
+}
+
+.slot-unavailable:hover {
+  background-color: #f1f5f9;
+}

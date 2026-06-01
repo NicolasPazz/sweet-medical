@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import TurnoSearchBar from '../components/turnoSearchBar/TurnoSearchBar.jsx';
 import './Home.css';
 
 export default function Home() {
