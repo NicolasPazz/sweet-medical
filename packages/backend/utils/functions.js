@@ -1,5 +1,6 @@
 // utils/dateUtils.js
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
+import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 
 export {
   crearFechaDesdeAtributos,
@@ -137,11 +138,8 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
 
     const turnosQueObstruyen = turnosNoDisponibles.filter((t) => {
       const minutosTurno = stringAMinutos(t.hora);
-      const esDisponible =
-        t.estado instanceof Disponible ||
-        (typeof t.estado === 'string' && t.estado.toUpperCase() === 'DISPONIBLE') ||
-        (typeof t.estado?.getEstadoNombre === 'function' &&
-          t.estado.getEstadoNombre().toUpperCase() === 'DISPONIBLE');
+      const esDisponible = t.estado.getEstadoNombre() === EstadoTurno.DISPONIBLE;
+      
       return (
         t.diaSemana === disp.diaSemana &&
         minutosTurno >= inicioDisp &&
