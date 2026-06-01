@@ -1,6 +1,7 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
+import { EstadoTurno } from '../../turno/EstadoTurno.js';
 
 export class PendienteReprogramacion {
   id;
@@ -9,7 +10,7 @@ export class PendienteReprogramacion {
   }
 
   getEstadoNombre() {
-    return 'PENDIENTE_REPROGRAMACION';
+    return EstadoTurno.PENDIENTE_REPROGRAMACION;
   }
 
   notificar(remitente) {

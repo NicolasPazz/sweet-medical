@@ -288,7 +288,7 @@ export class Agenda {
     for (let i = lista.length - 1; i >= 0; i--) {
       const turno = lista[i];
 
-      if (turno.estado instanceof Disponible) {
+      if (turno.estado.getEstadoNombre() === EstadoTurno.DISPONIBLE) {
         const estaEnRango = medico.disponibilidades.some((disp) =>
           estaEnDisponibilidad(turno.diaSemana, turno.hora, disp),
         );
