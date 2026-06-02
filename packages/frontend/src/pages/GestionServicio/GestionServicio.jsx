@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../mockdata/servicios.js';
+import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../../mockdata/servicios.js';
 import './GestionServicio.css';
 
 // El back tiene /especialidades y /practicas como endpoints separados.

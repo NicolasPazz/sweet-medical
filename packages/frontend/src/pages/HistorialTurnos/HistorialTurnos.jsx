@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
-import { TURNOS_MOCK, ESTADO_CONFIG } from '../mockdata/turnos.js';
+import { TURNOS_MOCK, ESTADO_CONFIG } from '../../mockdata/turnos.js';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
