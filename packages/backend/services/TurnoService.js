@@ -997,10 +997,14 @@ export class TurnoService {
 
     const limitesFechas = { fechaDesde: fechaDesdeStr, fechaHasta: fechaHastaStr };
 
-    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(filtros, limitesFechas);
+    const medicoIds = medicos.map((m) => String(m._id || m.id));
+    const filtrosBusqueda = { ...filtros, medicoIds };
+
+    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(filtrosBusqueda, limitesFechas);
 
     // Agrupamiento por médico
     const slotsPorMedico = slotsCrudos.reduce((acc, slot) => {
+      if (!slot.medico) return acc;
       const medicoId =
         slot.medico && slot.medico._id ? slot.medico._id.toString() : slot.medico.toString();
       if (!acc[medicoId]) acc[medicoId] = [];
@@ -1118,11 +1122,12 @@ export class TurnoService {
       const medico = await this.medicoRepository.findById(profesional_id);
       if (!medico) throw new NotFoundError('El profesional especificado no existe');
 
-      const id = servicio._id;
+      const idStr = String(servicio._id || servicio.id || servicio);
       const tieneServicio =
         servicioTipo === 'PRACTICA'
-          ? medico.practicas?.some((p) => p.id === id || p._id?.toString() === id)
-          : medico.especialidades?.some((e) => e.id === id || e._id?.toString() === id);
+          ? medico.practicas?.some((p) => String(p._id || p.id || p) === idStr)
+          : medico.especialidades?.some((e) => String(e._id || e.id || e) === idStr);
+
 
       if (!tieneServicio) {
         const label = servicioTipo === 'PRACTICA' ? 'práctica' : 'especialidad';
@@ -1134,14 +1139,15 @@ export class TurnoService {
 
     const medicos = await this.medicoRepository.findAll();
     const medicosValidos = medicos.filter((m) => {
-      if (filtros.practica) {
+      const idStr = String(servicio._id || servicio.id);
+      if (servicioTipo === 'PRACTICA') {
         return m.practicas?.some(
-          (p) => p.id === filtros.practica || p._id?.toString() === filtros.practica,
+          (p) => String(p._id || p.id || p) === idStr,
         );
       }
-      if (filtros.especialidad) {
+      if (servicioTipo === 'ESPECIALIDAD') {
         return m.especialidades?.some(
-          (e) => e.id === filtros.especialidad || e._id?.toString() === filtros.especialidad,
+          (e) => String(e._id || e.id || e) === idStr,
         );
       }
       return false;

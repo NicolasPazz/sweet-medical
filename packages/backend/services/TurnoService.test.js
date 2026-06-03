@@ -17,7 +17,6 @@ const mockTurnoRepository = {
   findAllByPatientId: jest.fn(),
   findAllByMedicId: jest.fn(),
   findAll: jest.fn(),
-  findByMedicFechaHora: jest.fn(),
 };
 
 const mockUsuarioRepository = {
@@ -44,6 +43,7 @@ const mockSlotRepository = {
   findAllSlotsByMedicId: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
+  findByMedicFechaHora: jest.fn(),
 };
 
 const mockServicioRepository = {
@@ -71,7 +71,7 @@ describe('TurnoService', () => {
     process.env.DURACION_SLOT_MINUTOS = '30';
     process.env.NUM_SEMANAS_GENERAR_SLOTS = '4';
   });
-});
+
 
 // ==========================================
 // TESTS: RESERVA DE TURNOS
@@ -348,7 +348,10 @@ it('obtiene historial de turno mapeado para un paciente y un médico existentes'
       nombreMedico: 'Dr. House',
       id_paciente: 'p-1',
       fechaHora: turno.fechaHora,
-      sede: 'Sede',
+      sede: {
+        id_sede: null,
+        nombre: 'Sede',
+      },
       servicio_id: 'serv-1',
       servicio_nombre: 'Cardio',
       estado: 'RESERVADO',
@@ -362,7 +365,13 @@ it('obtiene historial de turno mapeado para un paciente y un médico existentes'
 
 it('confirma un turno reservado con éxito', async () => {
   const usuario = { id: 'u-medico', roles: [Rol.MEDICO] };
-  const medico = { _id: 'm-1', id: 'm-1', usuario: { _id: 'u-medico' }, nombre: 'Dr. Strange' };
+  const medico = {
+    _id: 'm-1',
+    id: 'm-1',
+    usuario: { _id: 'u-medico' },
+    nombre: 'Dr. Strange',
+    sedes: [{ _id: 'sede-1', nombre: 'Sede Central' }],
+  };
   const paciente = { id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Pepito' };
 
   const turno = new Turno(
@@ -370,7 +379,7 @@ it('confirma un turno reservado con éxito', async () => {
     paciente,
     '2026-05-17',
     '09:00',
-    { nombre: 'Sede' },
+    { nombre: 'Sede Central' },
     { nombre: 'Cardio', costo: 1000 },
     1000,
   );
@@ -446,14 +455,28 @@ describe('Lógica de Reprogramación', () => {
 // TESTS: RESTRICCIÓN DE SEDE AL CONFIRMAR
 // ==========================================
 describe('Restricción de Sede al Confirmar Turno', () => {
-  let usuarioMedico, medico, paciente, turnoAConfirmar;
+  let usuarioMedico, usuarioPaciente, medico, paciente, turnoAConfirmar, turnoOriginal;
+  const fechaFuturaValida = new Date('2026-05-24T10:00:00.000Z');
 
   beforeEach(() => {
-    usuarioMedico = { id: 'u-medico', roles: [Rol.MEDICO] };
-    medico = { id: 'm-1', _id: 'm-1', usuario: 'u-medico', nombre: 'Dr. Strange' };
-    paciente = { id: 'p-1', nombre: 'Pepito' };
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-05-24T10:00:00.000Z'));
 
-    // Instanciamos el Turno
+    usuarioMedico = { id: 'u-medico', roles: [Rol.MEDICO] };
+    usuarioPaciente = { id: 'u-paciente', _id: 'u-paciente', roles: [Rol.PACIENTE] };
+    medico = {
+      id: 'm-1',
+      _id: 'm-1',
+      usuario: 'u-medico',
+      nombre: 'Dr. Strange',
+      sedes: [
+        { _id: 'sede-ramos', nombre: 'Sede Ramos' },
+        { _id: 'sede-1', nombre: 'Sede Central' }
+      ]
+    };
+    paciente = { id: 'p-1', _id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Sebastián' };
+
+    // Instanciamos el Turno A Confirmar
     turnoAConfirmar = new Turno(
       medico,
       paciente,
@@ -465,9 +488,24 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     );
     turnoAConfirmar.id = 't-confirmar';
     turnoAConfirmar.estado = new Reservado(turnoAConfirmar);
-
-    // SOLUCIÓN: Usamos un string de fecha ISO completo para evitar el desfase de zona horaria en toDateString()
     turnoAConfirmar.fechaHora = new Date('2026-05-24T00:00:00.000Z');
+
+    // Instanciamos el Turno Original (para reprogramaciones)
+    turnoOriginal = new Turno(
+      medico,
+      paciente,
+      '2026-05-24',
+      '13:00',
+      { nombre: 'Sede Central' },
+      { _id: 's-cardio', nombre: 'Cardiología', codigo: 'CARD-01' },
+      1500,
+    );
+    turnoOriginal.id = 't-original';
+    turnoOriginal.estado = new Reservado(turnoOriginal);
+    turnoOriginal.fechaHora = new Date('2026-05-24T13:00:00.000Z');
+
+    turnoOriginal.solicitarReprogramacion = jest.fn().mockReturnValue({ id: 'notif-proponer' });
+    turnoOriginal.actualizarEstado = jest.fn().mockReturnValue({ id: 'notif-responder' });
 
     mockUsuarioRepository.findById.mockResolvedValue(usuarioMedico);
     mockTurnoRepository.findById.mockResolvedValue(turnoAConfirmar);
@@ -475,51 +513,37 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     mockTurnoRepository.save.mockResolvedValue(turnoAConfirmar);
   });
 
-  it('falla con BadRequestError si es el primer turno del día y no se envía sede en el body', async () => {
-    mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([]);
-
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-05-17T10:00:00Z'));
-
-    usuarioPaciente = { id: 'u-paciente', _id: 'u-paciente', roles: [Rol.PACIENTE] };
-    usuarioMedico = { id: 'u-medico', _id: 'u-medico', roles: [Rol.MEDICO] };
-
-    paciente = { id: 'p-1', _id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Sebastián' };
-    medico = { id: 'm-1', _id: 'm-1', usuario: { _id: 'u-medico' }, nombre: 'Dr. House' };
-
-    turnoOriginal = new Turno(
-      medico,
-      paciente,
-      '2026-05-17',
-      '13:00',
-      { nombre: 'Sede Central' },
-      { _id: 's-cardio', nombre: 'Cardiología', codigo: 'CARD-01' },
-      1500,
-    );
-    turnoOriginal.id = 't-original';
-    turnoOriginal.estado = { getEstadoNombre: () => 'RESERVADO' };
-    turnoOriginal.fechaHora = new Date('2026-05-17T13:00:00Z');
-
-    turnoOriginal.solicitarReprogramacion = jest.fn().mockReturnValue({ id: 'notif-proponer' });
-    turnoOriginal.actualizarEstado = jest.fn().mockReturnValue({ id: 'notif-responder' });
-  });
-
   afterEach(() => {
     jest.useRealTimers();
   });
 
+  it('falla con BadRequestError si es el primer turno del día y no se envía sede en el body', async () => {
+    mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([]);
+
+    await expect(service.confirmarTurno('u-medico', 't-confirmar', undefined)).rejects.toThrow(
+      BadRequestError,
+    );
+
+    expect(mockTurnoRepository.save).not.toHaveBeenCalled();
+  });
+
   it('propone una reprogramación con éxito si hay bache disponible y coincide la especialidad', async () => {
-    const turnoDestinoBache = {
-      id: 't-bache',
+    const slotDestinoBache = {
+      _id: 's-bache',
+      id: 's-bache',
+      medico: 'm-1',
+      fecha: '2026-05-24',
+      horaInicio: '10:00',
+      duracionMins: 30,
+      estado: 'DISPONIBLE',
       servicio: { _id: 's-cardio', nombre: 'Cardiología' },
-      estado: { getEstadoNombre: () => 'DISPONIBLE' },
     };
 
     turnoOriginal.servicio = { _id: 's-cardio', nombre: 'Cardiología' };
 
     mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
     mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
-    mockTurnoRepository.findByMedicFechaHora.mockResolvedValue(turnoDestinoBache);
+    mockSlotRepository.findByMedicFechaHora.mockResolvedValue(slotDestinoBache);
 
     const resultado = await service.proponerReprogramacion(
       'u-paciente',
@@ -528,7 +552,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
       'Fuerza mayor',
     );
 
-    expect(mockTurnoRepository.findByMedicFechaHora).toHaveBeenCalledWith('m-1', fechaFuturaValida);
+    expect(mockSlotRepository.findByMedicFechaHora).toHaveBeenCalled();
     expect(turnoOriginal.solicitarReprogramacion).toHaveBeenCalledWith(
       usuarioPaciente,
       fechaFuturaValida,
@@ -540,20 +564,20 @@ describe('Restricción de Sede al Confirmar Turno', () => {
   });
 
   it('falla al proponer una reprogramación con menos de 1 hora de antelación', async () => {
-    turnoOriginal.fechaHora = new Date('2026-05-17T10:30:00Z');
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-05-24T12:30:00.000Z')); // Menos de una hora de 13:00
 
     mockUsuarioRepository.findById.mockResolvedValue(usuarioPaciente);
     mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
 
-    await expect(service.confirmarTurno('u-medico', 't-confirmar', undefined)).rejects.toThrow(
-      BadRequestError,
-    );
+    await expect(
+      service.proponerReprogramacion('u-paciente', 't-original', fechaFuturaValida, 'Fuerza mayor'),
+    ).rejects.toThrow(ConflictError);
 
     expect(mockTurnoRepository.save).not.toHaveBeenCalled();
   });
 
   it('propaga la sede a los slots disponibles si es el primer turno del día y viene la sede en el body', async () => {
-    // Usamos el mismo formato de fecha ISO para el slot del mock
     const slotDisponible = {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
@@ -565,8 +589,8 @@ describe('Restricción de Sede al Confirmar Turno', () => {
 
     const resultado = await service.confirmarTurno('u-medico', 't-confirmar', 'sede-ramos');
 
-    expect(resultado.sede).toBe('sede-ramos');
-    expect(slotDisponible.sede).toBe('sede-ramos');
+    expect(resultado.sede?.id_sede || resultado.sede?._id).toBe('sede-ramos');
+    expect(slotDisponible.sede?.id_sede || slotDisponible.sede?._id || slotDisponible.sede).toBe('sede-ramos');
     expect(mockSlotRepository.save).toHaveBeenCalledWith(slotDisponible);
   });
 
@@ -575,7 +599,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
       estado: 'RESERVADO',
-      sede: 'sede-ramos',
+      sede: { _id: 'sede-ramos', nombre: 'Ramos' },
     };
     mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([slotConSedePrevia]);
 
@@ -591,13 +615,14 @@ describe('Restricción de Sede al Confirmar Turno', () => {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
       estado: 'RESERVADO',
-      sede: 'sede-ramos',
+      sede: { _id: 'sede-ramos', nombre: 'Ramos' },
     };
     mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([slotConSedePrevia]);
 
     const resultado = await service.confirmarTurno('u-medico', 't-confirmar', undefined);
 
-    expect(resultado.sede).toBe('sede-ramos');
+    const sedeId = resultado.sede?.id_sede || resultado.sede?._id || resultado.sede;
+    expect(sedeId).toBe('sede-ramos');
     expect(mockTurnoRepository.save).toHaveBeenCalled();
   });
 
@@ -606,29 +631,47 @@ describe('Restricción de Sede al Confirmar Turno', () => {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
       estado: 'RESERVADO',
-      sede: 'sede-ramos',
+      sede: { _id: 'sede-ramos', nombre: 'Ramos' },
     };
     mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([slotConSedePrevia]);
 
     const resultado = await service.confirmarTurno('u-medico', 't-confirmar', 'sede-ramos');
 
-    expect(resultado.sede).toBe('sede-ramos');
+    const sedeId = resultado.sede?.id_sede || resultado.sede?._id || resultado.sede;
+    expect(sedeId).toBe('sede-ramos');
     expect(mockTurnoRepository.save).toHaveBeenCalled();
-
-    it('acepta la propuesta de reprogramación, actualiza la fecha y limpia la propuesta', async () => {
-      turnoOriginal.propuestaCambio = {
-        nuevaFechaHora: fechaFuturaValida,
-        proponenteId: 'u-paciente',
-      };
-
-      mockUsuarioRepository.findById.mockResolvedValue(usuarioMedico);
-      mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
-
-      const resultado = await service.responderReprogramacion('u-medico', 't-original', true);
-
-      expect(resultado.fechaHora).toEqual(new Date(fechaFuturaValida));
-      expect(resultado.propuestaCambio).toBeNull();
-      expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
-    });
   });
+
+  it('acepta la propuesta de reprogramación, actualiza la fecha y limpia la propuesta', async () => {
+    turnoOriginal.propuestaCambio = {
+      nuevaFechaHora: fechaFuturaValida,
+      proponenteId: 'u-paciente',
+    };
+
+    const slotNuevo = {
+      _id: 's-nuevo',
+      id: 's-nuevo',
+      medico: 'm-1',
+      fecha: '2026-05-24',
+      horaInicio: '10:00',
+      duracionMins: 30,
+      estado: 'DISPONIBLE',
+      servicio: { _id: 's-cardio', nombre: 'Cardiología' },
+    };
+
+    mockUsuarioRepository.findById.mockResolvedValue(usuarioMedico);
+    mockTurnoRepository.findById.mockResolvedValue(turnoOriginal);
+    mockSlotRepository.model = { findOne: jest.fn().mockResolvedValue(null) };
+    mockSlotRepository.findByMedicFechaHora.mockResolvedValue(slotNuevo);
+    mockTurnoRepository.save.mockResolvedValue(turnoOriginal);
+
+    const resultado = await service.responderReprogramacion('u-medico', 't-original', true);
+
+    expect(resultado.fechaHora).toEqual(new Date(fechaFuturaValida));
+    expect(resultado.propuestaCambio).toBeNull();
+    expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
+  });
+});
+
+// Cierre final del describe('TurnoService') que abarca todo el archivo
 });

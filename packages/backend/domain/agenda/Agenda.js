@@ -7,6 +7,7 @@ import {
   calcularHoraDesdeMinutos,
   horarioIncluido,
   ordenarSlots,
+  validarSlotsContiguos,
 } from '../../utils/functions.js';
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
@@ -454,9 +455,13 @@ export class Agenda {
         }
 
         if (minutosAcumulados >= duracionTurno) {
-          // Resolver Sede
+          // Resolver Sede: Mongoose por defecto inicializa slotInicio.sede como { _id: null, nombre: null }.
+          // Por ende, debemos comprobar que la sede sea válida (tenga id, _id o nombre) antes de usarla,
+          // de lo contrario recurrimos a la sede configurada del médico.
           const sedeVirtual =
-            slotInicio.sede || (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
+            (slotInicio.sede && (slotInicio.sede._id || slotInicio.sede.id || slotInicio.sede.nombre))
+              ? slotInicio.sede
+              : (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
 
           // Turno válido: avanzar i hasta después del último slot usado
           const turno = new Turno(

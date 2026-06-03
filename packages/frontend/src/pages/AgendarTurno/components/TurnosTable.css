@@ -1,0 +1,68 @@
+.tabla-responsiva {
+  width: 100%;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.02);
+  margin-bottom: 2rem;
+}
+
+.tabla-resultados {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.tabla-resultados th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 2px solid #edf2f7;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.tabla-resultados td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #edf2f7;
+  color: #2d3748;
+}
+
+.tabla-resultados tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.tabla-resultados tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.nombre-profesional {
+  font-weight: 600;
+  color: #1a202c;
+  display: block;
+}
+
+.nombre-servicio {
+  color: #4a5568;
+}
+
+.celda-hora {
+  font-weight: 700;
+  color: #271f92;
+  font-size: 1.05rem;
+}
+
+.celda-costo {
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.etiqueta-estado {
+  background-color: rgba(39, 31, 146, 0.08);
+  color: #271f92;
+  border: 1px solid rgba(39, 31, 146, 0.15);
+}

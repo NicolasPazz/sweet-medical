@@ -32,6 +32,7 @@ import { PracticaModel } from '../infrastructure/schemas/PracticaSchema.js';
 import { SedeModel } from '../infrastructure/schemas/SedeSchema.js';
 import { PlanModel } from '../infrastructure/schemas/PlanSchema.js';
 import { ObraSocialModel } from '../infrastructure/schemas/ObraSocialSchema.js';
+import { SlotModel } from '../infrastructure/schemas/SlotSchema.js';
 
 export class SeedingController {
   constructor() {
@@ -272,7 +273,9 @@ export class SeedingController {
 
       logger.info(`Se cargaron ${pacientesGuardados.length} pacientes.`);
 
-      // 8. Cargar turnos
+      // 8. Cargar turnos y slots
+      await SlotModel.deleteMany({});
+      await SlotModel.syncIndexes();
       await turnoRepository.deleteAll();
 
       logger.info('Iniciando generación batch de turnos iniciales...');
