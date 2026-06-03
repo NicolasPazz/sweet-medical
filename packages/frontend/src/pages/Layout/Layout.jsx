@@ -8,11 +8,12 @@ const Layout = () => {
     <div className="layout">
       <Header />
 
-      <main className="main-content">
-        <Outlet />
-      </main>
-
-      <Footer year={new Date().getFullYear()} />
+      <div className="content-wrapper">
+        <main className="main-content">
+          <Outlet />
+        </main>
+        <Footer year={new Date().getFullYear()} />
+      </div>
     </div>
   );
 };

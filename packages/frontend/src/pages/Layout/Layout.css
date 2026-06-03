@@ -1,10 +1,20 @@
 .layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
-  background-color: rgb(255, 255, 255);
+  background-color: #F0F7F8; /* Un fondo grisáceo-azulado muy suave y premium */
+  overflow: hidden;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .main-content {
   flex: 1;
 }
+

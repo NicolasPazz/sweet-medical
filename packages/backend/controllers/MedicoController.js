@@ -18,6 +18,7 @@ export class MedicoController {
         id_usuario: m.usuario?.id || m.usuario?._id,
         id_medico: m.id || m._id,
         nombre: m.nombre,
+        matricula: m.matricula,
         especialidades: m.especialidades,
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,

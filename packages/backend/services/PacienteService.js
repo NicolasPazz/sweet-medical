@@ -29,9 +29,11 @@ export class PacienteService {
       };
 
       let cobertura;
+      let costoEstimado = t.costo;
       try {
         const resultado = MotorCostos.calcularPara(turnoAdaptado, paciente);
         cobertura = resultado.tipoCobertura;
+        costoEstimado = resultado.costoEstimado;
       } catch (error) {
         console.log('Error calculando cobertura para turno', t.id || t._id, ':', error.message);
       }
@@ -53,7 +55,7 @@ export class PacienteService {
             ? t.estado.getEstadoNombre()
             : t.estado || 'N/A',
         costo: t.costo,
-
+        costoEstimado: costoEstimado,
         cobertura: cobertura,
       };
     });
