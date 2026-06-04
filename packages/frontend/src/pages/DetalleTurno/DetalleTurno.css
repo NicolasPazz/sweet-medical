@@ -1,0 +1,98 @@
+/* ── Contenedor del Bloque de Detalle ── */
+.detalle-card {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  margin-bottom: 32px;
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Encabezado interno del comprobante */
+.detalle-header-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed #e2e8f0;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.detalle-id {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Filas de información estructurada */
+.detalle-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detalle-info-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 12px;
+}
+
+.detalle-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detalle-value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Costo resaltado con el color principal */
+.detalle-value-costo {
+  font-size: 15px;
+  color: #271f92;
+  font-weight: 700;
+}
+
+/* Grupo de botones de acción inferiores */
+.detalle-acciones-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 680px;
+}
+
+/* Botón específico de Cancelar con estilo de alerta (CORREGIDO) */
+.btn-cancelar-accion {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;          /* ← Lo subimos de 12px a 14px para igualar */
+  font-weight: 600;         /* ← Mantiene el mismo peso visual */
+  padding: 12px 32px;       /* ← Cambiado de '8px 18px' a '12px 32px' para que midan lo mismo */
+  border-radius: 20px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+  box-sizing: border-box;   /* ← Asegura que el borde no estire el botón de más */
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.btn-cancelar-accion:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.btn-cancelar-accion:active {
+  transform: scale(0.97);   /* ← Le agregamos el mismo efecto de clic del botón principal */
+}
