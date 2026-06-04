@@ -5,7 +5,7 @@ import { TURNOS_MOCK, ESTADO_CONFIG } from '../../mockdata/turnos.js';
 
 // IMPORTAMOS TUS SUB-PANTALLAS (Las creamos a continuación)
 import DetalleTurno from '../DetalleTurno/DetalleTurno.jsx';
-//import ReprogramarTurno from './ReprogramarTurno.jsx';
+import ReprogramarTurno from '../ReprogramarTurno/ReprogramarTurno.jsx';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);

@@ -62,16 +62,26 @@
   font-weight: 700;
 }
 
-/* Grupo de botones de acción inferiores */
+/* Grupo de botones de acción inferiores (CORREGIDO) */
 .detalle-acciones-group {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  justify-content: flex-end;
+  display: flex !important;      /* Fuerza el comportamiento flex */
+  justify-content: flex-end;    /* Empuja ambos botones hacia la derecha */
+  gap: 16px;                     /* Separa los botones para que no se choquen */
+  margin-top: 32px;
   width: 100%;
-  max-width: 680px;
+  box-sizing: border-box;
 }
 
+/* Forzamos que el botón de reprogramar herede el alineado correcto */
+.detalle-acciones-group .btn-nuevo-turno {
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: static !important;  /* Evita que un position: absolute rompa el flex */
+  margin: 0 !important;          /* Limpia márgenes heredados */
+}
 /* Botón específico de Cancelar con estilo de alerta (CORREGIDO) */
 .btn-cancelar-accion {
   font-family: 'Roboto Mono', monospace;
