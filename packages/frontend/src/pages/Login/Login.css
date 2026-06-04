@@ -1,42 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .inicioSesion-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #1e1757 0%, #2f2686 100%);
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    font-family: 'DM Sans', sans-serif;
+    background-color: #F2F6F6;  
+
+    /* 🌟 El truco mágico: Posicionamiento absoluto absoluto */
+    position: fixed;
+    top: 0;
+    bottom: 0; /* Se estira hasta tocar el borde inferior de la pantalla */
+    right: 0;  /* Se pega al borde derecho de la pantalla */
+    
+    /* 🌟 Ocupa todo el ancho restante quitando el espacio de la barra lateral */
+    /* Si tu menú lateral mide, por ejemplo, 260px, pon ese valor aquí: */
+    width: calc(100vw - 260px); 
+    
+    /* Un z-index alto para tapar el header y footer del layout, */
+    /* pero lo suficientemente bajo para no romper modales si los hubiera */
+    z-index: 100; 
+    
+    padding: 40px 20px;
+    overflow-y: auto; /* Permite scroll vertical si la pantalla es muy pequeña */
 }
 
 .form-container {
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
-    margin-top: -70px;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    padding: 48px 44px;
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
     width: 100%;
-    max-width: 420px; 
-    box-sizing: border-box; 
+    max-width: 420px;
 }
 
 .form-container h1 {
-    font-family: 'Roboto Mono', monospace;
-    margin-top: 0;
-    margin-bottom: 30px;
-    color: #2f2686;
+    font-family: 'Playfair Display', serif;
+    margin: 0 0 8px;
+    color: #064B50;
     font-size: 28px;
     font-weight: 700;
     text-align: center;
+}
+
+.form-container .form-subtitle {
+    text-align: center;
+    color: #6B7280;
+    font-size: 14px;
+    margin-bottom: 32px;
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 20px; 
+    gap: 20px;
 }
 
 .login-form > div {
@@ -46,77 +72,77 @@
 }
 
 .login-form label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #475569;
-    font-family: 'Roboto Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .login-form input {
-    padding: 12px 16px; 
+    padding: 13px 16px;
     font-size: 15px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
     outline: none;
-    background-color: #f8fafc; 
-    transition: all 0.3s ease; 
+    background-color: #F8FAFC;
+    transition: all 0.2s ease;
     color: #1e293b;
+    font-family: 'DM Sans', sans-serif;
 }
 
 .login-form input:focus {
-    border-color: #2f2686;
+    border-color: #12979F;
     background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(47, 38, 134, 0.15); 
+    box-shadow: 0 0 0 4px rgba(18, 151, 159, 0.12);
 }
 
 .login-form button {
-    margin-top: 10px;
+    margin-top: 6px;
     padding: 14px;
-    background-color: #2f2686;
+    background-color: #064B50;
     color: #ffffff;
     border: none;
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'DM Sans', sans-serif;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(47, 38, 134, 0.2);
+    box-shadow: 0 4px 14px rgba(6, 75, 80, 0.3);
 }
 
 .login-form button:hover {
-    background-color: #1c155c; 
-    transform: translateY(-1px); 
-    box-shadow: 0 6px 12px rgba(47, 38, 134, 0.3);
+    background-color: #0A6E74;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(6, 75, 80, 0.35);
 }
 
 .login-form button:active {
-    transform: translateY(2px); 
+    transform: translateY(1px);
 }
 
 .registro-link {
     text-align: center;
-    margin-top: 30px; 
+    margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #F1F5F9;
 }
-
 
 .registro-link p {
     margin: 0;
-    color: #64748b;
+    color: #64748B;
     font-size: 14px;
-    font-family: 'Roboto Mono', monospace;
 }
 
 .registro-link a {
-    color: #2f2686; 
+    color: #12979F;
     font-weight: 600;
     text-decoration: none;
-    transition: color 0.2s ease, text-decoration 0.2s ease;
+    transition: color 0.2s ease;
 }
 
 .registro-link a:hover {
-    color: #1c155c;
+    color: #064B50;
     text-decoration: underline;
 }

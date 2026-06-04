@@ -11,11 +11,9 @@ const Header = () => {
     return (
         <header className="header">
             <div className="logo-container">
+                <a href = "/">
                 <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
-                <div className="logo-text">
-                    <h1>Sweet</h1>
-                    <span>Medical</span>
-                </div>
+                </a>
             </div>
 
             <nav className="header-nav">

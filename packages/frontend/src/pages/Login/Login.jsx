@@ -1,9 +1,11 @@
 import "./Login.css";
+import Header from "../../components/header/Header.jsx";
 
 export default function Login() {
 
     return (
         <div className="inicioSesion-container">
+
             <div className="form-container">
 
                 <h1>Iniciar Sesión</h1>

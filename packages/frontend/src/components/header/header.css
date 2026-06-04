@@ -4,7 +4,6 @@
     width: 260px;
     min-width: 260px;
     height: 100vh;
-    position: sticky;
     top: 0;
     background-color: #064B50; /* Teal dark premium */
     border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -13,6 +12,9 @@
     justify-content: flex-start;
     align-items: stretch;
     z-index: 100;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08); 
+    position: relative; 
+    z-index: 101;
 }
 
 /* Contenedor del Logo */
@@ -20,15 +22,18 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 24px 28px;
+    padding: 0 24px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 24px;
 }
 
 .logo-img {
-    height: 40px;
+    height: 60px;
     width: auto;
     object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+    transform: scale(1.5);
+    transform-origin: left center; 
 }
 
 .logo-text h1 {

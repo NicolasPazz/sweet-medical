@@ -1,40 +1,86 @@
 import { Link } from 'react-router-dom';
+import { FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaArrowRight, FaShieldAlt, FaClock, FaUserMd } from 'react-icons/fa';
 import './Home.css';
 
 export default function Home() {
-  const manejarBusqueda = (termino) => {
-    console.log('Buscando turnos para:', termino);
-    // fetch(`/api/turnos?q=${termino}`)
-  };
-
   return (
     <div className="home-container">
-      <main className="home-main">
-        <h1 className="home-title">Sweet Medical</h1>
 
+      {/* Hero */}
+      <section className="home-hero">
+        <div className="home-hero-badge">Plataforma de salud digital</div>
+        <h1 className="home-title">Bienvenido a <span>Sweet Medical</span></h1>
         <p className="home-subtitle">
-          Plataforma para la gestión de turnos, profesionales y servicios de salud.
+          Gestioná tus turnos, revisá tu historial médico y accedé a todos los servicios de salud en un solo lugar.
         </p>
+        <div className="home-hero-cta">
+          <Link to="/solicitar-turno" className="cta-primary">
+            <FaCalendarAlt /> Agendar turno
+          </Link>
+          <Link to="/historial-medico" className="cta-secondary">
+            Ver historial <FaArrowRight />
+          </Link>
+        </div>
+      </section>
 
-        <nav className="options-nav">
-          <ul>
-            <li>
-              <Link to="/historial-medico" className="option-link">
-                <img src="/HistorialMedico.png" alt="Listado" className="option-image" />
-                <span className="option-title">Ver historial médico</span>
-                <span className="descripcion">Visualizar historial de turnos realizados</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/solicitar-turno" className="option-link">
-                <img src="/fotoTurno.png" alt="Turno" className="option-image" />
-                <span className="option-title">Agendar Turno</span>
-                <span className="descripcion">Agendar un turno según un servicio y médico</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </main>
+      {/* Cards de acceso rápido */}
+      <section className="home-cards">
+        <Link to="/solicitar-turno" className="home-card home-card--accent">
+          <div className="home-card-icon"><FaCalendarAlt /></div>
+          <div className="home-card-body">
+            <span className="home-card-title">Agendar Turno</span>
+            <span className="home-card-desc">Elegí servicio, médico y horario disponible</span>
+          </div>
+          <FaArrowRight className="home-card-arrow" />
+        </Link>
+
+        <Link to="/historial-medico" className="home-card">
+          <div className="home-card-icon"><FaHistory /></div>
+          <div className="home-card-body">
+            <span className="home-card-title">Historial Médico</span>
+            <span className="home-card-desc">Revisá tus turnos y consultas anteriores</span>
+          </div>
+          <FaArrowRight className="home-card-arrow" />
+        </Link>
+
+        <Link to="/servicio" className="home-card">
+          <div className="home-card-icon"><FaBriefcaseMedical /></div>
+          <div className="home-card-body">
+            <span className="home-card-title">Servicios</span>
+            <span className="home-card-desc">Conocé todas las especialidades disponibles</span>
+          </div>
+          <FaArrowRight className="home-card-arrow" />
+        </Link>
+
+        <Link to="/contact" className="home-card">
+          <div className="home-card-icon"><FaEnvelope /></div>
+          <div className="home-card-body">
+            <span className="home-card-title">Contacto</span>
+            <span className="home-card-desc">Comunicate con nuestro equipo</span>
+          </div>
+          <FaArrowRight className="home-card-arrow" />
+        </Link>
+      </section>
+
+      {/* Features */}
+      <section className="home-features">
+        <div className="home-feature">
+          <FaShieldAlt className="home-feature-icon" />
+          <h3>Datos seguros</h3>
+          <p>Tu información médica está protegida y solo accesible por vos.</p>
+        </div>
+        <div className="home-feature">
+          <FaClock className="home-feature-icon" />
+          <h3>Turnos 24/7</h3>
+          <p>Agendá en cualquier momento sin necesidad de llamar.</p>
+        </div>
+        <div className="home-feature">
+          <FaUserMd className="home-feature-icon" />
+          <h3>Especialistas</h3>
+          <p>Accedé a una red de profesionales de la salud certificados.</p>
+        </div>
+      </section>
+
     </div>
   );
 }

@@ -12,6 +12,8 @@ export default function Perfil() {
     return false;
   };
 
+  
+
   return (
     <div className="perfil-page">
         {/* --- HEADER --- */}
@@ -90,7 +92,7 @@ export default function Perfil() {
             </div>
             
             <p className="availability-help">Visualizá tus horarios de atención. Las celdas en verde indican tus horas activas.</p>
-
+            
             <div className="calendar-grid-container">
                 <table className="calendar-table">
                     <thead>

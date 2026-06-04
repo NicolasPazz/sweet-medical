@@ -25,8 +25,8 @@ function App() {
             <Route path="solicitar-turno/:idServicio" element={<AgendarTurno />} />
             <Route path="historial-medico" element={<HistorialTurnos />} />
             <Route path="perfil" element={<Perfil />} />
-            <Route path="login" element= {<Login />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/login" element={<Login />} />
           </Route>
         </Routes>
       </BrowserRouter>
