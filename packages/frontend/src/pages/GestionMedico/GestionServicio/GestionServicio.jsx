@@ -177,7 +177,9 @@ export function GestionServicio() {
     const normalizar = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
     const cargar = async () => {
       try {
-        const [esp, prac] = await Promise.all([getEspecialidades(), getPracticas()]);
+        const [espRes, pracRes] = await Promise.all([getEspecialidades(), getPracticas()]);
+        const esp = espRes?.data ?? espRes ?? [];
+        const prac = pracRes?.data ?? pracRes ?? [];
         setEspecialidades(esp.map(normalizar));
         setPracticas(prac.map(normalizar));
       } catch (e) {

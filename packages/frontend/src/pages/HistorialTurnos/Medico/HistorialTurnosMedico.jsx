@@ -32,9 +32,9 @@ export default function HistorialTurnosMedico() {
     );
   };
 
-  const handleCancelar = (idTurno) => {
+  const handleCancelar = (idTurno, motivo) => {
     setTurnos((prev) =>
-      prev.map((t) => t._id === idTurno ? { ...t, estado: 'CANCELADO' } : t)
+      prev.map((t) => t._id === idTurno ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo } : t)
     );
     setVista('LISTADO');
   };
@@ -74,7 +74,7 @@ export default function HistorialTurnosMedico() {
         formatFecha={formatFecha}
         onVolver={() => setVista('LISTADO')}
         onConfirmar={() => handleConfirmar(turnoActualizado._id)}
-        onCancelar={() => handleCancelar(turnoActualizado._id)}
+        onCancelar={(motivo) => handleCancelar(turnoActualizado._id, motivo)}
         onAceptarReprogramacion={() => handleAceptarReprogramacion(turnoActualizado._id)}
         onRechazarReprogramacion={() => handleRechazarReprogramacion(turnoActualizado._id)}
       />

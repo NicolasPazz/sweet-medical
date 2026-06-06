@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import './HistorialTurnosMedico.css';
+import CancelarTurnoModal from '../../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
 
 const PUEDE_CONFIRMAR = ['RESERVADO'];
 const PUEDE_CANCELAR = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE_REPROGRAMACION'];
@@ -13,6 +15,8 @@ export default function DetalleTurnoMedico({
   onAceptarReprogramacion,
   onRechazarReprogramacion,
 }) {
+  const [modalCancelar, setModalCancelar] = useState(false);
+
   const puedeConfirmar = PUEDE_CONFIRMAR.includes(turno.estado);
   const puedeCancelar = PUEDE_CANCELAR.includes(turno.estado);
   const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
@@ -21,16 +25,17 @@ export default function DetalleTurnoMedico({
     if (window.confirm('¿Confirmás este turno?')) onConfirmar();
   };
 
-  const handleCancelar = () => {
-    if (window.confirm('¿Estás seguro de que querés cancelar este turno?')) onCancelar();
-  };
-
   const handleAceptar = () => {
     if (window.confirm('¿Aceptás la reprogramación propuesta por el paciente?')) onAceptarReprogramacion();
   };
 
   const handleRechazar = () => {
     if (window.confirm('¿Rechazás la reprogramación? El turno volverá a su fecha original.')) onRechazarReprogramacion();
+  };
+
+  const handleConfirmarCancelacion = (motivo) => {
+    setModalCancelar(false);
+    onCancelar(motivo);
   };
 
   return (
@@ -79,7 +84,6 @@ export default function DetalleTurnoMedico({
           </span>
         </div>
 
-        {/* Bloque de propuesta de reprogramación */}
         {esPendiente && turno.propuestaCambio && (
           <div className="detalle-propuesta-bloque">
             <p className="detalle-propuesta-titulo">📅 Propuesta del paciente</p>
@@ -94,10 +98,9 @@ export default function DetalleTurnoMedico({
           </div>
         )}
 
-        {/* Acciones */}
         <div className="detalle-acciones-group">
           {puedeCancelar && !esPendiente && (
-            <button className="btn-cancelar-accion" onClick={handleCancelar}>
+            <button className="btn-cancelar-accion" onClick={() => setModalCancelar(true)}>
               ✕ Cancelar Turno
             </button>
           )}
@@ -118,6 +121,14 @@ export default function DetalleTurnoMedico({
           )}
         </div>
       </div>
+
+      {modalCancelar && (
+        <CancelarTurnoModal
+          turno={turno}
+          onClose={() => setModalCancelar(false)}
+          onConfirm={handleConfirmarCancelacion}
+        />
+      )}
     </div>
   );
 }

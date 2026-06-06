@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './DetalleTurno.css';
+import CancelarTurnoModal from '../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
 
-export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, onIrAReprogramar }) {
+export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, onIrAReprogramar, onCancelar }) {
+    const [modalCancelar, setModalCancelar] = useState(false);
+
     // Solo se permite cancelar o reprogramar si está confirmado, reservado o pendiente
-    const esModificable = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE'].includes(turno.estado);
+    const esModificable = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE_REPROGRAMACION'].includes(turno.estado);
+
+    const handleConfirmarCancelacion = (motivo) => {
+        setModalCancelar(false);
+        if (onCancelar) {
+            onCancelar(motivo);
+        } else {
+            // fallback hardcodeado si no se pasa callback
+            turno.estado = 'CANCELADO';
+            onVolver();
+        }
+    };
 
     return (
         <div className="historial-container">
@@ -13,10 +27,7 @@ export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, 
                 <p className="historial-subtitle">Comprobante e información de tu cita médica</p>
             </div>
 
-            {/* CAMBIADO: Usamos 'detalle-card' en vez de 'turno-card' */}
             <div className="detalle-card">
-
-                {/* CAMBIADO: Estructura interna adaptada al CSS */}
                 <div className="detalle-header-block">
                     <span className="detalle-id">ID de Turno: #{turno._id}</span>
                     <span className={`turno-estado ${cfgEstado?.color}`}>{cfgEstado?.label}</span>
@@ -55,23 +66,16 @@ export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, 
                 </div>
 
                 {esModificable && (
-                    /* CAMBIADO: Usamos 'detalle-acciones-group' */
                     <div className="detalle-acciones-group">
                         <button
-                            className="btn-cancelar-accion" /* CAMBIADO: Tu clase de cancelar */
-                            onClick={() => {
-                                if (window.confirm("¿Estás seguro de que deseas cancelar este turno?")) {
-                                    turno.estado = 'CANCELADO';
-                                    alert("Turno cancelado con éxito.");
-                                    onVolver();
-                                }
-                            }}
+                            className="btn-cancelar-accion"
+                            onClick={() => setModalCancelar(true)}
                         >
                             ❌ Cancelar Cita
                         </button>
 
                         <button
-                            className="btn-nuevo-turno" /* Se mantiene el estilo global de la app */
+                            className="btn-nuevo-turno"
                             style={{ position: 'static', margin: '0' }}
                             onClick={onIrAReprogramar}
                         >
@@ -80,6 +84,14 @@ export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, 
                     </div>
                 )}
             </div>
+
+            {modalCancelar && (
+                <CancelarTurnoModal
+                    turno={turno}
+                    onClose={() => setModalCancelar(false)}
+                    onConfirm={handleConfirmarCancelacion}
+                />
+            )}
         </div>
     );
 }

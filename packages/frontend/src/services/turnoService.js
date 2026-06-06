@@ -7,12 +7,12 @@ export const getMedicos = async () => {
 
 export const getEspecialidades = async () => {
   const res = await api.get('/especialidades');
-  return res.data.data;
+  return res.data;
 };
 
 export const getPracticas = async () => {
   const res = await api.get('/practicas');
-  return res.data.data;
+  return res.data;
 };
 
 export const getSedes = async () => {
