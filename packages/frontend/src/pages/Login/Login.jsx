@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './Login.css';
 import Toast from '../../components/Toast/Toast.jsx';
+import {useAuth} from '../../components/AuthProvider.jsx';
 
 export default function Login() {
 
@@ -16,12 +17,14 @@ export default function Login() {
 
     const [toast, setToast] = useState(null);
 
+    const { login } = useAuth();
+
     const mostrarToast = (mensaje, tipo = 'success') => {
         setToast({ mensaje, tipo });
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const nuevosErrores = {
             email: !formData.email,
             password: !formData.password
@@ -37,7 +40,18 @@ export default function Login() {
 
         // sendLoginData(formData); // Aca se envía la request al back
 
-        mostrarToast('Inicio de sesión exitoso', 'success');
+        const respuesta = { codigo: 200, token: 'abc123' };
+
+        if(respuesta.codigo === 200) {
+            login(respuesta.token);
+            mostrarToast('Inicio de sesión exitoso', 'success');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            window.location.href = '/';
+        }
+        else {
+            mostrarToast('Error al iniciar sesión', 'error');
+        }
+        
     };
 
     const handleChange = (campo, valor) => {

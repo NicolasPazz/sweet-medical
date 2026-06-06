@@ -260,3 +260,28 @@
 .slot-unavailable:hover {
   background-color: #f1f5f9;
 }
+
+.logout-container {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+.btn-logout {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #dc2626;
+}

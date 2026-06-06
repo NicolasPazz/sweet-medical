@@ -3,6 +3,7 @@ import { FaShoppingCart, FaHome, FaCalendarAlt, FaHistory, FaBriefcaseMedical, F
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
+import { useAuth } from "../../components/AuthProvider.jsx";
 
 const Header = () => {
     const { summary } = useCart();
@@ -60,10 +61,17 @@ const Header = () => {
                     <NotificationBell />
                 </div>
                 <div className="header-auth-row">
-                    <Link id="iniciar-sesion" to="/login">
-                        <FaUser className="auth-icon" />
-                        <span>Iniciar sesión</span>
-                    </Link>
+                    {useAuth().isAuthenticated ? (
+                        <Link id="iniciar-sesion" to="/perfil">
+                            <FaUser className="auth-icon" />
+                            <span>Mi Perfil</span>
+                        </Link>
+                    ) : (
+                        <Link id="iniciar-sesion" to="/login">
+                            <FaUser className="auth-icon" />
+                            <span>Iniciar sesión</span>
+                        </Link>
+                    )}
                 </div>
             </div>
         </header>
