@@ -38,6 +38,22 @@ export class PacienteService {
         console.log('Error calculando cobertura para turno', t.id || t._id, ':', error.message);
       }
 
+      const historialTurnos = Array.isArray(t.historialEstados)
+        ? t.historialEstados.map((h) => ({
+            id_cambio: h._id || h.id,
+            fechaHoraIngreso: h.fechaHoraIngreso,
+            estado: h.estado,
+            motivo: h.motivo,
+            usuario: h.usuario
+              ? {
+                  id: h.usuario._id || h.usuario.id || h.usuario,
+                  nombre: h.usuario.nombre || null,
+                  email: h.usuario.email || null,
+                }
+              : null,
+          }))
+        : [];
+
       return {
         id_turno: t.id || t._id,
         fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
@@ -57,6 +73,7 @@ export class PacienteService {
         costo: t.costo,
         costoEstimado: costoEstimado,
         cobertura: cobertura,
+        historialTurnos,
       };
     });
   }

@@ -11,24 +11,17 @@
     align-items: center;
     justify-content: center;
     font-family: 'DM Sans', sans-serif;
-    background-color: #F2F6F6;  
+    background-color: #F2F6F6;
 
-    /* 🌟 El truco mágico: Posicionamiento absoluto absoluto */
     position: fixed;
     top: 0;
-    bottom: 0; /* Se estira hasta tocar el borde inferior de la pantalla */
-    right: 0;  /* Se pega al borde derecho de la pantalla */
-    
-    /* 🌟 Ocupa todo el ancho restante quitando el espacio de la barra lateral */
-    /* Si tu menú lateral mide, por ejemplo, 260px, pon ese valor aquí: */
-    width: calc(100vw - 260px); 
-    
-    /* Un z-index alto para tapar el header y footer del layout, */
-    /* pero lo suficientemente bajo para no romper modales si los hubiera */
-    z-index: 100; 
-    
+    bottom: 0;
+    right: 0;
+    width: calc(100vw - 260px);
+    z-index: 100;
+
     padding: 40px 20px;
-    overflow-y: auto; /* Permite scroll vertical si la pantalla es muy pequeña */
+    overflow-y: auto;
 }
 
 .form-container {
@@ -79,7 +72,14 @@
     letter-spacing: 0.5px;
 }
 
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
 .login-form input {
+    width: 100%;
     padding: 13px 16px;
     font-size: 15px;
     border: 1.5px solid #E2E8F0;
@@ -89,12 +89,37 @@
     transition: all 0.2s ease;
     color: #1e293b;
     font-family: 'DM Sans', sans-serif;
+    box-sizing: border-box;
 }
 
 .login-form input:focus {
     border-color: #12979F;
     background-color: #ffffff;
     box-shadow: 0 0 0 4px rgba(18, 151, 159, 0.12);
+}
+
+.login-form input.input-error {
+    border-color: #B91C1C;
+    background-color: #FEF2F2;
+}
+
+.login-form input.input-error:focus {
+    border-color: #B91C1C;
+    box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.1);
+}
+
+.icono-error {
+    position: absolute;
+    right: 12px;
+    font-size: 16px;
+    color: #B91C1C;
+    pointer-events: none;
+    animation: aparecer 0.2s ease;
+}
+
+@keyframes aparecer {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
 .login-form button {

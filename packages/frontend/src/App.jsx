@@ -11,6 +11,7 @@ import { CartProvider } from './context/CartContext.jsx';
 import Perfil from './pages/Perfil/Perfil';
 import Login from './pages/Login/Login';
 import './App.css';
+import Registro from './pages/Registro/Registro.jsx';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="perfil" element={<Perfil />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
           </Route>
         </Routes>
       </BrowserRouter>
