@@ -1,14 +1,25 @@
+import React, { useState, useRef } from 'react'; // <-- Agregamos useState y useRef
 import "./header.css";
 import { FaShoppingCart, FaHome, FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaUser } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from "../../components/AuthProvider.jsx";
-import GestionMedico from "@/pages/GestionMedico/GestionMedico";
+import CartDropdown from '../cart/CartDropdown.jsx'; // <-- Importamos tu nuevo componente
 
 const Header = () => {
-    const { summary } = useCart();
+    const { summary, cartItems, removeItem, clearCart } = useCart(); // <-- Sacamos los elementos y acciones del Context
     const location = useLocation();
+
+    // Estados para controlar la apertura y el ancla del carrito
+    const [cartOpen, setCartOpen] = useState(false);
+    const cartButtonRef = useRef(null); // <-- Guardará la posición exacta del botón en la UI
+
+    const handleConfirmarReservaMasiva = () => {
+        alert("¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!");
+        if (clearCart) clearCart();
+        setCartOpen(false);
+    };
 
     return (
         <header className="header">
@@ -55,12 +66,20 @@ const Header = () => {
 
             <div className="header-footer-section">
                 <div className="header-actions-row">
-                    <button className="cart-btn" aria-label="Ver carrito">
+                    {/* BOTÓN DEL CARRITO CON SU ACCIÓN Y SU REFERENCIA ASIGNADA */}
+                    <button
+                        ref={cartButtonRef} // ← Guarda la coordenada física del botón
+                        className={`cart-btn ${cartOpen ? 'cart-btn--active' : ''}`}
+                        aria-label="Ver carrito"
+                        onClick={() => setCartOpen(prev => !prev)} // ← Abre y cierra el menú
+                    >
                         <FaShoppingCart className="cart-icon" />
                         {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
                     </button>
+
                     <NotificationBell />
                 </div>
+
                 <div className="header-auth-row">
                     {useAuth().isAuthenticated ? (
                         <Link id="iniciar-sesion" to="/perfil">
@@ -75,6 +94,17 @@ const Header = () => {
                     )}
                 </div>
             </div>
+
+            {/* CONTROL DESPLEGABLE DEL CARRITO ENLAZADO AL CONTEXTO */}
+            <CartDropdown
+                open={cartOpen}
+                setOpen={setCartOpen}
+                anchorRef={cartButtonRef} // Pasa el ancla para calcular la posición exacta
+                onConfirmarReserva={() => {
+                    setStep(5);        // 1. Mandamos al usuario directo al paso 5 (Revisar y Confirmar)
+                    setCartOpen(false); // 2. Cerramos el dropdown flotante para que no estorbe la vista
+                }}
+            />
         </header>
     );
 };

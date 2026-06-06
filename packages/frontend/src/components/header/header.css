@@ -136,6 +136,11 @@
     transition: all 0.2s ease;
 }
 
+.cart-btn--active {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
 .cart-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.15);

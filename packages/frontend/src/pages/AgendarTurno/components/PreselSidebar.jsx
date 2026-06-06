@@ -25,16 +25,16 @@ export default function PreselSidebar({ onConfirm }) {
               <span className="presel-num">{idx + 1}</span>
               <div className="presel-info">
                 <div className="presel-spec-doc">
-                  <strong>{item.especialidad || item.practica}</strong>
+                  <strong>{item.especialidad || item.practica || item.servicio || "Consulta Médica"}</strong>
                 </div>
                 <div className="presel-doc-name">
-                  {item.medico?.nombre}
+                  {item.medico?.nombre || item.medico || "Profesional asignado"}
                 </div>
                 <div className="presel-datetime">
-                  {item.fecha} a las {item.hora}
+                  {item.fecha || "Hoy"} a las {item.hora} hs
                 </div>
                 <div className="presel-meta">
-                  Sede: {item.sede?.nombre || "No especificada"}
+                  Sede: {item.sede?.nombre || item.sede || "No especificada"}
                 </div>
                 {item.costoEstimado !== undefined && (
                   <div className="presel-cost">
