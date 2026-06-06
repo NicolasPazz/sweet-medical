@@ -16,6 +16,7 @@ import Perfil from './pages/Perfil/Perfil';
 import Login from './pages/Login/Login';
 import './App.css';
 import Registro from './pages/Registro/Registro.jsx';
+import Contacto from './pages/Contacto.jsx';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="contact" element={<Contacto />} />
           </Route>
         </Routes>
       </BrowserRouter>
