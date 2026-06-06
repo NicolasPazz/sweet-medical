@@ -33,6 +33,7 @@ function tiempoRelativo(fecha) {
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState(notificacionesMock);
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
 
   const unread = notifications.filter(n => !n.leida);
@@ -50,6 +51,15 @@ export default function NotificationBell() {
   }, []);
 
   function toggleOpen() {
+    if (!open && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        bottom: window.innerHeight - rect.top + 8,
+        left: rect.left,
+        width: 360,
+      });
+    }
     setOpen(prev => !prev);
   }
 
@@ -86,7 +96,7 @@ export default function NotificationBell() {
       </IconButton>
 
       {open && (
-        <div className="nb-dropdown">
+        <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(480, window.innerHeight - (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) - 16) }}>
           {/* Encabezado */}
           <div className="nb-header">
             <span className="nb-header__title">Notificaciones</span>

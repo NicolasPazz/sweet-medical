@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../../../mockdata/servicios.js';
+import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 
 // El back tiene /especialidades y /practicas como endpoints separados.
@@ -167,8 +168,29 @@ function Toast({ msg, type }) {
 
 // ─── Página principal ──────────────────────────────────────────────────────
 export function GestionServicio() {
-  const [especialidades, setEspecialidades] = useState([...especialidadesMock]);
-  const [practicas, setPracticas] = useState([...practicasMock]);
+  const [especialidades, setEspecialidades] = useState([]);
+  const [practicas, setPracticas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(null);
+
+  useEffect(() => {
+    const normalizar = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
+    const cargar = async () => {
+      try {
+        const [esp, prac] = await Promise.all([getEspecialidades(), getPracticas()]);
+        setEspecialidades(esp.map(normalizar));
+        setPracticas(prac.map(normalizar));
+      } catch (e) {
+        console.error('[GestionServicio] Error al cargar servicios:', e);
+        setErrorCarga('No se pudieron cargar los servicios. Usando datos de ejemplo.');
+        setEspecialidades([...especialidadesMock]);
+        setPracticas([...practicasMock]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargar();
+  }, []);
 
   const [modalCrear, setModalCrear] = useState(false);
   const [modalEditar, setModalEditar] = useState(null);
@@ -227,6 +249,12 @@ export function GestionServicio() {
           </button>
         </div>
 
+        {errorCarga && (
+          <div className="gs-toast gs-toast--error" style={{ position: 'static', marginBottom: '16px' }}>
+            ⚠️ {errorCarga}
+          </div>
+        )}
+
         <div className="gs-filters">
           {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
             <button
@@ -244,7 +272,9 @@ export function GestionServicio() {
           ))}
         </div>
 
-        {serviciosFiltrados.length === 0 ? (
+        {loading ? (
+          <div className="gs-empty"><div className="gs-empty-icon">⏳</div><div>Cargando servicios...</div></div>
+        ) : serviciosFiltrados.length === 0 ? (
           <div className="gs-empty">
             <div className="gs-empty-icon">🩺</div>
             <div>No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
