@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
-import { TURNOS_MOCK, ESTADO_CONFIG } from '../../mockdata/turnos.js';
-import TurnoCard from '../../components/TurnoCard/TurnoCard.jsx';
+import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
+import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 
-import DetalleTurno from '../DetalleTurno/DetalleTurno.jsx';
-import ReprogramarTurno from '../ReprogramarTurno/ReprogramarTurno.jsx';
+import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
+import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);

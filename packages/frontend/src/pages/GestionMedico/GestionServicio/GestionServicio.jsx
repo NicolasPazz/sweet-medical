@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../../mockdata/servicios.js';
+import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../../../mockdata/servicios.js';
 import './GestionServicio.css';
 
 // El back tiene /especialidades y /practicas como endpoints separados.
@@ -17,12 +17,12 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   const [form, setForm] = useState(
     esEdicion
       ? {
-          tipo: servicio.tipo,
-          nombre: servicio.nombre,
-          duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-          costo: String(servicio.costo),
-          codigo: servicio.codigo ?? '',
-        }
+        tipo: servicio.tipo,
+        nombre: servicio.nombre,
+        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
+        costo: String(servicio.costo),
+        codigo: servicio.codigo ?? '',
+      }
       : EMPTY_FORM(),
   );
   const [error, setError] = useState('');
@@ -168,13 +168,13 @@ function Toast({ msg, type }) {
 // ─── Página principal ──────────────────────────────────────────────────────
 export function GestionServicio() {
   const [especialidades, setEspecialidades] = useState([...especialidadesMock]);
-  const [practicas, setPracticas]           = useState([...practicasMock]);
+  const [practicas, setPracticas] = useState([...practicasMock]);
 
-  const [modalCrear, setModalCrear]       = useState(false);
-  const [modalEditar, setModalEditar]     = useState(null);
+  const [modalCrear, setModalCrear] = useState(false);
+  const [modalEditar, setModalEditar] = useState(null);
   const [modalEliminar, setModalEliminar] = useState(null);
-  const [toast, setToast]                 = useState(null);
-  const [filtro, setFiltro]               = useState('TODOS');
+  const [toast, setToast] = useState(null);
+  const [filtro, setFiltro] = useState('TODOS');
 
   const mostrarToast = (msg, type = 'success') => {
     setToast({ msg, type });

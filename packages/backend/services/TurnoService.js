@@ -254,14 +254,14 @@ export class TurnoService {
     return turno;
   }
 
-  async obtenerHistorial(idPaciente, idMedico) {
+  async obtenerHistorial(dniPaciente, idMedico) {
     const medico = await this.medicoRepository.findByIdUsuario(idMedico);
 
     if (medico == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    const paciente = await this.pacienteRepository.findByIdUsuario(idPaciente);
+    const paciente = await this.pacienteRepository.findByDniPaciente(idPaciente);
 
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');

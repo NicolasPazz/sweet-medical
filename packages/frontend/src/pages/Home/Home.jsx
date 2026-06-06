@@ -43,11 +43,11 @@ export default function Home() {
           <FaArrowRight className="home-card-arrow" />
         </Link>
 
-        <Link to="/servicio" className="home-card">
+        <Link to="/gestion-medico" className="home-card">
           <div className="home-card-icon"><FaBriefcaseMedical /></div>
           <div className="home-card-body">
-            <span className="home-card-title">Servicios</span>
-            <span className="home-card-desc">Conocé todas las especialidades disponibles</span>
+            <span className="home-card-title">Gestión médica</span>
+            <span className="home-card-desc">Administrá tus actividades como médico</span>
           </div>
           <FaArrowRight className="home-card-arrow" />
         </Link>

@@ -50,3 +50,7 @@ export const getHistorialPaciente = async (idUsuario) => {
   return res.data;
 };
 
+export const actualizarDisponibilidad = async (id_medico, disponibilidades) => {
+  const res = await api.patch('/medicos/disponibilidad', { id_medico, disponibilidades });
+  return res.data;
+};

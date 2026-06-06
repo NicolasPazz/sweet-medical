@@ -4,9 +4,13 @@ import Layout from './pages/Layout/Layout';
 import Home from './pages/Home/Home';
 import HealthPage from './pages/HealthPage/HealthPage';
 import NotFound from './pages/Errors/NotFound/NotFound';
-import { GestionServicio } from './pages/GestionServicio/GestionServicio';
+import { GestionMedico } from './pages/GestionMedico/GestionMedico';
+import { GestionServicio } from './pages/GestionMedico/GestionServicio/GestionServicio';
+import HistorialPaciente from './pages/GestionMedico/HistorialPaciente/HistorialPaciente';
+import DisponibilidadMedico from './pages/GestionMedico/DisponibilidadMedico/DisponibilidadMedico';
 import AgendarTurno from './pages/AgendarTurno/AgendarTurno';
-import HistorialTurnos from './pages/HistorialTurnos/HistorialTurnos';
+import HistorialTurnos from './pages/HistorialTurnos/Paciente/HistorialTurnos';
+import HistorialTurnosMedico from './pages/HistorialTurnos/Medico/HistorialTurnosMedico';
 import { CartProvider } from './context/CartContext.jsx';
 import Perfil from './pages/Perfil/Perfil';
 import Login from './pages/Login/Login';
@@ -21,14 +25,21 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="health" element={<HealthPage />} />
-            <Route path="servicio" element={<GestionServicio />} />
+
+            {/* Panel médico */}
+            <Route path="gestion-medico" element={<GestionMedico />} />
+            <Route path="gestion-medico/servicio" element={<GestionServicio />} />
+            <Route path="gestion-medico/mis-turnos" element={<HistorialTurnosMedico />} />
+            <Route path="gestion-medico/historial-paciente" element={<HistorialPaciente />} />
+            <Route path="gestion-medico/disponibilidad" element={<DisponibilidadMedico />} />
+
             <Route path="solicitar-turno" element={<AgendarTurno />} />
             <Route path="solicitar-turno/:idServicio" element={<AgendarTurno />} />
             <Route path="historial-medico" element={<HistorialTurnos />} />
             <Route path="perfil" element={<Perfil />} />
-            <Route path="*" element={<NotFound />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>

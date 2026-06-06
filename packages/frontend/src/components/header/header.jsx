@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from "../../components/AuthProvider.jsx";
+import GestionMedico from "@/pages/GestionMedico/GestionMedico";
 
 const Header = () => {
     const { summary } = useCart();
@@ -12,8 +13,8 @@ const Header = () => {
     return (
         <header className="header">
             <div className="logo-container">
-                <a href = "/">
-                <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
+                <a href="/">
+                    <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
                 </a>
             </div>
 
@@ -38,9 +39,9 @@ const Header = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/servicio" className={location.pathname === '/servicio' ? 'active' : ''}>
+                        <Link to="/gestion-medico" className={location.pathname === '/gestion-medico' ? 'active' : ''}>
                             <FaBriefcaseMedical className="header-icon" />
-                            <span className="header-label">Servicios</span>
+                            <span className="header-label">Gestión médica</span>
                         </Link>
                     </li>
                     <li>

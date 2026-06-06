@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&display=swap');
+
+.gm-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Roboto Mono', monospace;
+  padding-top: 80px;
+}
+
+.gm-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.gm-header {
+  margin-bottom: 40px;
+}
+
+.gm-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.gm-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ─── Grid de tarjetas ───────────────────────────────────────────────────── */
+.gm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .gm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Tarjeta ────────────────────────────────────────────────────────────── */
+.gm-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 28px 24px 20px;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Roboto Mono', monospace;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  position: relative;
+}
+
+.gm-card:hover {
+  box-shadow: 0 6px 20px rgba(39, 31, 146, 0.1);
+  border-color: #271f92;
+  transform: translateY(-2px);
+}
+
+.gm-card-icono {
+  font-size: 32px;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.gm-card-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.gm-card-descripcion {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.gm-card-arrow {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #271f92;
+  font-weight: 700;
+  align-self: flex-end;
+  transition: transform 0.15s;
+}
+
+.gm-card:hover .gm-card-arrow {
+  transform: translateX(4px);
+}

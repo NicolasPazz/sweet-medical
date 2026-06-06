@@ -55,12 +55,12 @@ export class TurnoController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idPaciente = req.params.id_paciente;
+      const dniPaciente = req.params.dni_paciente;
       ValidadorId.validarIds(idPaciente);
       const idMedico = req.params.id_usuario;
       ValidadorId.validarIds(idMedico);
 
-      const historial = await this.turnoService.obtenerHistorial(idPaciente, idMedico);
+      const historial = await this.turnoService.obtenerHistorial(dniPaciente, idMedico);
 
       return res.status(200).json({
         status: 'success',
