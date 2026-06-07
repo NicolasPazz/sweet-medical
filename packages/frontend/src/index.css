@@ -6,6 +6,17 @@
   box-sizing: border-box;
 }
 
+/* Los navegadores excluyen botones y campos de formulario de la herencia
+   de font-family del body por defecto. Este fix lo corrige globalmente. */
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 body {
   margin: 0;
   font-family: 'Roboto Mono', monospace;

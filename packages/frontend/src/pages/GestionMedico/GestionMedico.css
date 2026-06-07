@@ -38,12 +38,6 @@
   gap: 16px;
 }
 
-@media (max-width: 600px) {
-  .gm-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ─── Tarjeta ────────────────────────────────────────────────────────────── */
 .gm-card {
   display: flex;
@@ -97,4 +91,25 @@
 
 .gm-card:hover .gm-card-arrow {
   transform: translateX(4px);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .gm-page {
+    padding-top: 20px;
+  }
+
+  .gm-container {
+    padding: 24px 16px;
+  }
+
+  .gm-title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .gm-grid {
+    grid-template-columns: 1fr;
+  }
 }

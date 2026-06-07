@@ -1,20 +1,18 @@
-import React, { useRef } from 'react'; // <-- Agregamos useState y useRef
+import React, { useRef, useState, useEffect } from 'react';
 import "./header.css";
-import { FaShoppingCart, FaHome, FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaUser } from 'react-icons/fa';
+import { FaShoppingCart, FaHome, FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from "../../components/AuthProvider.jsx";
 import { getUserByToken } from '../../services/userService.js';
-import { useState, useEffect } from 'react';
-import CartDropdown from '../cart/CartDropdown.jsx'; // <-- Importamos tu nuevo componente
+import CartDropdown from '../cart/CartDropdown.jsx';
 
 const Header = () => {
-    const { summary, cartItems, removeItem, clearCart } = useCart(); // <-- Sacamos los elementos y acciones del Context
+    const { summary, cartItems, removeItem, clearCart } = useCart();
     const location = useLocation();
 
     const { token } = useAuth();
-
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -28,13 +26,17 @@ const Header = () => {
                 }
             }
         };
-
         fetchUser();
     }, [token]);
 
-    // Estados para controlar la apertura y el ancla del carrito
     const [cartOpen, setCartOpen] = useState(false);
-    const cartButtonRef = useRef(null); // <-- Guardará la posición exacta del botón en la UI
+    const [menuOpen, setMenuOpen] = useState(false);
+    const cartButtonRef = useRef(null);
+
+    // Cierra el menú al navegar
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [location.pathname]);
 
     const handleConfirmarReservaMasiva = () => {
         alert("¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!");
@@ -43,94 +45,110 @@ const Header = () => {
     };
 
     return (
-        <header className="header">
-            <div className="logo-container">
-                <a href="/">
-                    <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
-                </a>
-            </div>
+        <>
+            {/* Overlay para cerrar el menú al tocar afuera en mobile */}
+            <div
+                className={`nav-overlay ${menuOpen ? 'visible' : ''}`}
+                onClick={() => setMenuOpen(false)}
+            />
 
-            <nav className="header-nav">
-                <ul>
-                    <li>
-                        <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-                            <FaHome className="header-icon" />
-                            <span className="header-label">Inicio</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/solicitar-turno" className={location.pathname === '/solicitar-turno' ? 'active' : ''}>
-                            <FaCalendarAlt className="header-icon" />
-                            <span className="header-label">Agendar Turno</span>
-                        </Link>
-                    </li>
-                      {user?.rol === "Paciente" && (
+            <header className="header">
+                <div className="logo-container">
+                    <a href="/">
+                        <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
+                    </a>
+                </div>
+
+                {/* Navegación (sidebar en desktop / drawer en mobile) */}
+                <nav className={`header-nav ${menuOpen ? 'open' : ''}`}>
+                    <ul>
                         <li>
-                            <Link to="/historial-medico" className={location.pathname === '/historial-medico' ? 'active' : ''}>
-                                <FaHistory className="header-icon" />
-                                <span className="header-label">Historial Médico</span>
-                            </Link>
-                        </li> 
-                    )}
-                    {user?.rol === "Médico" && (
-                        <li>
-                            <Link to="/gestion-medico" className={location.pathname === '/gestion-medico' ? 'active' : ''}>
-                                <FaBriefcaseMedical className="header-icon" />
-                                <span className="header-label">Gestión médica</span>
+                            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+                                <FaHome className="header-icon" />
+                                <span className="header-label">Inicio</span>
                             </Link>
                         </li>
-                    )}
-                    <li>
-                        <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
-                            <FaEnvelope className="header-icon" />
-                            <span className="header-label">Contacto</span>
-                        </Link>
-                    </li>
-                </ul>
-            </nav>
+                        <li>
+                            <Link to="/solicitar-turno" className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}>
+                                <FaCalendarAlt className="header-icon" />
+                                <span className="header-label">Agendar Turno</span>
+                            </Link>
+                        </li>
+                        {user?.rol === "Paciente" && (
+                            <li>
+                                <Link to="/historial-medico" className={location.pathname === '/historial-medico' ? 'active' : ''}>
+                                    <FaHistory className="header-icon" />
+                                    <span className="header-label">Historial Médico</span>
+                                </Link>
+                            </li>
+                        )}
+                        {user?.rol === "Médico" && (
+                            <li>
+                                <Link to="/gestion-medico" className={location.pathname.startsWith('/gestion-medico') ? 'active' : ''}>
+                                    <FaBriefcaseMedical className="header-icon" />
+                                    <span className="header-label">Gestión médica</span>
+                                </Link>
+                            </li>
+                        )}
+                        <li>
+                            <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
+                                <FaEnvelope className="header-icon" />
+                                <span className="header-label">Contacto</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
 
-            <div className="header-footer-section">
-                <div className="header-actions-row">
-                    {/* BOTÓN DEL CARRITO CON SU ACCIÓN Y SU REFERENCIA ASIGNADA */}
-                    <button
-                        ref={cartButtonRef} // ← Guarda la coordenada física del botón
-                        className={`cart-btn ${cartOpen ? 'cart-btn--active' : ''}`}
-                        aria-label="Ver carrito"
-                        onClick={() => setCartOpen(prev => !prev)} // ← Abre y cierra el menú
-                    >
-                        <FaShoppingCart className="cart-icon" />
-                        {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
-                    </button>
+                <div className="header-footer-section">
+                    <div className="header-actions-row">
+                        <button
+                            ref={cartButtonRef}
+                            className={`cart-btn ${cartOpen ? 'cart-btn--active' : ''}`}
+                            aria-label="Ver carrito"
+                            onClick={() => setCartOpen(prev => !prev)}
+                        >
+                            <FaShoppingCart className="cart-icon" />
+                            {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+                        </button>
 
-                    <NotificationBell />
+                        <NotificationBell />
+                    </div>
+
+                    <div className="header-auth-row">
+                        {useAuth().isAuthenticated ? (
+                            <Link id="iniciar-sesion" to="/perfil">
+                                <FaUser className="auth-icon" />
+                                <span>Mi Perfil</span>
+                            </Link>
+                        ) : (
+                            <Link id="iniciar-sesion" to="/login">
+                                <FaUser className="auth-icon" />
+                                <span>Iniciar sesión</span>
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
-                <div className="header-auth-row">
-                    {useAuth().isAuthenticated ? (
-                        <Link id="iniciar-sesion" to="/perfil">
-                            <FaUser className="auth-icon" />
-                            <span>Mi Perfil</span>
-                        </Link>
-                    ) : (
-                        <Link id="iniciar-sesion" to="/login">
-                            <FaUser className="auth-icon" />
-                            <span>Iniciar sesión</span>
-                        </Link>
-                    )}
-                </div>
-            </div>
+                {/* Botón hamburger — solo visible en mobile */}
+                <button
+                    className="hamburger-btn"
+                    aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                    onClick={() => setMenuOpen(prev => !prev)}
+                >
+                    {menuOpen ? <FaTimes /> : <FaBars />}
+                </button>
 
-            {/* CONTROL DESPLEGABLE DEL CARRITO ENLAZADO AL CONTEXTO */}
-            <CartDropdown
-                open={cartOpen}
-                setOpen={setCartOpen}
-                anchorRef={cartButtonRef} // Pasa el ancla para calcular la posición exacta
-                onConfirmarReserva={() => {
-                    setStep(5);        // 1. Mandamos al usuario directo al paso 5 (Revisar y Confirmar)
-                    setCartOpen(false); // 2. Cerramos el dropdown flotante para que no estorbe la vista
-                }}
-            />
-        </header>
+                {/* Carrito desplegable */}
+                <CartDropdown
+                    open={cartOpen}
+                    setOpen={setCartOpen}
+                    anchorRef={cartButtonRef}
+                    onConfirmarReserva={() => {
+                        setCartOpen(false);
+                    }}
+                />
+            </header>
+        </>
     );
 };
 

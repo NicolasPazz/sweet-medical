@@ -55,6 +55,7 @@
   box-shadow: var(--shadow-sm);
   margin-bottom: 32px;
   border: 1px solid #E8F0F1;
+  overflow-x: auto;
 }
 
 .step {
@@ -64,6 +65,7 @@
   flex: 1;
   position: relative;
   transition: var(--transition);
+  min-width: 80px;
 }
 
 .step:not(:last-child)::after {
@@ -252,6 +254,7 @@
   margin-bottom: 24px;
   border-bottom: 2px solid var(--neutral-100);
   padding-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -512,6 +515,7 @@
   display: flex;
   gap: 8px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .filter-chip {
@@ -783,11 +787,14 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .actions-group {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Alerta de Error */
@@ -900,6 +907,8 @@
 .success-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Resultados Vacíos */
@@ -944,6 +953,7 @@
   border: 1px solid #E8F0F1;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  overflow-x: auto;
 }
 
 .historial-tabla {
@@ -951,6 +961,7 @@
   border-collapse: collapse;
   text-align: left;
   font-size: 13px;
+  min-width: 500px;
 }
 
 .historial-tabla th {
@@ -1035,7 +1046,9 @@
   outline: none;
   background: var(--white);
   cursor: pointer;
-  min-width: 280px;
+  min-width: 200px;
+  width: 100%;
+  max-width: 280px;
   transition: var(--transition);
 }
 
@@ -1094,4 +1107,76 @@
   color: var(--neutral-400);
   margin-top: 12px;
   max-width: 440px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .wizard-layout-two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel-group {
+    order: -1; /* Preview panel arriba en mobile */
+  }
+}
+
+@media (max-width: 768px) {
+  .agendar-container {
+    padding: 24px 16px;
+  }
+
+  .agendar-wizard-title {
+    font-size: 22px;
+  }
+
+  .stepper {
+    padding: 16px 12px;
+    gap: 4px;
+  }
+
+  .step-info {
+    display: none; /* Solo mostrar los círculos en mobile */
+  }
+
+  .step {
+    flex: 0 0 auto;
+    min-width: unset;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .card-header {
+    padding: 16px 16px 12px;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .confirm-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .success-screen {
+    padding: 24px 16px;
+  }
+
+  .btn-row {
+    flex-direction: column-reverse;
+  }
+
+  .btn-row .btn,
+  .actions-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

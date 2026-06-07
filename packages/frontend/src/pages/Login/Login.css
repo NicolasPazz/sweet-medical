@@ -10,14 +10,7 @@
     justify-content: center;
     font-family: 'Roboto Mono', monospace;
     background-color: #F2F6F6;
-
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: calc(100vw - 260px);
-    z-index: 100;
-
+    min-height: 100vh;
     padding: 40px 20px;
     overflow-y: auto;
 }
@@ -168,4 +161,15 @@
 .registro-link a:hover {
     color: #064B50;
     text-decoration: underline;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .form-container {
+        padding: 36px 24px;
+    }
+
+    .form-container h1 {
+        font-size: 22px;
+    }
 }

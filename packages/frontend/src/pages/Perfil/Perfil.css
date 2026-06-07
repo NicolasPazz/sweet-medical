@@ -16,6 +16,8 @@
   max-width: 1100px;
   padding-bottom: 20px;
   margin-bottom: 35px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header-title {
@@ -139,6 +141,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .availability-section .section-title {
@@ -270,4 +274,47 @@
 
 .btn-logout:hover {
   background-color: #dc2626;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .perfil-page {
+    padding: 20px 12px;
+  }
+
+  .header-container {
+    flex-wrap: wrap;
+  }
+
+  .user-name {
+    font-size: 16px;
+    margin-left: 0;
+  }
+
+  /* Columnas del perfil: una sola columna en mobile */
+  .profile-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .left-section, .right-section {
+    padding: 16px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+
+  .availability-section {
+    padding: 16px;
+  }
+
+  .logout-container {
+    justify-content: center;
+  }
+
+  .btn-logout {
+    width: 100%;
+    max-width: 300px;
+  }
 }

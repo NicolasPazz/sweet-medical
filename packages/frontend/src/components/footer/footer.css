@@ -2,7 +2,7 @@
   background-color: #ffffff;
   border-top: 1px solid #e5e7eb;
   padding: 20px 0;
-  margin-top: auto; /* Empuja el footer al fondo si el contenido es corto */
+  margin-top: auto;
   width: 100%;
 }
 
@@ -13,6 +13,8 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .footer-text {
@@ -37,4 +39,11 @@
 
 .footer-links a:hover {
   color: #160ca3;
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
 }
