@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap');
-
 .registro-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Roboto Mono', monospace;
     background-color: #F2F6F6;
 
     position: fixed;
@@ -30,7 +28,7 @@
 }
 
 .registro-form h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Roboto Mono', monospace;
     margin: 0 0 8px;
     color: #064B50;
     font-size: 28px;
@@ -71,7 +69,7 @@
     background-color: #F8FAFC;
     transition: all 0.2s ease;
     color: #1e293b;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Roboto Mono', monospace;
     box-sizing: border-box;
 }
 
@@ -119,7 +117,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Roboto Mono', monospace;
     transition: all 0.2s ease;
     box-shadow: 0 4px 14px rgba(6, 75, 80, 0.3);
 }
