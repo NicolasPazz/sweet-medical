@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import './GestionMedico.css';
-import {useAuth} from "../../components/AuthProvider.jsx";
+import { useAuth } from "../../components/AuthProvider.jsx";
 import ErrorPage from '../ErrorPage/ErrorPage';
 import { useState, useEffect } from "react";
 import { getUserByToken } from '../../services/userService.js';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+
+const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
 const OPCIONES = [
     {
@@ -34,36 +38,43 @@ const OPCIONES = [
 
 export function GestionMedico() {
     const navigate = useNavigate();
-
     const { isAuthenticated, token } = useAuth();
-
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-            const fetchUser = async () => {
-                if (token) {
-                    try {
-                        const userData = await getUserByToken(token);
-                        setUser(userData);
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                    }
+        const fetchUser = async () => {
+            if (token) {
+                try {
+                    const userData = await getUserByToken(token);
+                    setUser(userData);
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                } finally {
+                    setLoading(false);
                 }
-            };
-    
-            fetchUser();
-        }, [token]);
-    
-    if(!isAuthenticated){
-       return(
-        <ErrorPage type = "401"/>
-       )
+            } else {
+                setLoading(false);
+            }
+        };
+        fetchUser();
+    }, [token]);
+
+    if (!isAuthenticated) {
+        return <ErrorPage type="401" />;
     }
 
-    if(user?.rol !== "Médico"){
+    if (loading) {
         return (
-            <ErrorPage type = "403"/>
-        )
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+                <Spin indicator={spinIcon} />
+                <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando...</span>
+            </div>
+        );
+    }
+
+    if (user?.rol !== "Médico") {
+        return <ErrorPage type="403" />;
     }
 
     return (

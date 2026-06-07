@@ -5,7 +5,6 @@ import CancelarTurnoModal from '../../components/CancelarTurnoModal/CancelarTurn
 export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, onIrAReprogramar, onCancelar }) {
     const [modalCancelar, setModalCancelar] = useState(false);
 
-    // Solo se permite cancelar o reprogramar si está confirmado, reservado o pendiente
     const esModificable = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE_REPROGRAMACION'].includes(turno.estado);
 
     const handleConfirmarCancelacion = (motivo) => {
@@ -13,7 +12,6 @@ export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, 
         if (onCancelar) {
             onCancelar(motivo);
         } else {
-            // fallback hardcodeado si no se pasa callback
             turno.estado = 'CANCELADO';
             onVolver();
         }
@@ -67,13 +65,9 @@ export default function DetalleTurno({ turno, cfgEstado, formatFecha, onVolver, 
 
                 {esModificable && (
                     <div className="detalle-acciones-group">
-                        <button
-                            className="btn-cancelar-accion"
-                            onClick={() => setModalCancelar(true)}
-                        >
+                        <button className="btn-cancelar-accion" onClick={() => setModalCancelar(true)}>
                             ❌ Cancelar Cita
                         </button>
-
                         <button
                             className="btn-nuevo-turno"
                             style={{ position: 'static', margin: '0' }}

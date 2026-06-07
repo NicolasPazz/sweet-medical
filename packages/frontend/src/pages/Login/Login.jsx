@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import './Login.css';
 import Toast from '../../components/Toast/Toast.jsx';
-import {useAuth} from '../../components/AuthProvider.jsx';
+import { useAuth } from '../../components/AuthProvider.jsx';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+
+const spinIcon = <LoadingOutlined style={{ fontSize: 16, color: '#fff' }} spin />;
 
 export default function Login() {
-
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-
-    const [errores, setErrores] = useState({
-        email: false,
-        password: false
-    });
-
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [errores, setErrores] = useState({ email: false, password: false });
     const [toast, setToast] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const { login } = useAuth();
 
@@ -27,31 +23,31 @@ export default function Login() {
     const handleSubmit = async () => {
         const nuevosErrores = {
             email: !formData.email,
-            password: !formData.password
+            password: !formData.password,
         };
-
         setErrores(nuevosErrores);
 
-        const hayErrores = Object.values(nuevosErrores).some(Boolean);
-        if (hayErrores) {
+        if (Object.values(nuevosErrores).some(Boolean)) {
             mostrarToast('Por favor, completa todos los campos', 'warning');
             return;
         }
 
-        // sendLoginData(formData); // Aca se envía la request al back
+        setSubmitting(true);
+        try {
+            // sendLoginData(formData); // Aca se envía la request al back
+            const respuesta = { codigo: 200, token: 'abc123' };
 
-        const respuesta = { codigo: 200, token: 'abc123' };
-
-        if(respuesta.codigo === 200) {
-            login(respuesta.token);
-            mostrarToast('Inicio de sesión exitoso', 'success');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            window.location.href = '/';
+            if (respuesta.codigo === 200) {
+                login(respuesta.token);
+                mostrarToast('Inicio de sesión exitoso', 'success');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                window.location.href = '/';
+            } else {
+                mostrarToast('Error al iniciar sesión', 'error');
+            }
+        } finally {
+            setSubmitting(false);
         }
-        else {
-            mostrarToast('Error al iniciar sesión', 'error');
-        }
-        
     };
 
     const handleChange = (campo, valor) => {
@@ -96,7 +92,9 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <button onClick={handleSubmit}>Iniciar sesión</button>
+                    <button onClick={handleSubmit} disabled={submitting} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        {submitting ? <><Spin indicator={spinIcon} /> Ingresando...</> : 'Iniciar sesión'}
+                    </button>
                 </div>
 
                 <div className="registro-link">

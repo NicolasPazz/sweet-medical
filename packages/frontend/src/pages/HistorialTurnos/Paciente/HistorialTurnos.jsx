@@ -4,8 +4,9 @@ import './HistorialTurnos.css';
 import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getUserByToken } from '../../../services/userService.js';
-import {useAuth} from "../../../components/AuthProvider.jsx";
-import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
+import { useAuth } from '../../../components/AuthProvider.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
@@ -21,40 +22,45 @@ export default function HistorialTurnos() {
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
+  const [turnos, setTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Simula carga asincrónica del mock
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTurnos([...TURNOS_MOCK]);
+      setLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
-            const fetchUser = async () => {
-                if (token) {
-                    try {
-                        const userData = await getUserByToken(token);
-                        setUser(userData);
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                    }
-                }
-            };
-    
-            fetchUser();
-        }, [token]);
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
 
-  
-    if(!isAuthenticated){
-       return(
-        <ErrorPage type = "401"/>
-       )
-    }
-        
-    if(user?.rol !== "Paciente"){
-        return (
-            <ErrorPage type = "403"/>
-        )
-    }
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (user?.rol !== 'Paciente') {
+    return <ErrorPage type="403" />;
+  }
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
-  const turnosFiltrados = (filtro === 'TODOS')
-    ? TURNOS_MOCK
-    : TURNOS_MOCK.filter((t) => t.estado === filtro);
+  const turnosFiltrados = filtro === 'TODOS'
+    ? turnos
+    : turnos.filter((t) => t.estado === filtro);
 
   const handleAbrirDetalle = (turno) => {
     setTurnoSeleccionado(turno);
@@ -102,7 +108,9 @@ export default function HistorialTurnos() {
         ))}
       </div>
 
-      {turnosFiltrados.length === 0 ? (
+      {loading ? (
+        <SkeletonTurnoList count={5} />
+      ) : turnosFiltrados.length === 0 ? (
         <p className="historial-vacio">No hay turnos para mostrar.</p>
       ) : (
         <ul className="turnos-lista">

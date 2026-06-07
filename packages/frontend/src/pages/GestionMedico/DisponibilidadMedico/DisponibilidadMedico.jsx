@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { getMedicos, actualizarDisponibilidad } from '../../../services/turnoService.js';
 import './DisponibilidadMedico.css';
 import { getUserByToken } from '../../../services/userService.js';
-import {useAuth} from "../../../components/AuthProvider.jsx";
-import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
-
+import { useAuth } from '../../../components/AuthProvider.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import Spinner from '../../../components/ui/Spinner.jsx';
 
 const MEDICO_SIMULADO_NOMBRE = 'Dr. Especialista 1';
 
@@ -113,31 +113,26 @@ export default function DisponibilidadMedico() {
   }, []);
 
   useEffect(() => {
-            const fetchUser = async () => {
-                if (token) {
-                    try {
-                        const userData = await getUserByToken(token);
-                        setUser(userData);
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                    }
-                }
-            };
-    
-            fetchUser();
-        }, [token]);
-    
-    if(!isAuthenticated){
-       return(
-        <ErrorPage type = "401"/>
-       )
-    }
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
 
-    if(user?.rol !== "Médico"){
-        return (
-            <ErrorPage type = "403"/>
-        )
-    }
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (user?.rol !== 'Médico') {
+    return <ErrorPage type="403" />;
+  }
 
   const handleChange = (index, field, value) => {
     setDisponibilidades((prev) =>
@@ -183,7 +178,6 @@ export default function DisponibilidadMedico() {
     try {
       await actualizarDisponibilidad(medico.id_medico, disponibilidades);
 
-      // Actualizar estado local para reflejar los nuevos datos sin re-fetch
       const nuevasDisps = disponibilidades.map((d) => ({ ...d }));
       setMedico((prev) => ({ ...prev, disponibilidades: nuevasDisps }));
 
@@ -197,7 +191,6 @@ export default function DisponibilidadMedico() {
     }
   };
 
-  // Agrupar por día para la vista de solo lectura
   const disByDay = DIAS.reduce((acc, dia) => {
     const franjas = disponibilidades.filter((d) => d.diaSemana === dia);
     if (franjas.length > 0) acc[dia] = franjas;
@@ -217,9 +210,8 @@ export default function DisponibilidadMedico() {
         </div>
 
         {loading ? (
-          <div className="dm-card dm-loading-card">
-            <div className="dm-spinner" />
-            <span>Cargando disponibilidad...</span>
+          <div className="dm-card">
+            <Spinner size="md" text="Cargando disponibilidad..." />
           </div>
         ) : error && !medico ? (
           <div className="dm-card dm-error-card">⚠️ {error}</div>
@@ -246,7 +238,9 @@ export default function DisponibilidadMedico() {
                     Cancelar
                   </button>
                   <button className="dm-btn-primary" onClick={handleSave} disabled={saving}>
-                    {saving ? 'Guardando...' : '💾 Guardar cambios'}
+                    {saving
+                      ? <Spinner size="sm" text="Guardando..." inline />
+                      : '💾 Guardar cambios'}
                   </button>
                 </div>
               )}

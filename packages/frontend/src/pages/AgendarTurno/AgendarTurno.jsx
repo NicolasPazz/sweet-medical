@@ -12,6 +12,7 @@ import {
 import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
+import Spinner from '../../components/ui/Spinner.jsx';
 import './AgendarTurno.css';
 
 // Meta información dinámica para especialidades y prácticas
@@ -51,15 +52,15 @@ export default function AgendarTurno() {
 
   // Estados de selección del asistente
   const [selectedPaciente, setSelectedPaciente] = useState(null);
-  const [step, setStep] = useState(0); // 0 significa que no se seleccionó paciente aún
-  const [searchMode, setSearchMode] = useState('ESPECIALIDAD'); // 'ESPECIALIDAD' o 'PRACTICA'
+  const [step, setStep] = useState(0);
+  const [searchMode, setSearchMode] = useState('ESPECIALIDAD');
   const [selectedService, setSelectedService] = useState(null);
   const [selectedMedico, setSelectedMedico] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [slotFilter, setSlotFilter] = useState('todos'); // 'todos', 'presencial', 'telemedicina'
+  const [slotFilter, setSlotFilter] = useState('todos');
   const [docSearch, setDocSearch] = useState('');
 
   // Historial de turnos del paciente
@@ -237,17 +238,10 @@ export default function AgendarTurno() {
     fetchSlots();
   }, [selectedDate, selectedService, selectedMedico, step, selectedPaciente]);
 
-  // =========================================================================
-  // NUEVO: Escuchador global para redirigir al Paso 5 desde el CarritoDropdown
-  // =========================================================================
+  // Escuchador global para redirigir al Paso 5 desde el CarritoDropdown
   useEffect(() => {
-    const irAlPasoConfirmacion = () => {
-      setStep(5); // Fuerza al asistente a ir a la pantalla de revisión final
-    };
-
+    const irAlPasoConfirmacion = () => setStep(5);
     window.addEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
-
-    // Limpieza del evento cuando el componente se desmonta
     return () => window.removeEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
   }, []);
 
@@ -295,7 +289,7 @@ export default function AgendarTurno() {
       setConfirmed(true);
       setStep(5);
       clearCart();
-      cargarHistorial(selectedPaciente); // Recargar turnos
+      cargarHistorial(selectedPaciente);
     } catch (err) {
       console.error("Error al realizar la reserva:", err);
       setError(err.response?.data?.message || "Ocurrió un error al reservar el turno. Verifique los parámetros.");
@@ -326,7 +320,6 @@ export default function AgendarTurno() {
   if (confirmed && step === 5) {
     return (
       <div className="agendar-container">
-        {/* Selector de Paciente en simulación */}
         <div className="paciente-select-container">
           <label className="paciente-select-label">👤 Paciente de Simulación:</label>
           <select
@@ -417,7 +410,6 @@ export default function AgendarTurno() {
         </p>
       </header>
 
-      {/* Selector de Paciente en simulación */}
       <div className="paciente-select-container">
         <label className="paciente-select-label">👤 Paciente de Simulación:</label>
         <select
@@ -439,7 +431,6 @@ export default function AgendarTurno() {
         )}
       </div>
 
-      {/* Si NO hay paciente seleccionado, advertir */}
       {!selectedPaciente ? (
         <div className="card">
           <div className="card-body no-patient-selected">
@@ -641,10 +632,7 @@ export default function AgendarTurno() {
                   </div>
 
                   {loading ? (
-                    <div className="loading-spinner-container">
-                      <div className="spinner"></div>
-                      <p>Cargando disponibilidad...</p>
-                    </div>
+                    <Spinner size="md" text="Cargando disponibilidad..." />
                   ) : (
                     <MiniCalendar
                       selectedDate={selectedDate}
@@ -704,10 +692,7 @@ export default function AgendarTurno() {
                   </div>
 
                   {loading ? (
-                    <div className="loading-spinner-container">
-                      <div className="spinner"></div>
-                      <p>Consultando horarios disponibles...</p>
-                    </div>
+                    <Spinner size="md" text="Consultando horarios disponibles..." />
                   ) : (
                     <>
                       <div className="slots-grid">
@@ -727,13 +712,11 @@ export default function AgendarTurno() {
                                 className={`slot-btn ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
                                   setSelectedSlot(slot);
-
                                   const turnToAdd = {
                                     ...slot,
                                     especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
                                     practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
                                   };
-
                                   addTurn(turnToAdd);
                                 }}
                               >
@@ -807,7 +790,6 @@ export default function AgendarTurno() {
                   </div>
                 </div>
                 <div className="card-body">
-                  {/* Renderizado dinámico basado en lo que hay en el carrito */}
                   {(cartItems.length > 0 ? cartItems : [selectedSlot]).filter(Boolean).map((item, index) => (
                     <div className="confirm-box" key={item.id || index} style={{ marginBottom: '1.5rem' }}>
                       <div className="confirm-header-inside" style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}>
@@ -878,7 +860,6 @@ export default function AgendarTurno() {
         </>
       )}
 
-      {/* Sección inferior de turnos registrados del paciente */}
       {selectedPaciente && renderHistorialSection(historialCitas, loadingHistorial, selectedPaciente)}
     </div>
   );
@@ -929,9 +910,7 @@ function renderHistorialSection(historial, loadingHistorial, paciente) {
 
                 return (
                   <tr key={turno.id || turno._id || turno.id_turno}>
-                    <td>
-                      <strong>{turno.medico || 'No especificado'}</strong>
-                    </td>
+                    <td><strong>{turno.medico || 'No especificado'}</strong></td>
                     <td>{turno.servicio || 'General'}</td>
                     <td>{fechaFormatted}</td>
                     <td>{turno.hora ? `${turno.hora} hs` : 'Sin definir'}</td>

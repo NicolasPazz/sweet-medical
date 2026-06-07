@@ -3,14 +3,10 @@ import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPrac
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getUserByToken } from '../../../services/userService.js';
-import {useAuth} from "../../../components/AuthProvider.jsx";
-import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
+import { useAuth } from '../../../components/AuthProvider.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
 
-// El back tiene /especialidades y /practicas como endpoints separados.
-// Acá mantenemos dos arrays en estado para reflejar esa separación.
-// La UI los unifica con un campo `tipo` solo para mostrar y filtrar.
-
-// Agrega `tipo` solo para renderizar; ese campo NO se persiste en los arrays
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
 const EMPTY_FORM = () => ({ tipo: 'ESPECIALIDAD', nombre: '', duracionTurnoEnMins: '', costo: '', codigo: '' });
@@ -21,12 +17,12 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   const [form, setForm] = useState(
     esEdicion
       ? {
-        tipo: servicio.tipo,
-        nombre: servicio.nombre,
-        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-        costo: String(servicio.costo),
-        codigo: servicio.codigo ?? '',
-      }
+          tipo: servicio.tipo,
+          nombre: servicio.nombre,
+          duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
+          costo: String(servicio.costo),
+          codigo: servicio.codigo ?? '',
+        }
       : EMPTY_FORM(),
   );
   const [error, setError] = useState('');
@@ -171,7 +167,7 @@ function Toast({ msg, type }) {
 
 // ─── Página principal ──────────────────────────────────────────────────────
 export function GestionServicio() {
-  const { isAuthenticated, token } = useAuth(); 
+  const { isAuthenticated, token } = useAuth();
   const [especialidades, setEspecialidades] = useState([]);
   const [practicas, setPracticas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -184,7 +180,6 @@ export function GestionServicio() {
   const [toast, setToast] = useState(null);
   const [filtro, setFiltro] = useState('TODOS');
 
-  
   useEffect(() => {
     const normalizar = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
     const cargar = async () => {
@@ -205,33 +200,28 @@ export function GestionServicio() {
     };
     cargar();
   }, []);
-  
-    useEffect(() => {
-            const fetchUser = async () => {
-                if (token) {
-                    try {
-                        const userData = await getUserByToken(token);
-                        setUser(userData);
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                    }
-                }
-            };
-    
-            fetchUser();
-        }, [token]);
 
-    if(!isAuthenticated){
-       return(
-        <ErrorPage type = "401"/>
-       )
-    }
-        
-    if(user?.rol !== "Médico"){
-        return (
-            <ErrorPage type = "403"/>
-        )
-    }
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
+
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (user?.rol !== 'Médico') {
+    return <ErrorPage type="403" />;
+  }
 
   const mostrarToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -308,7 +298,7 @@ export function GestionServicio() {
         </div>
 
         {loading ? (
-          <div className="gs-empty"><div className="gs-empty-icon">⏳</div><div>Cargando servicios...</div></div>
+          <SkeletonServicioList count={4} />
         ) : serviciosFiltrados.length === 0 ? (
           <div className="gs-empty">
             <div className="gs-empty-icon">🩺</div>

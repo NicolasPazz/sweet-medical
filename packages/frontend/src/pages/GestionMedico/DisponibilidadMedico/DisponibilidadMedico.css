@@ -17,20 +17,6 @@
 .dm-title { font-size: 1.6rem; font-weight: 700; color: #1a2e35; margin: 0; }
 .dm-subtitle { color: #6b7280; font-size: 0.95rem; margin: 0; }
 
-/* Banner simulación */
-.dm-simulacion-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  background: #f0fdfa;
-  border: 1px solid #99f6e4;
-  border-radius: 10px;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9rem;
-  color: #0f766e;
-}
-.dm-simulacion-icon { font-size: 1.1rem; }
-
 /* Card */
 .dm-card {
   background: #fff;
@@ -42,30 +28,11 @@
   gap: 1rem;
 }
 
-.dm-loading-card {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.875rem;
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-
 .dm-error-card {
   color: #b91c1c;
   background: #fef2f2;
   border-color: #fca5a5;
 }
-
-.dm-spinner {
-  width: 22px;
-  height: 22px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #0d9488;
-  border-radius: 50%;
-  animation: dm-spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-@keyframes dm-spin { to { transform: rotate(360deg); } }
 
 .dm-card-header {
   display: flex;
@@ -222,6 +189,9 @@
 
 /* Buttons */
 .dm-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 0.5rem 1.25rem;
   background: #0d9488;
   color: #fff;

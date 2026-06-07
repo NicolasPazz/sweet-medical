@@ -1,12 +1,15 @@
 import './Perfil.css';
 import { useState, useEffect } from 'react';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from "../../components/AuthProvider.jsx";
 import ErrorPage from "../ErrorPage/ErrorPage.jsx";
 import { getUserByToken } from '../../services/userService.js';
 
+const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
+
 export default function Perfil() {
     const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-    // Genera las columnas de horas (0 a 23)
     const horas = Array.from({ length: 24 }, (_, i) => i);
 
     const checkDisponibilidadSimulada = (dia, hora) => {
@@ -18,6 +21,7 @@ export default function Perfil() {
 
     const { isAuthenticated, token, logout } = useAuth();
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -27,17 +31,27 @@ export default function Perfil() {
                     setUser(userData);
                 } catch (error) {
                     console.error('Error fetching user data:', error);
+                } finally {
+                    setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
-
         fetchUser();
     }, [token]);
 
     if (!isAuthenticated) {
+        return <ErrorPage type="403" />;
+    }
+
+    if (loading) {
         return (
-            <ErrorPage type = "403"/>
-        )
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+                <Spin indicator={spinIcon} />
+                <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando perfil...</span>
+            </div>
+        );
     }
 
     return (
@@ -106,7 +120,7 @@ export default function Perfil() {
                 </div>
             </div>
 
-            {/* --- NUEVO CONTENEDOR APARTE (ABAJO) --- */}
+            {/* --- DISPONIBILIDAD --- */}
             <div className="availability-section">
                 <div className="availability-header">
                     <h2 className="section-title">Disponibilidad Horaria</h2>
@@ -138,9 +152,7 @@ export default function Perfil() {
                                                 key={`${dia}-${hora}`}
                                                 className={`slot-cell ${disponible ? 'slot-available' : 'slot-unavailable'}`}
                                                 title={`${dia} a las ${hora}:00 - ${disponible ? 'Disponible' : 'No disponible'}`}
-                                            >
-                                                {/* Espacio para clickear a futuro */}
-                                            </td>
+                                            />
                                         );
                                     })}
                                 </tr>

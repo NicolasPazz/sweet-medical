@@ -4,8 +4,9 @@ import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
 import { getUserByToken } from '../../../services/userService.js';
-import {useAuth} from "../../../components/AuthProvider.jsx";
-import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
+import { useAuth } from '../../../components/AuthProvider.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
@@ -14,39 +15,43 @@ function formatFecha(fechaHora) {
 
 export default function HistorialTurnosMedico() {
   const { isAuthenticated, token } = useAuth();
-  const [turnos, setTurnos] = useState([...TURNOS_MEDICO_MOCK]);
+  const [turnos, setTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('TODOS');
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
-  
-  useEffect(() => {
-            const fetchUser = async () => {
-                if (token) {
-                    try {
-                        const userData = await getUserByToken(token);
-                        setUser(userData);
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                    }
-                }
-            };
-    
-            fetchUser();
-        }, [token]);
 
-  
-    if(!isAuthenticated){
-       return(
-        <ErrorPage type = "401"/>
-       )
-    }
-        
-    if(user?.rol !== "Médico"){
-        return (
-            <ErrorPage type = "403"/>
-        )
-    }
+  // Simula carga asincrónica del mock (cuando se integre al backend, solo cambia el fetch)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTurnos([...TURNOS_MEDICO_MOCK]);
+      setLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
+
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (user?.rol !== 'Médico') {
+    return <ErrorPage type="403" />;
+  }
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
@@ -78,7 +83,6 @@ export default function HistorialTurnosMedico() {
     setVista('LISTADO');
   };
 
-  // Aceptar reprogramación: turno vuelve a RESERVADO con la nueva fecha
   const handleAceptarReprogramacion = (idTurno) => {
     setTurnos((prev) =>
       prev.map((t) => {
@@ -94,7 +98,6 @@ export default function HistorialTurnosMedico() {
     );
   };
 
-  // Rechazar reprogramación: turno vuelve a RESERVADO con la fecha original intacta
   const handleRechazarReprogramacion = (idTurno) => {
     setTurnos((prev) =>
       prev.map((t) => {
@@ -139,7 +142,9 @@ export default function HistorialTurnosMedico() {
         ))}
       </div>
 
-      {turnosFiltrados.length === 0 ? (
+      {loading ? (
+        <SkeletonTurnoList count={5} />
+      ) : turnosFiltrados.length === 0 ? (
         <p className="historial-vacio">No hay turnos para mostrar.</p>
       ) : (
         <ul className="turnos-lista">
@@ -175,7 +180,6 @@ export default function HistorialTurnosMedico() {
                   <span className="turno-costo">${turno.costo?.toLocaleString('es-AR')}</span>
                 </div>
 
-                {/* Botones inline — stopPropagation para no abrir detalle */}
                 {puedeConfirmar && (
                   <button
                     className="btn-confirmar-inline"

@@ -4,12 +4,15 @@ import './Home.css';
 import { useAuth } from "../../components/AuthProvider.jsx";
 import { useState, useEffect } from 'react';
 import { getUserByToken } from '../../services/userService.js';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+
+const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
 export default function Home() {
-
   const { token } = useAuth();
-
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,12 +22,24 @@ export default function Home() {
           setUser(userData);
         } catch (error) {
           console.error('Error fetching user data:', error);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
-
     fetchUser();
   }, [token]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+        <Spin indicator={spinIcon} />
+        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="home-container">
@@ -40,16 +55,16 @@ export default function Home() {
           <Link to="/solicitar-turno" className="cta-primary">
             <FaCalendarAlt /> Agendar turno
           </Link>
-            {user?.rol === "Paciente" && (
-          <Link to="/historial-medico" className="cta-secondary">
-            Ver historial <FaArrowRight />
-          </Link>
-            )}
-            {user?.rol === "Médico" && (
-          <Link to="/gestion-medico" className="cta-secondary">
-            Gestión médica <FaArrowRight />
-          </Link>
-            )}
+          {user?.rol === "Paciente" && (
+            <Link to="/historial-medico" className="cta-secondary">
+              Ver historial <FaArrowRight />
+            </Link>
+          )}
+          {user?.rol === "Médico" && (
+            <Link to="/gestion-medico" className="cta-secondary">
+              Gestión médica <FaArrowRight />
+            </Link>
+          )}
         </div>
       </section>
 
@@ -71,8 +86,8 @@ export default function Home() {
               <span className="home-card-title">Historial Médico</span>
               <span className="home-card-desc">Revisá tus turnos y consultas anteriores</span>
             </div>
-          <FaArrowRight className="home-card-arrow" />
-        </Link>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
         )}
         {user?.rol === "Médico" && (
           <Link to="/gestion-medico" className="home-card">
@@ -81,8 +96,8 @@ export default function Home() {
               <span className="home-card-title">Gestión médica</span>
               <span className="home-card-desc">Administrá tus actividades como médico</span>
             </div>
-          <FaArrowRight className="home-card-arrow" />
-        </Link>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
         )}
         <Link to="/contact" className="home-card">
           <div className="home-card-icon"><FaEnvelope /></div>
