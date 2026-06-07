@@ -7,7 +7,7 @@ export const getUserByToken = async (token) => {
         id: 1,
         nombre: 'Lucca Bertani',
         username: "LuccaTarta",
-        rol: 'Médico',
+        rol: 'Paciente',
         especialidades: ['Cardiología', 'Cirugía General'],
         practicas: ['Electrocardiograma', 'Ecografía Abdominal'],
         antiguedad: 5,

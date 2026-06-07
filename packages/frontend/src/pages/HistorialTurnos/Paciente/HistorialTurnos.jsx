@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
 import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
+import { getUserByToken } from '../../../services/userService.js';
+import {useAuth} from "../../../components/AuthProvider.jsx";
+import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
 
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
@@ -14,9 +17,38 @@ function formatFecha(fechaHora) {
 
 export default function HistorialTurnos() {
   const [filtro, setFiltro] = useState('TODOS');
-
+  const { isAuthenticated, token } = useAuth();
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+            const fetchUser = async () => {
+                if (token) {
+                    try {
+                        const userData = await getUserByToken(token);
+                        setUser(userData);
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            };
+    
+            fetchUser();
+        }, [token]);
+
+  
+    if(!isAuthenticated){
+       return(
+        <ErrorPage type = "401"/>
+       )
+    }
+        
+    if(user?.rol !== "Paciente"){
+        return (
+            <ErrorPage type = "403"/>
+        )
+    }
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 

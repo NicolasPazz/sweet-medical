@@ -4,11 +4,31 @@ import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from "../../components/AuthProvider.jsx";
-import GestionMedico from "@/pages/GestionMedico/GestionMedico";
+import { getUserByToken } from '../../services/userService.js';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
     const { summary } = useCart();
     const location = useLocation();
+
+    const { token } = useAuth();
+
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (token) {
+                try {
+                    const userData = await getUserByToken(token);
+                    setUser(userData);
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            }
+        };
+
+        fetchUser();
+    }, [token]);
 
     return (
         <header className="header">
@@ -32,18 +52,22 @@ const Header = () => {
                             <span className="header-label">Agendar Turno</span>
                         </Link>
                     </li>
-                    <li>
-                        <Link to="/historial-medico" className={location.pathname === '/historial-medico' ? 'active' : ''}>
-                            <FaHistory className="header-icon" />
-                            <span className="header-label">Historial Médico</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/gestion-medico" className={location.pathname === '/gestion-medico' ? 'active' : ''}>
-                            <FaBriefcaseMedical className="header-icon" />
-                            <span className="header-label">Gestión médica</span>
-                        </Link>
-                    </li>
+                      {user?.rol === "Paciente" && (
+                        <li>
+                            <Link to="/historial-medico" className={location.pathname === '/historial-medico' ? 'active' : ''}>
+                                <FaHistory className="header-icon" />
+                                <span className="header-label">Historial Médico</span>
+                            </Link>
+                        </li> 
+                    )}
+                    {user?.rol === "Médico" && (
+                        <li>
+                            <Link to="/gestion-medico" className={location.pathname === '/gestion-medico' ? 'active' : ''}>
+                                <FaBriefcaseMedical className="header-icon" />
+                                <span className="header-label">Gestión médica</span>
+                            </Link>
+                        </li>
+                    )}
                     <li>
                         <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
                             <FaEnvelope className="header-icon" />

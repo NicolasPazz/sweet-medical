@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PACIENTES_MOCK, HISTORIAL_POR_PACIENTE } from '../../../mockdata/pacientes.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
+import { getUserByToken } from '../../../services/userService.js';
+import {useAuth} from "../../../components/AuthProvider.jsx";
+import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
@@ -103,10 +106,40 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
 
 // ─── Vista principal: búsqueda por DNI ────────────────────────────────────
 export default function HistorialPaciente() {
+  const { isAuthenticated, token } = useAuth();
   const [dni, setDni] = useState('');
   const [estado, setEstado] = useState('idle'); // 'idle' | 'not_found' | 'found'
   const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
   const [historial, setHistorial] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+            const fetchUser = async () => {
+                if (token) {
+                    try {
+                        const userData = await getUserByToken(token);
+                        setUser(userData);
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            };
+    
+            fetchUser();
+        }, [token]);
+
+  
+    if(!isAuthenticated){
+       return(
+        <ErrorPage type = "401"/>
+       )
+    }
+        
+    if(user?.rol !== "Médico"){
+        return (
+            <ErrorPage type = "403"/>
+        )
+    }
 
   const handleBuscar = () => {
     const trimmed = dni.trim();

@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './HistorialTurnosMedico.css';
 import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
+import { getUserByToken } from '../../../services/userService.js';
+import {useAuth} from "../../../components/AuthProvider.jsx";
+import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
@@ -10,10 +13,40 @@ function formatFecha(fechaHora) {
 }
 
 export default function HistorialTurnosMedico() {
+  const { isAuthenticated, token } = useAuth();
   const [turnos, setTurnos] = useState([...TURNOS_MEDICO_MOCK]);
   const [filtro, setFiltro] = useState('TODOS');
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+            const fetchUser = async () => {
+                if (token) {
+                    try {
+                        const userData = await getUserByToken(token);
+                        setUser(userData);
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            };
+    
+            fetchUser();
+        }, [token]);
+
+  
+    if(!isAuthenticated){
+       return(
+        <ErrorPage type = "401"/>
+       )
+    }
+        
+    if(user?.rol !== "Médico"){
+        return (
+            <ErrorPage type = "403"/>
+        )
+    }
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
@@ -29,6 +62,12 @@ export default function HistorialTurnosMedico() {
   const handleConfirmar = (idTurno) => {
     setTurnos((prev) =>
       prev.map((t) => t._id === idTurno ? { ...t, estado: 'CONFIRMADO' } : t)
+    );
+  };
+
+  const handleFinalizar = (idTurno) => {
+    setTurnos((prev) =>
+      prev.map((t) => t._id === idTurno ? { ...t, estado: 'REALIZADO' } : t)
     );
   };
 
@@ -108,6 +147,7 @@ export default function HistorialTurnosMedico() {
             const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
             const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
             const puedeConfirmar = turno.estado === 'RESERVADO';
+            const puedeFinalizar = turno.estado === 'CONFIRMADO' && new Date(turno.fechaHora) <= new Date();
 
             return (
               <li
@@ -159,6 +199,14 @@ export default function HistorialTurnosMedico() {
                       ✕ Rechazar
                     </button>
                   </div>
+                )}
+                {puedeFinalizar && (
+                  <button
+                    className="btn-finalizar-inline"
+                    onClick={(e) => { e.stopPropagation(); handleFinalizar(turno._id); }}
+                  >
+                    ✔ Finalizar
+                  </button>
                 )}
               </li>
             );

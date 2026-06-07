@@ -7,6 +7,9 @@ import { usuarioRepository } from './infrastructure/repositories/UsuarioReposito
 import { Usuario } from './domain/usuario/Usuario.js';
 import { PacienteModel } from './infrastructure/schemas/PacienteSchema.js';
 import { SeedingController } from './controllers/SeedingController.js';
+import { pacienteService } from './services/PacienteService.js';
+import { turnoService } from './services/TurnoService.js';
+
 
 const PORT = getPort();
 
@@ -43,6 +46,10 @@ const start = async () => {
     } catch (seedErr) {
       logger.error('[Auto-Seed] Error al verificar o cargar datos:', seedErr.message);
     }
+
+    logger.info('[App] Vinculando dependencias cruzadas de servicios...');
+    pacienteService.turnoService = turnoService;
+    turnoService.pacienteService = pacienteService;
 
     server.port = PORT;
     server.launch();

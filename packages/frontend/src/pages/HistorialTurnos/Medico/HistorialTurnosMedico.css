@@ -161,12 +161,35 @@
   white-space: nowrap;
 }
 
-.estado-disponible  { background: #f0fdf4; color: #16a34a; }
-.estado-reservado   { background: #eff6ff; color: #2563eb; }
-.estado-confirmado  { background: #f0fdf4; color: #15803d; }
-.estado-cancelado   { background: #fef2f2; color: #dc2626; }
-.estado-realizado   { background: #f8fafc; color: #475569; }
-.estado-pendiente   { background: #fffbeb; color: #d97706; }
+.estado-disponible {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.estado-reservado {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.estado-confirmado {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.estado-cancelado {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.estado-realizado {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.estado-pendiente {
+  background: #fffbeb;
+  color: #d97706;
+}
 
 .turno-costo {
   font-size: 13px;
@@ -252,6 +275,29 @@
 }
 
 .btn-rechazar-inline:active {
+  transform: scale(0.96);
+}
+
+.btn-finalizar-inline {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccfbf1;
+  background: #f0fdfa;
+  color: #115e59;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.btn-finalizar-inline:hover {
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-finalizar-inline:active {
   transform: scale(0.96);
 }
 

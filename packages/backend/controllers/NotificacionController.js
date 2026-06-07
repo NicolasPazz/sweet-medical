@@ -1,10 +1,10 @@
-import { NotificacionService } from '../services/NotificacionService.js';
+import { notificacionService } from '../services/NotificacionService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 export class NotificacionController {
-  constructor({ notificacionService = new NotificacionService() } = {}) {
-    this.notificacionService = notificacionService;
+  constructor({ notificacionService: svc = notificacionService } = {}) {
+    this.notificacionService = svc;
   }
 
   obtenerLeidas = async (req, res, next) => {

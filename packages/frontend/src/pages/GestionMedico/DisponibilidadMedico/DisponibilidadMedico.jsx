@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getMedicos, actualizarDisponibilidad } from '../../../services/turnoService';
+import { getMedicos, actualizarDisponibilidad } from '../../../services/turnoService.js';
 import './DisponibilidadMedico.css';
+import { getUserByToken } from '../../../services/userService.js';
+import {useAuth} from "../../../components/AuthProvider.jsx";
+import ErrorPage from "../../ErrorPage/ErrorPage.jsx";
+
 
 const MEDICO_SIMULADO_NOMBRE = 'Dr. Especialista 1';
 
@@ -72,6 +76,8 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
 }
 
 export default function DisponibilidadMedico() {
+  const { isAuthenticated, token } = useAuth();
+  const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -105,6 +111,33 @@ export default function DisponibilidadMedico() {
     };
     load();
   }, []);
+
+  useEffect(() => {
+            const fetchUser = async () => {
+                if (token) {
+                    try {
+                        const userData = await getUserByToken(token);
+                        setUser(userData);
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            };
+    
+            fetchUser();
+        }, [token]);
+    
+    if(!isAuthenticated){
+       return(
+        <ErrorPage type = "401"/>
+       )
+    }
+
+    if(user?.rol !== "Médico"){
+        return (
+            <ErrorPage type = "403"/>
+        )
+    }
 
   const handleChange = (index, field, value) => {
     setDisponibilidades((prev) =>

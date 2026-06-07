@@ -1,10 +1,10 @@
-import { PracticaService } from '../services/PracticaService.js';
+import { practicaService } from '../services/PracticaService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 export class PracticaController {
-  constructor({ practicaService = new PracticaService() } = {}) {
-    this.practicaService = practicaService;
+  constructor({ practicaService: svc = practicaService } = {}) {
+    this.practicaService = svc;
   }
 
   obtenerTodos = async (req, res, next) => {

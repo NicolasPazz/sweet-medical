@@ -1,18 +1,15 @@
-import { MedicoService } from '../services/MedicoService.js';
-import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
+import { medicoService } from '../services/MedicoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
-import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 
 export class MedicoController {
-  constructor({ medicoService = new MedicoService() } = {}) {
-    this.medicoService = medicoService;
-    this.medicoRepository = medicoRepository;
+  constructor({ medicoService: svc = medicoService } = {}) {
+    this.medicoService = svc;
   }
 
   leerMedicos = async (req, res, next) => {
     try {
-      const medicos = await this.medicoRepository.findAll();
+      const medicos = await this.medicoService.leerTodos();
 
       const dataParaEnviar = medicos.map((m) => ({
         id_usuario: m.usuario?.id || m.usuario?._id,

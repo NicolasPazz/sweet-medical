@@ -1,15 +1,28 @@
-import { TurnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
-import { PacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 export class PacienteService {
   constructor({
-    turnoRepository = new TurnoRepository(),
-    pacienteRepository = new PacienteRepository(),
+    pacienteRepository: pacienteRepo = pacienteRepository,
   } = {}) {
-    this.turnoRepository = turnoRepository;
-    this.pacienteRepository = pacienteRepository;
+    this.pacienteRepository = pacienteRepo;
+  }
+
+  async findById(id) {
+    return await this.pacienteRepository.findById(id);
+  }
+
+  async findByIdUsuario(usuarioId) {
+    return await this.pacienteRepository.findByIdUsuario(usuarioId);
+  }
+
+  async findByDniPaciente(dni) {
+    return await this.pacienteRepository.findByDniPaciente(dni);
+  }
+
+  async leerTodos() {
+    return await this.pacienteRepository.findAll();
   }
 
   async obtenerHistorialTurnos(id) {
@@ -18,7 +31,7 @@ export class PacienteService {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
+    const turnos = await this.turnoService.findAllByPatientId(paciente.id || paciente._id);
 
     return turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
@@ -78,3 +91,5 @@ export class PacienteService {
     });
   }
 }
+
+export const pacienteService = new PacienteService();

@@ -1,8 +1,31 @@
 import { Link } from 'react-router-dom';
 import { FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaArrowRight, FaShieldAlt, FaClock, FaUserMd } from 'react-icons/fa';
 import './Home.css';
+import { useAuth } from "../../components/AuthProvider.jsx";
+import { useState, useEffect } from 'react';
+import { getUserByToken } from '../../services/userService.js';
 
 export default function Home() {
+
+  const { token } = useAuth();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [token]);
+
   return (
     <div className="home-container">
 
@@ -17,9 +40,16 @@ export default function Home() {
           <Link to="/solicitar-turno" className="cta-primary">
             <FaCalendarAlt /> Agendar turno
           </Link>
+            {user?.rol === "Paciente" && (
           <Link to="/historial-medico" className="cta-secondary">
             Ver historial <FaArrowRight />
           </Link>
+            )}
+            {user?.rol === "Médico" && (
+          <Link to="/gestion-medico" className="cta-secondary">
+            Gestión médica <FaArrowRight />
+          </Link>
+            )}
         </div>
       </section>
 
@@ -34,24 +64,26 @@ export default function Home() {
           <FaArrowRight className="home-card-arrow" />
         </Link>
 
-        <Link to="/historial-medico" className="home-card">
-          <div className="home-card-icon"><FaHistory /></div>
-          <div className="home-card-body">
-            <span className="home-card-title">Historial Médico</span>
-            <span className="home-card-desc">Revisá tus turnos y consultas anteriores</span>
-          </div>
+        {user?.rol === "Paciente" && (
+          <Link to="/historial-medico" className="home-card">
+            <div className="home-card-icon"><FaHistory /></div>
+            <div className="home-card-body">
+              <span className="home-card-title">Historial Médico</span>
+              <span className="home-card-desc">Revisá tus turnos y consultas anteriores</span>
+            </div>
           <FaArrowRight className="home-card-arrow" />
         </Link>
-
-        <Link to="/gestion-medico" className="home-card">
-          <div className="home-card-icon"><FaBriefcaseMedical /></div>
-          <div className="home-card-body">
-            <span className="home-card-title">Gestión médica</span>
-            <span className="home-card-desc">Administrá tus actividades como médico</span>
-          </div>
+        )}
+        {user?.rol === "Médico" && (
+          <Link to="/gestion-medico" className="home-card">
+            <div className="home-card-icon"><FaBriefcaseMedical /></div>
+            <div className="home-card-body">
+              <span className="home-card-title">Gestión médica</span>
+              <span className="home-card-desc">Administrá tus actividades como médico</span>
+            </div>
           <FaArrowRight className="home-card-arrow" />
         </Link>
-
+        )}
         <Link to="/contact" className="home-card">
           <div className="home-card-icon"><FaEnvelope /></div>
           <div className="home-card-body">

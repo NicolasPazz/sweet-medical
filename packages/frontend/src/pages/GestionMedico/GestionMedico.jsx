@@ -1,5 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import './GestionMedico.css';
+import {useAuth} from "../../components/AuthProvider.jsx";
+import ErrorPage from '../ErrorPage/ErrorPage';
+import { useState, useEffect } from "react";
+import { getUserByToken } from '../../services/userService.js';
 
 const OPCIONES = [
     {
@@ -30,6 +34,37 @@ const OPCIONES = [
 
 export function GestionMedico() {
     const navigate = useNavigate();
+
+    const { isAuthenticated, token } = useAuth();
+
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+            const fetchUser = async () => {
+                if (token) {
+                    try {
+                        const userData = await getUserByToken(token);
+                        setUser(userData);
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            };
+    
+            fetchUser();
+        }, [token]);
+    
+    if(!isAuthenticated){
+       return(
+        <ErrorPage type = "401"/>
+       )
+    }
+
+    if(user?.rol !== "Médico"){
+        return (
+            <ErrorPage type = "403"/>
+        )
+    }
 
     return (
         <div className="gm-page">

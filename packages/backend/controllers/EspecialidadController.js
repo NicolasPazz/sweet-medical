@@ -1,10 +1,10 @@
-import { EspecialidadService } from '../services/EspecialidadService.js';
+import { especialidadService } from '../services/EspecialidadService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 export class EspecialidadController {
-  constructor({ especialidadService = new EspecialidadService() } = {}) {
-    this.especialidadService = especialidadService;
+  constructor({ especialidadService: svc = especialidadService } = {}) {
+    this.especialidadService = svc;
   }
 
   obtenerTodos = async (req, res, next) => {

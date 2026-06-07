@@ -1,7 +1,7 @@
 import './Perfil.css';
 import { useState, useEffect } from 'react';
 import { useAuth } from "../../components/AuthProvider.jsx";
-import NotFound from "../Errors/NotFound/NotFound.jsx";
+import ErrorPage from "../ErrorPage/ErrorPage.jsx";
 import { getUserByToken } from '../../services/userService.js';
 
 export default function Perfil() {
@@ -20,14 +20,23 @@ export default function Perfil() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        if (token) {
-            getUserByToken(token).then(setUser);
-        }
+        const fetchUser = async () => {
+            if (token) {
+                try {
+                    const userData = await getUserByToken(token);
+                    setUser(userData);
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            }
+        };
+
+        fetchUser();
     }, [token]);
 
     if (!isAuthenticated) {
         return (
-            <NotFound />
+            <ErrorPage type = "403"/>
         )
     }
 

@@ -1,13 +1,11 @@
 import { BadRequestError } from '../errors/AppError.js';
-import { TurnoService } from '../services/TurnoService.js';
+import { turnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
-import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { logger } from '../utils/Logger.js';
 
 export class TurnoController {
-  constructor({ turnoService = new TurnoService() } = {}) {
-    this.turnoService = turnoService;
-    this.pacienteRepository = pacienteRepository;
+  constructor({ turnoService: svc = turnoService } = {}) {
+    this.turnoService = svc;
   }
 
   reservarTurno = async (req, res, next) => {
@@ -308,7 +306,7 @@ export class TurnoController {
         let paciente = req.user?.paciente ?? null;
 
         if (!paciente && pacienteId) {
-          paciente = await this.pacienteRepository.findById(pacienteId);
+          paciente = await this.turnoService.buscarPacientePorId(pacienteId);
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');

@@ -1,14 +1,34 @@
-import { ConflictError, NotFoundError } from '../errors/AppError.js';
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
-import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
+import { usuarioService } from './UsuarioService.js';
+import { ConflictError, NotFoundError } from '../errors/AppError.js';
 
 export class MedicoService {
   constructor({
     medicoRepository: medicoRepo = medicoRepository,
-    usuarioRepository: usuarioRepo = usuarioRepository,
+    usuarioService: usuarioSvc = usuarioService,
   } = {}) {
     this.medicoRepository = medicoRepo;
-    this.usuarioRepository = usuarioRepo;
+    this.usuarioService = usuarioSvc;
+  }
+
+  async findById(id) {
+    return await this.medicoRepository.findById(id);
+  }
+
+  async findByIdUsuario(usuarioId) {
+    return await this.medicoRepository.findByIdUsuario(usuarioId);
+  }
+
+  async findAll() {
+    return await this.medicoRepository.findAll();
+  }
+
+  async save(medico) {
+    return await this.medicoRepository.save(medico);
+  }
+
+  async leerTodos() {
+    return await this.medicoRepository.findAll();
   }
 
   async actualizarDisponibilidad(id_medico, disponibilidades) {
@@ -38,7 +58,7 @@ export class MedicoService {
       throw new ConflictError(`Ya existe un medico con matricula ${data.matricula}`);
     }
 
-    const usuario = await this.usuarioRepository.save({
+    const usuario = await this.usuarioService.save({
       nombreUsuario: data.usuario.nombreUsuario,
       contrasena: data.usuario.contrasena,
       email: data.usuario.email,
@@ -59,3 +79,5 @@ export class MedicoService {
     return medico;
   }
 }
+
+export const medicoService = new MedicoService();

@@ -1,10 +1,10 @@
-import { ServicioService } from '../services/ServicioService.js';
+import { servicioService } from '../services/ServicioService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { BadRequestError } from '../errors/AppError.js';
 
 export class ServicioController {
-  constructor({ servicioService = new ServicioService() } = {}) {
-    this.servicioService = servicioService;
+  constructor({ servicioService: svc = servicioService } = {}) {
+    this.servicioService = svc;
   }
 
   obtenerTodos = async (req, res, next) => {
