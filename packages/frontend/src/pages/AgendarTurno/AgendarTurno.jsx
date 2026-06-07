@@ -237,6 +237,20 @@ export default function AgendarTurno() {
     fetchSlots();
   }, [selectedDate, selectedService, selectedMedico, step, selectedPaciente]);
 
+  // =========================================================================
+  // NUEVO: Escuchador global para redirigir al Paso 5 desde el CarritoDropdown
+  // =========================================================================
+  useEffect(() => {
+    const irAlPasoConfirmacion = () => {
+      setStep(5); // Fuerza al asistente a ir a la pantalla de revisión final
+    };
+
+    window.addEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
+
+    // Limpieza del evento cuando el componente se desmonta
+    return () => window.removeEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
+  }, []);
+
   // Filtrado de médicos según el servicio seleccionado
   const medicosFiltrados = medicos.filter((m) => {
     const queryTerm = docSearch.toLowerCase();
@@ -251,20 +265,6 @@ export default function AgendarTurno() {
 
     return matchesName && matchesService;
   });
-
-  // Agregar turno al carrito de preseleccionados
-  const handleAddPreselected = () => {
-    if (!selectedSlot) return;
-
-    const turnToAdd = {
-      ...selectedSlot,
-      especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
-      practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
-    };
-
-    addTurn(turnToAdd);
-    setSelectedSlot(null);
-  };
 
   // Confirmar los turnos preseleccionados
   const handleConfirmReservation = async () => {
@@ -725,7 +725,17 @@ export default function AgendarTurno() {
                               <button
                                 key={slot.id}
                                 className={`slot-btn ${isSelected ? 'selected' : ''}`}
-                                onClick={() => setSelectedSlot(slot)}
+                                onClick={() => {
+                                  setSelectedSlot(slot);
+
+                                  const turnToAdd = {
+                                    ...slot,
+                                    especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
+                                    practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
+                                  };
+
+                                  addTurn(turnToAdd);
+                                }}
                               >
                                 <span className="slot-time">{slot.hora} hs</span>
                                 <span className="slot-type">{isTele ? "Telemedicina" : "Presencial"}</span>
@@ -751,18 +761,11 @@ export default function AgendarTurno() {
                     <button className="btn btn-ghost" onClick={() => setStep(3)}>← Volver</button>
                     <div className="actions-group">
                       <button
-                        className="btn btn-outline"
-                        disabled={!selectedSlot}
-                        onClick={handleAddPreselected}
-                      >
-                        + Agregar a preseleccionados
-                      </button>
-                      <button
                         className="btn btn-primary"
-                        disabled={!selectedSlot}
+                        disabled={!selectedSlot && cartItems.length === 0}
                         onClick={() => setStep(5)}
                       >
-                        Confirmar este turno →
+                        Revisar y Confirmar Turno →
                       </button>
                     </div>
                   </div>
@@ -800,53 +803,64 @@ export default function AgendarTurno() {
                   <div className="card-header-icon">✅</div>
                   <div>
                     <h2>Confirmar Reserva de Cita</h2>
-                    <p>Revisá los detalles de tu turno antes de guardarlo</p>
+                    <p>Revisá los detalles de tus turnos preseleccionados antes de guardarlos</p>
                   </div>
                 </div>
                 <div className="card-body">
-                  <div className="confirm-box">
-                    <div className="confirm-row">
-                      <div>
-                        <div className="confirm-label">Paciente de Reserva</div>
-                        <div className="confirm-value">{selectedPaciente?.nombre}</div>
-                        <div className="confirm-sub">DNI: {selectedPaciente?.dni} · Obra Social: {selectedPaciente?.obraSocial} ({selectedPaciente?.plan})</div>
+                  {/* Renderizado dinámico basado en lo que hay en el carrito */}
+                  {(cartItems.length > 0 ? cartItems : [selectedSlot]).filter(Boolean).map((item, index) => (
+                    <div className="confirm-box" key={item.id || index} style={{ marginBottom: '1.5rem' }}>
+                      <div className="confirm-header-inside" style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}>
+                        Turno #{index + 1}
                       </div>
-                    </div>
-                    <div className="confirm-row">
-                      <div>
-                        <div className="confirm-label">Servicio Solicitado</div>
-                        <div className="confirm-value">{selectedService?.nombre}</div>
-                      </div>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>✎ Cambiar</button>
-                    </div>
-                    <div className="confirm-row">
-                      <div>
-                        <div className="confirm-label">Profesional Asignado</div>
-                        <div className="confirm-value">{selectedMedico ? selectedMedico.nombre : "Cualquier Profesional disponible"}</div>
-                        <div className="confirm-sub">Sede: {selectedSlot?.sede?.nombre || selectedMedico?.sedes?.[0]?.nombre || "No asignada"}</div>
-                      </div>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setStep(2)}>✎ Cambiar</button>
-                    </div>
-                    <div className="confirm-row">
-                      <div>
-                        <div className="confirm-label">Fecha y Hora</div>
-                        <div className="confirm-value highlight-value">
-                          {selectedDate} a las {selectedSlot?.hora} hs
+
+                      <div className="confirm-row">
+                        <div>
+                          <div className="confirm-label">Paciente de Reserva</div>
+                          <div className="confirm-value">{selectedPaciente?.nombre}</div>
+                          <div className="confirm-sub">DNI: {selectedPaciente?.dni} · Obra Social: {selectedPaciente?.obraSocial} ({selectedPaciente?.plan})</div>
                         </div>
                       </div>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setStep(4)}>✎ Cambiar</button>
-                    </div>
-                    <div className="confirm-row">
-                      <div>
-                        <div className="confirm-label">Cobertura y Costo</div>
-                        <div className="confirm-value highlight-cost-value">
-                          {selectedSlot?.costoEstimado === 0
-                            ? `100% Cubierto por ${selectedPaciente?.obraSocial}`
-                            : `Paga Particular: $${selectedSlot?.costoEstimado}`}
+
+                      <div className="confirm-row">
+                        <div>
+                          <div className="confirm-label">Servicio Solicitado</div>
+                          <div className="confirm-value">{item.especialidad || item.practica || selectedService?.nombre}</div>
+                        </div>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>✎ Cambiar</button>
+                      </div>
+
+                      <div className="confirm-row">
+                        <div>
+                          <div className="confirm-label">Profesional Asignado</div>
+                          <div className="confirm-value">{item.medico?.nombre || selectedMedico?.nombre || "Cualquier Profesional disponible"}</div>
+                          <div className="confirm-sub">Sede: {item.sede?.nombre || "No asignada"}</div>
+                        </div>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(2)}>✎ Cambiar</button>
+                      </div>
+
+                      <div className="confirm-row">
+                        <div>
+                          <div className="confirm-label">Fecha y Hora</div>
+                          <div className="confirm-value highlight-value">
+                            {item.fecha || selectedDate} a las {item.hora} hs
+                          </div>
+                        </div>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(4)}>✎ Cambiar</button>
+                      </div>
+
+                      <div className="confirm-row">
+                        <div>
+                          <div className="confirm-label">Cobertura y Costo</div>
+                          <div className="confirm-value highlight-cost-value">
+                            {item.costoEstimado === 0
+                              ? `100% Cubierto por ${selectedPaciente?.obraSocial}`
+                              : `Paga Particular: $${item.costoEstimado}`}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
 
                   <div className="btn-row">
                     <button className="btn btn-ghost" onClick={() => setStep(4)}>← Volver</button>
@@ -854,7 +868,7 @@ export default function AgendarTurno() {
                       className="btn btn-success"
                       onClick={handleConfirmReservation}
                     >
-                      🎉 Confirmar Reserva de Turno
+                      🎉 Confirmar Reserva de ({cartItems.length > 0 ? cartItems.length : 1}) Turno(s)
                     </button>
                   </div>
                 </div>
