@@ -2,9 +2,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px 20px;
+  padding: 16px 20px;
   background-color: #f8fafc;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px - 60px);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .header-container {
@@ -14,10 +16,15 @@
   border-bottom: 2px solid #f1f5f9;
   width: 100%;
   max-width: 1100px;
-  padding-bottom: 20px;
-  margin-bottom: 35px;
-  flex-wrap: wrap;
-  gap: 10px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
 }
 
 .header-title {
@@ -28,10 +35,10 @@
 }
 
 .user-name {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 500;
   color: #64748b;
-  margin: 0 20px 0 auto;
+  margin: 0;
 }
 
 .user-avatar {
@@ -252,28 +259,26 @@
 }
 
 .logout-container {
-  width: 100%;
-  max-width: 1100px;
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 25px;
-  margin-bottom: 10px;
+  display: none;
 }
 
 .btn-logout {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 10px 20px;
+  background: none;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+  padding: 6px 14px;
   border-radius: 6px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-logout:hover {
-  background-color: #dc2626;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */

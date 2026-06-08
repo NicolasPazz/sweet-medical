@@ -59,8 +59,13 @@ export default function Perfil() {
             {/* --- HEADER --- */}
             <div className="header-container">
                 <h1 className="header-title">Mi Perfil</h1>
-                <h2 className="user-name">{user?.username || "N/A"}</h2>
-                <img className="user-avatar" src={user?.avatar || "/avatar.png"} alt="Avatar de usuario" />
+                <div className="header-right">
+                    <h2 className="user-name">{user?.username || "N/A"}</h2>
+                    <img className="user-avatar" src={user?.avatar || "/avatar.png"} alt="Avatar de usuario" />
+                    <button className="btn-logout" onClick={() => { logout(); window.location.href = '/login'; }}>
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
 
             {/* --- CONTENEDOR DE INFORMACIÓN (DOS COLUMNAS) --- */}
@@ -120,53 +125,7 @@ export default function Perfil() {
                 </div>
             </div>
 
-            {/* --- DISPONIBILIDAD --- */}
-            <div className="availability-section">
-                <div className="availability-header">
-                    <h2 className="section-title">Disponibilidad Horaria</h2>
-                    <button className="btn-disponibilidad" onClick={() => console.log('Cambiar disponibilidad')}>
-                        Modificar Disponibilidad
-                    </button>
-                </div>
 
-                <p className="availability-help">Visualizá tus horarios de atención. Las celdas en verde indican tus horas activas.</p>
-
-                <div className="calendar-grid-container">
-                    <table className="calendar-table">
-                        <thead>
-                            <tr>
-                                <th className="day-header-cell">Día</th>
-                                {horas.map(hora => (
-                                    <th key={hora}>{`${hora}:00`}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {diasSemana.map(dia => (
-                                <tr key={dia}>
-                                    <td className="day-cell"><strong>{dia}</strong></td>
-                                    {horas.map(hora => {
-                                        const disponible = checkDisponibilidadSimulada(dia, hora);
-                                        return (
-                                            <td
-                                                key={`${dia}-${hora}`}
-                                                className={`slot-cell ${disponible ? 'slot-available' : 'slot-unavailable'}`}
-                                                title={`${dia} a las ${hora}:00 - ${disponible ? 'Disponible' : 'No disponible'}`}
-                                            />
-                                        );
-                                    })}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div className="logout-container">
-                <button className="btn-logout" onClick={() => { logout(); window.location.href = '/login'; }}>
-                    Cerrar sesión
-                </button>
-            </div>
         </div>
     );
 }
