@@ -1,15 +1,26 @@
-import { TurnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
-import { PacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 export class PacienteService {
-  constructor({
-    turnoRepository = new TurnoRepository(),
-    pacienteRepository = new PacienteRepository(),
-  } = {}) {
-    this.turnoRepository = turnoRepository;
-    this.pacienteRepository = pacienteRepository;
+  constructor({ pacienteRepository: pacienteRepo = pacienteRepository } = {}) {
+    this.pacienteRepository = pacienteRepo;
+  }
+
+  async findById(id) {
+    return await this.pacienteRepository.findById(id);
+  }
+
+  async findByIdUsuario(usuarioId) {
+    return await this.pacienteRepository.findByIdUsuario(usuarioId);
+  }
+
+  async findByDniPaciente(dni) {
+    return await this.pacienteRepository.findByDniPaciente(dni);
+  }
+
+  async leerTodos() {
+    return await this.pacienteRepository.findAll();
   }
 
   async obtenerHistorialTurnos(id) {
@@ -18,7 +29,7 @@ export class PacienteService {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
+    const turnos = await this.turnoService.findAllByPatientId(paciente.id || paciente._id);
 
     return turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
@@ -29,12 +40,30 @@ export class PacienteService {
       };
 
       let cobertura;
+      let costoEstimado = t.costo;
       try {
         const resultado = MotorCostos.calcularPara(turnoAdaptado, paciente);
         cobertura = resultado.tipoCobertura;
+        costoEstimado = resultado.costoEstimado;
       } catch (error) {
         console.log('Error calculando cobertura para turno', t.id || t._id, ':', error.message);
       }
+
+      const historialTurnos = Array.isArray(t.historialEstados)
+        ? t.historialEstados.map((h) => ({
+            id_cambio: h._id || h.id,
+            fechaHoraIngreso: h.fechaHoraIngreso,
+            estado: h.estado,
+            motivo: h.motivo,
+            usuario: h.usuario
+              ? {
+                  id: h.usuario._id || h.usuario.id || h.usuario,
+                  nombre: h.usuario.nombre || null,
+                  email: h.usuario.email || null,
+                }
+              : null,
+          }))
+        : [];
 
       return {
         id_turno: t.id || t._id,
@@ -53,9 +82,12 @@ export class PacienteService {
             ? t.estado.getEstadoNombre()
             : t.estado || 'N/A',
         costo: t.costo,
-
+        costoEstimado: costoEstimado,
         cobertura: cobertura,
+        historialTurnos,
       };
     });
   }
 }
+
+export const pacienteService = new PacienteService();

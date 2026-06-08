@@ -1,29 +1,26 @@
+import { servicioRepository } from '../infrastructure/repositories/ServicioRepository.js';
+import { usuarioService } from './UsuarioService.js';
 import { Especialidad } from '../domain/servicios/Especialidad.js';
 import { Practica } from '../domain/servicios/Practica.js';
-import { servicioRepository } from '../infrastructure/repositories/ServicioRepository.js';
-import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
-import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/AppError.js';
+import { BadRequestError, NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/logger.js';
 
 export class ServicioService {
   constructor({
     servicioRepository: servicioRepo = servicioRepository,
-    usuarioRepository: usuarioRepo = usuarioRepository,
+    usuarioService: usuarioSvc = usuarioService,
   } = {}) {
     this.servicioRepository = servicioRepo;
-    this.usuarioRepository = usuarioRepo;
+    this.usuarioService = usuarioSvc;
   }
 
-  async verificarUsuarioSistema(idUsuario) {
-    ValidadorId.validarIds(idUsuario);
-    const usuario = await this.usuarioRepository.findById(idUsuario);
-    if (!usuario) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
-    if (usuario.nombreUsuario !== 'SISTEMA') {
-      throw new ForbiddenError('Solo el usuario SISTEMA puede realizar esta operación');
-    }
+  async findById(id) {
+    return await this.servicioRepository.findById(id);
+  }
+
+  async findByIdAndTipoServicio(id, tipoServicio) {
+    return await this.servicioRepository.findByIdAndTipoServicio(id, tipoServicio);
   }
 
   async obtenerTodos() {
@@ -40,7 +37,7 @@ export class ServicioService {
   }
 
   async agregar(idUsuario, datosServicio) {
-    await this.verificarUsuarioSistema(idUsuario);
+    await this.usuarioService.verificarUsuarioSistema(idUsuario);
 
     let servicio;
 
@@ -63,7 +60,7 @@ export class ServicioService {
   }
 
   async modificar(idUsuario, id, datosActualizados, tipoServicio) {
-    await this.verificarUsuarioSistema(idUsuario);
+    await this.usuarioService.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
     const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoServicio);
@@ -87,7 +84,7 @@ export class ServicioService {
   }
 
   async eliminar(idUsuario, id, tipoServicio) {
-    await this.verificarUsuarioSistema(idUsuario);
+    await this.usuarioService.verificarUsuarioSistema(idUsuario);
     ValidadorId.validarIds(id);
 
     const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoServicio);
@@ -103,3 +100,5 @@ export class ServicioService {
       return await this.servicioRepository.updatePractica(id, data);
   }
 }
+
+export const servicioService = new ServicioService();

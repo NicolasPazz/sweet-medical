@@ -1,0 +1,93 @@
+/* ══════════════════════════════════════════════════
+   Layout de los skeletons — el shimmer lo maneja antd
+   ══════════════════════════════════════════════════ */
+
+/* ── SkeletonTurnoCard ── */
+.sm-skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.sm-skeleton-card__left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 70px;
+}
+
+.sm-skeleton-card__center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sm-skeleton-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 100px;
+}
+
+/* ── SkeletonTurnoList ── */
+.sm-skeleton-list {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* ── SkeletonDetalleTurno ── */
+.sm-skeleton-detail {
+  width: 100%;
+  max-width: 680px;
+  padding: 24px 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sm-skeleton-detail__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 2px dashed #e2e8f0;
+}
+
+.sm-skeleton-detail__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── SkeletonServicioCard ── */
+.sm-skeleton-servicio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.sm-skeleton-servicio__left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sm-skeleton-servicio__right {
+  display: flex;
+  gap: 10px;
+}

@@ -1,0 +1,166 @@
+/* ── Overlay ─────────────────────────────────────────────────────────────── */
+.ctm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: ctm-fade 0.15s ease;
+}
+
+@keyframes ctm-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.ctm-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+  font-family: 'Roboto Mono', monospace;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: ctm-slide 0.18s ease;
+}
+
+@keyframes ctm-slide {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Título ──────────────────────────────────────────────────────────────── */
+.ctm-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ── Texto de advertencia (no puede cancelar) ────────────────────────────── */
+.ctm-warning {
+  font-size: 14px;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Texto descriptivo ───────────────────────────────────────────────────── */
+.ctm-body {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Label del textarea ──────────────────────────────────────────────────── */
+.ctm-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ctm-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+.ctm-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.ctm-textarea:focus {
+  border-color: #271f92;
+}
+
+/* ── Contador de caracteres ──────────────────────────────────────────────── */
+.ctm-char-count {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: -8px;
+}
+
+/* ── Error ───────────────────────────────────────────────────────────────── */
+.ctm-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin: 0;
+}
+
+/* ── Footer con botones ──────────────────────────────────────────────────── */
+.ctm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ctm-btn-secondary {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ctm-btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+.ctm-btn-danger {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.ctm-btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}

@@ -1,10 +1,173 @@
-import './Header.css';
+import React, { useRef, useState, useEffect } from 'react';
+import './header.css';
+import {
+  FaShoppingCart,
+  FaHome,
+  FaCalendarAlt,
+  FaHistory,
+  FaBriefcaseMedical,
+  FaEnvelope,
+  FaUser,
+  FaBars,
+  FaTimes,
+} from 'react-icons/fa';
+import { useCart } from '../../context/CartContext.jsx';
+import { Link, useLocation } from 'react-router-dom';
+import NotificationBell from '../notification/NotificationBell.jsx';
+import { useAuth } from '../../components/AuthProvider.jsx';
+import { getUserByToken } from '../../services/userService.js';
+import CartDropdown from '../cart/CartDropdown.jsx';
 
 const Header = () => {
+  const { summary, cartItems, removeItem, clearCart } = useCart();
+  const location = useLocation();
+
+  const { token } = useAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
+
+  const [cartOpen, setCartOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const cartButtonRef = useRef(null);
+
+  // Cierra el menú al navegar
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const handleConfirmarReservaMasiva = () => {
+    alert('¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!');
+    if (clearCart) clearCart();
+    setCartOpen(false);
+  };
+
   return (
-    <header className="top-banner">
-      <p>💳 3 y 6 cuotas sin interés en todos los tratamientos</p>
-    </header>
+    <>
+      {/* Overlay para cerrar el menú al tocar afuera en mobile */}
+      <div
+        className={`nav-overlay ${menuOpen ? 'visible' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+
+      <header className="header">
+        <div className="logo-container">
+          <a href="/">
+            <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
+          </a>
+        </div>
+
+        {/* Navegación (sidebar en desktop / drawer en mobile) */}
+        <nav className={`header-nav ${menuOpen ? 'open' : ''}`}>
+          <ul>
+            <li>
+              <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+                <FaHome className="header-icon" />
+                <span className="header-label">Inicio</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/solicitar-turno"
+                className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
+              >
+                <FaCalendarAlt className="header-icon" />
+                <span className="header-label">Agendar Turno</span>
+              </Link>
+            </li>
+            {user?.rol === 'Paciente' && (
+              <li>
+                <Link
+                  to="/historial-medico"
+                  className={location.pathname === '/historial-medico' ? 'active' : ''}
+                >
+                  <FaHistory className="header-icon" />
+                  <span className="header-label">Historial Médico</span>
+                </Link>
+              </li>
+            )}
+            {user?.rol === 'Médico' && (
+              <li>
+                <Link
+                  to="/gestion-medico"
+                  className={location.pathname.startsWith('/gestion-medico') ? 'active' : ''}
+                >
+                  <FaBriefcaseMedical className="header-icon" />
+                  <span className="header-label">Gestión médica</span>
+                </Link>
+              </li>
+            )}
+            <li>
+              <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
+                <FaEnvelope className="header-icon" />
+                <span className="header-label">Contacto</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="header-footer-section">
+          <div className="header-actions-row">
+            <button
+              ref={cartButtonRef}
+              className={`cart-btn ${cartOpen ? 'cart-btn--active' : ''}`}
+              aria-label="Ver carrito"
+              onClick={() => setCartOpen((prev) => !prev)}
+            >
+              <FaShoppingCart className="cart-icon" />
+              {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+            </button>
+
+            <NotificationBell />
+          </div>
+
+          <div className="header-auth-row">
+            {useAuth().isAuthenticated ? (
+              <Link id="iniciar-sesion" to="/perfil">
+                <FaUser className="auth-icon" />
+                <span>Mi Perfil</span>
+              </Link>
+            ) : (
+              <Link id="iniciar-sesion" to="/login">
+                <FaUser className="auth-icon" />
+                <span>Iniciar sesión</span>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Botón hamburger — solo visible en mobile */}
+        <button
+          className="hamburger-btn"
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          onClick={() => setMenuOpen((prev) => !prev)}
+        >
+          {menuOpen ? <FaTimes /> : <FaBars />}
+        </button>
+
+        {/* Carrito desplegable */}
+        <CartDropdown
+          open={cartOpen}
+          setOpen={setCartOpen}
+          anchorRef={cartButtonRef}
+          onConfirmarReserva={() => {
+            setCartOpen(false);
+          }}
+        />
+      </header>
+    </>
   );
 };
 

@@ -281,7 +281,7 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/medico/:id_usuario/historial/:id_paciente')
+  .route('/medico/:id_usuario/historial/:dni_paciente')
   .get((req, res, next) => turnoController.obtenerHistorial(req, res, next));
 
 /**

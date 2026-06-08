@@ -1,10 +1,9 @@
 import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
-import { usuarioRepository } from '../infrastructure/repositories/UsuarioRepository.js';
-import { notificacionRepository } from '../infrastructure/repositories/NotificacionRepository.js';
-import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
-import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { slotRepository } from '../infrastructure/repositories/SlotRepository.js';
-import { servicioRepository } from '../infrastructure/repositories/ServicioRepository.js';
+import { usuarioService } from './UsuarioService.js';
+import { notificacionService } from './NotificacionService.js';
+import { medicoService } from './MedicoService.js';
+import { servicioService } from './ServicioService.js';
 import { Reservado } from '../domain/notificacion/estado-turno/Reservado.js';
 import { Cancelado } from '../domain/notificacion/estado-turno/Cancelado.js';
 import { Confirmado } from '../domain/notificacion/estado-turno/Confirmado.js';
@@ -25,43 +24,39 @@ import { logger } from '../utils/logger.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { TurnoMapper } from '../domain/turno/dtos/TurnoMapper.js';
 import { DateUtil } from '../utils/DateUtil.js';
+import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
 import mongoose from 'mongoose';
 
 export class TurnoService {
-  turnoRepository;
-  pacienteRepository;
-
   constructor({
     turnoRepository: turnoRepo = turnoRepository,
-    usuarioRepository: usuarioRepo = usuarioRepository,
-    notificacionRepository: notificacionRepo = notificacionRepository,
-    medicoRepository: medicoRepo = medicoRepository,
-    pacienteRepository: pacienteRepo = pacienteRepository,
     slotRepository: slotRepo = slotRepository,
-    servicioRepository: servicioRepo = servicioRepository,
+    usuarioService: usuarioSvc = usuarioService,
+    notificacionService: notificacionSvc = notificacionService,
+    medicoService: medicoSvc = medicoService,
+    servicioService: servicioSvc = servicioService,
   } = {}) {
     this.turnoRepository = turnoRepo;
-    this.usuarioRepository = usuarioRepo;
-    this.notificacionRepository = notificacionRepo;
-    this.medicoRepository = medicoRepo;
-    this.pacienteRepository = pacienteRepo;
     this.slotRepository = slotRepo;
-    this.servicioRepository = servicioRepo;
+    this.usuarioService = usuarioSvc;
+    this.notificacionService = notificacionSvc;
+    this.medicoService = medicoSvc;
+    this.servicioService = servicioSvc;
   }
 
   async reservarTurno(dtoReserva) {
-    const usuario = await this.usuarioRepository.findById(dtoReserva.id_usuario);
+    const usuario = await this.usuarioService.findById(dtoReserva.id_usuario);
 
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    const paciente = await this.pacienteRepository.findByIdUsuario(dtoReserva.id_usuario);
+    const paciente = await this.pacienteService.findByIdUsuario(dtoReserva.id_usuario);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const servicio = await this.servicioRepository.findById(dtoReserva.id_servicio);
+    const servicio = await this.servicioService.findById(dtoReserva.id_servicio);
 
     if (servicio == null) {
       throw new NotFoundError('Servicio no encontrado');
@@ -107,7 +102,7 @@ export class TurnoService {
     const slot = slots[0];
     const fechaTurno = slot.fecha;
     const horaInicioTurno = slot.horaInicio;
-    const medico = await this.medicoRepository.findById(idMedicoDelPrimerSlot);
+    const medico = await this.medicoService.findById(idMedicoDelPrimerSlot);
 
     if (medico == null) {
       throw new NotFoundError('Médico asociado a los slots no encontrado');
@@ -162,7 +157,7 @@ export class TurnoService {
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
     if (notificacion) {
-      await this.notificacionRepository.save(notificacion);
+      await this.notificacionService.save(notificacion);
     }
     const turnoGuardado = await this.turnoRepository.save(turno);
 
@@ -179,7 +174,7 @@ export class TurnoService {
   async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
     const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const usuario = await this.usuarioService.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
@@ -189,7 +184,8 @@ export class TurnoService {
       throw new NotFoundError('Turno no encontrado');
     }
 
-    if (!(turno.estado instanceof Reservado) && !(turno.estado instanceof Confirmado)) {
+    const estadoActual = turno.estado.getEstadoNombre();
+    if (estadoActual !== EstadoTurno.RESERVADO && estadoActual !== EstadoTurno.CONFIRMADO) {
       throw new ConflictError('No se puede cancelar el turno en este estado');
     }
 
@@ -227,7 +223,7 @@ export class TurnoService {
     const notificacion = turno.actualizarEstado(usuario, new Cancelado(turno), motivo);
 
     if (notificacion) {
-      await this.notificacionRepository.save(notificacion);
+      await this.notificacionService.save(notificacion);
     }
 
     await this.turnoRepository.save(turno);
@@ -253,14 +249,14 @@ export class TurnoService {
     return turno;
   }
 
-  async obtenerHistorial(idPaciente, idMedico) {
-    const medico = await this.medicoRepository.findByIdUsuario(idMedico);
+  async obtenerHistorial(dniPaciente, idMedico) {
+    const medico = await this.medicoService.findByIdUsuario(idMedico);
 
     if (medico == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
 
-    const paciente = await this.pacienteRepository.findByIdUsuario(idPaciente);
+    const paciente = await this.pacienteService.findByDniPaciente(dniPaciente);
 
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
@@ -272,7 +268,7 @@ export class TurnoService {
   }
 
   async finalizarTurno(id_usuario, id_turno) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const usuario = await this.usuarioService.findById(id_usuario);
 
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
@@ -294,7 +290,7 @@ export class TurnoService {
       throw new ConflictError('El turno no pertenece al medico');
     }
 
-    if (!(turno.estado instanceof Confirmado)) {
+    if (turno.estado.getEstadoNombre() !== EstadoTurno.CONFIRMADO) {
       throw new ConflictError('El turno no está en estado confirmado');
     }
 
@@ -312,7 +308,7 @@ export class TurnoService {
 
       if (indice !== -1) {
         turno.medico.turnosActualesYFuturos.splice(indice, 1);
-        await this.medicoRepository.save(turno.medico);
+        await this.medicoService.save(turno.medico);
       }
     }
 
@@ -325,7 +321,7 @@ export class TurnoService {
     logger.debug(`[CONFIRMAR TURNO] Iniciando proceso para Turno ID: ${id_turno}`);
 
     // 1. Validaciones iniciales de existencia y permisos del Usuario
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const usuario = await this.usuarioService.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
@@ -505,7 +501,7 @@ export class TurnoService {
 
     if (notificacion) {
       logger.debug(`[CONFIRMAR TURNO] Notificación generada. Guardando en repositorio...`);
-      await this.notificacionRepository.save(notificacion);
+      await this.notificacionService.save(notificacion);
     } else {
       logger.debug(
         `[CONFIRMAR TURNO] No se generó ninguna notificación para este cambio de estado.`,
@@ -520,7 +516,7 @@ export class TurnoService {
   }
 
   async obtenerDisponibilidad(id_usuario, id_servicio) {
-    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
+    const medico = await this.medicoService.findByIdUsuario(id_usuario);
 
     if (medico == null) {
       throw new NotFoundError('Médico no encontrado');
@@ -528,7 +524,7 @@ export class TurnoService {
 
     const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(medico.id || medico._id);
 
-    const servicio = await this.servicioRepository.findById(id_servicio);
+    const servicio = await this.servicioService.findById(id_servicio);
 
     if (servicio == null) {
       throw new NotFoundError('Servicio no encontrado');
@@ -561,7 +557,7 @@ export class TurnoService {
     console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
-      const medicos = await this.medicoRepository.findAll();
+      const medicos = await this.medicoService.findAll();
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
@@ -623,7 +619,7 @@ export class TurnoService {
   }
 
   async obtenerSlotsMedico(id_usuario) {
-    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
+    const medico = await this.medicoService.findByIdUsuario(id_usuario);
 
     if (medico == null) {
       throw new NotFoundError('Médico no encontrado');
@@ -635,7 +631,7 @@ export class TurnoService {
   }
 
   async obtenerTurnosMedico(id_usuario) {
-    const medico = await this.medicoRepository.findByIdUsuario(id_usuario);
+    const medico = await this.medicoService.findByIdUsuario(id_usuario);
 
     if (medico == null) {
       throw new NotFoundError('Médico no encontrado');
@@ -727,7 +723,7 @@ export class TurnoService {
   }
 
   async proponerReprogramacion(id_usuario, id_turno, nuevaFechaHora, motivo) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const usuario = await this.usuarioService.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
@@ -808,7 +804,7 @@ export class TurnoService {
     const notificacion = turno.solicitarReprogramacion(usuario, nuevaFechaHora, motivo);
 
     if (notificacion) {
-      await this.notificacionRepository.save(notificacion);
+      await this.notificacionService.save(notificacion);
     }
     await this.turnoRepository.save(turno);
 
@@ -816,7 +812,7 @@ export class TurnoService {
   }
 
   async responderReprogramacion(id_usuario, id_turno, aceptado) {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
+    const usuario = await this.usuarioService.findById(id_usuario);
     if (usuario == null) {
       throw new NotFoundError('Usuario no encontrado');
     }
@@ -906,7 +902,7 @@ export class TurnoService {
       );
 
       if (notificacion) {
-        await this.notificacionRepository.save(notificacion);
+        await this.notificacionService.save(notificacion);
       }
     } else {
       // Si se rechaza, vuelve a RESERVADO con su fecha vieja intacta y no tocamos ningún slot
@@ -917,7 +913,7 @@ export class TurnoService {
       );
 
       if (notificacion) {
-        await this.notificacionRepository.save(notificacion);
+        await this.notificacionService.save(notificacion);
       }
     }
 
@@ -967,9 +963,9 @@ export class TurnoService {
     const servicioTipo = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
 
     const servicio = filtros.practica
-      ? await this.servicioRepository.findById(filtros.practica)
+      ? await this.servicioService.findById(filtros.practica)
       : filtros.especialidad
-        ? await this.servicioRepository.findById(filtros.especialidad)
+        ? await this.servicioService.findById(filtros.especialidad)
         : null;
 
     if (servicio == null) {
@@ -996,10 +992,17 @@ export class TurnoService {
 
     const limitesFechas = { fechaDesde: fechaDesdeStr, fechaHasta: fechaHastaStr };
 
-    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(filtros, limitesFechas);
+    const medicoIds = medicos.map((m) => String(m._id || m.id));
+    const filtrosBusqueda = { ...filtros, medicoIds };
+
+    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(
+      filtrosBusqueda,
+      limitesFechas,
+    );
 
     // Agrupamiento por médico
     const slotsPorMedico = slotsCrudos.reduce((acc, slot) => {
+      if (!slot.medico) return acc;
       const medicoId =
         slot.medico && slot.medico._id ? slot.medico._id.toString() : slot.medico.toString();
       if (!acc[medicoId]) acc[medicoId] = [];
@@ -1100,7 +1103,7 @@ export class TurnoService {
     const tipoEsperado = filtros.practica ? 'PRACTICA' : 'ESPECIALIDAD';
     const id = filtros.practica || filtros.especialidad;
 
-    const servicio = await this.servicioRepository.findByIdAndTipoServicio(id, tipoEsperado);
+    const servicio = await this.servicioService.findByIdAndTipoServicio(id, tipoEsperado);
     if (!servicio) {
       const label = tipoEsperado === 'PRACTICA' ? 'práctica' : 'especialidad';
       throw new NotFoundError(`No se encontró ninguna ${label} con el ID proporcionado`);
@@ -1114,14 +1117,14 @@ export class TurnoService {
   async _filtrarMedicosValidos(profesional_id, servicio, servicioTipo) {
     if (profesional_id) {
       // Si se especificó un médico concreto, validamos que ofrezca el servicio solicitado
-      const medico = await this.medicoRepository.findById(profesional_id);
+      const medico = await this.medicoService.findById(profesional_id);
       if (!medico) throw new NotFoundError('El profesional especificado no existe');
 
-      const id = servicio._id;
+      const idStr = String(servicio._id || servicio.id || servicio);
       const tieneServicio =
         servicioTipo === 'PRACTICA'
-          ? medico.practicas?.some((p) => p.id === id || p._id?.toString() === id)
-          : medico.especialidades?.some((e) => e.id === id || e._id?.toString() === id);
+          ? medico.practicas?.some((p) => String(p._id || p.id || p) === idStr)
+          : medico.especialidades?.some((e) => String(e._id || e.id || e) === idStr);
 
       if (!tieneServicio) {
         const label = servicioTipo === 'PRACTICA' ? 'práctica' : 'especialidad';
@@ -1131,22 +1134,26 @@ export class TurnoService {
       return [medico];
     }
 
-    const medicos = await this.medicoRepository.findAll();
+    const medicos = await this.medicoService.findAll();
     const medicosValidos = medicos.filter((m) => {
-      // Comento por error de compilacion: filtros no esta definido
-      /*if (filtros.practica) {
-        return m.practicas?.some(
-          (p) => p.id === filtros.practica || p._id?.toString() === filtros.practica,
-        );
+      const idStr = String(servicio._id || servicio.id);
+      if (servicioTipo === 'PRACTICA') {
+        return m.practicas?.some((p) => String(p._id || p.id || p) === idStr);
       }
-      if (filtros.especialidad) {
-        return m.especialidades?.some(
-          (e) => e.id === filtros.especialidad || e._id?.toString() === filtros.especialidad,
-        );
-      }*/
+      if (servicioTipo === 'ESPECIALIDAD') {
+        return m.especialidades?.some((e) => String(e._id || e.id || e) === idStr);
+      }
       return false;
     });
     return medicosValidos;
+  }
+
+  async buscarPacientePorId(pacienteId) {
+    return await this.pacienteService.findById(pacienteId);
+  }
+
+  async findAllByPatientId(pacienteId) {
+    return await this.turnoRepository.findAllByPatientId(pacienteId);
   }
 }
 

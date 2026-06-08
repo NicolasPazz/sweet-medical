@@ -1,19 +1,346 @@
-.top-banner {
-  background-color: #271f92;
-  color: #ffffff;
-  text-align: center;
-  padding: 8px 10px;
-  font-family: 'Roboto Mono', monospace;
-  font-size: 13px;
-  font-weight: 500;
+/* ─── Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --sidebar-width: 260px;
+  --header-height-mobile: 60px;
+}
 
-  position: fixed;
+/* ─── Sidebar (desktop) ─────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
   top: 0;
+  background-color: #064b50;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px 0 24px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  align-items: stretch;
+  z-index: 101;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Logo ──────────────────────────────────────────────────────────────── */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+  transform: scale(1.5);
+  transform-origin: left center;
+}
+
+.logo-text h1 {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+}
+
+.logo-text span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ─── Navegación ────────────────────────────────────────────────────────── */
+.header-nav {
+  flex: 1;
+  padding: 0 12px;
+}
+
+.header-nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.header-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.header-nav a.active {
+  background-color: #12979f;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(18, 151, 159, 0.25);
+  font-weight: 600;
+}
+
+.header-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.header-label {
+  white-space: nowrap;
+}
+
+/* ─── Sección Pie / Acciones ────────────────────────────────────────────── */
+.header-footer-section {
+  padding: 20px 16px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ─── Carrito ───────────────────────────────────────────────────────────── */
+.cart-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.cart-btn--active {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.cart-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.cart-icon {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #f26e4b;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #064b50;
+}
+
+/* ─── Auth Row ──────────────────────────────────────────────────────────── */
+.header-auth-row {
+  display: flex;
   width: 100%;
-  z-index: 1001;
+}
+
+#iniciar-sesion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  width: 100%;
+  color: #ffffff;
+  background-color: #f26e4b;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(242, 110, 75, 0.2);
   box-sizing: border-box;
 }
 
-.top-banner p {
-  margin: 0;
+#iniciar-sesion:hover {
+  background-color: #e05c38;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(242, 110, 75, 0.3);
+}
+
+#iniciar-sesion:active {
+  transform: scale(0.98);
+}
+
+.auth-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ─── Botón hamburger (solo mobile) ────────────────────────────────────── */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── Overlay para cerrar el menú en mobile ─────────────────────────────── */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+
+.nav-overlay.visible {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE – mobile breakpoint
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* El sidebar se convierte en top navbar fija */
+  .header {
+    flex-direction: row;
+    width: 100%;
+    min-width: unset;
+    height: var(--header-height-mobile);
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 0 12px 0 16px;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    gap: 0;
+  }
+
+  /* Logo compacto */
+  .logo-container {
+    padding: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .logo-img {
+    height: 36px;
+    transform: none;
+  }
+
+  /* La nav se convierte en menú deslizante lateral */
+  .header-nav {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 260px;
+    height: 100vh;
+    background-color: #064b50;
+    padding: 80px 12px 24px;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    overflow-y: auto;
+  }
+
+  .header-nav.open {
+    left: 0;
+  }
+
+  .header-nav ul {
+    flex-direction: column;
+  }
+
+  /* Acciones: carrito + campana + botón de perfil en fila */
+  .header-footer-section {
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    border-top: none;
+    gap: 4px; /* gap entre el grupo de iconos y el botón de auth */
+  }
+
+  .header-actions-row {
+    gap: 4px; /* gap entre carrito y campanita */
+  }
+
+  /* Separador visual entre campanita y botón de perfil */
+  .header-auth-row {
+    width: auto;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    margin-left: 4px;
+  }
+
+  #iniciar-sesion {
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    gap: 6px;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    margin-left: 4px;
+  }
 }

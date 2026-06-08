@@ -1,24 +1,22 @@
-import { MedicoService } from '../services/MedicoService.js';
-import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
+import { medicoService } from '../services/MedicoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
-import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
-import { BadRequestError } from '../errors/AppError.js';
+import { BadRequestError } from '../utils/errors/AppError.js';
 
 export class MedicoController {
-  constructor({ medicoService = new MedicoService() } = {}) {
-    this.medicoService = medicoService;
-    this.medicoRepository = medicoRepository;
+  constructor({ medicoService: svc = medicoService } = {}) {
+    this.medicoService = svc;
   }
 
   leerMedicos = async (req, res, next) => {
     try {
-      const medicos = await this.medicoRepository.findAll();
+      const medicos = await this.medicoService.leerTodos();
 
       const dataParaEnviar = medicos.map((m) => ({
         id_usuario: m.usuario?.id || m.usuario?._id,
         id_medico: m.id || m._id,
         nombre: m.nombre,
+        matricula: m.matricula,
         especialidades: m.especialidades,
         practicas: m.practicas,
         disponibilidades: m.disponibilidades,
@@ -34,7 +32,7 @@ export class MedicoController {
               }
             : 'N/A',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
-          estado: turno.estado ? turno.estado.constructor.name : 'N/A',
+          estado: turno.estado ? turno.estado.getEstadoNombre() : 'N/A',
           costoPaciente: turno.costo, // Monto ya calculado según el plan [cite: 2337]
           horario: turno.hora,
           diaSemana: turno.diaSemana,

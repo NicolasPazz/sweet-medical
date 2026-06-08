@@ -1,0 +1,116 @@
+/* ── Contenedor del Bloque de Reprogramación ── */
+.reprogramar-card {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  margin-bottom: 32px;
+  font-family: 'Roboto Mono', monospace;
+  box-sizing: border-box;
+}
+
+/* Sección de pasos del formulario */
+.reprogramar-paso-section {
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.reprogramar-paso-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 10px 0;
+}
+
+/* ── Selector de Fecha Nativo Estilizado ── */
+.reprogramar-input-fecha {
+  font-family: 'Roboto Mono', monospace;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #1e293b;
+  outline: none;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.reprogramar-input-fecha:focus {
+  border-color: #271f92;
+  box-shadow: 0 0 0 3px rgba(39, 31, 146, 0.1);
+}
+
+/* Grid o botonera para los casilleros de horarios */
+.grid-horarios {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* Botones de hora que imitan los filtros circulares de tu compañero */
+.hora-slot-btn {
+  font-family: 'Roboto Mono', monospace;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hora-slot-btn:hover {
+  border-color: #271f92;
+  color: #271f92;
+}
+
+/* Estado activo para cuando el paciente elije una hora */
+.hora-slot-btn.seleccionado {
+  background-color: #271f92;
+  color: #fff;
+  border-color: #271f92;
+  box-shadow: 0 4px 12px rgba(39, 31, 146, 0.15);
+}
+
+/* Botón de Confirmación (Verde de éxito como el estado confirmado) */
+.btn-confirmar-cambio {
+  font-family: 'Roboto Mono', monospace;
+  display: block;
+  width: 100%;
+  background-color: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 12px;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.btn-confirmar-cambio:hover {
+  background-color: #15803d;
+}
+
+.btn-confirmar-cambio:active {
+  transform: scale(0.98);
+}
+
+.btn-confirmar-cambio:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}

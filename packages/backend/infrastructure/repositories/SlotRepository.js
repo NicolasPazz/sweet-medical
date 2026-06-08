@@ -93,7 +93,7 @@ export class SlotRepository {
 
     return await this.model
       .find(query)
-      .populate('medico')
+      .populate({ path: 'medico', populate: { path: 'sedes' } })
       .sort({ medico: 1, fecha: 1, horaInicio: 1 })
       .lean();
   }

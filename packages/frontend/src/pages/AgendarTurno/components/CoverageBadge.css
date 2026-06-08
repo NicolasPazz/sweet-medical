@@ -1,0 +1,26 @@
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  border-radius: 50rem;
+  text-align: center;
+}
+
+.etiqueta-total {
+  background-color: #def7ec;
+  color: #03543f;
+  border: 1px solid #bcf0da;
+}
+
+.etiqueta-parcial {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.etiqueta-no {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+  border: 1px solid #fbd5d5;
+}

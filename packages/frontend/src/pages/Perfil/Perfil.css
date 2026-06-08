@@ -1,0 +1,332 @@
+.perfil-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 80px - 60px);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  border-bottom: 2px solid #f1f5f9;
+  width: 100%;
+  max-width: 1100px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0 10px;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+.user-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  border: 2px solid #e2e8f0;
+  background-color: #e2e8f0;
+}
+
+/* Contenedor de las dos columnas */
+.profile-container {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+  width: 100%;
+  max-width: 1100px;
+  align-items: flex-start;
+}
+
+.left-section,
+.right-section {
+  flex: 1;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.05),
+    0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+/* --- ESTILOS DE TABLAS MODERNIZADOS --- */
+
+.medical-table,
+.personal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.medical-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.medical-table td {
+  padding: 14px 12px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.medical-table tr:last-child td {
+  border-bottom: none;
+}
+
+.medical-table ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.medical-table li {
+  margin-bottom: 4px;
+  color: #475569;
+}
+
+.personal-table td {
+  padding: 14px 0;
+  border-bottom: 1px solid #f8fafc;
+  color: #334155;
+}
+
+.personal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.personal-table td.label {
+  width: 110px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* --- SECCIÓN DISPONIBILIDAD HORARIA --- */
+
+.availability-section {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.05),
+    0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 35px;
+  box-sizing: border-box;
+}
+
+.availability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.availability-section .section-title {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.availability-help {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+.btn-disponibilidad {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-disponibilidad:hover {
+  background-color: #2563eb;
+}
+
+.calendar-grid-container {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1200px;
+}
+
+.calendar-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 8px;
+  font-size: 0.8rem;
+  border-bottom: 2px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  text-align: center;
+  min-width: 45px;
+}
+
+.day-header-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc !important;
+  z-index: 5;
+  border-right: 2px solid #e2e8f0 !important;
+  width: 100px;
+}
+
+.day-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #39557e;
+  text-align: left;
+  padding: 14px 12px;
+  font-size: 0.9rem;
+  border-right: 2px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 2;
+  width: 100px;
+}
+
+.slot-cell {
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.slot-cell:last-child {
+  border-right: none;
+}
+
+.slot-available {
+  background-color: #dcfce7;
+  border-right: 1px solid #bbf7d0;
+  border-bottom: 1px solid #bbf7d0;
+}
+
+.slot-available:hover {
+  background-color: #bbf7d0;
+}
+
+.slot-unavailable {
+  background-color: #ffffff;
+}
+
+.slot-unavailable:hover {
+  background-color: #f1f5f9;
+}
+
+.logout-container {
+  display: none;
+}
+
+.btn-logout {
+  background: none;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-logout:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .perfil-page {
+    padding: 20px 12px;
+  }
+
+  .header-container {
+    flex-wrap: wrap;
+  }
+
+  .user-name {
+    font-size: 16px;
+    margin-left: 0;
+  }
+
+  /* Columnas del perfil: una sola columna en mobile */
+  .profile-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .left-section,
+  .right-section {
+    padding: 16px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+
+  .availability-section {
+    padding: 16px;
+  }
+
+  .logout-container {
+    justify-content: center;
+  }
+
+  .btn-logout {
+    width: 100%;
+    max-width: 300px;
+  }
+}

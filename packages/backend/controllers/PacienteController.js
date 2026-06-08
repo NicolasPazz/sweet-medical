@@ -1,11 +1,9 @@
-import { PacienteService } from '../services/PacienteService.js';
-import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { pacienteService } from '../services/PacienteService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 
 export class PacienteController {
-  constructor({ pacienteService = new PacienteService() } = {}) {
-    this.pacienteService = pacienteService;
-    this.pacienteRepository = pacienteRepository;
+  constructor({ pacienteService: svc = pacienteService } = {}) {
+    this.pacienteService = svc;
   }
 
   obtenerHistorial = async (req, res, next) => {
@@ -27,7 +25,7 @@ export class PacienteController {
 
   leerPacientes = async (req, res, next) => {
     try {
-      const pacientes = await this.pacienteRepository.findAll();
+      const pacientes = await this.pacienteService.leerTodos();
 
       const dataParaEnviar = pacientes.map((p) => ({
         id_usuario: p.usuario._id,
