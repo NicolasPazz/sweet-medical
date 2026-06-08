@@ -42,7 +42,7 @@ export default function Perfil() {
     }, [token]);
 
     if (!isAuthenticated) {
-        return <ErrorPage type="403" />;
+        return <ErrorPage type="401" />;
     }
 
     if (loading) {
@@ -71,33 +71,69 @@ export default function Perfil() {
             {/* --- CONTENEDOR DE INFORMACIÓN (DOS COLUMNAS) --- */}
             <div className="profile-container">
                 <div className="left-section">
-                    <table className="medical-table">
-                        <thead>
-                            <tr>
-                                <th>Datos Profesionales</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><strong>Rol:</strong> {user?.rol || "N/A"}</td></tr>
-                            <tr><td><strong>Años de antigüedad:</strong> {user?.antiguedad || "N/A"}</td></tr>
-                            <tr>
-                                <td>
-                                    <strong>Especialidades:</strong>
-                                    <ul>
-                                        {user?.especialidades ? user.especialidades.map((esp, index) => <li key={index}>{esp}</li>) : <li>N/A</li>}
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>Prácticas:</strong>
-                                    <ul>
-                                        {user?.practicas ? user.practicas.map((practica, index) => <li key={index}>{practica}</li>) : <li>N/A</li>}
-                                    </ul>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    {user?.rol === 'Paciente' ? (
+                        <>
+                            <h2 className="section-title">🏥 Mi Cobertura</h2>
+                            <div className="cobertura-row">
+                                <span className="cobertura-label">Obra Social:</span>
+                                <span className="cobertura-value">{user?.obraSocial || 'N/A'}</span>
+                            </div>
+                            <div className="cobertura-row">
+                                <span className="cobertura-label">Plan:</span>
+                                <span className="cobertura-badge">{user?.plan || 'N/A'}</span>
+                            </div>
+                            <div className="cobertura-row cobertura-row--top">
+                                <span className="cobertura-label">Especialidades cubiertas:</span>
+                                <ul className="cobertura-list">
+                                    {user?.coberturasEspecialidad?.length
+                                        ? user.coberturasEspecialidad.map((e, i) => (
+                                            <li key={i} className="cobertura-chip cobertura-chip--esp">{e}</li>
+                                          ))
+                                        : <li className="cobertura-empty">Sin cobertura registrada</li>
+                                    }
+                                </ul>
+                            </div>
+                            <div className="cobertura-row cobertura-row--top">
+                                <span className="cobertura-label">Prácticas cubiertas:</span>
+                                <ul className="cobertura-list">
+                                    {user?.coberturasPractica?.length
+                                        ? user.coberturasPractica.map((p, i) => (
+                                            <li key={i} className="cobertura-chip cobertura-chip--prac">{p}</li>
+                                          ))
+                                        : <li className="cobertura-empty">Sin cobertura registrada</li>
+                                    }
+                                </ul>
+                            </div>
+                        </>
+                    ) : (
+                        <table className="medical-table">
+                            <thead>
+                                <tr>
+                                    <th>Datos Profesionales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Rol:</strong> {user?.rol || 'N/A'}</td></tr>
+                                <tr><td><strong>Años de antigüedad:</strong> {user?.antiguedad || 'N/A'}</td></tr>
+                                <tr>
+                                    <td>
+                                        <strong>Especialidades:</strong>
+                                        <ul>
+                                            {user?.especialidades ? user.especialidades.map((esp, index) => <li key={index}>{esp}</li>) : <li>N/A</li>}
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>Prácticas:</strong>
+                                        <ul>
+                                            {user?.practicas ? user.practicas.map((practica, index) => <li key={index}>{practica}</li>) : <li>N/A</li>}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 <div className="right-section">

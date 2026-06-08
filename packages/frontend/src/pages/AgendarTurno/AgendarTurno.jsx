@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   getMedicos,
   getEspecialidades,
@@ -43,6 +44,7 @@ const getInitials = (name) => {
 
 export default function AgendarTurno() {
   const { items: cartItems, addTurn, removeTurn, clearCart } = useCart();
+  const location = useLocation();
 
   // Listas de datos del backend
   const [pacientes, setPacientes] = useState([]);
@@ -238,12 +240,19 @@ export default function AgendarTurno() {
     fetchSlots();
   }, [selectedDate, selectedService, selectedMedico, step, selectedPaciente]);
 
-  // Escuchador global para redirigir al Paso 5 desde el CarritoDropdown
+  // Escuchador global para redirigir al Paso 5 desde el CarritoDropdown (cuando ya estamos en la página)
   useEffect(() => {
     const irAlPasoConfirmacion = () => setStep(5);
     window.addEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
     return () => window.removeEventListener('ir_a_confirmar_turnos', irAlPasoConfirmacion);
   }, []);
+
+  // Navegar al paso 5 si venimos del carrito desde otra página
+  useEffect(() => {
+    if (location.state?.irAConfirmar && cartItems.length > 0) {
+      setStep(5);
+    }
+  }, [location.state]);
 
   // Filtrado de médicos según el servicio seleccionado
   const medicosFiltrados = medicos.filter((m) => {

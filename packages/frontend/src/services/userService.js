@@ -14,7 +14,11 @@ export const getUserByToken = async (token) => {
         telefono: '123456789',
         direccion: 'Calle Falsa 123',
         email: 'usuario@sweetmedical.com',
-        avatar: '/chiqui.jpg'
+        avatar: '/chiqui.jpg',
+        obraSocial: "SWISS_MEDICAL",
+        plan: "PREMIUM",
+        coberturasEspecialidad: ["CARDIOLOGÍA", "PEDIATRÍA"],
+        coberturasPractica: ["ELECTROCARDIOGRAMA"]
     }
 
     return user;

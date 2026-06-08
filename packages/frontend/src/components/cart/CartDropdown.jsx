@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext.jsx';
 import './CartDropdown.css';
 
 export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anchorRef }) {
     const { items, removeTurn, clearCart } = useCart();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const [dropdownStyle, setDropdownStyle] = useState({});
     const dropdownRef = useRef(null);
@@ -118,8 +121,12 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                     <button
                         className="cart-footer__btn-confirm"
                         onClick={() => {
-                            window.dispatchEvent(new Event('ir_a_confirmar_turnos'));
                             setOpen(false);
+                            if (location.pathname === '/solicitar-turno') {
+                                window.dispatchEvent(new Event('ir_a_confirmar_turnos'));
+                            } else {
+                                navigate('/solicitar-turno', { state: { irAConfirmar: true } });
+                            }
                         }}
                     >
                         Confirmar Reserva Masiva ✓
