@@ -260,24 +260,37 @@ export default function AgendarTurno() {
     return matchesName && matchesService;
   });
 
+  // Extrae un turno del carrito, carga sus datos en la pantalla y te lleva al paso a editar
+  const handleEditarTurno = (itemToEdit, targetStep) => {
+    removeTurn(itemToEdit.id);
+
+    if (itemToEdit.id_servicio_seleccionado) {
+      setSelectedService({
+        _id: itemToEdit.id_servicio_seleccionado,
+        nombre: itemToEdit.especialidad || itemToEdit.practica
+      });
+      setSearchMode(itemToEdit.especialidad ? 'ESPECIALIDAD' : 'PRACTICA');
+    }
+
+    setSelectedMedico(itemToEdit.medico || null);
+    setSelectedDate(itemToEdit.fecha || null);
+    setSelectedSlot(null);
+
+    setStep(targetStep);
+  };
+
   // Confirmar los turnos preseleccionados
   const handleConfirmReservation = async () => {
-    const itemsToConfirm = cartItems.length > 0 ? cartItems : (selectedSlot ? [{
-      ...selectedSlot,
-      especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
-      practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
-    }] : []);
-
-    if (itemsToConfirm.length === 0) return;
+    if (cartItems.length === 0) return;
 
     setLoading(true);
     setError(null);
     try {
-      const promesas = itemsToConfirm.map(item => {
+      const promesas = cartItems.map(item => {
         const slotsIds = item.id.replace('virtual_', '').split('_');
         const dataReserva = {
           id_usuario: selectedPaciente.id_usuario,
-          id_servicio: selectedService._id,
+          id_servicio: item.id_servicio_seleccionado || selectedService._id,
           slotsIds: slotsIds,
         };
         return reservarTurno(dataReserva);
@@ -285,7 +298,7 @@ export default function AgendarTurno() {
 
       await Promise.all(promesas);
 
-      setReservaExitoData(itemsToConfirm);
+      setReservaExitoData([...cartItems]);
       setConfirmed(true);
       setStep(5);
       clearCart();
@@ -600,7 +613,7 @@ export default function AgendarTurno() {
                 </div>
               </div>
 
-              <PreselSidebar onConfirm={handleConfirmReservation} />
+              <PreselSidebar onConfirm={() => setStep(5)} />
             </div>
           )}
 
@@ -654,7 +667,7 @@ export default function AgendarTurno() {
                 </div>
               </div>
 
-              <PreselSidebar onConfirm={handleConfirmReservation} />
+              <PreselSidebar onConfirm={() => setStep(5)} />
             </div>
           )}
 
@@ -710,15 +723,7 @@ export default function AgendarTurno() {
                               <button
                                 key={slot.id}
                                 className={`slot-btn ${isSelected ? 'selected' : ''}`}
-                                onClick={() => {
-                                  setSelectedSlot(slot);
-                                  const turnToAdd = {
-                                    ...slot,
-                                    especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
-                                    practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
-                                  };
-                                  addTurn(turnToAdd);
-                                }}
+                                onClick={() => setSelectedSlot(slot)}
                               >
                                 <span className="slot-time">{slot.hora} hs</span>
                                 <span className="slot-type">{isTele ? "Telemedicina" : "Presencial"}</span>
@@ -742,13 +747,53 @@ export default function AgendarTurno() {
 
                   <div className="btn-row">
                     <button className="btn btn-ghost" onClick={() => setStep(3)}>← Volver</button>
-                    <div className="actions-group">
+
+                    <div className="actions-group" style={{ display: 'flex', gap: '10px' }}>
+                      {selectedSlot && (
+                        <button
+                          className="btn btn-ghost"
+                          style={{ border: '1px solid #cbd5e1' }}
+                          onClick={() => {
+                            if (!cartItems.some(i => i.id === selectedSlot.id)) {
+                              addTurn({
+                                ...selectedSlot,
+                                especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
+                                practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
+                                medico: selectedSlot.medico || selectedMedico,
+                                id_servicio_seleccionado: selectedService._id
+                              });
+                            }
+                            setSelectedSlot(null);
+                            // Resetea la búsqueda y manda al paso 1
+                            setStep(1);
+                            setSelectedService(null);
+                            setSelectedMedico(null);
+                            setSelectedDate(null);
+                            setSlots([]);
+                          }}
+                        >
+                          ➕ Sumar turno y buscar otro
+                        </button>
+                      )}
+
                       <button
                         className="btn btn-primary"
                         disabled={!selectedSlot && cartItems.length === 0}
-                        onClick={() => setStep(5)}
+                        onClick={() => {
+                          if (selectedSlot && !cartItems.some(i => i.id === selectedSlot.id)) {
+                            addTurn({
+                              ...selectedSlot,
+                              especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
+                              practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
+                              medico: selectedSlot.medico || selectedMedico,
+                              id_servicio_seleccionado: selectedService._id
+                            });
+                          }
+                          setSelectedSlot(null);
+                          setStep(5);
+                        }}
                       >
-                        Revisar y Confirmar Turno →
+                        Ir a Confirmación →
                       </button>
                     </div>
                   </div>
@@ -773,7 +818,7 @@ export default function AgendarTurno() {
                     </div>
                   </div>
                 </div>
-                <PreselSidebar onConfirm={handleConfirmReservation} />
+                <PreselSidebar onConfirm={() => setStep(5)} />
               </div>
             </div>
           )}
@@ -790,7 +835,7 @@ export default function AgendarTurno() {
                   </div>
                 </div>
                 <div className="card-body">
-                  {(cartItems.length > 0 ? cartItems : [selectedSlot]).filter(Boolean).map((item, index) => (
+                  {cartItems.map((item, index) => (
                     <div className="confirm-box" key={item.id || index} style={{ marginBottom: '1.5rem' }}>
                       <div className="confirm-header-inside" style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}>
                         Turno #{index + 1}
@@ -809,7 +854,9 @@ export default function AgendarTurno() {
                           <div className="confirm-label">Servicio Solicitado</div>
                           <div className="confirm-value">{item.especialidad || item.practica || selectedService?.nombre}</div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>✎ Cambiar</button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 1)}>
+                          ✎ Cambiar
+                        </button>
                       </div>
 
                       <div className="confirm-row">
@@ -818,7 +865,9 @@ export default function AgendarTurno() {
                           <div className="confirm-value">{item.medico?.nombre || selectedMedico?.nombre || "Cualquier Profesional disponible"}</div>
                           <div className="confirm-sub">Sede: {item.sede?.nombre || "No asignada"}</div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(2)}>✎ Cambiar</button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 2)}>
+                          ✎ Cambiar
+                        </button>
                       </div>
 
                       <div className="confirm-row">
@@ -828,7 +877,9 @@ export default function AgendarTurno() {
                             {item.fecha || selectedDate} a las {item.hora} hs
                           </div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setStep(4)}>✎ Cambiar</button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 4)}>
+                          ✎ Cambiar
+                        </button>
                       </div>
 
                       <div className="confirm-row">
@@ -849,8 +900,9 @@ export default function AgendarTurno() {
                     <button
                       className="btn btn-success"
                       onClick={handleConfirmReservation}
+                      disabled={cartItems.length === 0}
                     >
-                      🎉 Confirmar Reserva de ({cartItems.length > 0 ? cartItems.length : 1}) Turno(s)
+                      🎉 Confirmar Reserva de ({cartItems.length}) Turno(s)
                     </button>
                   </div>
                 </div>
