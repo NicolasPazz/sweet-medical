@@ -229,7 +229,8 @@
     color: #ffffff;
     font-size: 22px;
     line-height: 1;
-    margin-left: auto;
+    margin-left: 4px;
+    flex-shrink: 0;
 }
 
 /* ─── Overlay para cerrar el menú en mobile ─────────────────────────────── */
@@ -246,7 +247,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE – mobile-first breakpoint
+   RESPONSIVE – mobile breakpoint
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -259,12 +260,13 @@
         position: fixed;
         top: 0;
         left: 0;
-        padding: 0 16px;
+        padding: 0 12px 0 16px;
         align-items: center;
         border-right: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         z-index: 200;
+        gap: 0;
     }
 
     /* Logo compacto */
@@ -273,6 +275,7 @@
         border-bottom: none;
         margin-bottom: 0;
         flex: 1;
+        min-width: 0;
     }
 
     .logo-img {
@@ -303,25 +306,29 @@
         flex-direction: column;
     }
 
-    /* Acciones: carrito + notificaciones + auth en fila en el top navbar */
+    /* Acciones: carrito + campana + botón de perfil en fila */
     .header-footer-section {
         flex-direction: row;
         align-items: center;
         padding: 0;
         border-top: none;
-        gap: 8px;
+        gap: 4px;          /* gap entre el grupo de iconos y el botón de auth */
     }
 
     .header-actions-row {
-        gap: 8px;
+        gap: 4px;          /* gap entre carrito y campanita */
     }
 
+    /* Separador visual entre campanita y botón de perfil */
     .header-auth-row {
         width: auto;
+        padding-left: 8px;
+        border-left: 1px solid rgba(255, 255, 255, 0.15);
+        margin-left: 4px;
     }
 
     #iniciar-sesion {
-        padding: 8px 14px;
+        padding: 7px 12px;
         border-radius: 8px;
         font-size: 12px;
         gap: 6px;
@@ -329,19 +336,12 @@
         white-space: nowrap;
     }
 
-    #iniciar-sesion span {
-        display: none; /* Solo mostrar ícono en pantallas muy chicas */
-    }
-
     .hamburger-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-}
-
-@media (max-width: 480px) {
-    #iniciar-sesion span {
-        display: none;
+        padding-left: 10px;
+        border-left: 1px solid rgba(255, 255, 255, 0.15);
+        margin-left: 4px;
     }
 }

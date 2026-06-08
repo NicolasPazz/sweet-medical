@@ -1,18 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useCart } from '../../context/CartContext.jsx'; // Importamos el contexto global
+import { useCart } from '../../context/CartContext.jsx';
 import './CartDropdown.css';
 
 export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anchorRef }) {
-    // Traemos los datos y funciones del estado global
     const { items, removeTurn, clearCart } = useCart();
 
     const [dropdownStyle, setDropdownStyle] = useState({});
     const dropdownRef = useRef(null);
 
-    // Calculamos el costo acumulado usando la propiedad costoEstimado o costo
     const totalCosto = items.reduce((acc, item) => acc + (item.costoEstimado ?? item.costo ?? 0), 0);
 
-    // Cerrar al hacer click fuera del menú desplegable
     useEffect(() => {
         function handleClickOutside(e) {
             if (anchorRef.current && anchorRef.current.contains(e.target)) return;
@@ -24,31 +21,45 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [anchorRef, setOpen]);
 
-    // Recalcular la posición fixed exacta arriba del botón asignado
     useEffect(() => {
         if (open && anchorRef.current) {
             const rect = anchorRef.current.getBoundingClientRect();
-            setDropdownStyle({
-                position: 'fixed',
-                bottom: window.innerHeight - rect.top + 8,
-                left: rect.left,
-                width: 360,
-            });
+            const isMobile = window.innerWidth <= 768;
+
+            if (isMobile) {
+                // En mobile: desplegar hacia abajo desde el botón
+                setDropdownStyle({
+                    position: 'fixed',
+                    top: rect.bottom + 8,
+                    right: 8,
+                    left: 'auto',
+                    width: Math.min(360, window.innerWidth - 16),
+                });
+            } else {
+                // En desktop (sidebar): desplegar hacia arriba desde el botón
+                setDropdownStyle({
+                    position: 'fixed',
+                    bottom: window.innerHeight - rect.top + 8,
+                    left: rect.left,
+                    width: 360,
+                });
+            }
         }
     }, [open, anchorRef, items]);
 
     if (!open) return null;
 
+    const isMobile = window.innerWidth <= 768;
+    const maxH = isMobile
+        ? window.innerHeight - (anchorRef.current?.getBoundingClientRect().bottom ?? 0) - 24
+        : Math.min(480, window.innerHeight - (window.innerHeight - (anchorRef.current?.getBoundingClientRect().top ?? 0)) - 16);
+
     return (
         <div
             className="cart-dropdown"
             ref={dropdownRef}
-            style={{
-                ...dropdownStyle,
-                maxHeight: Math.min(480, window.innerHeight - (window.innerHeight - (anchorRef.current?.getBoundingClientRect().top ?? 0)) - 16)
-            }}
+            style={{ ...dropdownStyle, maxHeight: Math.min(480, maxH) }}
         >
-            {/* Encabezado */}
             <div className="cart-header">
                 <span className="cart-header__title">Turnos Seleccionados</span>
                 {items.length > 0 && (
@@ -58,7 +69,6 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                 )}
             </div>
 
-            {/* Lista de turnos */}
             <div className="cart-list">
                 {items.length === 0 ? (
                     <div className="cart-empty">
@@ -67,7 +77,6 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                     </div>
                 ) : (
                     items.map((item) => {
-                        // Adaptamos dinámicamente las propiedades del objeto guardado
                         const servicioNombre = item.especialidad || item.practica || item.servicio?.nombre || 'Consulta Médica';
                         const medicoNombre = item.medico?.nombre || 'Médico General';
                         const itemId = item.id || item._id;
@@ -98,7 +107,6 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                 )}
             </div>
 
-            {/* Footer con el botón confirmador */}
             {items.length > 0 && (
                 <div className="cart-footer">
                     <div className="cart-footer__total-row">
@@ -107,13 +115,11 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                             {totalCosto === 0 ? "Sin costo (Cubierto)" : `$${totalCosto.toLocaleString('es-AR')}`}
                         </span>
                     </div>
-                    {/* Al hacer click acá, se ejecuta la función que le pasaste desde el componente principal */}
                     <button
                         className="cart-footer__btn-confirm"
                         onClick={() => {
-                            // Dispara un evento global avisando que se quiere ir a confirmar
                             window.dispatchEvent(new Event('ir_a_confirmar_turnos'));
-                            setOpen(false); // Cierra el dropdown
+                            setOpen(false);
                         }}
                     >
                         Confirmar Reserva Masiva ✓

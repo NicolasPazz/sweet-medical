@@ -5,11 +5,9 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import './NotificationBell.css';
 import { notificacionesMock } from '@/mockdata/notificaciones';
 
-
-// ── Inferir ícono a partir del contenido del mensaje ─────────────────────────
 function inferirIcono(mensaje) {
   const m = mensaje.toLowerCase();
-  if (m.includes('cancelado') || m.includes('cancelar'))  return '❌';
+  if (m.includes('cancelado') || m.includes('cancelar'))   return '❌';
   if (m.includes('confirmado') || m.includes('confirmada')) return '✅';
   if (m.includes('recordatorio') || m.includes('mañana'))  return '⏰';
   if (m.includes('reprogramar') || m.includes('propuesta')) return '🔄';
@@ -17,15 +15,14 @@ function inferirIcono(mensaje) {
   return '🔔';
 }
 
-// ── Tiempo relativo legible ───────────────────────────────────────────────────
 function tiempoRelativo(fecha) {
   const diff = Date.now() - new Date(fecha).getTime();
   const min  = Math.floor(diff / 60000);
   const hs   = Math.floor(diff / 3600000);
   const dias = Math.floor(diff / 86400000);
-  if (min  < 1)  return 'ahora';
-  if (min  < 60) return `hace ${min} min`;
-  if (hs   < 24) return `hace ${hs} h`;
+  if (min  < 1)   return 'ahora';
+  if (min  < 60)  return `hace ${min} min`;
+  if (hs   < 24)  return `hace ${hs} h`;
   if (dias === 1) return 'ayer';
   return `hace ${dias} días`;
 }
@@ -39,7 +36,6 @@ export default function NotificationBell() {
   const unread = notifications.filter(n => !n.leida);
   const unreadCount = unread.length;
 
-  // Cerrar al hacer click fuera del menú
   useEffect(() => {
     function handleClickOutside(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -53,34 +49,48 @@ export default function NotificationBell() {
   function toggleOpen() {
     if (!open && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setDropdownStyle({
-        position: 'fixed',
-        bottom: window.innerHeight - rect.top + 8,
-        left: rect.left,
-        width: 360,
-      });
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        // En mobile: desplegar hacia abajo desde el botón
+        setDropdownStyle({
+          position: 'fixed',
+          top: rect.bottom + 8,
+          right: 8,
+          left: 'auto',
+          width: Math.min(360, window.innerWidth - 16),
+        });
+      } else {
+        // En desktop (sidebar): desplegar hacia arriba desde el botón
+        setDropdownStyle({
+          position: 'fixed',
+          bottom: window.innerHeight - rect.top + 8,
+          left: rect.left,
+          width: 360,
+        });
+      }
     }
     setOpen(prev => !prev);
   }
 
-  // Marcar una notificación individual como leída
-  // → cuando integres el backend: PATCH /notificaciones/:_id/:idUsuario
   function markAsRead(id) {
     setNotifications(prev =>
       prev.map(n =>
-        n._id === id
-          ? { ...n, leida: true, fechaHoraLeida: new Date() }
-          : n
+        n._id === id ? { ...n, leida: true, fechaHoraLeida: new Date() } : n
       )
     );
   }
 
-  // Marcar todas como leídas
   function markAllAsRead() {
     setNotifications(prev =>
       prev.map(n => ({ ...n, leida: true, fechaHoraLeida: new Date() }))
     );
   }
+
+  const isMobile = window.innerWidth <= 768;
+  const maxH = isMobile
+    ? window.innerHeight - (containerRef.current?.getBoundingClientRect().bottom ?? 0) - 24
+    : Math.min(480, window.innerHeight - (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) - 16);
 
   return (
     <div className="nb-wrapper" ref={containerRef}>
@@ -96,8 +106,7 @@ export default function NotificationBell() {
       </IconButton>
 
       {open && (
-        <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(480, window.innerHeight - (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) - 16) }}>
-          {/* Encabezado */}
+        <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(480, maxH) }}>
           <div className="nb-header">
             <span className="nb-header__title">Notificaciones</span>
             {unreadCount > 0 && (
@@ -107,7 +116,6 @@ export default function NotificationBell() {
             )}
           </div>
 
-          {/* Lista */}
           <div className="nb-list">
             {unread.length === 0 ? (
               <div className="nb-empty">
@@ -123,7 +131,7 @@ export default function NotificationBell() {
                   role="button"
                   tabIndex={0}
                   onKeyDown={e => e.key === 'Enter' && markAsRead(n._id)}
-                  aria-label={`Marcar como leída notificación`}
+                  aria-label="Marcar como leída notificación"
                 >
                   <span className="nb-item__icon">{inferirIcono(n.mensaje)}</span>
                   <div className="nb-item__body">
