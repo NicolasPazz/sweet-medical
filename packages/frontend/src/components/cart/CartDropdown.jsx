@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext.jsx';
 import './CartDropdown.css';
 
 export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anchorRef }) {
-  const { items, removeTurn, clearCart } = useCart();
+
+    const { items, removeTurn, clearCart } = useCart();
+    const navigate = useNavigate();
+    const location = useLocation();
+
 
   const [dropdownStyle, setDropdownStyle] = useState({});
   const dropdownRef = useRef(null);
@@ -87,21 +92,54 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
             const medicoNombre = item.medico?.nombre || 'Médico General';
             const itemId = item.id || item._id;
 
-            return (
-              <div key={itemId} className="cart-item">
-                <span className="cart-item__icon">📅</span>
-                <div className="cart-item__body">
-                  <p className="cart-item__service">{servicioNombre}</p>
-                  <p className="cart-item__doctor">{medicoNombre}</p>
-                  <p className="cart-item__meta">
-                    {item.fecha || 'Propuesta'} - {item.hora || '00:00'} hs
-                  </p>
-                  <p
-                    className="cart-item__sede"
-                    style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}
-                  >
-                    📍 Sede: {item.sede?.nombre || 'No especificada'}
-                  </p>
+
+                        return (
+                            <div key={itemId} className="cart-item">
+                                <span className="cart-item__icon">📅</span>
+                                <div className="cart-item__body">
+                                    <p className="cart-item__service">{servicioNombre}</p>
+                                    <p className="cart-item__doctor">{medicoNombre}</p>
+                                    <p className="cart-item__meta">
+                                        {item.fecha || 'Propuesta'} - {item.hora || '00:00'} hs
+                                    </p>
+                                    <p className="cart-item__sede" style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>
+                                        📍 Sede: {item.sede?.nombre || 'No especificada'}
+                                    </p>
+                                </div>
+                                <button
+                                    className="cart-item__remove"
+                                    onClick={() => removeTurn(itemId)}
+                                    title="Quitar del carrito"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {items.length > 0 && (
+                <div className="cart-footer">
+                    <div className="cart-footer__total-row">
+                        <span>Total estimado:</span>
+                        <span className="cart-footer__price">
+                            {totalCosto === 0 ? "Sin costo (Cubierto)" : `$${totalCosto.toLocaleString('es-AR')}`}
+                        </span>
+                    </div>
+                    <button
+                        className="cart-footer__btn-confirm"
+                        onClick={() => {
+                            setOpen(false);
+                            if (location.pathname === '/solicitar-turno') {
+                                window.dispatchEvent(new Event('ir_a_confirmar_turnos'));
+                            } else {
+                                navigate('/solicitar-turno', { state: { irAConfirmar: true } });
+                            }
+                        }}
+                    >
+                        Confirmar Reserva Masiva ✓
+                    </button>
                 </div>
                 <button
                   className="cart-item__remove"
