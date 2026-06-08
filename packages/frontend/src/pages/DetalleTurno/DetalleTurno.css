@@ -64,9 +64,9 @@
 
 /* Grupo de botones de acción inferiores (CORREGIDO) */
 .detalle-acciones-group {
-  display: flex !important;      /* Fuerza el comportamiento flex */
-  justify-content: flex-end;    /* Empuja ambos botones hacia la derecha */
-  gap: 16px;                     /* Separa los botones para que no se choquen */
+  display: flex !important; /* Fuerza el comportamiento flex */
+  justify-content: flex-end; /* Empuja ambos botones hacia la derecha */
+  gap: 16px; /* Separa los botones para que no se choquen */
   margin-top: 32px;
   width: 100%;
   box-sizing: border-box;
@@ -79,22 +79,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: static !important;  /* Evita que un position: absolute rompa el flex */
-  margin: 0 !important;          /* Limpia márgenes heredados */
+  position: static !important; /* Evita que un position: absolute rompa el flex */
+  margin: 0 !important; /* Limpia márgenes heredados */
 }
 /* Botón específico de Cancelar con estilo de alerta (CORREGIDO) */
 .btn-cancelar-accion {
   font-family: 'Roboto Mono', monospace;
-  font-size: 14px;          /* ← Lo subimos de 12px a 14px para igualar */
-  font-weight: 600;         /* ← Mantiene el mismo peso visual */
-  padding: 12px 32px;       /* ← Cambiado de '8px 18px' a '12px 32px' para que midan lo mismo */
+  font-size: 14px; /* ← Lo subimos de 12px a 14px para igualar */
+  font-weight: 600; /* ← Mantiene el mismo peso visual */
+  padding: 12px 32px; /* ← Cambiado de '8px 18px' a '12px 32px' para que midan lo mismo */
   border-radius: 20px;
   border: 1px solid #fca5a5;
   background: #fef2f2;
   color: #dc2626;
   cursor: pointer;
-  box-sizing: border-box;   /* ← Asegura que el borde no estire el botón de más */
-  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+  box-sizing: border-box; /* ← Asegura que el borde no estire el botón de más */
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.1s;
 }
 
 .btn-cancelar-accion:hover {
@@ -104,5 +108,5 @@
 }
 
 .btn-cancelar-accion:active {
-  transform: scale(0.97);   /* ← Le agregamos el mismo efecto de clic del botón principal */
+  transform: scale(0.97); /* ← Le agregamos el mismo efecto de clic del botón principal */
 }

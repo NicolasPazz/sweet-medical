@@ -46,11 +46,21 @@
   background: #fff;
   color: #475569;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
-.filtro-btn:hover { border-color: #271f92; color: #271f92; }
-.filtro-btn.activo { background-color: #271f92; border-color: #271f92; color: #fff; }
+.filtro-btn:hover {
+  border-color: #271f92;
+  color: #271f92;
+}
+.filtro-btn.activo {
+  background-color: #271f92;
+  border-color: #271f92;
+  color: #fff;
+}
 
 .turnos-lista {
   list-style: none;
@@ -78,11 +88,15 @@
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fff;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   flex-wrap: wrap;
 }
 
-.turno-card--clickable { cursor: pointer; }
+.turno-card--clickable {
+  cursor: pointer;
+}
 .turno-card--clickable:hover {
   border-color: #c7d2fe;
   box-shadow: 0 4px 12px rgba(39, 31, 146, 0.07);
@@ -96,8 +110,15 @@
   gap: 2px;
 }
 
-.turno-fecha { font-size: 12px; font-weight: 600; color: #1e293b; }
-.turno-hora  { font-size: 11px; color: #94a3b8; }
+.turno-fecha {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.turno-hora {
+  font-size: 11px;
+  color: #94a3b8;
+}
 
 .turno-card-center {
   display: flex;
@@ -106,9 +127,19 @@
   flex: 1;
 }
 
-.turno-servicio { font-size: 14px; font-weight: 600; color: #1e293b; }
-.turno-medico   { font-size: 12px; color: #64748b; }
-.turno-sede     { font-size: 11px; color: #94a3b8; }
+.turno-servicio {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.turno-medico {
+  font-size: 12px;
+  color: #64748b;
+}
+.turno-sede {
+  font-size: 11px;
+  color: #94a3b8;
+}
 
 .turno-card-right {
   display: flex;
@@ -126,14 +157,36 @@
   white-space: nowrap;
 }
 
-.estado-disponible  { background: #f0fdf4; color: #16a34a; }
-.estado-reservado   { background: #eff6ff; color: #2563eb; }
-.estado-confirmado  { background: #f0fdf4; color: #15803d; }
-.estado-cancelado   { background: #fef2f2; color: #dc2626; }
-.estado-realizado   { background: #f8fafc; color: #475569; }
-.estado-pendiente   { background: #fffbeb; color: #d97706; }
+.estado-disponible {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.estado-reservado {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.estado-confirmado {
+  background: #f0fdf4;
+  color: #15803d;
+}
+.estado-cancelado {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.estado-realizado {
+  background: #f8fafc;
+  color: #475569;
+}
+.estado-pendiente {
+  background: #fffbeb;
+  color: #d97706;
+}
 
-.turno-costo { font-size: 13px; font-weight: 600; color: #271f92; }
+.turno-costo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #271f92;
+}
 
 /* Chevron expandir */
 .turno-chevron {
@@ -176,9 +229,17 @@
   flex-wrap: wrap;
 }
 
-.turno-historial-fecha { color: #64748b; }
-.turno-historial-motivo { color: #1e293b; flex: 1; }
-.turno-historial-actor { color: #94a3b8; font-style: italic; }
+.turno-historial-fecha {
+  color: #64748b;
+}
+.turno-historial-motivo {
+  color: #1e293b;
+  flex: 1;
+}
+.turno-historial-actor {
+  color: #94a3b8;
+  font-style: italic;
+}
 
 /* ══════════════════════════════════════════════════
    BÚSQUEDA POR DNI
@@ -208,7 +269,9 @@
   transition: border-color 0.15s;
 }
 
-.hp-input:focus { border-color: #271f92; }
+.hp-input:focus {
+  border-color: #271f92;
+}
 
 .hp-btn-buscar {
   font-family: 'Roboto Mono', monospace;
@@ -220,13 +283,22 @@
   background: #271f92;
   color: #fff;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
   white-space: nowrap;
 }
 
-.hp-btn-buscar:hover  { background: #0f0775; }
-.hp-btn-buscar:active { transform: scale(0.97); }
-.hp-btn-buscar:disabled { opacity: 0.5; cursor: not-allowed; }
+.hp-btn-buscar:hover {
+  background: #0f0775;
+}
+.hp-btn-buscar:active {
+  transform: scale(0.97);
+}
+.hp-btn-buscar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .hp-error {
   margin-top: 10px;
@@ -276,7 +348,9 @@
   transition: background 0.12s;
 }
 
-.hp-hint-item:hover { background: #eef0ff; }
+.hp-hint-item:hover {
+  background: #eef0ff;
+}
 
 .hp-hint-dni {
   font-size: 13px;

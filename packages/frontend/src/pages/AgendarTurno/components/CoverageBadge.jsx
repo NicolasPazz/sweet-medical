@@ -15,9 +15,5 @@ export default function CoverageBadge({ cobertura }) {
 
   const badge = getCoverageLabel(cobertura);
 
-  return (
-    <span className={`badge ${badge.className}`}>
-      {badge.text}
-    </span>
-  );
+  return <span className={`badge ${badge.className}`}>{badge.text}</span>;
 }

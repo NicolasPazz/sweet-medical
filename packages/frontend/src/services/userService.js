@@ -1,5 +1,5 @@
-
 export const getUserByToken = async (token) => {
+  if (token !== 'abc123') return null;
 
     if(token !== 'abc123') return null;
 
@@ -21,5 +21,5 @@ export const getUserByToken = async (token) => {
         coberturasPractica: ["ELECTROCARDIOGRAMA"]
     }
 
-    return user;
-}
+  return user;
+};

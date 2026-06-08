@@ -52,10 +52,10 @@ export const TURNOS_MOCK = [
 ];
 
 export const ESTADO_CONFIG = {
-  DISPONIBLE:               { label: 'Disponible',          color: 'estado-disponible' },
-  RESERVADO:                { label: 'Reservado',           color: 'estado-reservado' },
-  CONFIRMADO:               { label: 'Confirmado',          color: 'estado-confirmado' },
-  CANCELADO:                { label: 'Cancelado',           color: 'estado-cancelado' },
-  REALIZADO:                { label: 'Realizado',           color: 'estado-realizado' },
+  DISPONIBLE: { label: 'Disponible', color: 'estado-disponible' },
+  RESERVADO: { label: 'Reservado', color: 'estado-reservado' },
+  CONFIRMADO: { label: 'Confirmado', color: 'estado-confirmado' },
+  CANCELADO: { label: 'Cancelado', color: 'estado-cancelado' },
+  REALIZADO: { label: 'Realizado', color: 'estado-realizado' },
   PENDIENTE_REPROGRAMACION: { label: 'Pend. Reprogramación', color: 'estado-pendiente' },
 };

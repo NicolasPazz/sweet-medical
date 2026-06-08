@@ -5,9 +5,7 @@ import { ValidadorId } from '../utils/ValidadorId.js';
 import { FactoryNotificacion } from '../domain/notificacion/FactoryNotificacion.js';
 
 export class NotificacionService {
-  constructor({
-    notificacionRepository: notificacionRepo = notificacionRepository,
-  } = {}) {
+  constructor({ notificacionRepository: notificacionRepo = notificacionRepository } = {}) {
     this.notificacionRepository = notificacionRepo;
   }
 

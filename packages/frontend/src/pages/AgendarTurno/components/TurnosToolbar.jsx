@@ -12,7 +12,9 @@ export default function TurnosToolbar({
     <div className="resultados-barra">
       <div className="resultados-conteo">
         {totalResults > 0 ? (
-          <span>Se encontraron <strong>{totalResults}</strong> turnos disponibles</span>
+          <span>
+            Se encontraron <strong>{totalResults}</strong> turnos disponibles
+          </span>
         ) : (
           !loading && <span>No se han realizado búsquedas o no hay turnos disponibles</span>
         )}
@@ -22,22 +24,14 @@ export default function TurnosToolbar({
         <div className="controles-ordenamiento">
           <div className="ordenar-campo">
             <label htmlFor="sortBy">Ordenar por:</label>
-            <select
-              id="sortBy"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
+            <select id="sortBy" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="costo">Costo Estimado</option>
               <option value="fecha">Fecha y Hora</option>
             </select>
           </div>
           <div className="ordenar-direccion">
             <label htmlFor="sortOrder">Dirección:</label>
-            <select
-              id="sortOrder"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-            >
+            <select id="sortOrder" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
               <option value="asc">Ascendente</option>
               <option value="desc">Descendente</option>
             </select>

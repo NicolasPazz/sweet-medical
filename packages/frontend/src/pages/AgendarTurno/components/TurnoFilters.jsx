@@ -58,7 +58,9 @@ export default function TurnoFilters({
         {/* Select de Especialidad */}
         {searchMode === 'ESPECIALIDAD' ? (
           <div className="filtro-grupo">
-            <label className="filtro-etiqueta" htmlFor="especialidad">Especialidad *</label>
+            <label className="filtro-etiqueta" htmlFor="especialidad">
+              Especialidad *
+            </label>
             <select
               id="especialidad"
               value={selectedEspecialidad}
@@ -67,14 +69,18 @@ export default function TurnoFilters({
             >
               <option value="">Seleccione Especialidad</option>
               {especialidades.map((esp) => (
-                <option key={esp._id} value={esp._id}>{esp.nombre}</option>
+                <option key={esp._id} value={esp._id}>
+                  {esp.nombre}
+                </option>
               ))}
             </select>
           </div>
         ) : (
           /* Select de Práctica */
           <div className="filtro-grupo">
-            <label className="filtro-etiqueta" htmlFor="practica">Práctica *</label>
+            <label className="filtro-etiqueta" htmlFor="practica">
+              Práctica *
+            </label>
             <select
               id="practica"
               value={selectedPractica}
@@ -83,7 +89,9 @@ export default function TurnoFilters({
             >
               <option value="">Seleccione Práctica</option>
               {practicas.map((prac) => (
-                <option key={prac._id} value={prac._id}>{prac.nombre} ({prac.codigo})</option>
+                <option key={prac._id} value={prac._id}>
+                  {prac.nombre} ({prac.codigo})
+                </option>
               ))}
             </select>
           </div>
@@ -91,7 +99,9 @@ export default function TurnoFilters({
 
         {/* Selector de Médico */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="medico">Médico (Opcional)</label>
+          <label className="filtro-etiqueta" htmlFor="medico">
+            Médico (Opcional)
+          </label>
           <select
             id="medico"
             value={selectedMedico}
@@ -99,29 +109,33 @@ export default function TurnoFilters({
           >
             <option value="">Todos los médicos</option>
             {medicos.map((med) => (
-              <option key={med.id_medico} value={med.id_medico}>{med.nombre}</option>
+              <option key={med.id_medico} value={med.id_medico}>
+                {med.nombre}
+              </option>
             ))}
           </select>
         </div>
 
         {/* Selector de Sede */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="sede">Sede (Opcional)</label>
-          <select
-            id="sede"
-            value={selectedSede}
-            onChange={(e) => setSelectedSede(e.target.value)}
-          >
+          <label className="filtro-etiqueta" htmlFor="sede">
+            Sede (Opcional)
+          </label>
+          <select id="sede" value={selectedSede} onChange={(e) => setSelectedSede(e.target.value)}>
             <option value="">Todas las sedes</option>
             {sedes.map((s) => (
-              <option key={s._id} value={s._id}>{s.nombre}</option>
+              <option key={s._id} value={s._id}>
+                {s.nombre}
+              </option>
             ))}
           </select>
         </div>
 
         {/* Selector de Paciente de Prueba */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="paciente">Paciente de Prueba (Opcional)</label>
+          <label className="filtro-etiqueta" htmlFor="paciente">
+            Paciente de Prueba (Opcional)
+          </label>
           <select
             id="paciente"
             value={selectedPaciente}
@@ -129,14 +143,18 @@ export default function TurnoFilters({
           >
             <option value="">Costo Particular (Sin Cobertura)</option>
             {pacientes.map((pac) => (
-              <option key={pac.id_paciente} value={pac.id_paciente}>{pac.nombre} (DNI: {pac.dni})</option>
+              <option key={pac.id_paciente} value={pac.id_paciente}>
+                {pac.nombre} (DNI: {pac.dni})
+              </option>
             ))}
           </select>
         </div>
 
         {/* Fecha Desde */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="fechaDesde">Fecha Desde</label>
+          <label className="filtro-etiqueta" htmlFor="fechaDesde">
+            Fecha Desde
+          </label>
           <input
             id="fechaDesde"
             type="date"
@@ -148,7 +166,9 @@ export default function TurnoFilters({
 
         {/* Fecha Hasta */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="fechaHasta">Fecha Hasta (Opcional)</label>
+          <label className="filtro-etiqueta" htmlFor="fechaHasta">
+            Fecha Hasta (Opcional)
+          </label>
           <input
             id="fechaHasta"
             type="date"

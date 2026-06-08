@@ -1,5 +1,5 @@
-import { useCart } from "../../../context/CartContext.jsx";
-import "./PreselSidebar.css";
+import { useCart } from '../../../context/CartContext.jsx';
+import './PreselSidebar.css';
 
 export default function PreselSidebar({ onConfirm }) {
   const { items, removeTurn, summary } = useCart();
@@ -9,9 +9,7 @@ export default function PreselSidebar({ onConfirm }) {
       <div className="presel-title">
         <span className="title-icon">📋</span>
         <span className="title-text">Preseleccionados</span>
-        {items.length > 0 && (
-          <span className="presel-badge">{items.length}</span>
-        )}
+        {items.length > 0 && <span className="presel-badge">{items.length}</span>}
       </div>
 
       {items.length === 0 ? (
@@ -25,20 +23,23 @@ export default function PreselSidebar({ onConfirm }) {
               <span className="presel-num">{idx + 1}</span>
               <div className="presel-info">
                 <div className="presel-spec-doc">
-                  <strong>{item.especialidad || item.practica || item.servicio || "Consulta Médica"}</strong>
+                  <strong>
+                    {item.especialidad || item.practica || item.servicio || 'Consulta Médica'}
+                  </strong>
                 </div>
                 <div className="presel-doc-name">
-                  {item.medico?.nombre || item.medico || "Profesional asignado"}
+                  {item.medico?.nombre || item.medico || 'Profesional asignado'}
                 </div>
                 <div className="presel-datetime">
-                  {item.fecha || "Hoy"} a las {item.hora} hs
+                  {item.fecha || 'Hoy'} a las {item.hora} hs
                 </div>
                 <div className="presel-meta">
-                  Sede: {item.sede?.nombre || item.sede || "No especificada"}
+                  Sede: {item.sede?.nombre || item.sede || 'No especificada'}
                 </div>
                 {item.costoEstimado !== undefined && (
                   <div className="presel-cost">
-                    Costo: {item.costoEstimado === 0 ? "Sin costo (Cubierto)" : `$${item.costoEstimado}`}
+                    Costo:{' '}
+                    {item.costoEstimado === 0 ? 'Sin costo (Cubierto)' : `$${item.costoEstimado}`}
                   </div>
                 )}
               </div>
@@ -58,15 +59,12 @@ export default function PreselSidebar({ onConfirm }) {
             <div className="summary-row">
               <span>Total Estimado:</span>
               <strong className="summary-total">
-                {summary.hasPendingCost ? "Pendiente" : `$${summary.totalCost}`}
+                {summary.hasPendingCost ? 'Pendiente' : `$${summary.totalCost}`}
               </strong>
             </div>
           </div>
 
-          <button
-            className="btn btn-primary btn-confirm-all"
-            onClick={onConfirm}
-          >
+          <button className="btn btn-primary btn-confirm-all" onClick={onConfirm}>
             Confirmar Selección
           </button>
         </div>

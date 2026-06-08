@@ -55,9 +55,7 @@ export default function HistorialTurnosMedico() {
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
-  const turnosFiltrados = filtro === 'TODOS'
-    ? turnos
-    : turnos.filter((t) => t.estado === filtro);
+  const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
 
   const handleAbrirDetalle = (turno) => {
     setTurnoSeleccionado(turno);
@@ -65,20 +63,18 @@ export default function HistorialTurnosMedico() {
   };
 
   const handleConfirmar = (idTurno) => {
-    setTurnos((prev) =>
-      prev.map((t) => t._id === idTurno ? { ...t, estado: 'CONFIRMADO' } : t)
-    );
+    setTurnos((prev) => prev.map((t) => (t._id === idTurno ? { ...t, estado: 'CONFIRMADO' } : t)));
   };
 
   const handleFinalizar = (idTurno) => {
-    setTurnos((prev) =>
-      prev.map((t) => t._id === idTurno ? { ...t, estado: 'REALIZADO' } : t)
-    );
+    setTurnos((prev) => prev.map((t) => (t._id === idTurno ? { ...t, estado: 'REALIZADO' } : t)));
   };
 
   const handleCancelar = (idTurno, motivo) => {
     setTurnos((prev) =>
-      prev.map((t) => t._id === idTurno ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo } : t)
+      prev.map((t) =>
+        t._id === idTurno ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo } : t,
+      ),
     );
     setVista('LISTADO');
   };
@@ -94,7 +90,7 @@ export default function HistorialTurnosMedico() {
           hora: t.propuestaCambio.nuevaHora,
           propuestaCambio: null,
         };
-      })
+      }),
     );
   };
 
@@ -103,7 +99,7 @@ export default function HistorialTurnosMedico() {
       prev.map((t) => {
         if (t._id !== idTurno) return t;
         return { ...t, estado: 'RESERVADO', propuestaCambio: null };
-      })
+      }),
     );
   };
 
@@ -112,7 +108,9 @@ export default function HistorialTurnosMedico() {
     return (
       <DetalleTurnoMedico
         turno={turnoActualizado}
-        cfgEstado={ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }}
+        cfgEstado={
+          ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
+        }
         formatFecha={formatFecha}
         onVolver={() => setVista('LISTADO')}
         onConfirmar={() => handleConfirmar(turnoActualizado._id)}
@@ -152,7 +150,8 @@ export default function HistorialTurnosMedico() {
             const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
             const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
             const puedeConfirmar = turno.estado === 'RESERVADO';
-            const puedeFinalizar = turno.estado === 'CONFIRMADO' && new Date(turno.fechaHora) <= new Date();
+            const puedeFinalizar =
+              turno.estado === 'CONFIRMADO' && new Date(turno.fechaHora) <= new Date();
 
             return (
               <li
@@ -171,7 +170,8 @@ export default function HistorialTurnosMedico() {
                   {turno.sede && <span className="turno-sede">{turno.sede.nombre}</span>}
                   {esPendiente && turno.propuestaCambio && (
                     <span className="turno-propuesta">
-                      → {formatFecha(turno.propuestaCambio.nuevaFechaHora)} {turno.propuestaCambio.nuevaHora}
+                      → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                      {turno.propuestaCambio.nuevaHora}
                     </span>
                   )}
                 </div>
@@ -183,7 +183,10 @@ export default function HistorialTurnosMedico() {
                 {puedeConfirmar && (
                   <button
                     className="btn-confirmar-inline"
-                    onClick={(e) => { e.stopPropagation(); handleConfirmar(turno._id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleConfirmar(turno._id);
+                    }}
                   >
                     ✓ Confirmar
                   </button>
@@ -207,7 +210,10 @@ export default function HistorialTurnosMedico() {
                 {puedeFinalizar && (
                   <button
                     className="btn-finalizar-inline"
-                    onClick={(e) => { e.stopPropagation(); handleFinalizar(turno._id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFinalizar(turno._id);
+                    }}
                   >
                     ✔ Finalizar
                   </button>

@@ -18,8 +18,8 @@ export class PacienteRepository {
     return await this.model.findOne({ usuario: usuarioId });
   }
 
-  async findByDniPaciente(pacienteDni){
-    return await this.model.findOne({dni:pacienteDni})
+  async findByDniPaciente(pacienteDni) {
+    return await this.model.findOne({ dni: pacienteDni });
   }
 
   // CREAR

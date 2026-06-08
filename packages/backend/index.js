@@ -10,7 +10,6 @@ import { SeedingController } from './controllers/SeedingController.js';
 import { pacienteService } from './services/PacienteService.js';
 import { turnoService } from './services/TurnoService.js';
 
-
 const PORT = getPort();
 
 const start = async () => {
@@ -31,11 +30,13 @@ const start = async () => {
     try {
       const count = await PacienteModel.countDocuments();
       if (count === 0) {
-        logger.info('[Auto-Seed] Base de datos vacía detectada. Cargando pacientes y datos de prueba...');
+        logger.info(
+          '[Auto-Seed] Base de datos vacía detectada. Cargando pacientes y datos de prueba...',
+        );
         const seedingController = new SeedingController();
         const mockReq = {};
         const mockRes = {
-          status: () => ({ json: () => {} })
+          status: () => ({ json: () => {} }),
         };
         const mockNext = (err) => {
           if (err) logger.error('[Auto-Seed] Error durante la carga:', err);
@@ -59,4 +60,3 @@ const start = async () => {
 };
 
 start();
-

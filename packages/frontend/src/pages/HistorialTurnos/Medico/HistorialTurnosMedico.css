@@ -46,7 +46,10 @@
   background: #fff;
   color: #475569;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
 .filtro-btn:hover {
@@ -86,7 +89,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fff;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   flex-wrap: wrap;
 }
 
@@ -213,7 +218,10 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
 }
 
 .btn-confirmar-inline:hover {
@@ -243,7 +251,10 @@
   color: #16a34a;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
 }
 
 .btn-aceptar-inline:hover {
@@ -266,7 +277,10 @@
   color: #dc2626;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
 }
 
 .btn-rechazar-inline:hover {
@@ -289,7 +303,10 @@
   color: #115e59;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
 }
 
 .btn-finalizar-inline:hover {
@@ -412,7 +429,11 @@
   background: #fef2f2;
   color: #dc2626;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.1s;
 }
 
 .btn-cancelar-accion:hover {
@@ -435,7 +456,9 @@
   background: #271f92;
   color: #fff;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 
 .btn-confirmar-accion:hover {

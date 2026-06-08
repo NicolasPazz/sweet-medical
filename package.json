@@ -26,8 +26,10 @@
     "fix:frontend": "npm -w @sweet-medical/frontend run lint:fix",
     "fix:all": "npm run format && npm run fix:backend && npm run fix:frontend",
     "test": "npm test --workspace=@sweet-medical/backend -- --silent --ci && npm test --workspace=@sweet-medical/frontend -- --silent --ci",
-    "test:backend": "npm test --workspace=@sweet-medical/backend -- --verbose",
-    "test:frontend": "npm test --workspace=@sweet-medical/frontend -- --verbose"
+    "test:backend": "npm test --workspace=@sweet-medical/backend",
+    "test:backend:verbose": "npm test --workspace=@sweet-medical/backend -- --verbose",
+    "test:frontend": "npm test --workspace=@sweet-medical/frontend",
+    "test:frontend:verbose": "npm test --workspace=@sweet-medical/frontend -- --verbose"
   },
   "keywords": [],
   "author": "",
@@ -54,6 +56,7 @@
     "express": "^5.2.1",
     "i18next": "^26.0.8",
     "mongoose": "^9.6.2",
+    "react-icons": "^5.6.0",
     "swagger": "^0.7.5",
     "zod": "^4.3.6"
   },

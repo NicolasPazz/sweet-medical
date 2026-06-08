@@ -1,10 +1,20 @@
-import { useState } from "react";
-import "./MiniCalendar.css";
+import { useState } from 'react';
+import './MiniCalendar.css';
 
-const WEEKDAYS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+const WEEKDAYS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
 const MONTHS = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 export default function MiniCalendar({ selectedDate, onSelectDate, availableDates = [] }) {
@@ -43,19 +53,27 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
   }
 
   const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
+  const todayStr = today.toISOString().split('T')[0];
 
   return (
     <div className="mini-calendar">
       <div className="cal-header">
-        <button className="cal-nav-btn" onClick={handlePrevMonth}>‹</button>
-        <span className="cal-month">{MONTHS[viewMonth]} {viewYear}</span>
-        <button className="cal-nav-btn" onClick={handleNextMonth}>›</button>
+        <button className="cal-nav-btn" onClick={handlePrevMonth}>
+          ‹
+        </button>
+        <span className="cal-month">
+          {MONTHS[viewMonth]} {viewYear}
+        </span>
+        <button className="cal-nav-btn" onClick={handleNextMonth}>
+          ›
+        </button>
       </div>
 
       <div className="cal-week-header">
-        {WEEKDAYS.map(d => (
-          <div className="cal-week-day" key={d}>{d}</div>
+        {WEEKDAYS.map((d) => (
+          <div className="cal-week-day" key={d}>
+            {d}
+          </div>
         ))}
       </div>
 
@@ -64,8 +82,8 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
           if (d === null) return <div key={`empty-${i}`} className="cal-day-empty" />;
 
           // Formatear fecha de la celda en YYYY-MM-DD
-          const monthStr = String(viewMonth + 1).padStart(2, "0");
-          const dayStr = String(d).padStart(2, "0");
+          const monthStr = String(viewMonth + 1).padStart(2, '0');
+          const dayStr = String(d).padStart(2, '0');
           const dateStr = `${viewYear}-${monthStr}-${dayStr}`;
 
           const isAvailable = availableDates.includes(dateStr);
@@ -76,7 +94,7 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
             <div
               key={d}
               onClick={() => isAvailable && onSelectDate(dateStr)}
-              className={`cal-day ${isToday ? "today" : ""} ${isSelected ? "selected" : ""} ${isAvailable ? "has-slots" : "disabled"}`}
+              className={`cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${isAvailable ? 'has-slots' : 'disabled'}`}
             >
               <span className="day-number">{d}</span>
             </div>

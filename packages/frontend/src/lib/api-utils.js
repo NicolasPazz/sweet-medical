@@ -5,6 +5,7 @@ export function getApiBaseUrl() {
   if (configured) {
     return configured.replace(/\/$/, '');
   }
+
   return DEV_FALLBACK_API_URL;
 }
 

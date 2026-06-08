@@ -1,11 +1,7 @@
 import './Toast.css';
 
 export default function Toast({ mensaje, tipo = 'success' }) {
-    if (!mensaje) return null;
+  if (!mensaje) return null;
 
-    return (
-        <div className={`toast toast-${tipo}`}>
-            {mensaje}
-        </div>
-    );
+  return <div className={`toast toast-${tipo}`}>{mensaje}</div>;
 }

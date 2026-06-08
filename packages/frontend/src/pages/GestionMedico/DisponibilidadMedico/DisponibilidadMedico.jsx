@@ -40,7 +40,9 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
         disabled={!isEditing}
       >
         {DIAS.map((d) => (
-          <option key={d} value={d}>{DIAS_LABEL[d]}</option>
+          <option key={d} value={d}>
+            {DIAS_LABEL[d]}
+          </option>
         ))}
       </select>
 
@@ -92,9 +94,7 @@ export default function DisponibilidadMedico() {
       try {
         const res = await getMedicos();
         if (res?.status === 'success') {
-          const encontrado = (res.data || []).find(
-            (m) => m.nombre === MEDICO_SIMULADO_NOMBRE
-          );
+          const encontrado = (res.data || []).find((m) => m.nombre === MEDICO_SIMULADO_NOMBRE);
           if (encontrado) {
             setMedico(encontrado);
             setDisponibilidades(encontrado.disponibilidades?.map((d) => ({ ...d })) || []);
@@ -135,9 +135,7 @@ export default function DisponibilidadMedico() {
   }
 
   const handleChange = (index, field, value) => {
-    setDisponibilidades((prev) =>
-      prev.map((d, i) => (i === index ? { ...d, [field]: value } : d))
-    );
+    setDisponibilidades((prev) => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
   };
 
   const handleAdd = () => {
@@ -198,12 +196,18 @@ export default function DisponibilidadMedico() {
   }, {});
 
   const getInitials = (nombre) =>
-    nombre.replace('Dr. ', '').replace('Dra. ', '').split(' ').map((p) => p[0]).join('').substring(0, 2).toUpperCase();
+    nombre
+      .replace('Dr. ', '')
+      .replace('Dra. ', '')
+      .split(' ')
+      .map((p) => p[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
 
   return (
     <div className="dm-page">
       <div className="dm-container">
-
         <div className="dm-header">
           <h1 className="dm-title">Mi Disponibilidad</h1>
           <p className="dm-subtitle">Consultá y administrá tus horarios de atención.</p>
@@ -238,9 +242,11 @@ export default function DisponibilidadMedico() {
                     Cancelar
                   </button>
                   <button className="dm-btn-primary" onClick={handleSave} disabled={saving}>
-                    {saving
-                      ? <Spinner size="sm" text="Guardando..." inline />
-                      : '💾 Guardar cambios'}
+                    {saving ? (
+                      <Spinner size="sm" text="Guardando..." inline />
+                    ) : (
+                      '💾 Guardar cambios'
+                    )}
                   </button>
                 </div>
               )}
@@ -249,7 +255,9 @@ export default function DisponibilidadMedico() {
             {error && (
               <div className="dm-error">
                 ⚠️ {error}
-                <button className="dm-error-close" onClick={() => setError(null)}>✕</button>
+                <button className="dm-error-close" onClick={() => setError(null)}>
+                  ✕
+                </button>
               </div>
             )}
 
@@ -298,7 +306,7 @@ export default function DisponibilidadMedico() {
                 <div className="dm-rows">
                   {disponibilidades.length === 0 ? (
                     <div className="dm-empty-edit">
-                      No hay franjas. Hacé clic en "+ Agregar franja" para empezar.
+                      No hay franjas. Hacé clic en &quot;+ Agregar franja&quot; para empezar.
                     </div>
                   ) : (
                     disponibilidades.map((d, i) => (
@@ -319,9 +327,7 @@ export default function DisponibilidadMedico() {
         ) : null}
       </div>
 
-      {toast && (
-        <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />
-      )}
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }

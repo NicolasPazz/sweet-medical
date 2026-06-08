@@ -35,7 +35,7 @@
 }
 
 .filtros-tarjeta select,
-.filtros-tarjeta input[type="date"] {
+.filtros-tarjeta input[type='date'] {
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
@@ -50,7 +50,7 @@
 }
 
 .filtros-tarjeta select:focus,
-.filtros-tarjeta input[type="date"]:focus {
+.filtros-tarjeta input[type='date']:focus {
   border-color: #271f92;
   box-shadow: 0 0 0 3px rgba(39, 31, 146, 0.15);
   background-color: #ffffff;
@@ -129,19 +129,19 @@
   .filtros-tarjeta {
     padding: 1.5rem;
   }
-  
+
   .filtros-grilla {
     grid-template-columns: 1fr;
   }
-  
+
   .ancho-completo-sm {
     grid-column: span 1;
   }
-  
+
   .busqueda-acciones {
     justify-content: center;
   }
-  
+
   .boton-buscar {
     width: 100%;
   }

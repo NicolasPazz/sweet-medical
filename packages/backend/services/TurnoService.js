@@ -25,6 +25,7 @@ import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { TurnoMapper } from '../domain/turno/dtos/TurnoMapper.js';
 import { DateUtil } from '../utils/DateUtil.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
+import mongoose from 'mongoose';
 
 export class TurnoService {
   constructor({
@@ -184,7 +185,7 @@ export class TurnoService {
     }
 
     const estadoActual = turno.estado.getEstadoNombre();
-    if (estadoActual !== EstadoTurno.RESERVADO && estadoActual !== EstadoTurno.CONFIRMADO){
+    if (estadoActual !== EstadoTurno.RESERVADO && estadoActual !== EstadoTurno.CONFIRMADO) {
       throw new ConflictError('No se puede cancelar el turno en este estado');
     }
 
@@ -994,7 +995,10 @@ export class TurnoService {
     const medicoIds = medicos.map((m) => String(m._id || m.id));
     const filtrosBusqueda = { ...filtros, medicoIds };
 
-    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(filtrosBusqueda, limitesFechas);
+    const slotsCrudos = await this.slotRepository.buscarSlotsDisponibles(
+      filtrosBusqueda,
+      limitesFechas,
+    );
 
     // Agrupamiento por médico
     const slotsPorMedico = slotsCrudos.reduce((acc, slot) => {
@@ -1122,7 +1126,6 @@ export class TurnoService {
           ? medico.practicas?.some((p) => String(p._id || p.id || p) === idStr)
           : medico.especialidades?.some((e) => String(e._id || e.id || e) === idStr);
 
-
       if (!tieneServicio) {
         const label = servicioTipo === 'PRACTICA' ? 'práctica' : 'especialidad';
         throw new BadRequestError(`El profesional especificado no ofrece la ${label} solicitada`);
@@ -1135,14 +1138,10 @@ export class TurnoService {
     const medicosValidos = medicos.filter((m) => {
       const idStr = String(servicio._id || servicio.id);
       if (servicioTipo === 'PRACTICA') {
-        return m.practicas?.some(
-          (p) => String(p._id || p.id || p) === idStr,
-        );
+        return m.practicas?.some((p) => String(p._id || p.id || p) === idStr);
       }
       if (servicioTipo === 'ESPECIALIDAD') {
-        return m.especialidades?.some(
-          (e) => String(e._id || e.id || e) === idStr,
-        );
+        return m.especialidades?.some((e) => String(e._id || e.id || e) === idStr);
       }
       return false;
     });

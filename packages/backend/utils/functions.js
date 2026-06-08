@@ -139,7 +139,7 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
     const turnosQueObstruyen = turnosNoDisponibles.filter((t) => {
       const minutosTurno = stringAMinutos(t.hora);
       const esDisponible = t.estado.getEstadoNombre() === EstadoTurno.DISPONIBLE;
-      
+
       return (
         t.diaSemana === disp.diaSemana &&
         minutosTurno >= inicioDisp &&

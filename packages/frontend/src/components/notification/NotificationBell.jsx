@@ -7,9 +7,9 @@ import { notificacionesMock } from '@/mockdata/notificaciones';
 
 function inferirIcono(mensaje) {
   const m = mensaje.toLowerCase();
-  if (m.includes('cancelado') || m.includes('cancelar'))   return '❌';
+  if (m.includes('cancelado') || m.includes('cancelar')) return '❌';
   if (m.includes('confirmado') || m.includes('confirmada')) return '✅';
-  if (m.includes('recordatorio') || m.includes('mañana'))  return '⏰';
+  if (m.includes('recordatorio') || m.includes('mañana')) return '⏰';
   if (m.includes('reprogramar') || m.includes('propuesta')) return '🔄';
   if (m.includes('reservado') || m.includes('nuevo turno')) return '📅';
   return '🔔';
@@ -17,12 +17,12 @@ function inferirIcono(mensaje) {
 
 function tiempoRelativo(fecha) {
   const diff = Date.now() - new Date(fecha).getTime();
-  const min  = Math.floor(diff / 60000);
-  const hs   = Math.floor(diff / 3600000);
+  const min = Math.floor(diff / 60000);
+  const hs = Math.floor(diff / 3600000);
   const dias = Math.floor(diff / 86400000);
-  if (min  < 1)   return 'ahora';
-  if (min  < 60)  return `hace ${min} min`;
-  if (hs   < 24)  return `hace ${hs} h`;
+  if (min < 1) return 'ahora';
+  if (min < 60) return `hace ${min} min`;
+  if (hs < 24) return `hace ${hs} h`;
   if (dias === 1) return 'ayer';
   return `hace ${dias} días`;
 }
@@ -33,7 +33,7 @@ export default function NotificationBell() {
   const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
 
-  const unread = notifications.filter(n => !n.leida);
+  const unread = notifications.filter((n) => !n.leida);
   const unreadCount = unread.length;
 
   useEffect(() => {
@@ -70,27 +70,30 @@ export default function NotificationBell() {
         });
       }
     }
-    setOpen(prev => !prev);
+    setOpen((prev) => !prev);
   }
 
   function markAsRead(id) {
-    setNotifications(prev =>
-      prev.map(n =>
-        n._id === id ? { ...n, leida: true, fechaHoraLeida: new Date() } : n
-      )
+    setNotifications((prev) =>
+      prev.map((n) => (n._id === id ? { ...n, leida: true, fechaHoraLeida: new Date() } : n)),
     );
   }
 
   function markAllAsRead() {
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, leida: true, fechaHoraLeida: new Date() }))
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, leida: true, fechaHoraLeida: new Date() })),
     );
   }
 
   const isMobile = window.innerWidth <= 768;
   const maxH = isMobile
     ? window.innerHeight - (containerRef.current?.getBoundingClientRect().bottom ?? 0) - 24
-    : Math.min(480, window.innerHeight - (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) - 16);
+    : Math.min(
+        480,
+        window.innerHeight -
+          (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
+          16,
+      );
 
   return (
     <div className="nb-wrapper" ref={containerRef}>
@@ -123,14 +126,14 @@ export default function NotificationBell() {
                 <p>No tenés notificaciones sin leer</p>
               </div>
             ) : (
-              unread.map(n => (
+              unread.map((n) => (
                 <div
                   key={n._id}
                   className="nb-item nb-item--unread"
                   onClick={() => markAsRead(n._id)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && markAsRead(n._id)}
+                  onKeyDown={(e) => e.key === 'Enter' && markAsRead(n._id)}
                   aria-label="Marcar como leída notificación"
                 >
                   <span className="nb-item__icon">{inferirIcono(n.mensaje)}</span>

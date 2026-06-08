@@ -71,7 +71,7 @@ describe('TurnoService', () => {
     process.env.DURACION_SLOT_MINUTOS = '30';
     process.env.NUM_SEMANAS_GENERAR_SLOTS = '4';
   });
-
+});
 
 // ==========================================
 // TESTS: RESERVA DE TURNOS
@@ -471,8 +471,8 @@ describe('Restricción de Sede al Confirmar Turno', () => {
       nombre: 'Dr. Strange',
       sedes: [
         { _id: 'sede-ramos', nombre: 'Sede Ramos' },
-        { _id: 'sede-1', nombre: 'Sede Central' }
-      ]
+        { _id: 'sede-1', nombre: 'Sede Central' },
+      ],
     };
     paciente = { id: 'p-1', _id: 'p-1', usuario: { _id: 'u-paciente' }, nombre: 'Sebastián' };
 
@@ -590,7 +590,9 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     const resultado = await service.confirmarTurno('u-medico', 't-confirmar', 'sede-ramos');
 
     expect(resultado.sede?.id_sede || resultado.sede?._id).toBe('sede-ramos');
-    expect(slotDisponible.sede?.id_sede || slotDisponible.sede?._id || slotDisponible.sede).toBe('sede-ramos');
+    expect(slotDisponible.sede?.id_sede || slotDisponible.sede?._id || slotDisponible.sede).toBe(
+      'sede-ramos',
+    );
     expect(mockSlotRepository.save).toHaveBeenCalledWith(slotDisponible);
   });
 
@@ -671,7 +673,4 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(resultado.propuestaCambio).toBeNull();
     expect(mockTurnoRepository.save).toHaveBeenCalledWith(turnoOriginal);
   });
-});
-
-// Cierre final del describe('TurnoService') que abarca todo el archivo
 });

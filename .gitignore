@@ -3,4 +3,5 @@ node_modules/
 .env
 *.md
 !README.md
+*.txt
 coverage/

@@ -27,9 +27,20 @@ export default function HealthPage() {
           {JSON.stringify(healthData, null, 2)}
         </pre>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
+            gap: 16,
+          }}
+        >
           <Spin indicator={spinIcon} />
-          <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }}>Consultando estado del backend...</span>
+          <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }}>
+            Consultando estado del backend...
+          </span>
         </div>
       )}
     </div>

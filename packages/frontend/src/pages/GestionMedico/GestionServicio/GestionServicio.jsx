@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { especialidadesMock, practicasMock, generarIdEspecialidad, generarIdPractica } from '../../../mockdata/servicios.js';
+import {
+  especialidadesMock,
+  practicasMock,
+  generarIdEspecialidad,
+  generarIdPractica,
+} from '../../../mockdata/servicios.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getUserByToken } from '../../../services/userService.js';
@@ -9,7 +14,13 @@ import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
-const EMPTY_FORM = () => ({ tipo: 'ESPECIALIDAD', nombre: '', duracionTurnoEnMins: '', costo: '', codigo: '' });
+const EMPTY_FORM = () => ({
+  tipo: 'ESPECIALIDAD',
+  nombre: '',
+  duracionTurnoEnMins: '',
+  costo: '',
+  codigo: '',
+});
 
 // ─── Modal crear / editar ──────────────────────────────────────────────────
 function ServicioModal({ servicio, onClose, onSaved }) {
@@ -34,9 +45,12 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   const handleSubmit = () => {
     setError('');
 
-    if (!form.nombre.trim())
-      return setError('El nombre es obligatorio.');
-    if (!form.duracionTurnoEnMins || !Number.isInteger(Number(form.duracionTurnoEnMins)) || Number(form.duracionTurnoEnMins) <= 0)
+    if (!form.nombre.trim()) return setError('El nombre es obligatorio.');
+    if (
+      !form.duracionTurnoEnMins ||
+      !Number.isInteger(Number(form.duracionTurnoEnMins)) ||
+      Number(form.duracionTurnoEnMins) <= 0
+    )
       return setError('La duración debe ser un entero positivo.');
     if (form.costo === '' || isNaN(Number(form.costo)) || Number(form.costo) < 0)
       return setError('El costo debe ser un número no negativo.');
@@ -44,7 +58,11 @@ function ServicioModal({ servicio, onClose, onSaved }) {
       return setError('El código es obligatorio para una Práctica.');
 
     const servicioGuardado = {
-      id: esEdicion ? servicio.id : (tipoFinal === 'ESPECIALIDAD' ? generarIdEspecialidad() : generarIdPractica()),
+      id: esEdicion
+        ? servicio.id
+        : tipoFinal === 'ESPECIALIDAD'
+          ? generarIdEspecialidad()
+          : generarIdPractica(),
       tipo: tipoFinal,
       nombre: form.nombre.trim(),
       duracionTurnoEnMins: Number(form.duracionTurnoEnMins),
@@ -58,7 +76,9 @@ function ServicioModal({ servicio, onClose, onSaved }) {
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title">{esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}</div>
+        <div className="gs-modal-title">
+          {esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}
+        </div>
 
         {error && <div className="gs-error">{error}</div>}
 
@@ -73,7 +93,12 @@ function ServicioModal({ servicio, onClose, onSaved }) {
         )}
 
         <label className="gs-label">Nombre</label>
-        <input className="gs-input" value={form.nombre} onChange={set('nombre')} placeholder="Ej: Cardiología" />
+        <input
+          className="gs-input"
+          value={form.nombre}
+          onChange={set('nombre')}
+          placeholder="Ej: Cardiología"
+        />
 
         <label className="gs-label">Duración del turno (minutos)</label>
         <input
@@ -110,7 +135,9 @@ function ServicioModal({ servicio, onClose, onSaved }) {
         )}
 
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>Cancelar</button>
+          <button className="gs-btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
           <button className="gs-btn-primary" onClick={handleSubmit}>
             {esEdicion ? 'Guardar cambios' : 'Crear servicio'}
           </button>
@@ -127,11 +154,16 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
       <div className="gs-modal">
         <div className="gs-modal-title">🗑️ Eliminar servicio</div>
         <p className="gs-modal-body">
-          ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se puede deshacer.
+          ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se
+          puede deshacer.
         </p>
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className="gs-btn-primary gs-btn-danger" onClick={onDeleted}>Sí, eliminar</button>
+          <button className="gs-btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
+          <button className="gs-btn-primary gs-btn-danger" onClick={onDeleted}>
+            Sí, eliminar
+          </button>
         </div>
       </div>
     </div>
@@ -140,7 +172,8 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
 
 // ─── Tarjeta de servicio ───────────────────────────────────────────────────
 function ServicioCard({ servicio, onEdit, onDelete }) {
-  const badgeClass = servicio.tipo === 'ESPECIALIDAD' ? 'gs-badge--especialidad' : 'gs-badge--practica';
+  const badgeClass =
+    servicio.tipo === 'ESPECIALIDAD' ? 'gs-badge--especialidad' : 'gs-badge--practica';
   return (
     <div className="gs-card">
       <div className="gs-card-left">
@@ -153,8 +186,12 @@ function ServicioCard({ servicio, onEdit, onDelete }) {
         </div>
       </div>
       <div className="gs-card-actions">
-        <button className="gs-btn-edit" onClick={() => onEdit(servicio)}>Editar</button>
-        <button className="gs-btn-delete" onClick={() => onDelete(servicio)}>Eliminar</button>
+        <button className="gs-btn-edit" onClick={() => onEdit(servicio)}>
+          Editar
+        </button>
+        <button className="gs-btn-delete" onClick={() => onDelete(servicio)}>
+          Eliminar
+        </button>
       </div>
     </div>
   );
@@ -246,7 +283,9 @@ export function GestionServicio() {
 
     setModalCrear(false);
     setModalEditar(null);
-    mostrarToast(esEdicion ? 'Servicio actualizado correctamente.' : 'Servicio creado correctamente.');
+    mostrarToast(
+      esEdicion ? 'Servicio actualizado correctamente.' : 'Servicio creado correctamente.',
+    );
   };
 
   const handleDeleted = () => {
@@ -263,7 +302,6 @@ export function GestionServicio() {
   return (
     <div className="gs-page">
       <div className="gs-container">
-
         <div className="gs-header">
           <div>
             <h1 className="gs-title">Gestión de Servicios</h1>
@@ -275,7 +313,10 @@ export function GestionServicio() {
         </div>
 
         {errorCarga && (
-          <div className="gs-toast gs-toast--error" style={{ position: 'static', marginBottom: '16px' }}>
+          <div
+            className="gs-toast gs-toast--error"
+            style={{ position: 'static', marginBottom: '16px' }}
+          >
             ⚠️ {errorCarga}
           </div>
         )}
@@ -316,9 +357,7 @@ export function GestionServicio() {
         )}
       </div>
 
-      {modalCrear && (
-        <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} />
-      )}
+      {modalCrear && <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} />}
       {modalEditar && (
         <ServicioModal
           servicio={modalEditar}

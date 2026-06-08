@@ -3,9 +3,7 @@ import { NotFoundError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 export class PacienteService {
-  constructor({
-    pacienteRepository: pacienteRepo = pacienteRepository,
-  } = {}) {
+  constructor({ pacienteRepository: pacienteRepo = pacienteRepository } = {}) {
     this.pacienteRepository = pacienteRepo;
   }
 

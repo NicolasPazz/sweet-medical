@@ -7,7 +7,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fff;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 
 .turno-card:hover {
@@ -76,12 +78,30 @@
   white-space: nowrap;
 }
 
-.estado-disponible  { background: #f0fdf4; color: #16a34a; }
-.estado-reservado   { background: #eff6ff; color: #2563eb; }
-.estado-confirmado  { background: #f0fdf4; color: #15803d; }
-.estado-cancelado   { background: #fef2f2; color: #dc2626; }
-.estado-realizado   { background: #f8fafc; color: #475569; }
-.estado-pendiente   { background: #fffbeb; color: #d97706; }
+.estado-disponible {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.estado-reservado {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.estado-confirmado {
+  background: #f0fdf4;
+  color: #15803d;
+}
+.estado-cancelado {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.estado-realizado {
+  background: #f8fafc;
+  color: #475569;
+}
+.estado-pendiente {
+  background: #fffbeb;
+  color: #d97706;
+}
 
 .turno-costo {
   font-size: 13px;

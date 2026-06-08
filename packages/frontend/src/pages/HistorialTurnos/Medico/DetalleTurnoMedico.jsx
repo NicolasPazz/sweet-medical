@@ -26,11 +26,13 @@ export default function DetalleTurnoMedico({
   };
 
   const handleAceptar = () => {
-    if (window.confirm('¿Aceptás la reprogramación propuesta por el paciente?')) onAceptarReprogramacion();
+    if (window.confirm('¿Aceptás la reprogramación propuesta por el paciente?'))
+      onAceptarReprogramacion();
   };
 
   const handleRechazar = () => {
-    if (window.confirm('¿Rechazás la reprogramación? El turno volverá a su fecha original.')) onRechazarReprogramacion();
+    if (window.confirm('¿Rechazás la reprogramación? El turno volverá a su fecha original.'))
+      onRechazarReprogramacion();
   };
 
   const handleConfirmarCancelacion = (motivo) => {
@@ -41,8 +43,12 @@ export default function DetalleTurnoMedico({
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <button className="filtro-btn" onClick={onVolver}>← Volver a Mis Turnos</button>
-        <h1 className="historial-title" style={{ marginTop: '15px' }}>Detalle del Turno</h1>
+        <button className="filtro-btn" onClick={onVolver}>
+          ← Volver a Mis Turnos
+        </button>
+        <h1 className="historial-title" style={{ marginTop: '15px' }}>
+          Detalle del Turno
+        </h1>
         <p className="historial-subtitle">Información del turno del paciente</p>
       </div>
 
@@ -89,7 +95,9 @@ export default function DetalleTurnoMedico({
             <p className="detalle-propuesta-titulo">📅 Propuesta del paciente</p>
             <div className="detalle-info-row">
               <span className="detalle-label">Nueva fecha propuesta:</span>
-              <span className="detalle-value">{formatFecha(turno.propuestaCambio.nuevaFechaHora)}</span>
+              <span className="detalle-value">
+                {formatFecha(turno.propuestaCambio.nuevaFechaHora)}
+              </span>
             </div>
             <div className="detalle-info-row">
               <span className="detalle-label">Nuevo horario:</span>

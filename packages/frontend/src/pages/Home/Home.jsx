@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
-import { FaCalendarAlt, FaHistory, FaBriefcaseMedical, FaEnvelope, FaArrowRight, FaShieldAlt, FaClock, FaUserMd } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaHistory,
+  FaBriefcaseMedical,
+  FaEnvelope,
+  FaArrowRight,
+  FaShieldAlt,
+  FaClock,
+  FaUserMd,
+} from 'react-icons/fa';
 import './Home.css';
-import { useAuth } from "../../components/AuthProvider.jsx";
+import { useAuth } from '../../components/AuthProvider.jsx';
 import { useState, useEffect } from 'react';
 import { getUserByToken } from '../../services/userService.js';
 import { Spin } from 'antd';
@@ -34,33 +43,46 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
         <Spin indicator={spinIcon} />
-        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando...</span>
+        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+          Cargando...
+        </span>
       </div>
     );
   }
 
   return (
     <div className="home-container">
-
       {/* Hero */}
       <section className="home-hero">
         <div className="home-hero-badge">Plataforma de salud digital</div>
-        <h1 className="home-title">Bienvenido a <span>Sweet Medical</span></h1>
+        <h1 className="home-title">
+          Bienvenido a <span>Sweet Medical</span>
+        </h1>
         <p className="home-subtitle">
-          Gestioná tus turnos, revisá tu historial médico y accedé a todos los servicios de salud en un solo lugar.
+          Gestioná tus turnos, revisá tu historial médico y accedé a todos los servicios de salud en
+          un solo lugar.
         </p>
         <div className="home-hero-cta">
           <Link to="/solicitar-turno" className="cta-primary">
             <FaCalendarAlt /> Agendar turno
           </Link>
-          {user?.rol === "Paciente" && (
+          {user?.rol === 'Paciente' && (
             <Link to="/historial-medico" className="cta-secondary">
               Ver historial <FaArrowRight />
             </Link>
           )}
-          {user?.rol === "Médico" && (
+          {user?.rol === 'Médico' && (
             <Link to="/gestion-medico" className="cta-secondary">
               Gestión médica <FaArrowRight />
             </Link>
@@ -71,7 +93,9 @@ export default function Home() {
       {/* Cards de acceso rápido */}
       <section className="home-cards">
         <Link to="/solicitar-turno" className="home-card home-card--accent">
-          <div className="home-card-icon"><FaCalendarAlt /></div>
+          <div className="home-card-icon">
+            <FaCalendarAlt />
+          </div>
           <div className="home-card-body">
             <span className="home-card-title">Agendar Turno</span>
             <span className="home-card-desc">Elegí servicio, médico y horario disponible</span>
@@ -79,9 +103,11 @@ export default function Home() {
           <FaArrowRight className="home-card-arrow" />
         </Link>
 
-        {user?.rol === "Paciente" && (
+        {user?.rol === 'Paciente' && (
           <Link to="/historial-medico" className="home-card">
-            <div className="home-card-icon"><FaHistory /></div>
+            <div className="home-card-icon">
+              <FaHistory />
+            </div>
             <div className="home-card-body">
               <span className="home-card-title">Historial Médico</span>
               <span className="home-card-desc">Revisá tus turnos y consultas anteriores</span>
@@ -89,9 +115,11 @@ export default function Home() {
             <FaArrowRight className="home-card-arrow" />
           </Link>
         )}
-        {user?.rol === "Médico" && (
+        {user?.rol === 'Médico' && (
           <Link to="/gestion-medico" className="home-card">
-            <div className="home-card-icon"><FaBriefcaseMedical /></div>
+            <div className="home-card-icon">
+              <FaBriefcaseMedical />
+            </div>
             <div className="home-card-body">
               <span className="home-card-title">Gestión médica</span>
               <span className="home-card-desc">Administrá tus actividades como médico</span>
@@ -100,7 +128,9 @@ export default function Home() {
           </Link>
         )}
         <Link to="/contact" className="home-card">
-          <div className="home-card-icon"><FaEnvelope /></div>
+          <div className="home-card-icon">
+            <FaEnvelope />
+          </div>
           <div className="home-card-body">
             <span className="home-card-title">Contacto</span>
             <span className="home-card-desc">Comunicate con nuestro equipo</span>
@@ -127,7 +157,6 @@ export default function Home() {
           <p>Accedé a una red de profesionales de la salud certificados.</p>
         </div>
       </section>
-
     </div>
   );
 }

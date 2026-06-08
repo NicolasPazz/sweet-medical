@@ -39,11 +39,10 @@ function App() {
             <Route path="perfil" element={<Perfil />} />
             <Route path="login" element={<Login />} />
             <Route path="registro" element={<Registro />} />
-            <Route path="*" element={<ErrorPage type = "404" />} />
-            <Route path = "404" element = { <ErrorPage type = "404" />} />
-            <Route path = "403" element = { <ErrorPage type = "403" />} />
+            <Route path="*" element={<ErrorPage type="404" />} />
+            <Route path="404" element={<ErrorPage type="404" />} />
+            <Route path="403" element={<ErrorPage type="403" />} />
             <Route path="contact" element={<Contacto />} />
-            
           </Route>
         </Routes>
       </BrowserRouter>

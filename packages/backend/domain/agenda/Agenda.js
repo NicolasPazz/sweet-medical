@@ -12,6 +12,7 @@ import {
 import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Slot } from '../turno/Slot.js';
+import { EstadoTurno } from '../turno/EstadoTurno.js';
 
 /**
  * Convierte un objeto Date a string 'YYYY-MM-DD' usando la fecha LOCAL del servidor,
@@ -459,9 +460,11 @@ export class Agenda {
           // Por ende, debemos comprobar que la sede sea válida (tenga id, _id o nombre) antes de usarla,
           // de lo contrario recurrimos a la sede configurada del médico.
           const sedeVirtual =
-            (slotInicio.sede && (slotInicio.sede._id || slotInicio.sede.id || slotInicio.sede.nombre))
+            slotInicio.sede && (slotInicio.sede._id || slotInicio.sede.id || slotInicio.sede.nombre)
               ? slotInicio.sede
-              : (medico.sedes && medico.sedes.length > 0 ? medico.sedes[0] : null);
+              : medico.sedes && medico.sedes.length > 0
+                ? medico.sedes[0]
+                : null;
 
           // Turno válido: avanzar i hasta después del último slot usado
           const turno = new Turno(

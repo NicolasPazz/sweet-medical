@@ -28,14 +28,14 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
   }, []);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
-  const turnosFiltrados = filtro === 'TODOS'
-    ? turnos
-    : turnos.filter((t) => t.estado === filtro);
+  const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
 
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <button className="filtro-btn" onClick={onVolver}>← Nueva búsqueda</button>
+        <button className="filtro-btn" onClick={onVolver}>
+          ← Nueva búsqueda
+        </button>
         <h1 className="historial-title" style={{ marginTop: '15px' }}>
           Historial de {paciente.nombre}
         </h1>
@@ -99,7 +99,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                         return (
                           <li key={i} className="turno-historial-item">
                             <span className={`turno-estado ${hCfg.color}`}>{hCfg.label}</span>
-                            <span className="turno-historial-fecha">{formatFecha(h.fechaHoraCambio)}</span>
+                            <span className="turno-historial-fecha">
+                              {formatFecha(h.fechaHoraCambio)}
+                            </span>
                             <span className="turno-historial-motivo">{h.motivo}</span>
                             <span className="turno-historial-actor">@{h.actor}</span>
                           </li>
@@ -151,9 +153,20 @@ export default function HistorialPaciente() {
 
   if (loadingUser) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
         <Spin indicator={spinIcon} />
-        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando...</span>
+        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+          Cargando...
+        </span>
       </div>
     );
   }
@@ -208,7 +221,9 @@ export default function HistorialPaciente() {
     <div className="historial-container">
       <div className="historial-header">
         <h1 className="historial-title">Historial de Paciente</h1>
-        <p className="historial-subtitle">Ingresá el DNI del paciente para ver su historial de turnos</p>
+        <p className="historial-subtitle">
+          Ingresá el DNI del paciente para ver su historial de turnos
+        </p>
       </div>
 
       <div className="hp-search-box">
@@ -231,14 +246,23 @@ export default function HistorialPaciente() {
             disabled={!dni.trim() || estado === 'searching'}
             style={{ display: 'flex', alignItems: 'center', gap: 8 }}
           >
-            {estado === 'searching'
-              ? <><Spin indicator={<LoadingOutlined style={{ fontSize: 14, color: '#fff' }} spin />} /> Buscando...</>
-              : 'Buscar'}
+            {estado === 'searching' ? (
+              <>
+                <Spin
+                  indicator={<LoadingOutlined style={{ fontSize: 14, color: '#fff' }} spin />}
+                />{' '}
+                Buscando...
+              </>
+            ) : (
+              'Buscar'
+            )}
           </button>
         </div>
 
         {estado === 'not_found' && (
-          <p className="hp-error">No se encontró ningún paciente con el DNI <strong>{dni}</strong>.</p>
+          <p className="hp-error">
+            No se encontró ningún paciente con el DNI <strong>{dni}</strong>.
+          </p>
         )}
       </div>
 

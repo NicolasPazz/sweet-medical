@@ -50,7 +50,10 @@
   cursor: pointer;
   text-align: left;
   font-family: 'Roboto Mono', monospace;
-  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
   position: relative;
 }
 

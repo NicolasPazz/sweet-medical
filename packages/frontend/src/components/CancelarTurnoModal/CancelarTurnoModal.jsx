@@ -27,7 +27,9 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
   };
 
   const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   });
 
   return (
@@ -39,18 +41,19 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
           <>
             <p className="ctm-warning">
               No podés cancelar este turno. La cancelación requiere al menos{' '}
-              <strong>1 hora de anticipación</strong> y el turno está programado
-              para dentro de menos de eso.
+              <strong>1 hora de anticipación</strong> y el turno está programado para dentro de
+              menos de eso.
             </p>
             <div className="ctm-footer">
-              <button className="ctm-btn-secondary" onClick={onClose}>Entendido</button>
+              <button className="ctm-btn-secondary" onClick={onClose}>
+                Entendido
+              </button>
             </div>
           </>
         ) : (
           <>
             <p className="ctm-body">
-              Estás por cancelar el turno del{' '}
-              <strong>{fechaFormateada}</strong> a las{' '}
+              Estás por cancelar el turno del <strong>{fechaFormateada}</strong> a las{' '}
               <strong>{turno.hora} hs</strong>. Esta acción no se puede deshacer.
             </p>
 
@@ -62,7 +65,10 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
               rows={3}
               placeholder="Ej: No puedo asistir por compromisos laborales..."
               value={motivo}
-              onChange={(e) => { setMotivo(e.target.value); setError(''); }}
+              onChange={(e) => {
+                setMotivo(e.target.value);
+                setError('');
+              }}
               maxLength={300}
             />
             <span className="ctm-char-count">{motivo.length}/300</span>
@@ -70,7 +76,9 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
             {error && <p className="ctm-error">{error}</p>}
 
             <div className="ctm-footer">
-              <button className="ctm-btn-secondary" onClick={onClose}>Volver</button>
+              <button className="ctm-btn-secondary" onClick={onClose}>
+                Volver
+              </button>
               <button className="ctm-btn-danger" onClick={handleConfirm}>
                 Confirmar cancelación
               </button>

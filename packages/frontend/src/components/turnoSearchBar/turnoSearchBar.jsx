@@ -12,12 +12,7 @@ const TurnoSearchBar = ({ onSearch }) => {
     }
   };
 
-  return (
-    <form className="turno-search" onSubmit={handleSearch}>
-      
-
-    </form>
-  );
+  return <form className="turno-search" onSubmit={handleSearch}></form>;
 };
 
 export default TurnoSearchBar;

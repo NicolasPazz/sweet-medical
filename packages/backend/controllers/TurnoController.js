@@ -54,7 +54,7 @@ export class TurnoController {
   obtenerHistorial = async (req, res, next) => {
     try {
       const dniPaciente = req.params.dni_paciente;
-      ValidadorId.validarIds(idPaciente);
+      // ValidadorId.validarIds(idPaciente);
       const idMedico = req.params.id_usuario;
       ValidadorId.validarIds(idMedico);
 

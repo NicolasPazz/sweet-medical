@@ -58,9 +58,7 @@ export default function HistorialTurnos() {
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
-  const turnosFiltrados = filtro === 'TODOS'
-    ? turnos
-    : turnos.filter((t) => t.estado === filtro);
+  const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
 
   const handleAbrirDetalle = (turno) => {
     setTurnoSeleccionado(turno);
@@ -71,7 +69,9 @@ export default function HistorialTurnos() {
     return (
       <DetalleTurno
         turno={turnoSeleccionado}
-        cfgEstado={ESTADO_CONFIG[turnoSeleccionado.estado] ?? { label: turnoSeleccionado.estado, color: '' }}
+        cfgEstado={
+          ESTADO_CONFIG[turnoSeleccionado.estado] ?? { label: turnoSeleccionado.estado, color: '' }
+        }
         formatFecha={formatFecha}
         onVolver={() => setVista('LISTADO')}
         onIrAReprogramar={() => setVista('REPROGRAMAR')}
