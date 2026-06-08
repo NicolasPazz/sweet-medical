@@ -11,8 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend-lint:
-    name: Backend Linting
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,51 +19,49 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install Dependencies
-        run: npm install
-      - name: Run Lint
-        run: npm run lint:backend
+      - name: Clean Install
+        run: npm ci
+
+  backend-lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run lint:backend
 
   test-backend:
-    name: Test Backend
-    needs: backend-lint
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - name: Install Dependencies
-        run: npm install
-      - name: Run Backend Tests
-        run: npm run test:backend
+      - run: npm ci
+      - run: npm run test:backend
 
   frontend-lint:
-    name: Frontend Linting
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - name: Install Dependencies
-        run: npm install
-      - name: Run Lint
-        run: npm run lint:frontend
+      - run: npm ci
+      - run: npm run lint:frontend
 
   test-frontend:
-    name: Test Frontend
-    needs: frontend-lint
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - name: Install Dependencies
-        run: npm install
-      - name: Run Frontend Tests
-        run: npm run test:frontend
+      - run: npm ci
+      - run: npm run test:frontend
