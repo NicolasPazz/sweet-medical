@@ -78,6 +78,7 @@ export class MedicoService {
 
     return medico;
   }
+
 }
 
 export const medicoService = new MedicoService();

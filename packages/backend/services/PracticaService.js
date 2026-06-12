@@ -3,14 +3,17 @@ import { practicaRepository } from '../infrastructure/repositories/PracticaRepos
 import { usuarioService } from './UsuarioService.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
+import { medicoService } from './MedicoService.js';
 
 export class PracticaService {
   constructor({
     practicaRepository: practicaRepo = practicaRepository,
     usuarioService: usuarioSvc = usuarioService,
+    medicoService: medicoSvc = medicoService,
   } = {}) {
     this.practicaRepository = practicaRepo;
     this.usuarioService = usuarioSvc;
+    this.medicoService = medicoSvc;
   }
 
   async obtenerTodos() {
@@ -49,6 +52,13 @@ export class PracticaService {
     const practica = await this.practicaRepository.findById(id);
     if (!practica) throw new NotFoundError('Práctica no encontrada');
     return await this.practicaRepository.update(id, { activo: false });
+  }
+
+  async obtenerTodosPorMedico(id_usuario) {
+    ValidadorId.validarIds(id_usuario);
+    const medico = await this.medicoService.findByIdUsuario(id_usuario);
+    if (!medico) throw new NotFoundError('Médico no encontrado');
+    return medico.practicas;
   }
 }
 

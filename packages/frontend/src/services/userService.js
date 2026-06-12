@@ -1,13 +1,15 @@
 export const getUserByToken = async (token) => {
+  
+  console.log("TOKEN: ", token);
+
   if (token !== 'abc123') return null;
 
-    if(token !== 'abc123') return null;
-
+  
     const user = {
-        id: 1,
+        id: "6a0f950c7469fbef799921bc",
         nombre: 'Lucca Bertani',
         username: "LuccaTarta",
-        rol: 'Paciente',
+        rol: 'Médico',
         especialidades: ['Cardiología', 'Cirugía General'],
         practicas: ['Electrocardiograma', 'Ecografía Abdominal'],
         antiguedad: 5,

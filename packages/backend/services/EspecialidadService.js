@@ -3,14 +3,17 @@ import { especialidadRepository } from '../infrastructure/repositories/Especiali
 import { usuarioService } from './UsuarioService.js';
 import { NotFoundError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
+import { medicoService } from '../services/MedicoService.js';
 
 export class EspecialidadService {
   constructor({
     especialidadRepository: especialidadRepo = especialidadRepository,
     usuarioService: usuarioSvc = usuarioService,
+    medicoService: medicoSvc = medicoService
   } = {}) {
     this.especialidadRepository = especialidadRepo;
     this.usuarioService = usuarioSvc;
+    this.medicoService = medicoSvc;
   }
 
   async obtenerTodos() {
@@ -49,6 +52,18 @@ export class EspecialidadService {
     if (!especialidad) throw new NotFoundError('Especialidad no encontrada');
     return await this.especialidadRepository.update(id, { activo: false });
   }
+
+  async obtenerTodosPorMedico(id_usuario){
+
+    ValidadorId.validarIds(id_usuario);
+
+    const medico = await this.medicoService.findByIdUsuario(id_usuario);
+
+    console.log(medico);
+
+    return medico.especialidades;
+  }
+
 }
 
 export const especialidadService = new EspecialidadService();

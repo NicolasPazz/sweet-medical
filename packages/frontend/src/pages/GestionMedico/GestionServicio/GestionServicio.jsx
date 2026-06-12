@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   especialidadesMock,
   practicasMock,
-  generarIdEspecialidad,
-  generarIdPractica,
 } from '../../../mockdata/servicios.js';
+import { getAllEspecialidadesByMedic, getAllPracticaByMedic } from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getUserByToken } from '../../../services/userService.js';
@@ -36,16 +35,54 @@ function ServicioModal({ servicio, onClose, onSaved }) {
         }
       : EMPTY_FORM(),
   );
+  const [catalogoServicios, setCatalogoServicios] = useState([]);
+  const [loadingCatalogo, setLoadingCatalogo] = useState(false);
   const [error, setError] = useState('');
 
+  // Al crear: carga el catálogo global según el tipo seleccionado
+  useEffect(() => {
+    if (esEdicion) return;
+    const cargarCatalogo = async () => {
+      setLoadingCatalogo(true);
+      setCatalogoServicios([]);
+      setForm((f) => ({ ...f, servicioId: '', nombre: '', duracionTurnoEnMins: '', costo: '', codigo: '' }));
+      try {
+        const res = form.tipo === 'ESPECIALIDAD'
+          ? await getEspecialidades()
+          : await getPracticas();
+        const lista = res?.data ?? [];
+        setCatalogoServicios(lista);
+      } catch (e) {
+        console.error('Error cargando catálogo:', e);
+      } finally {
+        setLoadingCatalogo(false);
+      }
+    };
+    cargarCatalogo();
+  }, [form.tipo, esEdicion]);
+
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  // Al seleccionar del catálogo, autocompleta los campos
+  const handleSeleccionCatalogo = (e) => {
+    const id = e.target.value;
+    const seleccionado = catalogoServicios.find((s) => String(s._id ?? s.id) === id);
+    if (!seleccionado) return;
+    setForm((f) => ({
+      ...f,
+      servicioId: id,
+      nombre: seleccionado.nombre,
+      duracionTurnoEnMins: String(seleccionado.duracionTurnoEnMins),
+      costo: String(seleccionado.costo),
+      codigo: seleccionado.codigo ?? '',
+    }));
+  };
 
   const tipoFinal = esEdicion ? servicio.tipo : form.tipo;
 
   const handleSubmit = () => {
     setError('');
-
-    if (!form.nombre.trim()) return setError('El nombre es obligatorio.');
+    if (!esEdicion && !form.servicioId) return setError('Seleccioná un servicio del catálogo.');
     if (
       !form.duracionTurnoEnMins ||
       !Number.isInteger(Number(form.duracionTurnoEnMins)) ||
@@ -54,20 +91,14 @@ function ServicioModal({ servicio, onClose, onSaved }) {
       return setError('La duración debe ser un entero positivo.');
     if (form.costo === '' || isNaN(Number(form.costo)) || Number(form.costo) < 0)
       return setError('El costo debe ser un número no negativo.');
-    if (tipoFinal === 'PRACTICA' && !form.codigo.trim())
-      return setError('El código es obligatorio para una Práctica.');
 
     const servicioGuardado = {
-      id: esEdicion
-        ? servicio.id
-        : tipoFinal === 'ESPECIALIDAD'
-          ? generarIdEspecialidad()
-          : generarIdPractica(),
+      id: esEdicion ? servicio.id : form.servicioId,
       tipo: tipoFinal,
-      nombre: form.nombre.trim(),
+      nombre: form.nombre,
       duracionTurnoEnMins: Number(form.duracionTurnoEnMins),
       costo: Number(form.costo),
-      ...(tipoFinal === 'PRACTICA' && { codigo: form.codigo.trim() }),
+      ...(tipoFinal === 'PRACTICA' && { codigo: form.codigo }),
     };
 
     onSaved(servicioGuardado, esEdicion);
@@ -89,16 +120,25 @@ function ServicioModal({ servicio, onClose, onSaved }) {
               <option value="ESPECIALIDAD">Especialidad</option>
               <option value="PRACTICA">Práctica</option>
             </select>
+
+            <label className="gs-label">Seleccioná del catálogo</label>
+            <select
+              className="gs-select"
+              value={form.servicioId ?? ''}
+              onChange={handleSeleccionCatalogo}
+              disabled={loadingCatalogo}
+            >
+              <option value="" disabled>
+                {loadingCatalogo ? 'Cargando...' : 'Elegí un servicio'}
+              </option>
+              {catalogoServicios.map((s) => (
+                <option key={s._id ?? s.id} value={s._id ?? s.id}>
+                  {s.nombre}
+                </option>
+              ))}
+            </select>
           </>
         )}
-
-        <label className="gs-label">Nombre</label>
-        <input
-          className="gs-input"
-          value={form.nombre}
-          onChange={set('nombre')}
-          placeholder="Ej: Cardiología"
-        />
 
         <label className="gs-label">Duración del turno (minutos)</label>
         <input
@@ -108,6 +148,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
           value={form.duracionTurnoEnMins}
           onChange={set('duracionTurnoEnMins')}
           placeholder="Ej: 30"
+          readOnly={!esEdicion && !!form.servicioId}
         />
 
         <label className="gs-label">Costo ($)</label>
@@ -119,17 +160,16 @@ function ServicioModal({ servicio, onClose, onSaved }) {
           value={form.costo}
           onChange={set('costo')}
           placeholder="Ej: 7000"
+          readOnly={!esEdicion && !!form.servicioId}
         />
 
-        {tipoFinal === 'PRACTICA' && (
+        {tipoFinal === 'PRACTICA' && form.codigo && (
           <>
             <label className="gs-label">Código</label>
             <input
               className="gs-input"
               value={form.codigo}
-              onChange={set('codigo')}
-              placeholder="Ej: ECG-001"
-              disabled={esEdicion}
+              disabled
             />
           </>
         )}
@@ -139,7 +179,7 @@ function ServicioModal({ servicio, onClose, onSaved }) {
             Cancelar
           </button>
           <button className="gs-btn-primary" onClick={handleSubmit}>
-            {esEdicion ? 'Guardar cambios' : 'Crear servicio'}
+            {esEdicion ? 'Guardar cambios' : 'Agregar'}
           </button>
         </div>
       </div>
@@ -208,6 +248,7 @@ export function GestionServicio() {
   const [especialidades, setEspecialidades] = useState([]);
   const [practicas, setPracticas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -218,10 +259,29 @@ export function GestionServicio() {
   const [filtro, setFiltro] = useState('TODOS');
 
   useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getUserByToken(token);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setLoadingUser(false);
+        }
+      } else {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [token]);
+
+  useEffect(() => {
+    if (!user) return;
     const normalizar = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
     const cargar = async () => {
       try {
-        const [espRes, pracRes] = await Promise.all([getEspecialidades(), getPracticas()]);
+        const [espRes, pracRes] = await Promise.all([getAllEspecialidadesByMedic(user.id), getAllPracticaByMedic(user.id)]);
         const esp = espRes?.data ?? espRes ?? [];
         const prac = pracRes?.data ?? pracRes ?? [];
         setEspecialidades(esp.map(normalizar));
@@ -236,24 +296,14 @@ export function GestionServicio() {
       }
     };
     cargar();
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (token) {
-        try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-    };
-    fetchUser();
-  }, [token]);
+  }, [user]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
+  }
+
+  if (loadingUser) {
+    return null;
   }
 
   if (user?.rol !== 'Médico') {
@@ -305,7 +355,7 @@ export function GestionServicio() {
         <div className="gs-header">
           <div>
             <h1 className="gs-title">Gestión de Servicios</h1>
-            <p className="gs-subtitle">Administrá las especialidades y prácticas del sistema.</p>
+            <p className="gs-subtitle">Administrá tus especialidades y prácticas.</p>
           </div>
           <button className="gs-btn-primary" onClick={() => setModalCrear(true)}>
             + Nuevo servicio

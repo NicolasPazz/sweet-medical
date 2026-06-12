@@ -15,4 +15,8 @@ router
   .patch((req, res, next) => practicaController.modificar(req, res, next))
   .delete((req, res, next) => practicaController.eliminar(req, res, next));
 
+router
+  .route('/all/:id_usuario')
+  .get((req, res, next) => practicaController.obtenerTodosPorMedico(req, res, next));
+
 export default router;

@@ -15,4 +15,8 @@ router
   .patch((req, res, next) => especialidadController.modificar(req, res, next))
   .delete((req, res, next) => especialidadController.eliminar(req, res, next));
 
+router.
+  route('/all/:id_usuario')
+  .get((req, res, next) => especialidadController.obtenerTodosPorMedico(req, res, next));
+
 export default router;
