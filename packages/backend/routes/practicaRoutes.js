@@ -16,6 +16,11 @@ router
   .delete((req, res, next) => practicaController.eliminar(req, res, next));
 
 router
+  .route('/usuario/:id_usuario')
+  .post((req, res, next) => practicaController.agregarAMedico(req, res, next))
+  .delete((req, res, next) => practicaController.eliminarDeMedico(req, res, next));
+
+router
   .route('/all/:id_usuario')
   .get((req, res, next) => practicaController.obtenerTodosPorMedico(req, res, next));
 

@@ -68,6 +68,30 @@ export class PracticaController {
     }
   };
 
+  agregarAMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(id_usuario, practicaId);
+      const resultado = await this.practicaService.agregarAMedico(id_usuario, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  eliminarDeMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(id_usuario, practicaId);
+      const resultado = await this.practicaService.eliminarDeMedico(id_usuario, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   obtenerTodosPorMedico = async (req, res, next) => {
     try {
       const { id_usuario } = req.params;

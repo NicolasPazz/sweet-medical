@@ -48,6 +48,38 @@ export class MedicoRepository {
     return await this.model.findByIdAndUpdate(id, datosActualizados, { new: true });
   }
 
+  async agregarEspecialidadAMedico(medicoId, especialidadId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $addToSet: { especialidades: especialidadId } },
+      { new: true },
+    );
+  }
+
+  async eliminarEspecialidadDeMedico(medicoId, especialidadId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $pull: { especialidades: especialidadId } },
+      { new: true },
+    );
+  }
+
+  async agregarPracticaAMedico(medicoId, practicaId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $addToSet: { practicas: practicaId } },
+      { new: true },
+    );
+  }
+
+  async eliminarPracticaDeMedico(medicoId, practicaId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $pull: { practicas: practicaId } },
+      { new: true },
+    );
+  }
+
   // ELIMINAR
   async delete(id) {
     return await this.model.findByIdAndDelete(id);

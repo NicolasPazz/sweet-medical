@@ -48,6 +48,22 @@ export class MedicoService {
     return medico;
   }
 
+  async eliminarEspecialidadDeMedico(medicoId, especialidadId) {
+    return await this.medicoRepository.eliminarEspecialidadDeMedico(medicoId, especialidadId);
+  }
+
+  async agregarPracticaAMedico(medicoId, practicaId) {
+    return await this.medicoRepository.agregarPracticaAMedico(medicoId, practicaId);
+  }
+
+  async eliminarPracticaDeMedico(medicoId, practicaId) {
+    return await this.medicoRepository.eliminarPracticaDeMedico(medicoId, practicaId);
+  }
+
+  async agregarEspecialidadAMedico(medicoId, especialidadId) {
+    return await this.medicoRepository.agregarEspecialidadAMedico(medicoId, especialidadId);
+  }
+
   async crearMedico(data) {
     if (!data?.usuario || !data?.matricula || !data?.nombre) {
       throw new Error('Faltan datos obligatorios para crear el médico');

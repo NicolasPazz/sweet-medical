@@ -71,6 +71,30 @@ export class EspecialidadController {
     }
   };
 
+  eliminarDeMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(id_usuario, especialidadId);
+      const resultado = await this.especialidadService.eliminarDeMedico(id_usuario, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarAMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(id_usuario, especialidadId);
+      const resultado = await this.especialidadService.agregarAMedico(id_usuario, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   obtenerTodosPorMedico = async (req, res, next) => {
     try{
 

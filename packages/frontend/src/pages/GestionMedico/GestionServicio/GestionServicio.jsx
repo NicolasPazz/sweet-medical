@@ -3,7 +3,7 @@ import {
   especialidadesMock,
   practicasMock,
 } from '../../../mockdata/servicios.js';
-import { getAllEspecialidadesByMedic, getAllPracticaByMedic } from '../../../services/ServiciosService.js';
+import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico ,eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getUserByToken } from '../../../services/userService.js';
@@ -22,17 +22,17 @@ const EMPTY_FORM = () => ({
 });
 
 // ─── Modal crear / editar ──────────────────────────────────────────────────
-function ServicioModal({ servicio, onClose, onSaved }) {
+function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [], practicasUsuario = [] }) {
   const esEdicion = !!servicio;
   const [form, setForm] = useState(
     esEdicion
       ? {
-          tipo: servicio.tipo,
-          nombre: servicio.nombre,
-          duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-          costo: String(servicio.costo),
-          codigo: servicio.codigo ?? '',
-        }
+        tipo: servicio.tipo,
+        nombre: servicio.nombre,
+        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
+        costo: String(servicio.costo),
+        codigo: servicio.codigo ?? '',
+      }
       : EMPTY_FORM(),
   );
   const [catalogoServicios, setCatalogoServicios] = useState([]);
@@ -51,7 +51,9 @@ function ServicioModal({ servicio, onClose, onSaved }) {
           ? await getEspecialidades()
           : await getPracticas();
         const lista = res?.data ?? [];
-        setCatalogoServicios(lista);
+        const serviciosYaAsignados = form.tipo === 'ESPECIALIDAD' ? especialidadesUsuario : practicasUsuario;
+        const idsYaAsignados = new Set(serviciosYaAsignados.map((s) => s.id ?? s._id?.toString()));
+        setCatalogoServicios(lista.filter((serv) => !idsYaAsignados.has(serv._id?.toString() ?? serv.id)));
       } catch (e) {
         console.error('Error cargando catálogo:', e);
       } finally {
@@ -140,9 +142,10 @@ function ServicioModal({ servicio, onClose, onSaved }) {
           </>
         )}
 
-        <label className="gs-label">Duración del turno (minutos)</label>
+        <label className="gs-label" htmlFor="duracionTurnoInput">Duración del turno (minutos)</label>
         <input
           className="gs-input"
+          id="duracionTurnoInput"
           type="number"
           min="1"
           value={form.duracionTurnoEnMins}
@@ -151,9 +154,10 @@ function ServicioModal({ servicio, onClose, onSaved }) {
           readOnly={!esEdicion && !!form.servicioId}
         />
 
-        <label className="gs-label">Costo ($)</label>
+        <label className="gs-label" htmlFor='costoInput'>Costo ($)</label>
         <input
           className="gs-input"
+          id="costoInput"
           type="number"
           min="0"
           step="0.01"
@@ -165,9 +169,10 @@ function ServicioModal({ servicio, onClose, onSaved }) {
 
         {tipoFinal === 'PRACTICA' && form.codigo && (
           <>
-            <label className="gs-label">Código</label>
+            <label className="gs-label" htmlFor='codigoInput'>Código</label>
             <input
               className="gs-input"
+              id="codigoInput"
               value={form.codigo}
               disabled
             />
@@ -318,112 +323,158 @@ export function GestionServicio() {
   const todos = [...conTipo(especialidades, 'ESPECIALIDAD'), ...conTipo(practicas, 'PRACTICA')];
   const serviciosFiltrados = todos.filter((s) => filtro === 'TODOS' || s.tipo === filtro);
 
-  const handleSaved = (servicioGuardado, esEdicion) => {
+  const handleSaved = async (servicioGuardado, esEdicion) => {
     const { tipo, ...sinTipo } = servicioGuardado;
 
-    if (tipo === 'ESPECIALIDAD') {
-      setEspecialidades((prev) =>
-        esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
-      );
-    } else {
-      setPracticas((prev) =>
-        esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
-      );
-    }
+    try {
+      if (!esEdicion) {
+        let statusCode;
+        if (tipo === 'ESPECIALIDAD') {
+          statusCode = await agregarEspecialidadAMedico(servicioGuardado, user.id);
+        } else {
+          statusCode = await agregarPracticaAMedico(servicioGuardado, user.id);
+        }
 
-    setModalCrear(false);
-    setModalEditar(null);
-    mostrarToast(
-      esEdicion ? 'Servicio actualizado correctamente.' : 'Servicio creado correctamente.',
-    );
+        if (statusCode === 200) {
+          mostrarToast('Servicio agregado con éxito.', 'success');
+        } else {
+          mostrarToast('Respuesta inesperada del servidor.', 'error');
+        }
+      } else {
+        mostrarToast('Servicio actualizado correctamente.', 'success');
+      }
+
+      if (tipo === 'ESPECIALIDAD') {
+        setEspecialidades((prev) =>
+          esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
+        );
+      } else {
+        setPracticas((prev) =>
+          esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
+        );
+      }
+
+      setModalCrear(false);
+      setModalEditar(null);
+
+    } catch (error) {
+      console.error('Error al guardar el servicio:', error);
+      if (error.response) {
+        const mensajeBackend = error.response.data?.mensaje || 'Error en los datos enviados.';
+        mostrarToast(`Error (${error.response.status}): ${mensajeBackend}`, 'error');
+      } else {
+        mostrarToast('No se pudo conectar con el servidor. Revisá tu conexión.', 'error');
+      }
+    }
   };
 
-  const handleDeleted = () => {
-    const { tipo, id } = modalEliminar;
-    if (tipo === 'ESPECIALIDAD') {
-      setEspecialidades((prev) => prev.filter((s) => s.id !== id));
-    } else {
-      setPracticas((prev) => prev.filter((s) => s.id !== id));
+  const handleDeleted = async () => {
+    try {
+      const { tipo, id } = modalEliminar;
+      let statusCode;
+      if (tipo === 'ESPECIALIDAD') {
+        statusCode = await eliminarEspecialidadAMedico(modalEliminar, user.id);
+      } else {
+        statusCode = await eliminarPracticaAMedico(modalEliminar, user.id);
+      }
+
+      if (statusCode === 200) {
+        if (tipo === 'ESPECIALIDAD') {
+          setEspecialidades((prev) => prev.filter((s) => s.id !== id));
+        } else {
+          setPracticas((prev) => prev.filter((s) => s.id !== id));
+        }
+        mostrarToast('Servicio eliminado correctamente.', 'success');
+      } else {
+        mostrarToast('Error en la eliminación del servicio, intentá más tarde.', 'error');
+      }
+    } catch (error) {
+      if (error.response) {
+        const mensajeBackend = error.response.data?.mensaje || 'Error en los datos enviados.';
+        mostrarToast(`Error (${error.response.status}): ${mensajeBackend}`, 'error');
+      } else {
+        mostrarToast('No se pudo conectar con el servidor. Revisá tu conexión.', 'error');
+      }
+    } finally {
+      setModalEliminar(null);
     }
-    setModalEliminar(null);
-    mostrarToast('Servicio eliminado.');
   };
 
-  return (
-    <div className="gs-page">
-      <div className="gs-container">
-        <div className="gs-header">
-          <div>
-            <h1 className="gs-title">Gestión de Servicios</h1>
-            <p className="gs-subtitle">Administrá tus especialidades y prácticas.</p>
-          </div>
-          <button className="gs-btn-primary" onClick={() => setModalCrear(true)}>
-            + Nuevo servicio
-          </button>
+return (
+  <div className="gs-page">
+    <div className="gs-container">
+      <div className="gs-header">
+        <div>
+          <h1 className="gs-title">Gestión de Servicios</h1>
+          <p className="gs-subtitle">Administrá tus especialidades y prácticas.</p>
         </div>
-
-        {errorCarga && (
-          <div
-            className="gs-toast gs-toast--error"
-            style={{ position: 'static', marginBottom: '16px' }}
-          >
-            ⚠️ {errorCarga}
-          </div>
-        )}
-
-        <div className="gs-filters">
-          {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
-            <button
-              key={op}
-              className={`gs-filter-btn${filtro === op ? ' active' : ''}`}
-              onClick={() => setFiltro(op)}
-            >
-              {op === 'TODOS' ? 'Todos' : op === 'ESPECIALIDAD' ? 'Especialidades' : 'Prácticas'}
-              {op !== 'TODOS' && (
-                <span className="gs-filter-count">
-                  ({(op === 'ESPECIALIDAD' ? especialidades : practicas).length})
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <SkeletonServicioList count={4} />
-        ) : serviciosFiltrados.length === 0 ? (
-          <div className="gs-empty">
-            <div className="gs-empty-icon">🩺</div>
-            <div>No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
-          </div>
-        ) : (
-          serviciosFiltrados.map((serv) => (
-            <ServicioCard
-              key={serv.id}
-              servicio={serv}
-              onEdit={setModalEditar}
-              onDelete={setModalEliminar}
-            />
-          ))
-        )}
+        <button className="gs-btn-primary" onClick={() => setModalCrear(true)}>
+          + Nuevo servicio
+        </button>
       </div>
 
-      {modalCrear && <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} />}
-      {modalEditar && (
-        <ServicioModal
-          servicio={modalEditar}
-          onClose={() => setModalEditar(null)}
-          onSaved={handleSaved}
-        />
-      )}
-      {modalEliminar && (
-        <ConfirmDeleteModal
-          servicio={modalEliminar}
-          onClose={() => setModalEliminar(null)}
-          onDeleted={handleDeleted}
-        />
+      {errorCarga && (
+        <div
+          className="gs-toast gs-toast--error"
+          style={{ position: 'static', marginBottom: '16px' }}
+        >
+          ⚠️ {errorCarga}
+        </div>
       )}
 
-      {toast && <Toast msg={toast.msg} type={toast.type} />}
+      <div className="gs-filters">
+        {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
+          <button
+            key={op}
+            className={`gs-filter-btn${filtro === op ? ' active' : ''}`}
+            onClick={() => setFiltro(op)}
+          >
+            {op === 'TODOS' ? 'Todos' : op === 'ESPECIALIDAD' ? 'Especialidades' : 'Prácticas'}
+            {op !== 'TODOS' && (
+              <span className="gs-filter-count">
+                ({(op === 'ESPECIALIDAD' ? especialidades : practicas).length})
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <SkeletonServicioList count={4} />
+      ) : serviciosFiltrados.length === 0 ? (
+        <div className="gs-empty">
+          <div className="gs-empty-icon">🩺</div>
+          <div>No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
+        </div>
+      ) : (
+        serviciosFiltrados.map((serv) => (
+          <ServicioCard
+            key={serv.id}
+            servicio={serv}
+            onEdit={setModalEditar}
+            onDelete={setModalEliminar}
+          />
+        ))
+      )}
     </div>
-  );
+
+    {modalCrear && <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} especialidadesUsuario={especialidades} practicasUsuario={practicas} />}
+    {modalEditar && (
+      <ServicioModal
+        servicio={modalEditar}
+        onClose={() => setModalEditar(null)}
+        onSaved={handleSaved}
+      />
+    )}
+    {modalEliminar && (
+      <ConfirmDeleteModal
+        servicio={modalEliminar}
+        onClose={() => setModalEliminar(null)}
+        onDeleted={handleDeleted}
+      />
+    )}
+
+    {toast && <Toast msg={toast.msg} type={toast.type} />}
+  </div>
+);
 }

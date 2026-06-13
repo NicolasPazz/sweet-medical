@@ -15,6 +15,11 @@ router
   .patch((req, res, next) => especialidadController.modificar(req, res, next))
   .delete((req, res, next) => especialidadController.eliminar(req, res, next));
 
+router
+  .route('/usuario/:id_usuario')
+  .post((req, res, next) => especialidadController.agregarAMedico(req, res, next))
+  .delete((req, res, next) => especialidadController.eliminarDeMedico(req, res, next));
+
 router.
   route('/all/:id_usuario')
   .get((req, res, next) => especialidadController.obtenerTodosPorMedico(req, res, next));
