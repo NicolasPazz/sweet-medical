@@ -41,7 +41,7 @@ export default function Perfil() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
         <Spin indicator={spinIcon} />
-        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando perfil...</span>
+        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>Cargando perfil...</span>
       </div>
     );
   }
@@ -50,11 +50,11 @@ export default function Perfil() {
     <div className="perfil-page">
       {/* --- HEADER --- */}
       <div className="header-container">
-        <h1 className="header-title">Mi Perfil</h1>
+        <h1 className="header-title text-ellipsis">Mi Perfil</h1>
         <div className="header-right">
-          <h2 className="user-name">{user?.username || "N/A"}</h2>
+          <h2 className="user-name text-ellipsis">{user?.username || "N/A"}</h2>
           <img className="user-avatar" src={user?.avatar || "/avatar.png"} alt="Avatar de usuario" />
-          <button className="btn-logout" onClick={() => { logout(); window.location.href = '/login'; }}>
+          <button className="btn-logout text-ellipsis" onClick={() => { logout(); window.location.href = '/login'; }}>
             Cerrar sesión
           </button>
         </div>
@@ -67,36 +67,36 @@ export default function Perfil() {
         <div className="left-section">
           {user?.rol === 'Paciente' ? (
             <>
-              <h2 className="section-title">🏥 Mi Cobertura</h2>
+              <h2 className="section-title text-ellipsis">🏥 Mi Cobertura</h2>
               <div className="cobertura-row">
-                <span className="cobertura-label">Obra Social:</span>
-                <span className="cobertura-value">{user?.obraSocial || 'N/A'}</span>
+                <span className="cobertura-label text-ellipsis">Obra Social:</span>
+                <span className="cobertura-value text-ellipsis">{user?.obraSocial || 'N/A'}</span>
               </div>
               <div className="cobertura-row">
-                <span className="cobertura-label">Plan:</span>
-                <span className="cobertura-badge">{user?.plan || 'N/A'}</span>
+                <span className="cobertura-label text-ellipsis">Plan:</span>
+                <span className="cobertura-badge text-ellipsis">{user?.plan || 'N/A'}</span>
               </div>
               <div className="cobertura-row cobertura-row--top">
-                <span className="cobertura-label">Especialidades cubiertas:</span>
+                <span className="cobertura-label text-ellipsis">Especialidades cubiertas:</span>
                 <ul className="cobertura-list">
                   {user?.coberturasEspecialidad?.length ? (
                     user.coberturasEspecialidad.map((e, i) => (
-                      <li key={i} className="cobertura-chip cobertura-chip--esp">{e}</li>
+                      <li key={i} className="cobertura-chip cobertura-chip--esp text-ellipsis">{e}</li>
                     ))
                   ) : (
-                    <li className="cobertura-empty">Sin cobertura registrada</li>
+                    <li className="cobertura-empty text-ellipsis">Sin cobertura registrada</li>
                   )}
                 </ul>
               </div>
               <div className="cobertura-row cobertura-row--top">
-                <span className="cobertura-label">Prácticas cubiertas:</span>
+                <span className="cobertura-label text-ellipsis">Prácticas cubiertas:</span>
                 <ul className="cobertura-list">
                   {user?.coberturasPractica?.length ? (
                     user.coberturasPractica.map((p, i) => (
-                      <li key={i} className="cobertura-chip cobertura-chip--prac">{p}</li>
+                      <li key={i} className="cobertura-chip cobertura-chip--prac text-ellipsis">{p}</li>
                     ))
                   ) : (
-                    <li className="cobertura-empty">Sin cobertura registrada</li>
+                    <li className="cobertura-empty text-ellipsis">Sin cobertura registrada</li>
                   )}
                 </ul>
               </div>
@@ -106,20 +106,20 @@ export default function Perfil() {
             <table className="medical-table">
               <thead>
                 <tr>
-                  <th>Datos Profesionales</th>
+                  <th className="text-ellipsis">Datos Profesionales</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td><strong>Rol:</strong> {user?.rol || 'N/A'}</td></tr>
-                <tr><td><strong>Años de antigüedad:</strong> {user?.antiguedad || 'N/A'}</td></tr>
+                <tr><td className="text-ellipsis"><strong>Rol:</strong> {user?.rol || 'N/A'}</td></tr>
+                <tr><td className="text-ellipsis"><strong>Años de antigüedad:</strong> {user?.antiguedad || 'N/A'}</td></tr>
                 <tr>
                   <td>
                     <strong>Especialidades:</strong>
                     <ul>
                       {user?.especialidades ? (
-                        user.especialidades.map((esp, index) => <li key={index}>{esp}</li>)
+                        user.especialidades.map((esp, index) => <li key={index} className="text-ellipsis">{esp}</li>)
                       ) : (
-                        <li>N/A</li>
+                        <li className="text-ellipsis">N/A</li>
                       )}
                     </ul>
                   </td>
@@ -129,9 +129,9 @@ export default function Perfil() {
                     <strong>Prácticas:</strong>
                     <ul>
                       {user?.practicas ? (
-                        user.practicas.map((practica, index) => <li key={index}>{practica}</li>)
+                        user.practicas.map((practica, index) => <li key={index} className="text-ellipsis">{practica}</li>)
                       ) : (
-                        <li>N/A</li>
+                        <li className="text-ellipsis">N/A</li>
                       )}
                     </ul>
                   </td>
@@ -143,24 +143,24 @@ export default function Perfil() {
 
         {/* COLUMNA DERECHA: Información Personal Común */}
         <div className="right-section">
-          <h2 className="section-title">Información Personal</h2>
+          <h2 className="section-title text-ellipsis">Información Personal</h2>
           <table className="personal-table">
             <tbody>
               <tr>
                 <td className="label"><strong>Nombre:</strong></td>
-                <td>{user?.nombre || 'N/A'}</td>
+                <td className="text-ellipsis">{user?.nombre || 'N/A'}</td>
               </tr>
               <tr>
                 <td className="label"><strong>Email:</strong></td>
-                <td>{user?.email || 'N/A'}</td>
+                <td className="text-ellipsis">{user?.email || 'N/A'}</td>
               </tr>
               <tr>
                 <td className="label"><strong>Teléfono:</strong></td>
-                <td>{user?.telefono || 'N/A'}</td>
+                <td className="text-ellipsis">{user?.telefono || 'N/A'}</td>
               </tr>
               <tr>
                 <td className="label"><strong>Dirección:</strong></td>
-                <td>{user?.direccion || 'N/A'}</td>
+                <td className="text-ellipsis">{user?.direccion || 'N/A'}</td>
               </tr>
             </tbody>
           </table>

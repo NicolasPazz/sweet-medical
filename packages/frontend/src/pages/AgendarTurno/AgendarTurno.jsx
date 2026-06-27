@@ -350,7 +350,7 @@ export default function AgendarTurno() {
     return (
       <div className="agendar-container">
         <div className="paciente-select-container">
-          <label className="paciente-select-label">👤 Paciente de Simulación:</label>
+          <label className="paciente-select-label text-ellipsis">👤 Paciente de Simulación:</label>
           <select
             className="paciente-select-dropdown"
             value={selectedPaciente ? selectedPaciente.id_paciente : ''}
@@ -364,7 +364,7 @@ export default function AgendarTurno() {
             ))}
           </select>
           {selectedPaciente && (
-            <div className="paciente-selected-info">
+            <div className="paciente-selected-info text-ellipsis">
               Cobertura: {selectedPaciente.obraSocial} ({selectedPaciente.plan})
             </div>
           )}
@@ -373,8 +373,8 @@ export default function AgendarTurno() {
         <div className="card">
           <div className="success-screen">
             <div className="success-icon">✅</div>
-            <h2 className="success-title">¡Turno(s) Confirmado(s)!</h2>
-            <p className="success-sub">
+            <h2 className="success-title text-ellipsis">¡Turno(s) Confirmado(s)!</h2>
+            <p className="success-sub text-ellipsis-multiline">
               Tus reservas han sido procesadas exitosamente para el paciente{' '}
               <strong>{selectedPaciente?.nombre}</strong>.
             </p>
@@ -382,31 +382,31 @@ export default function AgendarTurno() {
             <div className="ticket">
               {reservaExitoData.map((t, idx) => (
                 <div key={t.id || idx} className="ticket-item">
-                  <div className="ticket-header-label">Turno #{idx + 1}</div>
+                  <div className="ticket-header-label text-ellipsis">Turno #{idx + 1}</div>
                   <div className="ticket-row">
-                    <span className="ticket-label">Servicio</span>
-                    <span className="ticket-val">{t.especialidad || t.practica}</span>
+                    <span className="ticket-label text-ellipsis">Servicio</span>
+                    <span className="ticket-val text-ellipsis">{t.especialidad || t.practica}</span>
                   </div>
                   <div className="ticket-row">
-                    <span className="ticket-label">Médico</span>
-                    <span className="ticket-val">{t.medico?.nombre}</span>
+                    <span className="ticket-label text-ellipsis">Médico</span>
+                    <span className="ticket-val text-ellipsis">{t.medico?.nombre}</span>
                   </div>
                   <div className="ticket-row">
-                    <span className="ticket-label">Fecha</span>
-                    <span className="ticket-val">{t.fecha}</span>
+                    <span className="ticket-label text-ellipsis">Fecha</span>
+                    <span className="ticket-val text-ellipsis">{t.fecha}</span>
                   </div>
                   <div className="ticket-row">
-                    <span className="ticket-label">Hora</span>
-                    <span className="ticket-val">{t.hora} hs</span>
+                    <span className="ticket-label text-ellipsis">Hora</span>
+                    <span className="ticket-val text-ellipsis">{t.hora} hs</span>
                   </div>
                   <div className="ticket-row">
-                    <span className="ticket-label">Sede</span>
-                    <span className="ticket-val">{t.sede?.nombre || 'No especificada'}</span>
+                    <span className="ticket-label text-ellipsis">Sede</span>
+                    <span className="ticket-val text-ellipsis">{t.sede?.nombre || 'No especificada'}</span>
                   </div>
                   {t.costoEstimado !== undefined && (
                     <div className="ticket-row">
-                      <span className="ticket-label">Costo Estimado</span>
-                      <span className="ticket-val highlight-cost">
+                      <span className="ticket-label text-ellipsis">Costo Estimado</span>
+                      <span className="ticket-val highlight-cost text-ellipsis">
                         {t.costoEstimado === 0 ? 'Sin costo (Cubierto)' : `$${t.costoEstimado}`}
                       </span>
                     </div>
@@ -433,8 +433,8 @@ export default function AgendarTurno() {
   return (
     <div className="agendar-container">
       <header className="agendar-wizard-header">
-        <h1 className="agendar-wizard-title">Agendar Cita Médica</h1>
-        <p className="agendar-wizard-subtitle">
+        <h1 className="agendar-wizard-title text-ellipsis">Agendar Cita Médica</h1>
+        <p className="agendar-wizard-subtitle text-ellipsis">
           {selectedPaciente
             ? `Asistente de reserva interactivo para: ${selectedPaciente.nombre}`
             : 'Selecciona un paciente de simulación del menú desplegable para comenzar'}
@@ -442,7 +442,7 @@ export default function AgendarTurno() {
       </header>
 
       <div className="paciente-select-container">
-        <label className="paciente-select-label">👤 Paciente de Simulación:</label>
+        <label className="paciente-select-label text-ellipsis">👤 Paciente de Simulación:</label>
         <select
           className="paciente-select-dropdown"
           value={selectedPaciente ? selectedPaciente.id_paciente : ''}
@@ -456,7 +456,7 @@ export default function AgendarTurno() {
           ))}
         </select>
         {selectedPaciente && (
-          <div className="paciente-selected-info">
+          <div className="paciente-selected-info text-ellipsis">
             Cobertura: {selectedPaciente.obraSocial} ({selectedPaciente.plan})
           </div>
         )}
@@ -466,12 +466,12 @@ export default function AgendarTurno() {
         <div className="card">
           <div className="card-body no-patient-selected">
             <div className="no-patient-icon">👤</div>
-            <h3>Selección de Paciente para Simulación</h3>
-            <p>
+            <h3 className="text-ellipsis">Selección de Paciente para Simulación</h3>
+            <p className="text-ellipsis-multiline">
               Para iniciar el asistente de agendamiento de turnos, por favor selecciona un paciente
               de prueba del menú desplegable superior.
             </p>
-            <p className="no-patient-sub">
+            <p className="no-patient-sub text-ellipsis-multiline">
               Esto nos permitirá calcular las coberturas correspondientes, copagos y costos en
               tiempo real durante cada uno de los pasos de búsqueda.
             </p>
@@ -485,8 +485,8 @@ export default function AgendarTurno() {
               <div className={getStepClass(s)} key={s.n}>
                 <div className="step-circle">{step > s.n ? '✓' : s.n}</div>
                 <div className="step-info">
-                  <div className="step-label">{s.label}</div>
-                  <div className="step-name">{s.name}</div>
+                  <div className="step-label text-ellipsis">{s.label}</div>
+                  <div className="step-name text-ellipsis">{s.name}</div>
                 </div>
               </div>
             ))}
@@ -494,7 +494,7 @@ export default function AgendarTurno() {
 
           {error && (
             <div className="error-alert">
-              <span>⚠️ {error}</span>
+              <span className="text-ellipsis-multiline">⚠️ {error}</span>
               <button className="close-alert-btn" onClick={() => setError(null)}>
                 ✕
               </button>
@@ -507,8 +507,8 @@ export default function AgendarTurno() {
               <div className="card-header">
                 <div className="card-header-icon">🔍</div>
                 <div>
-                  <h2>¿Qué servicio médico necesitás?</h2>
-                  <p>
+                  <h2 className="text-ellipsis">¿Qué servicio médico necesitás?</h2>
+                  <p className="text-ellipsis-multiline">
                     Seleccioná si buscás una especialidad clínica o una práctica médica concreta
                   </p>
                 </div>
@@ -548,7 +548,7 @@ export default function AgendarTurno() {
                         <div className="service-icon" style={{ backgroundColor: meta.color }}>
                           {meta.icon}
                         </div>
-                        <div className="service-name">{serv.nombre}</div>
+                        <div className="service-name text-ellipsis">{serv.nombre}</div>
                       </div>
                     );
                   })}
@@ -575,8 +575,8 @@ export default function AgendarTurno() {
                 <div className="card-header">
                   <div className="card-header-icon">👨‍⚕️</div>
                   <div>
-                    <h2>Selección de Profesional</h2>
-                    <p>Filtros aplicados para: {selectedService?.nombre}</p>
+                    <h2 className="text-ellipsis">Selección de Profesional</h2>
+                    <p className="text-ellipsis">Filtros aplicados para: {selectedService?.nombre}</p>
                   </div>
                 </div>
                 <div className="card-body">
@@ -597,8 +597,8 @@ export default function AgendarTurno() {
                     >
                       <div className="doc-avatar">★</div>
                       <div className="doc-info">
-                        <div className="doc-name">Cualquier Profesional</div>
-                        <div className="doc-spec">Asignación al primer médico libre disponible</div>
+                        <div className="doc-name text-ellipsis">Cualquier Profesional</div>
+                        <div className="doc-spec text-ellipsis">Asignación al primer médico libre disponible</div>
                       </div>
                       <div className="doc-arrow">›</div>
                     </div>
@@ -616,10 +616,10 @@ export default function AgendarTurno() {
                         >
                           <div className="doc-avatar">{initials}</div>
                           <div className="doc-info">
-                            <div className="doc-name">{doc.nombre}</div>
-                            <div className="doc-spec">Matrícula: {doc.matricula || 'N/A'}</div>
+                            <div className="doc-name text-ellipsis">{doc.nombre}</div>
+                            <div className="doc-spec text-ellipsis">Matrícula: {doc.matricula || 'N/A'}</div>
                             <div className="doc-meta">
-                              <span className="doc-meta-item">📍 Sede: {sedeFisica}</span>
+                              <span className="doc-meta-item text-ellipsis">📍 Sede: {sedeFisica}</span>
                             </div>
                           </div>
                           <div className="doc-arrow">›</div>
@@ -628,7 +628,7 @@ export default function AgendarTurno() {
                     })}
 
                     {medicosFiltrados.length === 0 && (
-                      <div className="empty-results">
+                      <div className="empty-results text-ellipsis-multiline">
                         No se encontraron profesionales que ofrezcan este servicio.
                       </div>
                     )}
@@ -656,8 +656,8 @@ export default function AgendarTurno() {
                 <div className="card-header">
                   <div className="card-header-icon">📅</div>
                   <div>
-                    <h2>Seleccioná la Fecha</h2>
-                    <p>Los días con punto azul tienen turnos disponibles</p>
+                    <h2 className="text-ellipsis">Seleccioná la Fecha</h2>
+                    <p className="text-ellipsis-multiline">Los días con punto azul tienen turnos disponibles</p>
                   </div>
                 </div>
                 <div className="card-body">
@@ -666,10 +666,10 @@ export default function AgendarTurno() {
                       {selectedMedico ? getInitials(selectedMedico.nombre) : '★'}
                     </div>
                     <div className="preview-details">
-                      <div className="preview-name">
+                      <div className="preview-name text-ellipsis">
                         {selectedMedico ? selectedMedico.nombre : 'Cualquier Profesional'}
                       </div>
-                      <div className="preview-sub">
+                      <div className="preview-sub text-ellipsis">
                         {selectedService?.nombre}{' '}
                         {selectedMedico?.sedes?.[0]?.nombre
                           ? `· Sede: ${selectedMedico.sedes[0].nombre}`
@@ -720,8 +720,8 @@ export default function AgendarTurno() {
                 <div className="card-header">
                   <div className="card-header-icon">🕐</div>
                   <div>
-                    <h2>Horarios Disponibles</h2>
-                    <p>
+                    <h2 className="text-ellipsis">Horarios Disponibles</h2>
+                    <p className="text-ellipsis-multiline">
                       Fecha seleccionada: {selectedDate} ·{' '}
                       {selectedMedico ? selectedMedico.nombre : 'Cualquier médico'}
                     </p>
@@ -770,24 +770,24 @@ export default function AgendarTurno() {
                                 className={`slot-btn ${isSelected ? 'selected' : ''}`}
                                 onClick={() => setSelectedSlot(slot)}
                               >
-                                <span className="slot-time">{slot.hora} hs</span>
-                                <span className="slot-type">
+                                <span className="slot-time text-ellipsis">{slot.hora} hs</span>
+                                <span className="slot-type text-ellipsis">
                                   {isTele ? 'Telemedicina' : 'Presencial'}
                                 </span>
-                                <span className="slot-sede-tag">{slot.sede?.nombre || 'Sede'}</span>
+                                <span className="slot-sede-tag text-ellipsis">{slot.sede?.nombre || 'Sede'}</span>
                               </button>
                             );
                           })}
                       </div>
 
                       {slots.length === 0 && (
-                        <div className="empty-results">
+                        <div className="empty-results text-ellipsis-multiline">
                           No hay turnos disponibles para esta fecha con el profesional seleccionado.
                         </div>
                       )}
 
                       {selectedSlot && (
-                        <div className="slot-alert-info">
+                        <div className="slot-alert-info text-ellipsis-multiline">
                           ℹ️ Turno seleccionado:{' '}
                           <strong>
                             {selectedSlot.hora} hs (
@@ -873,16 +873,16 @@ export default function AgendarTurno() {
                       {selectedMedico ? getInitials(selectedMedico.nombre) : '★'}
                     </div>
                     <div className="doc-detail-info">
-                      <div className="doc-detail-name">
+                      <div className="doc-detail-name text-ellipsis">
                         {selectedMedico ? selectedMedico.nombre : 'Cualquier Profesional'}
                       </div>
-                      <div className="doc-detail-spec">{selectedService?.nombre}</div>
+                      <div className="doc-detail-spec text-ellipsis">{selectedService?.nombre}</div>
                       <div className="doc-detail-meta">
                         {selectedMedico?.matricula && (
-                          <span>Matrícula: {selectedMedico.matricula}</span>
+                          <span className="text-ellipsis">Matrícula: {selectedMedico.matricula}</span>
                         )}
                         {selectedMedico?.sedes?.[0]?.nombre && (
-                          <span>Sede: {selectedMedico.sedes[0].nombre}</span>
+                          <span className="text-ellipsis">Sede: {selectedMedico.sedes[0].nombre}</span>
                         )}
                       </div>
                     </div>
@@ -900,8 +900,8 @@ export default function AgendarTurno() {
                 <div className="card-header">
                   <div className="card-header-icon">✅</div>
                   <div>
-                    <h2>Confirmar Reserva de Cita</h2>
-                    <p>Revisá los detalles de tus turnos preseleccionados antes de guardarlos</p>
+                    <h2 className="text-ellipsis">Confirmar Reserva de Cita</h2>
+                    <p className="text-ellipsis-multiline">Revisá los detalles de tus turnos preseleccionados antes de guardarlos</p>
                   </div>
                 </div>
                 <div className="card-body">
@@ -912,7 +912,7 @@ export default function AgendarTurno() {
                       style={{ marginBottom: '1.5rem' }}
                     >
                       <div
-                        className="confirm-header-inside"
+                        className="confirm-header-inside text-ellipsis"
                         style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}
                       >
                         Turno #{index + 1}
@@ -920,9 +920,9 @@ export default function AgendarTurno() {
 
                       <div className="confirm-row">
                         <div>
-                          <div className="confirm-label">Paciente de Reserva</div>
-                          <div className="confirm-value">{selectedPaciente?.nombre}</div>
-                          <div className="confirm-sub">
+                          <div className="confirm-label text-ellipsis">Paciente de Reserva</div>
+                          <div className="confirm-value text-ellipsis">{selectedPaciente?.nombre}</div>
+                          <div className="confirm-sub text-ellipsis">
                             DNI: {selectedPaciente?.dni} · Obra Social:{' '}
                             {selectedPaciente?.obraSocial} ({selectedPaciente?.plan})
                           </div>
@@ -931,8 +931,8 @@ export default function AgendarTurno() {
 
                       <div className="confirm-row">
                         <div>
-                          <div className="confirm-label">Servicio Solicitado</div>
-                          <div className="confirm-value">
+                          <div className="confirm-label text-ellipsis">Servicio Solicitado</div>
+                          <div className="confirm-value text-ellipsis">
                             {item.especialidad || item.practica || selectedService?.nombre}
                           </div>
                         </div>
@@ -946,13 +946,13 @@ export default function AgendarTurno() {
 
                       <div className="confirm-row">
                         <div>
-                          <div className="confirm-label">Profesional Asignado</div>
-                          <div className="confirm-value">
+                          <div className="confirm-label text-ellipsis">Profesional Asignado</div>
+                          <div className="confirm-value text-ellipsis">
                             {item.medico?.nombre ||
                               selectedMedico?.nombre ||
                               'Cualquier Profesional disponible'}
                           </div>
-                          <div className="confirm-sub">
+                          <div className="confirm-sub text-ellipsis">
                             Sede: {item.sede?.nombre || 'No asignada'}
                           </div>
                         </div>
@@ -966,8 +966,8 @@ export default function AgendarTurno() {
 
                       <div className="confirm-row">
                         <div>
-                          <div className="confirm-label">Fecha y Hora</div>
-                          <div className="confirm-value highlight-value">
+                          <div className="confirm-label text-ellipsis">Fecha y Hora</div>
+                          <div className="confirm-value highlight-value text-ellipsis">
                             {item.fecha || selectedDate} a las {item.hora} hs
                           </div>
                         </div>
@@ -981,8 +981,8 @@ export default function AgendarTurno() {
 
                       <div className="confirm-row">
                         <div>
-                          <div className="confirm-label">Cobertura y Costo</div>
-                          <div className="confirm-value highlight-cost-value">
+                          <div className="confirm-label text-ellipsis">Cobertura y Costo</div>
+                          <div className="confirm-value highlight-cost-value text-ellipsis">
                             {item.costoEstimado === 0
                               ? `100% Cubierto por ${selectedPaciente?.obraSocial}`
                               : `Paga Particular: $${item.costoEstimado}`}
@@ -1021,14 +1021,14 @@ export default function AgendarTurno() {
 function renderHistorialSection(historial, loadingHistorial, paciente) {
   return (
     <div className="historial-paciente-seccion">
-      <div className="historial-header-title">
+      <div className="historial-header-title text-ellipsis">
         <span>📅</span> Turnos Registrados del Paciente ({paciente.nombre})
       </div>
 
       {loadingHistorial ? (
-        <div className="historial-cargando">Cargando turnos reservados del paciente...</div>
+        <div className="historial-cargando text-ellipsis">Cargando turnos reservados del paciente...</div>
       ) : historial.length === 0 ? (
-        <div className="historial-vacio">
+        <div className="historial-vacio text-ellipsis-multiline">
           El paciente no posee citas registradas o reservadas en el sistema.
         </div>
       ) : (
@@ -1036,14 +1036,14 @@ function renderHistorialSection(historial, loadingHistorial, paciente) {
           <table className="historial-tabla">
             <thead>
               <tr>
-                <th>Profesional</th>
-                <th>Servicio / Especialidad</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Sede</th>
-                <th>Estado</th>
-                <th>Cobertura</th>
-                <th>Costo Estimado</th>
+                <th className="text-ellipsis">Profesional</th>
+                <th className="text-ellipsis">Servicio / Especialidad</th>
+                <th className="text-ellipsis">Fecha</th>
+                <th className="text-ellipsis">Hora</th>
+                <th className="text-ellipsis">Sede</th>
+                <th className="text-ellipsis">Estado</th>
+                <th className="text-ellipsis">Cobertura</th>
+                <th className="text-ellipsis">Costo Estimado</th>
               </tr>
             </thead>
             <tbody>
@@ -1072,22 +1072,22 @@ function renderHistorialSection(historial, loadingHistorial, paciente) {
                 return (
                   <tr key={turno.id || turno._id || turno.id_turno}>
                     <td>
-                      <strong>{turno.medico || 'No especificado'}</strong>
+                      <strong className="text-ellipsis">{turno.medico || 'No especificado'}</strong>
                     </td>
-                    <td>{turno.servicio || 'General'}</td>
-                    <td>{fechaFormatted}</td>
-                    <td>{turno.hora ? `${turno.hora} hs` : 'Sin definir'}</td>
-                    <td>{turno.sede || 'No especificada'}</td>
+                    <td className="text-ellipsis">{turno.servicio || 'General'}</td>
+                    <td className="text-ellipsis">{fechaFormatted}</td>
+                    <td className="text-ellipsis">{turno.hora ? `${turno.hora} hs` : 'Sin definir'}</td>
+                    <td className="text-ellipsis">{turno.sede || 'No especificada'}</td>
                     <td>
                       <span
-                        className={`estado-badge ${isRealizado ? 'realizado' : ''} ${isReservado ? 'reservado' : ''} ${isCancelado ? 'cancelado' : ''} ${isDisponible ? 'disponible' : ''}`}
+                        className={`estado-badge text-ellipsis ${isRealizado ? 'realizado' : ''} ${isReservado ? 'reservado' : ''} ${isCancelado ? 'cancelado' : ''} ${isDisponible ? 'disponible' : ''}`}
                       >
                         {estadoLabel}
                       </span>
                     </td>
-                    <td>{turno.cobertura || 'No cubierta'}</td>
+                    <td className="text-ellipsis">{turno.cobertura || 'No cubierta'}</td>
                     <td>
-                      <span className="costo-texto">
+                      <span className="costo-texto text-ellipsis">
                         {turno.costoEstimado === 0
                           ? 'Cubierto 100%'
                           : `$${turno.costoEstimado ?? turno.costo ?? 0}`}

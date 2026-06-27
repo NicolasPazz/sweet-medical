@@ -58,12 +58,12 @@ export default function Login() {
   return (
     <div className="inicioSesion-container">
       <div className="form-container">
-        <h1>Iniciar Sesión</h1>
-        <p className="form-subtitle">Ingresá tus datos para continuar</p>
+        <h1 className="text-ellipsis">Iniciar Sesión</h1>
+        <p className="form-subtitle text-ellipsis">Ingresá tus datos para continuar</p>
 
         <div className="login-form">
           <div>
-            <label htmlFor="email">Correo electrónico:</label>
+            <label htmlFor="email" className="text-ellipsis">Correo electrónico:</label>
             <div className="input-wrapper">
               <input
                 type="email"
@@ -82,7 +82,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label htmlFor="password">Contraseña:</label>
+            <label htmlFor="password" className="text-ellipsis">Contraseña:</label>
             <div className="input-wrapper">
               <input
                 type="password"
@@ -103,6 +103,7 @@ export default function Login() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
+            className="text-ellipsis"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
           >
             {submitting ? (
@@ -116,7 +117,7 @@ export default function Login() {
         </div>
 
         <div className="registro-link">
-          <p>
+          <p className="text-ellipsis">
             ¿No tienes una cuenta? <a href="/registro">Regístrate aquí</a>
           </p>
         </div>

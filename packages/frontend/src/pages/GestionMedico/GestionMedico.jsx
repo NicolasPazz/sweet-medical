@@ -77,7 +77,7 @@ export function GestionMedico() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
           Cargando...
         </span>
       </div>
@@ -92,16 +92,16 @@ export function GestionMedico() {
     <div className="gm-page">
       <div className="gm-container">
         <div className="gm-header">
-          <h1 className="gm-title">Gestión Médica</h1>
-          <p className="gm-subtitle">Seleccioná una sección para administrar tu actividad.</p>
+          <h1 className="gm-title text-ellipsis">Gestión Médica</h1>
+          <p className="gm-subtitle text-ellipsis">Seleccioná una sección para administrar tu actividad.</p>
         </div>
 
         <div className="gm-grid">
           {OPCIONES.map((op) => (
             <button key={op.path} className="gm-card" onClick={() => navigate(op.path)}>
               <div className="gm-card-icono">{op.icono}</div>
-              <div className="gm-card-titulo">{op.titulo}</div>
-              <div className="gm-card-descripcion">{op.descripcion}</div>
+              <div className="gm-card-titulo text-ellipsis">{op.titulo}</div>
+              <div className="gm-card-descripcion text-ellipsis-multiline">{op.descripcion}</div>
               <div className="gm-card-arrow">→</div>
             </button>
           ))}

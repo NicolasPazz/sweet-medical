@@ -109,21 +109,21 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title">
+        <div className="gs-modal-title text-ellipsis">
           {esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}
         </div>
 
-        {error && <div className="gs-error">{error}</div>}
+        {error && <div className="gs-error text-ellipsis-multiline">{error}</div>}
 
         {!esEdicion && (
           <>
-            <label className="gs-label">Tipo de servicio</label>
+            <label className="gs-label text-ellipsis">Tipo de servicio</label>
             <select className="gs-select" value={form.tipo} onChange={set('tipo')}>
               <option value="ESPECIALIDAD">Especialidad</option>
               <option value="PRACTICA">Práctica</option>
             </select>
 
-            <label className="gs-label">Seleccioná del catálogo</label>
+            <label className="gs-label text-ellipsis">Seleccioná del catálogo</label>
             <select
               className="gs-select"
               value={form.servicioId ?? ''}
@@ -134,7 +134,7 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
                 {loadingCatalogo ? 'Cargando...' : 'Elegí un servicio'}
               </option>
               {catalogoServicios.map((s) => (
-                <option key={s._id ?? s.id} value={s._id ?? s.id}>
+                <option key={s._id ?? s.id} value={s._id ?? s.id} className="text-ellipsis">
                   {s.nombre}
                 </option>
               ))}
@@ -142,7 +142,7 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
           </>
         )}
 
-        <label className="gs-label" htmlFor="duracionTurnoInput">Duración del turno (minutos)</label>
+        <label className="gs-label text-ellipsis" htmlFor="duracionTurnoInput">Duración del turno (minutos)</label>
         <input
           className="gs-input"
           id="duracionTurnoInput"
@@ -154,7 +154,7 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
           readOnly={!esEdicion && !!form.servicioId}
         />
 
-        <label className="gs-label" htmlFor='costoInput'>Costo ($)</label>
+        <label className="gs-label text-ellipsis" htmlFor='costoInput'>Costo ($)</label>
         <input
           className="gs-input"
           id="costoInput"
@@ -169,7 +169,7 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
 
         {tipoFinal === 'PRACTICA' && form.codigo && (
           <>
-            <label className="gs-label" htmlFor='codigoInput'>Código</label>
+            <label className="gs-label text-ellipsis" htmlFor='codigoInput'>Código</label>
             <input
               className="gs-input"
               id="codigoInput"
@@ -180,10 +180,10 @@ function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [],
         )}
 
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>
+          <button className="gs-btn-secondary text-ellipsis" onClick={onClose}>
             Cancelar
           </button>
-          <button className="gs-btn-primary" onClick={handleSubmit}>
+          <button className="gs-btn-primary text-ellipsis" onClick={handleSubmit}>
             {esEdicion ? 'Guardar cambios' : 'Agregar'}
           </button>
         </div>
@@ -197,16 +197,16 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title">🗑️ Eliminar servicio</div>
-        <p className="gs-modal-body">
+        <div className="gs-modal-title text-ellipsis">🗑️ Eliminar servicio</div>
+        <p className="gs-modal-body text-ellipsis-multiline">
           ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se
           puede deshacer.
         </p>
         <div className="gs-modal-footer">
-          <button className="gs-btn-secondary" onClick={onClose}>
+          <button className="gs-btn-secondary text-ellipsis" onClick={onClose}>
             Cancelar
           </button>
-          <button className="gs-btn-primary gs-btn-danger" onClick={onDeleted}>
+          <button className="gs-btn-primary gs-btn-danger text-ellipsis" onClick={onDeleted}>
             Sí, eliminar
           </button>
         </div>
@@ -222,19 +222,19 @@ function ServicioCard({ servicio, onEdit, onDelete }) {
   return (
     <div className="gs-card">
       <div className="gs-card-left">
-        <div className="gs-card-name">{servicio.nombre}</div>
+        <div className="gs-card-name text-ellipsis">{servicio.nombre}</div>
         <div className="gs-card-meta">
-          <span className={`gs-badge ${badgeClass}`}>{servicio.tipo}</span>
-          <span>⏱ {servicio.duracionTurnoEnMins} min</span>
-          <span>💲 ${Number(servicio.costo).toLocaleString('es-AR')}</span>
-          {servicio.codigo && <span>🔖 {servicio.codigo}</span>}
+          <span className={`gs-badge ${badgeClass} text-ellipsis`}>{servicio.tipo}</span>
+          <span className="text-ellipsis">⏱ {servicio.duracionTurnoEnMins} min</span>
+          <span className="text-ellipsis">💲 ${Number(servicio.costo).toLocaleString('es-AR')}</span>
+          {servicio.codigo && <span className="text-ellipsis">🔖 {servicio.codigo}</span>}
         </div>
       </div>
       <div className="gs-card-actions">
-        <button className="gs-btn-edit" onClick={() => onEdit(servicio)}>
+        <button className="gs-btn-edit text-ellipsis" onClick={() => onEdit(servicio)}>
           Editar
         </button>
-        <button className="gs-btn-delete" onClick={() => onDelete(servicio)}>
+        <button className="gs-btn-delete text-ellipsis" onClick={() => onDelete(servicio)}>
           Eliminar
         </button>
       </div>
@@ -244,7 +244,7 @@ function ServicioCard({ servicio, onEdit, onDelete }) {
 
 // ─── Toast ─────────────────────────────────────────────────────────────────
 function Toast({ msg, type }) {
-  return <div className={`gs-toast gs-toast--${type}`}>{msg}</div>;
+  return <div className={`gs-toast gs-toast--${type} text-ellipsis`}>{msg}</div>;
 }
 
 // ─── Página principal ──────────────────────────────────────────────────────
@@ -405,17 +405,17 @@ return (
     <div className="gs-container">
       <div className="gs-header">
         <div>
-          <h1 className="gs-title">Gestión de Servicios</h1>
-          <p className="gs-subtitle">Administrá tus especialidades y prácticas.</p>
+          <h1 className="gs-title text-ellipsis">Gestión de Servicios</h1>
+          <p className="gs-subtitle text-ellipsis">Administrá tus especialidades y prácticas.</p>
         </div>
-        <button className="gs-btn-primary" onClick={() => setModalCrear(true)}>
+        <button className="gs-btn-primary text-ellipsis" onClick={() => setModalCrear(true)}>
           + Nuevo servicio
         </button>
       </div>
 
       {errorCarga && (
         <div
-          className="gs-toast gs-toast--error"
+          className="gs-toast gs-toast--error text-ellipsis-multiline"
           style={{ position: 'static', marginBottom: '16px' }}
         >
           ⚠️ {errorCarga}
@@ -426,12 +426,12 @@ return (
         {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
           <button
             key={op}
-            className={`gs-filter-btn${filtro === op ? ' active' : ''}`}
+            className={`gs-filter-btn${filtro === op ? ' active' : ''} text-ellipsis`}
             onClick={() => setFiltro(op)}
           >
             {op === 'TODOS' ? 'Todos' : op === 'ESPECIALIDAD' ? 'Especialidades' : 'Prácticas'}
             {op !== 'TODOS' && (
-              <span className="gs-filter-count">
+              <span className="gs-filter-count text-ellipsis">
                 ({(op === 'ESPECIALIDAD' ? especialidades : practicas).length})
               </span>
             )}
@@ -444,7 +444,7 @@ return (
       ) : serviciosFiltrados.length === 0 ? (
         <div className="gs-empty">
           <div className="gs-empty-icon">🩺</div>
-          <div>No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
+          <div className="text-ellipsis">No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
         </div>
       ) : (
         serviciosFiltrados.map((serv) => (

@@ -35,7 +35,7 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
   return (
     <div className="ctm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="ctm-modal">
-        <div className="ctm-title">❌ Cancelar turno</div>
+        <div className="ctm-title text-ellipsis">❌ Cancelar turno</div>
 
         {!puedeCancel ? (
           <>
@@ -45,7 +45,7 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
               menos de eso.
             </p>
             <div className="ctm-footer">
-              <button className="ctm-btn-secondary" onClick={onClose}>
+              <button className="ctm-btn-secondary text-ellipsis" onClick={onClose}>
                 Entendido
               </button>
             </div>
@@ -57,7 +57,7 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
               <strong>{turno.hora} hs</strong>. Esta acción no se puede deshacer.
             </p>
 
-            <label className="ctm-label">
+            <label className="ctm-label text-ellipsis">
               Motivo de cancelación <span className="ctm-required">*</span>
             </label>
             <textarea
@@ -71,15 +71,15 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
               }}
               maxLength={300}
             />
-            <span className="ctm-char-count">{motivo.length}/300</span>
+            <span className="ctm-char-count text-ellipsis">{motivo.length}/300</span>
 
             {error && <p className="ctm-error">{error}</p>}
 
             <div className="ctm-footer">
-              <button className="ctm-btn-secondary" onClick={onClose}>
+              <button className="ctm-btn-secondary text-ellipsis" onClick={onClose}>
                 Volver
               </button>
-              <button className="ctm-btn-danger" onClick={handleConfirm}>
+              <button className="ctm-btn-danger text-ellipsis" onClick={handleConfirm}>
                 Confirmar cancelación
               </button>
             </div>

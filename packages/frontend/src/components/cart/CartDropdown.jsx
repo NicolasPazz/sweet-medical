@@ -80,9 +80,9 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
     >
       {/* Header del Carrito */}
       <div className="cart-header">
-        <span className="cart-header__title">Turnos Seleccionados</span>
+        <span className="cart-header__title text-ellipsis">Turnos Seleccionados</span>
         {items.length > 0 && (
-          <button className="cart-header__clear" onClick={clearCart}>
+          <button className="cart-header__clear text-ellipsis" onClick={clearCart}>
             Vaciar todo
           </button>
         )}
@@ -93,7 +93,7 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
         {items.length === 0 ? (
           <div className="cart-empty">
             <span className="cart-empty__icon">🛒</span>
-            <p>No tenés turnos en el carrito</p>
+            <p className="text-ellipsis">No tenés turnos en el carrito</p>
           </div>
         ) : (
           items.map((item, index) => {
@@ -105,12 +105,12 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
               <div key={itemId} className="cart-item">
                 <span className="cart-item__icon">📅</span>
                 <div className="cart-item__body">
-                  <p className="cart-item__service">{servicioNombre}</p>
-                  <p className="cart-item__doctor">{medicoNombre}</p>
-                  <p className="cart-item__meta">
+                  <p className="cart-item__service text-ellipsis">{servicioNombre}</p>
+                  <p className="cart-item__doctor text-ellipsis">{medicoNombre}</p>
+                  <p className="cart-item__meta text-ellipsis">
                     {item.fecha || 'Propuesta'} - {item.hora || '00:00'} hs
                   </p>
-                  <p className="cart-item__sede" style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>
+                  <p className="cart-item__sede text-ellipsis" style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>
                     📍 Sede: {item.sede?.nombre || 'No especificada'}
                   </p>
                 </div>
@@ -131,13 +131,13 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
       {items.length > 0 && (
         <div className="cart-footer">
           <div className="cart-footer__total-row">
-            <span>Total estimado:</span>
-            <span className="cart-footer__price">
+            <span className="text-ellipsis">Total estimado:</span>
+            <span className="cart-footer__price text-ellipsis">
               {totalCosto === 0 ? "Sin costo (Cubierto)" : `$${totalCosto.toLocaleString('es-AR')}`}
             </span>
           </div>
           <button
-            className="cart-footer__btn-confirm"
+            className="cart-footer__btn-confirm text-ellipsis"
             onClick={() => {
               setOpen(false);
               if (location.pathname === '/solicitar-turno') {

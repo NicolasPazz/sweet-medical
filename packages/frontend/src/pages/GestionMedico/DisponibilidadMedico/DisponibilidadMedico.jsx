@@ -27,7 +27,7 @@ function Toast({ msg, type, onClose }) {
     const t = setTimeout(onClose, 3000);
     return () => clearTimeout(t);
   }, [onClose]);
-  return <div className={`dm-toast dm-toast--${type}`}>{msg}</div>;
+  return <div className={`dm-toast dm-toast--${type} text-ellipsis`}>{msg}</div>;
 }
 
 function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
@@ -47,7 +47,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
       </select>
 
       <div className="dm-time-group">
-        <label className="dm-time-label">Desde</label>
+        <label className="dm-time-label text-ellipsis">Desde</label>
         <input
           className="dm-input"
           type="time"
@@ -58,7 +58,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
       </div>
 
       <div className="dm-time-group">
-        <label className="dm-time-label">Hasta</label>
+        <label className="dm-time-label text-ellipsis">Hasta</label>
         <input
           className="dm-input"
           type="time"
@@ -209,8 +209,8 @@ export default function DisponibilidadMedico() {
     <div className="dm-page">
       <div className="dm-container">
         <div className="dm-header">
-          <h1 className="dm-title">Mi Disponibilidad</h1>
-          <p className="dm-subtitle">Consultá y administrá tus horarios de atención.</p>
+          <h1 className="dm-title text-ellipsis">Mi Disponibilidad</h1>
+          <p className="dm-subtitle text-ellipsis">Consultá y administrá tus horarios de atención.</p>
         </div>
 
         {loading ? (
@@ -218,30 +218,30 @@ export default function DisponibilidadMedico() {
             <Spinner size="md" text="Cargando disponibilidad..." />
           </div>
         ) : error && !medico ? (
-          <div className="dm-card dm-error-card">⚠️ {error}</div>
+          <div className="dm-card dm-error-card text-ellipsis-multiline">⚠️ {error}</div>
         ) : medico ? (
           <div className="dm-card">
             <div className="dm-card-header">
               <div className="dm-medico-info">
                 <div className="dm-medico-avatar">{getInitials(medico.nombre)}</div>
                 <div>
-                  <div className="dm-medico-nombre">{medico.nombre}</div>
+                  <div className="dm-medico-nombre text-ellipsis">{medico.nombre}</div>
                   {medico.matricula && (
-                    <div className="dm-medico-meta">Matrícula: {medico.matricula}</div>
+                    <div className="dm-medico-meta text-ellipsis">Matrícula: {medico.matricula}</div>
                   )}
                 </div>
               </div>
 
               {!isEditing ? (
-                <button className="dm-btn-edit" onClick={() => setIsEditing(true)}>
+                <button className="dm-btn-edit text-ellipsis" onClick={() => setIsEditing(true)}>
                   ✏️ Modificar disponibilidad
                 </button>
               ) : (
                 <div className="dm-edit-actions">
-                  <button className="dm-btn-secondary" onClick={handleCancelEdit} disabled={saving}>
+                  <button className="dm-btn-secondary text-ellipsis" onClick={handleCancelEdit} disabled={saving}>
                     Cancelar
                   </button>
-                  <button className="dm-btn-primary" onClick={handleSave} disabled={saving}>
+                  <button className="dm-btn-primary text-ellipsis" onClick={handleSave} disabled={saving}>
                     {saving ? (
                       <Spinner size="sm" text="Guardando..." inline />
                     ) : (
@@ -253,7 +253,7 @@ export default function DisponibilidadMedico() {
             </div>
 
             {error && (
-              <div className="dm-error">
+              <div className="dm-error text-ellipsis-multiline">
                 ⚠️ {error}
                 <button className="dm-error-close" onClick={() => setError(null)}>
                   ✕
@@ -267,8 +267,8 @@ export default function DisponibilidadMedico() {
                 {disponibilidades.length === 0 ? (
                   <div className="dm-empty">
                     <div className="dm-empty-icon">📅</div>
-                    <p>No tenés franjas horarias configuradas.</p>
-                    <button className="dm-btn-primary" onClick={() => setIsEditing(true)}>
+                    <p className="text-ellipsis">No tenés franjas horarias configuradas.</p>
+                    <button className="dm-btn-primary text-ellipsis" onClick={() => setIsEditing(true)}>
                       + Agregar disponibilidad
                     </button>
                   </div>
@@ -276,9 +276,9 @@ export default function DisponibilidadMedico() {
                   <div className="dm-days-grid">
                     {Object.entries(disByDay).map(([dia, franjas]) => (
                       <div key={dia} className="dm-day-card">
-                        <div className="dm-day-name">{DIAS_LABEL[dia]}</div>
+                        <div className="dm-day-name text-ellipsis">{DIAS_LABEL[dia]}</div>
                         {franjas.map((f, i) => (
-                          <div key={i} className="dm-day-franja">
+                          <div key={i} className="dm-day-franja text-ellipsis">
                             🕐 {f.horaDesde} – {f.horaHasta}
                           </div>
                         ))}
@@ -293,19 +293,19 @@ export default function DisponibilidadMedico() {
             {isEditing && (
               <div className="dm-edit-section">
                 <div className="dm-edit-header">
-                  <span className="dm-edit-hint">
+                  <span className="dm-edit-hint text-ellipsis">
                     {disponibilidades.length === 0
                       ? 'No hay franjas configuradas. Agregá una para comenzar.'
                       : `${disponibilidades.length} franja${disponibilidades.length !== 1 ? 's' : ''} configurada${disponibilidades.length !== 1 ? 's' : ''}`}
                   </span>
-                  <button className="dm-btn-add" onClick={handleAdd}>
+                  <button className="dm-btn-add text-ellipsis" onClick={handleAdd}>
                     + Agregar franja
                   </button>
                 </div>
 
                 <div className="dm-rows">
                   {disponibilidades.length === 0 ? (
-                    <div className="dm-empty-edit">
+                    <div className="dm-empty-edit text-ellipsis-multiline">
                       No hay franjas. Hacé clic en &quot;+ Agregar franja&quot; para empezar.
                     </div>
                   ) : (

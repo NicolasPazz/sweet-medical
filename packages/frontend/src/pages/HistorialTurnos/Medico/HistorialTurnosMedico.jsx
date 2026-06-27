@@ -124,15 +124,15 @@ export default function HistorialTurnosMedico() {
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <h1 className="historial-title">Turnos del Médico</h1>
-        <p className="historial-subtitle">Historial y próximos turnos de tus pacientes</p>
+        <h1 className="historial-title text-ellipsis">Turnos del Médico</h1>
+        <p className="historial-subtitle text-ellipsis">Historial y próximos turnos de tus pacientes</p>
       </div>
 
       <div className="filtros">
         {estados.map((e) => (
           <button
             key={e}
-            className={`filtro-btn ${filtro === e ? 'activo' : ''}`}
+            className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
             onClick={() => setFiltro(e)}
           >
             {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
@@ -143,7 +143,7 @@ export default function HistorialTurnosMedico() {
       {loading ? (
         <SkeletonTurnoList count={5} />
       ) : turnosFiltrados.length === 0 ? (
-        <p className="historial-vacio">No hay turnos para mostrar.</p>
+        <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
       ) : (
         <ul className="turnos-lista">
           {turnosFiltrados.map((turno) => {
@@ -161,28 +161,28 @@ export default function HistorialTurnosMedico() {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="turno-card-left">
-                  <span className="turno-fecha">{formatFecha(turno.fechaHora)}</span>
-                  <span className="turno-hora">{turno.hora}</span>
+                  <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
+                  <span className="turno-hora text-ellipsis">{turno.hora}</span>
                 </div>
                 <div className="turno-card-center">
-                  <span className="turno-servicio">{turno.servicio?.nombre}</span>
-                  <span className="turno-medico">{turno.paciente?.nombre}</span>
-                  {turno.sede && <span className="turno-sede">{turno.sede.nombre}</span>}
+                  <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
+                  <span className="turno-medico text-ellipsis">{turno.paciente?.nombre}</span>
+                  {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
                   {esPendiente && turno.propuestaCambio && (
-                    <span className="turno-propuesta">
+                    <span className="turno-propuesta text-ellipsis">
                       → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
                       {turno.propuestaCambio.nuevaHora}
                     </span>
                   )}
                 </div>
                 <div className="turno-card-right">
-                  <span className={`turno-estado ${cfg.color}`}>{cfg.label}</span>
-                  <span className="turno-costo">${turno.costo?.toLocaleString('es-AR')}</span>
+                  <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
+                  <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
                 </div>
 
                 {puedeConfirmar && (
                   <button
-                    className="btn-confirmar-inline"
+                    className="btn-confirmar-inline text-ellipsis"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleConfirmar(turno._id);
@@ -194,13 +194,13 @@ export default function HistorialTurnosMedico() {
                 {esPendiente && (
                   <div className="btns-reprogramacion-inline" onClick={(e) => e.stopPropagation()}>
                     <button
-                      className="btn-aceptar-inline"
+                      className="btn-aceptar-inline text-ellipsis"
                       onClick={() => handleAceptarReprogramacion(turno._id)}
                     >
                       ✓ Aceptar
                     </button>
                     <button
-                      className="btn-rechazar-inline"
+                      className="btn-rechazar-inline text-ellipsis"
                       onClick={() => handleRechazarReprogramacion(turno._id)}
                     >
                       ✕ Rechazar
@@ -209,7 +209,7 @@ export default function HistorialTurnosMedico() {
                 )}
                 {puedeFinalizar && (
                   <button
-                    className="btn-finalizar-inline"
+                    className="btn-finalizar-inline text-ellipsis"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleFinalizar(turno._id);

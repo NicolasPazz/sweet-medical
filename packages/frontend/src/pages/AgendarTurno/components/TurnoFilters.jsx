@@ -30,7 +30,7 @@ export default function TurnoFilters({
       <div className="filtros-grilla">
         {/* Selector de Modo */}
         <div className="filtro-grupo ancho-completo-sm">
-          <label className="filtro-etiqueta">Tipo de Prestación</label>
+          <label className="filtro-etiqueta text-ellipsis">Tipo de Prestación</label>
           <div className="modo-conmutador">
             <button
               type="button"
@@ -40,7 +40,7 @@ export default function TurnoFilters({
                 setSelectedPractica('');
               }}
             >
-              Especialidad
+              <span className="text-ellipsis">Especialidad</span>
             </button>
             <button
               type="button"
@@ -50,7 +50,7 @@ export default function TurnoFilters({
                 setSelectedEspecialidad('');
               }}
             >
-              Práctica
+              <span className="text-ellipsis">Práctica</span>
             </button>
           </div>
         </div>
@@ -58,7 +58,7 @@ export default function TurnoFilters({
         {/* Select de Especialidad */}
         {searchMode === 'ESPECIALIDAD' ? (
           <div className="filtro-grupo">
-            <label className="filtro-etiqueta" htmlFor="especialidad">
+            <label className="filtro-etiqueta text-ellipsis" htmlFor="especialidad">
               Especialidad *
             </label>
             <select
@@ -69,7 +69,7 @@ export default function TurnoFilters({
             >
               <option value="">Seleccione Especialidad</option>
               {especialidades.map((esp) => (
-                <option key={esp._id} value={esp._id}>
+                <option key={esp._id} value={esp._id} className="text-ellipsis">
                   {esp.nombre}
                 </option>
               ))}
@@ -78,7 +78,7 @@ export default function TurnoFilters({
         ) : (
           /* Select de Práctica */
           <div className="filtro-grupo">
-            <label className="filtro-etiqueta" htmlFor="practica">
+            <label className="filtro-etiqueta text-ellipsis" htmlFor="practica">
               Práctica *
             </label>
             <select
@@ -89,7 +89,7 @@ export default function TurnoFilters({
             >
               <option value="">Seleccione Práctica</option>
               {practicas.map((prac) => (
-                <option key={prac._id} value={prac._id}>
+                <option key={prac._id} value={prac._id} className="text-ellipsis">
                   {prac.nombre} ({prac.codigo})
                 </option>
               ))}
@@ -99,7 +99,7 @@ export default function TurnoFilters({
 
         {/* Selector de Médico */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="medico">
+          <label className="filtro-etiqueta text-ellipsis" htmlFor="medico">
             Médico (Opcional)
           </label>
           <select
@@ -109,7 +109,7 @@ export default function TurnoFilters({
           >
             <option value="">Todos los médicos</option>
             {medicos.map((med) => (
-              <option key={med.id_medico} value={med.id_medico}>
+              <option key={med.id_medico} value={med.id_medico} className="text-ellipsis">
                 {med.nombre}
               </option>
             ))}
@@ -118,13 +118,13 @@ export default function TurnoFilters({
 
         {/* Selector de Sede */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="sede">
+          <label className="filtro-etiqueta text-ellipsis" htmlFor="sede">
             Sede (Opcional)
           </label>
           <select id="sede" value={selectedSede} onChange={(e) => setSelectedSede(e.target.value)}>
             <option value="">Todas las sedes</option>
             {sedes.map((s) => (
-              <option key={s._id} value={s._id}>
+              <option key={s._id} value={s._id} className="text-ellipsis">
                 {s.nombre}
               </option>
             ))}
@@ -133,7 +133,7 @@ export default function TurnoFilters({
 
         {/* Selector de Paciente de Prueba */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="paciente">
+          <label className="filtro-etiqueta text-ellipsis" htmlFor="paciente">
             Paciente de Prueba (Opcional)
           </label>
           <select
@@ -143,7 +143,7 @@ export default function TurnoFilters({
           >
             <option value="">Costo Particular (Sin Cobertura)</option>
             {pacientes.map((pac) => (
-              <option key={pac.id_paciente} value={pac.id_paciente}>
+              <option key={pac.id_paciente} value={pac.id_paciente} className="text-ellipsis">
                 {pac.nombre} (DNI: {pac.dni})
               </option>
             ))}
@@ -152,7 +152,7 @@ export default function TurnoFilters({
 
         {/* Fecha Desde */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="fechaDesde">
+          <label className="filtro-etiqueta text-ellipsis" htmlFor="fechaDesde">
             Fecha Desde
           </label>
           <input
@@ -166,7 +166,7 @@ export default function TurnoFilters({
 
         {/* Fecha Hasta */}
         <div className="filtro-grupo">
-          <label className="filtro-etiqueta" htmlFor="fechaHasta">
+          <label className="filtro-etiqueta text-ellipsis" htmlFor="fechaHasta">
             Fecha Hasta (Opcional)
           </label>
           <input
@@ -179,7 +179,7 @@ export default function TurnoFilters({
       </div>
 
       <div className="busqueda-acciones">
-        <button type="submit" className="boton-buscar" disabled={loading}>
+        <button type="submit" className="boton-buscar text-ellipsis" disabled={loading}>
           {loading ? 'Buscando...' : 'Buscar Turnos'}
         </button>
       </div>

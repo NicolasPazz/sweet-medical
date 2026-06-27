@@ -75,7 +75,7 @@ const Header = () => {
             <li>
               <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
                 <FaHome className="header-icon" />
-                <span className="header-label">Inicio</span>
+                <span className="header-label text-ellipsis">Inicio</span>
               </Link>
             </li>
             <li>
@@ -84,7 +84,7 @@ const Header = () => {
                 className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
               >
                 <FaCalendarAlt className="header-icon" />
-                <span className="header-label">Agendar Turno</span>
+                <span className="header-label text-ellipsis">Agendar Turno</span>
               </Link>
             </li>
             {user?.rol === 'Paciente' && (
@@ -94,7 +94,7 @@ const Header = () => {
                   className={location.pathname === '/historial-medico' ? 'active' : ''}
                 >
                   <FaHistory className="header-icon" />
-                  <span className="header-label">Historial Médico</span>
+                  <span className="header-label text-ellipsis">Historial Médico</span>
                 </Link>
               </li>
             )}
@@ -105,14 +105,14 @@ const Header = () => {
                   className={location.pathname.startsWith('/gestion-medico') ? 'active' : ''}
                 >
                   <FaBriefcaseMedical className="header-icon" />
-                  <span className="header-label">Gestión médica</span>
+                  <span className="header-label text-ellipsis">Gestión médica</span>
                 </Link>
               </li>
             )}
             <li>
               <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
                 <FaEnvelope className="header-icon" />
-                <span className="header-label">Contacto</span>
+                <span className="header-label text-ellipsis">Contacto</span>
               </Link>
             </li>
           </ul>
@@ -127,7 +127,7 @@ const Header = () => {
               onClick={() => setCartOpen((prev) => !prev)}
             >
               <FaShoppingCart className="cart-icon" />
-              {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+              {summary?.count > 0 && <span className="cart-count text-ellipsis">{summary.count}</span>}
             </button>
 
             <NotificationBell />
@@ -137,12 +137,12 @@ const Header = () => {
             {useAuth().isAuthenticated ? (
               <Link id="iniciar-sesion" to="/perfil">
                 <FaUser className="auth-icon" />
-                <span>Mi Perfil</span>
+                <span className="text-ellipsis">Mi Perfil</span>
               </Link>
             ) : (
               <Link id="iniciar-sesion" to="/login">
                 <FaUser className="auth-icon" />
-                <span>Iniciar sesión</span>
+                <span className="text-ellipsis">Iniciar sesión</span>
               </Link>
             )}
           </div>

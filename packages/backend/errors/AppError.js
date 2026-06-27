@@ -41,6 +41,12 @@ export class DuplicateKeyError extends AppError {
   }
 }
 
+export class UnauthorizedError extends AppError {
+  constructor(message = 'No autorizado') {
+    super(message, 401);
+  }
+}
+
 export class ForbiddenError extends AppError {
   constructor(message) {
     super(message, 403);

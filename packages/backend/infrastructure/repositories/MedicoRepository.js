@@ -30,6 +30,12 @@ export class MedicoRepository {
       .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
   }
 
+  async findByDni(dni) {
+    return await this.model
+      .findOne({ dni })
+      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+  }
+
   // CREAR
   async save(medico) {
     const id = medico.id || medico._id;

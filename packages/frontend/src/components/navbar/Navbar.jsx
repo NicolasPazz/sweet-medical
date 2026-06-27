@@ -18,13 +18,13 @@ const Navbar = () => {
         <div className="navbar-section center">
           <ul className="nav-links">
             <li>
-              <Link to="/">Inicio</Link>
+              <Link to="/" className="text-ellipsis">Inicio</Link>
             </li>
             <li>
-              <Link to="/agendar">Agendar Turno</Link>
+              <Link to="/agendar" className="text-ellipsis">Agendar Turno</Link>
             </li>
             <li>
-              <Link to="/contacto">Contacto</Link>
+              <Link to="/contacto" className="text-ellipsis">Contacto</Link>
             </li>
           </ul>
         </div>
@@ -32,10 +32,10 @@ const Navbar = () => {
         <div className="navbar-section right">
           <button className="cart-btn" aria-label="Ver carrito">
             <FaShoppingCart className="cart-icon" />
-            {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+            {summary?.count > 0 && <span className="cart-count text-ellipsis">{summary.count}</span>}
           </button>
 
-          <Link id="iniciar-sesion" to="/login">
+          <Link id="iniciar-sesion" to="/login" className="text-ellipsis">
             Iniciar sesión
           </Link>
         </div>

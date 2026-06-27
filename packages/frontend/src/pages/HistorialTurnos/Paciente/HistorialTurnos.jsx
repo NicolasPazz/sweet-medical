@@ -92,15 +92,15 @@ export default function HistorialTurnos() {
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <h1 className="historial-title">Mis Turnos</h1>
-        <p className="historial-subtitle">Historial y turnos próximos</p>
+        <h1 className="historial-title text-ellipsis">Mis Turnos</h1>
+        <p className="historial-subtitle text-ellipsis">Historial y turnos próximos</p>
       </div>
 
       <div className="filtros">
         {estados.map((e) => (
           <button
             key={e}
-            className={`filtro-btn ${filtro === e ? 'activo' : ''}`}
+            className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
             onClick={() => setFiltro(e)}
           >
             {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
@@ -111,7 +111,7 @@ export default function HistorialTurnos() {
       {loading ? (
         <SkeletonTurnoList count={5} />
       ) : turnosFiltrados.length === 0 ? (
-        <p className="historial-vacio">No hay turnos para mostrar.</p>
+        <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
       ) : (
         <ul className="turnos-lista">
           {turnosFiltrados.map((turno) => {
@@ -128,7 +128,7 @@ export default function HistorialTurnos() {
         </ul>
       )}
 
-      <Link to="/solicitar-turno" className="btn-nuevo-turno">
+      <Link to="/solicitar-turno" className="btn-nuevo-turno text-ellipsis">
         + Nuevo turno
       </Link>
     </div>

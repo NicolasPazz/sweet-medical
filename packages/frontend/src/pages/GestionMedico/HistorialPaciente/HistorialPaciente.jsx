@@ -33,13 +33,13 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <button className="filtro-btn" onClick={onVolver}>
+        <button className="filtro-btn text-ellipsis" onClick={onVolver}>
           ← Nueva búsqueda
         </button>
-        <h1 className="historial-title" style={{ marginTop: '15px' }}>
+        <h1 className="historial-title text-ellipsis" style={{ marginTop: '15px' }}>
           Historial de {paciente.nombre}
         </h1>
-        <p className="historial-subtitle">
+        <p className="historial-subtitle text-ellipsis">
           DNI {paciente.dni} · {paciente.obraSocial} · {paciente.plan}
         </p>
       </div>
@@ -48,7 +48,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
         {estados.map((e) => (
           <button
             key={e}
-            className={`filtro-btn ${filtro === e ? 'activo' : ''}`}
+            className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
             onClick={() => setFiltro(e)}
           >
             {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
@@ -59,7 +59,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
       {loading ? (
         <SkeletonTurnoList count={4} />
       ) : turnosFiltrados.length === 0 ? (
-        <p className="historial-vacio">
+        <p className="historial-vacio text-ellipsis-multiline">
           {turnos.length === 0
             ? 'Este paciente no tiene turnos registrados.'
             : 'No hay turnos con ese estado.'}
@@ -76,34 +76,34 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                 onClick={() => setTurnoExpandido(expandido ? null : turno.id_turno)}
               >
                 <div className="turno-card-left">
-                  <span className="turno-fecha">{formatFecha(turno.fechaHora)}</span>
-                  <span className="turno-hora">{turno.hora}</span>
+                  <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
+                  <span className="turno-hora text-ellipsis">{turno.hora}</span>
                 </div>
                 <div className="turno-card-center">
-                  <span className="turno-servicio">{turno.servicio_nombre}</span>
-                  <span className="turno-medico">{turno.nombreMedico}</span>
-                  {turno.sede && <span className="turno-sede">{turno.sede.nombre}</span>}
+                  <span className="turno-servicio text-ellipsis">{turno.servicio_nombre}</span>
+                  <span className="turno-medico text-ellipsis">{turno.nombreMedico}</span>
+                  {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
                 </div>
                 <div className="turno-card-right">
-                  <span className={`turno-estado ${cfg.color}`}>{cfg.label}</span>
-                  <span className="turno-costo">${turno.costo?.toLocaleString('es-AR')}</span>
+                  <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
+                  <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
                 </div>
                 <span className="turno-chevron">{expandido ? '▲' : '▼'}</span>
 
                 {expandido && (
                   <div className="turno-historial" onClick={(e) => e.stopPropagation()}>
-                    <p className="turno-historial-titulo">Historial de estados</p>
+                    <p className="turno-historial-titulo text-ellipsis">Historial de estados</p>
                     <ul className="turno-historial-lista">
                       {turno.historialEstados.map((h, i) => {
                         const hCfg = ESTADO_CONFIG[h.estado] ?? { label: h.estado, color: '' };
                         return (
                           <li key={i} className="turno-historial-item">
-                            <span className={`turno-estado ${hCfg.color}`}>{hCfg.label}</span>
-                            <span className="turno-historial-fecha">
+                            <span className={`turno-estado ${hCfg.color} text-ellipsis`}>{hCfg.label}</span>
+                            <span className="turno-historial-fecha text-ellipsis">
                               {formatFecha(h.fechaHoraCambio)}
                             </span>
-                            <span className="turno-historial-motivo">{h.motivo}</span>
-                            <span className="turno-historial-actor">@{h.actor}</span>
+                            <span className="turno-historial-motivo text-ellipsis">{h.motivo}</span>
+                            <span className="turno-historial-actor text-ellipsis">@{h.actor}</span>
                           </li>
                         );
                       })}
@@ -164,7 +164,7 @@ export default function HistorialPaciente() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
           Cargando...
         </span>
       </div>
@@ -220,8 +220,8 @@ export default function HistorialPaciente() {
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <h1 className="historial-title">Historial de Paciente</h1>
-        <p className="historial-subtitle">
+        <h1 className="historial-title text-ellipsis">Historial de Paciente</h1>
+        <p className="historial-subtitle text-ellipsis">
           Ingresá el DNI del paciente para ver su historial de turnos
         </p>
       </div>
@@ -260,19 +260,19 @@ export default function HistorialPaciente() {
         </div>
 
         {estado === 'not_found' && (
-          <p className="hp-error">
+          <p className="hp-error text-ellipsis">
             No se encontró ningún paciente con el DNI <strong>{dni}</strong>.
           </p>
         )}
       </div>
 
       <div className="hp-hint">
-        <p className="hp-hint-titulo">DNIs de prueba disponibles:</p>
+        <p className="hp-hint-titulo text-ellipsis">DNIs de prueba disponibles:</p>
         <ul className="hp-hint-lista">
           {PACIENTES_MOCK.map((p) => (
             <li key={p.dni} className="hp-hint-item" onClick={() => setDni(p.dni)}>
-              <span className="hp-hint-dni">{p.dni}</span>
-              <span className="hp-hint-nombre">{p.nombre}</span>
+              <span className="hp-hint-dni text-ellipsis">{p.dni}</span>
+              <span className="hp-hint-nombre text-ellipsis">{p.nombre}</span>
             </li>
           ))}
         </ul>

@@ -29,3 +29,23 @@ body {
 code {
   font-family: 'Roboto Mono', monospace;
 }
+
+/* Utilidad global para truncar textos largos con puntos suspensivos.
+   Solo tiene efecto visual cuando el texto desborda su contenedor;
+   si el texto entra normalmente, no cambia nada. */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Variante para bloques de texto multilinea (ej. descripciones largas) */
+.text-ellipsis-multiline {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+

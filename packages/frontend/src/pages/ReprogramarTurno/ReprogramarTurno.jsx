@@ -31,13 +31,13 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
   return (
     <div className="historial-container">
       <div className="historial-header">
-        <button className="filtro-btn" onClick={onVolver}>
+        <button className="filtro-btn text-ellipsis" onClick={onVolver}>
           ← Volver al Detalle
         </button>
-        <h1 className="historial-title" style={{ marginTop: '15px' }}>
+        <h1 className="historial-title text-ellipsis" style={{ marginTop: '15px' }}>
           Solicitar Reprogramación
         </h1>
-        <p className="historial-subtitle">
+        <p className="historial-subtitle text-ellipsis">
           Enviá una propuesta de cambio para tu cita con el {turno.medico?.nombre}
         </p>
       </div>
@@ -45,7 +45,7 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
       <div className="reprogramar-card">
         {/* Paso 1: Selección de Fecha */}
         <div className="reprogramar-paso-section">
-          <label className="reprogramar-paso-title">1. Seleccioná el nuevo día propuesto:</label>
+          <label className="reprogramar-paso-title text-ellipsis">1. Seleccioná el nuevo día propuesto:</label>
           <input
             type="date"
             className="reprogramar-input-fecha"
@@ -61,13 +61,13 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
         {/* Paso 2: Selección de Horario */}
         {fecha && (
           <div className="reprogramar-paso-section">
-            <label className="reprogramar-paso-title">2. Seleccioná un horario disponible:</label>
+            <label className="reprogramar-paso-title text-ellipsis">2. Seleccioná un horario disponible:</label>
             <div className="grid-horarios">
               {slotsSimulados.map((slot) => (
                 <button
                   key={slot}
                   type="button"
-                  className={`hora-slot-btn ${hora === slot ? 'seleccionado' : ''}`}
+                  className={`hora-slot-btn ${hora === slot ? 'seleccionado' : ''} text-ellipsis`}
                   onClick={() => setHora(slot)}
                 >
                   {slot} hs
@@ -79,7 +79,7 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
 
         {/* Botón finalizador de flujo transformado a Solicitud */}
         <button
-          className="btn-confirmar-cambio"
+          className="btn-confirmar-cambio text-ellipsis"
           disabled={!fecha || !hora}
           onClick={handleConfirmarSolicitud}
         >

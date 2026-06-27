@@ -1,5 +1,5 @@
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
-import { NotFoundError } from '../errors/AppError.js';
+import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 export class PacienteService {
@@ -17,6 +17,18 @@ export class PacienteService {
 
   async findByDniPaciente(dni) {
     return await this.pacienteRepository.findByDniPaciente(dni);
+  }
+
+  async crearPaciente({ usuario }) {
+    if (!usuario) {
+      throw new Error('El usuario es obligatorio para crear un paciente');
+    }
+
+    const usuarioId = usuario?._id ?? usuario?.id ?? usuario;
+
+    return await this.pacienteRepository.save({
+      usuario: usuarioId,
+    });
   }
 
   async leerTodos() {

@@ -1,51 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './Registro.css';
 import Toast from '../../components/Toast/Toast.jsx';
+import { register } from '../../services/authService.js';
 
 export default function Registro() {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    password: '',
-  });
+  const navigate = useNavigate();
 
-  const [errores, setErrores] = useState({
-    nombre: false,
-    apellido: false,
-    email: false,
-    password: false,
-  });
-
+  const [formData, setFormData] = useState({ dni: '', email: '', password: '' });
+  const [errores, setErrores] = useState({ dni: false, email: false, password: false });
   const [toast, setToast] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
     setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleSubmit = () => {
-    const nuevosErrores = {
-      nombre: !formData.nombre,
-      apellido: !formData.apellido,
-      email: !formData.email,
-      password: !formData.password,
-    };
-
-    setErrores(nuevosErrores);
-
-    const hayErrores = Object.values(nuevosErrores).some(Boolean);
-    if (hayErrores) {
-      mostrarToast('Por favor, completa todos los campos', 'warning');
-      return;
-    }
-
-    // sendRegistrationData(formData); // Aca se envía la request al back
-
-    setFormData({ nombre: '', apellido: '', email: '', password: '' });
-    setErrores({ nombre: false, apellido: false, email: false, password: false });
-    mostrarToast('Registro exitoso', 'success');
   };
 
   const handleChange = (campo, valor) => {
@@ -53,48 +22,72 @@ export default function Registro() {
     if (errores[campo]) setErrores({ ...errores, [campo]: false });
   };
 
+  const handleSubmit = async () => {
+    const nuevosErrores = {
+      dni: !formData.dni.trim(),
+      email: !formData.email.trim(),
+      password: !formData.password.trim(),
+    };
+
+    setErrores(nuevosErrores);
+
+    if (Object.values(nuevosErrores).some(Boolean)) {
+      mostrarToast('Por favor, completá todos los campos', 'warning');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await register({
+        dni: formData.dni.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      mostrarToast('Cuenta activada exitosamente', 'success');
+      setTimeout(() => navigate('/login'), 1500);
+    } catch (error) {
+      const mensaje =
+        error.response?.data?.message ?? 'Ocurrió un error al registrarse. Intentá de nuevo.';
+      mostrarToast(mensaje, 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="registro-container">
       <div className="registro-form">
-        <h2>Registro de Usuario</h2>
-        <form>
-          <label htmlFor="nombre">Nombre:</label>
+        <h2 className="text-ellipsis">Activar cuenta</h2>
+
+        <form onSubmit={(e) => e.preventDefault()}>
+          <label htmlFor="dni" className="text-ellipsis">
+            DNI:
+          </label>
           <div className="input-wrapper">
             <input
               type="text"
-              id="nombre"
-              value={formData.nombre}
-              className={errores.nombre ? 'input-error' : ''}
-              onChange={(e) => handleChange('nombre', e.target.value)}
+              id="dni"
+              placeholder="Tu número de DNI"
+              value={formData.dni}
+              className={errores.dni ? 'input-error' : ''}
+              onChange={(e) => handleChange('dni', e.target.value)}
             />
-            {errores.nombre && (
+            {errores.dni && (
               <span className="icono-error" title="Campo requerido">
                 ⚠
               </span>
             )}
           </div>
 
-          <label htmlFor="apellido">Apellido:</label>
-          <div className="input-wrapper">
-            <input
-              type="text"
-              id="apellido"
-              value={formData.apellido}
-              className={errores.apellido ? 'input-error' : ''}
-              onChange={(e) => handleChange('apellido', e.target.value)}
-            />
-            {errores.apellido && (
-              <span className="icono-error" title="Campo requerido">
-                ⚠
-              </span>
-            )}
-          </div>
-
-          <label htmlFor="email">Correo Electrónico:</label>
+          <label htmlFor="email" className="text-ellipsis">
+            Correo Electrónico:
+          </label>
           <div className="input-wrapper">
             <input
               type="email"
               id="email"
+              placeholder="Tu correo electrónico"
               value={formData.email}
               className={errores.email ? 'input-error' : ''}
               onChange={(e) => handleChange('email', e.target.value)}
@@ -106,11 +99,14 @@ export default function Registro() {
             )}
           </div>
 
-          <label htmlFor="password">Contraseña:</label>
+          <label htmlFor="password" className="text-ellipsis">
+            Contraseña:
+          </label>
           <div className="input-wrapper">
             <input
               type="password"
               id="password"
+              placeholder="Elegí una contraseña"
               value={formData.password}
               className={errores.password ? 'input-error' : ''}
               onChange={(e) => handleChange('password', e.target.value)}
@@ -124,11 +120,16 @@ export default function Registro() {
         </form>
 
         <div className="registro-button">
-          <button onClick={handleSubmit}>Registrarse</button>
+          <button onClick={handleSubmit} disabled={submitting} className="text-ellipsis">
+            {submitting ? 'Activando cuenta...' : 'Activar cuenta'}
+          </button>
         </div>
+
         <div className="login-link">
-          <span>¿Ya tienes una cuenta?</span>
-          <Link to="/login">Volver al Login</Link>
+          <span className="text-ellipsis">¿Ya activaste tu cuenta?</span>
+          <Link to="/login" className="text-ellipsis">
+            Iniciar sesión
+          </Link>
         </div>
       </div>
 

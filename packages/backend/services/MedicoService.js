@@ -11,6 +11,10 @@ export class MedicoService {
     this.usuarioService = usuarioSvc;
   }
 
+  async findByDni(dni) {
+    return await this.medicoRepository.findByDni(dni);
+  }
+
   async findById(id) {
     return await this.medicoRepository.findById(id);
   }
@@ -66,7 +70,7 @@ export class MedicoService {
 
   async crearMedico(data) {
     if (!data?.usuario || !data?.matricula || !data?.nombre) {
-      throw new Error('Faltan datos obligatorios para crear el médico');
+      throw new Error('Faltan datos obligatorios para crear el médico (usuario, matricula, nombre)');
     }
 
     const medicoExistente = await this.medicoRepository.findByMatricula(data.matricula);
@@ -74,22 +78,16 @@ export class MedicoService {
       throw new ConflictError(`Ya existe un medico con matricula ${data.matricula}`);
     }
 
-    const usuario = await this.usuarioService.save({
-      nombreUsuario: data.usuario.nombreUsuario,
-      contrasena: data.usuario.contrasena,
-      email: data.usuario.email,
-      roles: ['MEDICO'],
-    });
+    const usuarioId = data.usuario?._id ?? data.usuario?.id ?? data.usuario;
 
-    const medico = await this.medicoRepository.crear({
-      usuario: usuario._id,
+    const medico = await this.medicoRepository.save({
+      usuario: usuarioId,
       matricula: data.matricula,
       nombre: data.nombre,
       especialidades: data.especialidades || [],
       practicas: data.practicas || [],
       sedes: data.sedes || [],
       disponibilidades: [],
-      turnosActualesYFuturos: [],
     });
 
     return medico;

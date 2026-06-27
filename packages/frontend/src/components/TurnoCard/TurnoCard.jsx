@@ -15,17 +15,17 @@ export default function TurnoCard({ turno, cfg, onClickTurno }) {
       style={{ cursor: 'pointer' }}
     >
       <div className="turno-card-left">
-        <span className="turno-fecha">{formatFecha(turno.fechaHora)}</span>
-        <span className="turno-hora">{turno.hora}</span>
+        <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
+        <span className="turno-hora text-ellipsis">{turno.hora}</span>
       </div>
       <div className="turno-card-center">
-        <span className="turno-servicio">{turno.servicio?.nombre ?? turno.servicio}</span>
-        <span className="turno-medico">{turno.medico?.nombre ?? turno.medico}</span>
-        {turno.sede && <span className="turno-sede">{turno.sede?.nombre ?? turno.sede}</span>}
+        <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre ?? turno.servicio}</span>
+        <span className="turno-medico text-ellipsis">{turno.medico?.nombre ?? turno.medico}</span>
+        {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede?.nombre ?? turno.sede}</span>}
       </div>
       <div className="turno-card-right">
-        <span className={`turno-estado ${cfg.color}`}>{cfg.label}</span>
-        <span className="turno-costo">${turno.costo?.toLocaleString('es-AR')}</span>
+        <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
+        <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
       </div>
     </li>
   );
