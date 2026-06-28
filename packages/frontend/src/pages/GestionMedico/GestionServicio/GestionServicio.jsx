@@ -6,7 +6,7 @@ import {
 import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico ,eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
-import { getUserByToken } from '../../../services/userService.js';
+import { getMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
@@ -249,7 +249,7 @@ function Toast({ msg, type }) {
 
 // ─── Página principal ──────────────────────────────────────────────────────
 export function GestionServicio() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [especialidades, setEspecialidades] = useState([]);
   const [practicas, setPracticas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -265,10 +265,13 @@ export function GestionServicio() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            id: data.perfil?._id ?? data.perfil?.id,
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -279,7 +282,7 @@ export function GestionServicio() {
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   useEffect(() => {
     if (!user) return;

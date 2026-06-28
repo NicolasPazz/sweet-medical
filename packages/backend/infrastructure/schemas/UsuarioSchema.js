@@ -47,16 +47,25 @@ const usuarioSchema = new mongoose.Schema(
       minlength: 7,
       maxlength: 9,
     },
-    nombre: {
-      type: String,
-      required: false,
-      trim: true,
-      minlength: 2,
-      maxlength: 100,
-    },
     activo: {
       type: Boolean,
       default: false,
+    },
+    numTel: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 20,
+    },
+    direccion: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 200,
+    },
+    fechaNacimiento: {
+      type: Date,
+      required: false,
     },
   },
   { timestamps: true, collection: 'usuarios' },

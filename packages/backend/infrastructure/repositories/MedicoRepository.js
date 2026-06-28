@@ -36,6 +36,14 @@ export class MedicoRepository {
       .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
   }
 
+  async findByUsuarioId(usuarioId) {
+    return await this.model
+      .findOne({ usuario: usuarioId })
+      .populate('especialidades')
+      .populate('practicas')
+      .populate('sedes');
+  }
+
   // CREAR
   async save(medico) {
     const id = medico.id || medico._id;

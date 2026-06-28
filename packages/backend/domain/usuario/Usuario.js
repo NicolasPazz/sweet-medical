@@ -5,8 +5,10 @@ export class Usuario {
   password;
   roles;
   dni;
-  nombre;
   activo;
+  numTel;
+  direccion;
+  fechaNacimiento;
 
   // Usuario del sistema para operaciones internas
   static USUARIO_SISTEMA = { id: null, _id: null, nombreUsuario: 'SISTEMA' };

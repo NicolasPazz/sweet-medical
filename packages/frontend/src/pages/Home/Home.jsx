@@ -12,23 +12,25 @@ import {
 import './Home.css';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import { useState, useEffect } from 'react';
-import { getUserByToken } from '../../services/userService.js';
+import { getMe } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
 export default function Home() {
-  const { token } = useAuth();
+  const { email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -39,7 +41,7 @@ export default function Home() {
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (loading) {
     return (

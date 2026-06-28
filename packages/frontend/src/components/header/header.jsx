@@ -15,38 +15,38 @@ import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from '../../components/AuthProvider.jsx';
-import { getUserByToken } from '../../services/userService.js';
 import CartDropdown from '../cart/CartDropdown.jsx';
+import { getMe } from '../../services/userService.js';
 
 const Header = () => {
-  const { summary, cartItems, removeItem, clearCart } = useCart();
+  const { summary, clearCart } = useCart();
   const location = useLocation();
-
-  const { token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (token) {
-        try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-    };
-    fetchUser();
-  }, [token]);
 
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const cartButtonRef = useRef(null);
 
-  // Cierra el menú al navegar
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, [email, password]);
 
   const handleConfirmarReservaMasiva = () => {
     alert('¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!');
@@ -134,7 +134,7 @@ const Header = () => {
           </div>
 
           <div className="header-auth-row">
-            {useAuth().isAuthenticated ? (
+            {isAuthenticated ? (
               <Link id="iniciar-sesion" to="/perfil">
                 <FaUser className="auth-icon" />
                 <span className="text-ellipsis">Mi Perfil</span>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PACIENTES_MOCK, HISTORIAL_POR_PACIENTE } from '../../../mockdata/pacientes.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
-import { getUserByToken } from '../../../services/userService.js';
+import { getMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
@@ -121,9 +121,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
 
 // ─── Vista principal: búsqueda por DNI ────────────────────────────────────
 export default function HistorialPaciente() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [dni, setDni] = useState('');
-  const [estado, setEstado] = useState('idle'); // 'idle' | 'searching' | 'not_found' | 'found'
+  const [estado, setEstado] = useState('idle');
   const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [user, setUser] = useState(null);
@@ -131,10 +131,12 @@ export default function HistorialPaciente() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -145,7 +147,7 @@ export default function HistorialPaciente() {
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;

@@ -1,27 +1,30 @@
-export const getUserByToken = async (token) => {
-  
-  console.log("TOKEN: ", token);
+import axios from 'axios';
+import { getApiBaseUrl } from '../lib/api-utils.js';
+import { generateBasicAuthHeader } from './ParserB64.js';
 
-  if (token !== 'abc123') return null;
+export const getMe = async ({ email, password }) => {
+  const authHeader = generateBasicAuthHeader(email, password);
+  const response = await axios.get(`${getApiBaseUrl()}/usuarios/me`, {
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+  });
 
-  
-    const user = {
-        id: "6a0f950c7469fbef799921bc",
-        nombre: 'Lucca Bertani',
-        username: "LuccaTarta",
-        rol: 'Médico',
-        especialidades: ['Cardiología', 'Cirugía General'],
-        practicas: ['Electrocardiograma', 'Ecografía Abdominal'],
-        antiguedad: 5,
-        telefono: '123456789',
-        direccion: 'Calle Falsa 123',
-        email: 'usuario@sweetmedical.com',
-        avatar: '/chiqui.jpg',
-        obraSocial: "SWISS_MEDICAL",
-        plan: "PREMIUM",
-        coberturasEspecialidad: ["CARDIOLOGÍA", "PEDIATRÍA"],
-        coberturasPractica: ["ELECTROCARDIOGRAMA"]
-    }
+  const { usuario, perfil } = response.data.data;
 
-  return user;
+  return {
+    usuario: {
+      id: usuario.id,
+      email: usuario.email,
+      dni: usuario.dni,
+      roles: usuario.roles,
+      activo: usuario.activo,
+      nombreUsuario: usuario.nombreUsuario,
+      numTel: usuario.numTel,
+      direccion: usuario.direccion,
+      fechaNacimiento: usuario.fechaNacimiento,
+    },
+    perfil,
+  };
 };

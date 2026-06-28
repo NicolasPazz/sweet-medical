@@ -5,45 +5,62 @@
   font-family: 'Roboto Mono', monospace;
   background-color: #f2f6f6;
   min-height: 100vh;
-  padding: 40px 20px;
-  overflow-y: auto;
+  padding: 32px 20px;
 }
 
 .registro-form {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 48px 44px;
+  padding: 36px 40px;
   border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 460px;
+  max-width: 560px;
 }
 
 .registro-form h2 {
   font-family: 'Roboto Mono', monospace;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: #064b50;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   text-align: center;
+}
+
+.registro-subtitulo {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  margin-bottom: 20px;
 }
 
 .registro-form form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 28px;
+  gap: 10px;
+}
+
+/* Fila de 2 columnas */
+.registro-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.registro-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .registro-form label {
   display: block;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
 }
 
 .input-wrapper {
@@ -54,10 +71,10 @@
 
 .registro-form input {
   width: 100%;
-  padding: 13px 16px;
-  font-size: 15px;
+  padding: 10px 14px;
+  font-size: 14px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 8px;
   outline: none;
   background-color: #f8fafc;
   transition: all 0.2s ease;
@@ -69,7 +86,7 @@
 .registro-form input:focus {
   border-color: #12979f;
   background-color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(18, 151, 159, 0.12);
+  box-shadow: 0 0 0 3px rgba(18, 151, 159, 0.1);
 }
 
 .registro-form input.input-error {
@@ -79,79 +96,71 @@
 
 .registro-form input.input-error:focus {
   border-color: #b91c1c;
-  box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.1);
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
 }
 
 .icono-error {
   position: absolute;
-  right: 12px;
-  font-size: 16px;
+  right: 10px;
+  font-size: 14px;
   color: #b91c1c;
   pointer-events: none;
-  animation: aparecer 0.2s ease;
-}
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .registro-button {
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .registro-button button {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background-color: #064b50;
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   font-family: 'Roboto Mono', monospace;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(6, 75, 80, 0.3);
+  box-shadow: 0 4px 14px rgba(6, 75, 80, 0.25);
 }
 
 .registro-button button:hover {
   background-color: #0a6e74;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(6, 75, 80, 0.35);
 }
 
 .registro-button button:active {
   transform: translateY(1px);
 }
 
+.registro-button button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .login-link {
   text-align: center;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .login-link span {
   color: #64748b;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .login-link a {
   color: #12979f;
   font-weight: 600;
   text-decoration: none;
-  transition: color 0.2s ease;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .login-link a:hover {
@@ -159,13 +168,12 @@
   text-decoration: underline;
 }
 
-/* ─── Mobile ─────────────────────────────────────────────────────────────── */
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .registro-form {
-    padding: 36px 24px;
+    padding: 28px 20px;
   }
 
-  .registro-form h2 {
-    font-size: 22px;
+  .registro-fila {
+    grid-template-columns: 1fr;
   }
 }

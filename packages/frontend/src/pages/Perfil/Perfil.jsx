@@ -4,21 +4,48 @@ import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
-import { getUserByToken } from '../../services/userService.js';
+import { getMe } from '../../services/userService.js';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
 export default function Perfil() {
-  const { isAuthenticated, token, logout } = useAuth();
+  const { isAuthenticated, email, password, logout } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (isAuthenticated) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          // Aplanamos los datos para que el template los consuma igual
+          setUser({
+            email: data.usuario?.email,
+            dni: data.usuario?.dni,
+            roles: data.usuario?.roles,
+            nombreUsuario: data.usuario?.nombreUsuario,
+            numTel: data.usuario?.numTel,
+            direccion: data.usuario?.direccion,
+            fechaNacimiento: data.usuario?.fechaNacimiento
+              ? (() => {
+                  const d = new Date(data.usuario.fechaNacimiento);
+                  const dia = String(d.getUTCDate()).padStart(2, '0');
+                  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+                  const anio = d.getUTCFullYear();
+                  return `${dia}/${mes}/${anio}`;
+                })()
+              : null,
+            nombre: data.perfil?.nombre,
+            matricula: data.perfil?.matricula,
+            especialidades: data.perfil?.especialidades?.map((e) => e.nombre) ?? [],
+            practicas: data.perfil?.practicas?.map((p) => p.nombre) ?? [],
+            sedes: data.perfil?.sedes?.map((s) => s.nombre) ?? [],
+            obraSocial: data.perfil?.obraSocial?.nombre,
+            plan: data.perfil?.plan?.nombre,
+            coberturasEspecialidad: data.perfil?.plan?.coberturasEspecialidad?.map((c) => c.especialidad?.nombre) ?? [],
+            coberturasPractica: data.perfil?.plan?.coberturasPractica?.map((c) => c.practica?.nombre) ?? [],
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -29,7 +56,7 @@ export default function Perfil() {
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   // Protección de ruta: si no está autenticado, va a la página de error 401
   if (!isAuthenticated) {
@@ -52,7 +79,7 @@ export default function Perfil() {
       <div className="header-container">
         <h1 className="header-title text-ellipsis">Mi Perfil</h1>
         <div className="header-right">
-          <h2 className="user-name text-ellipsis">{user?.username || "N/A"}</h2>
+          <h2 className="user-name text-ellipsis">{user?.nombreUsuario || user?.nombre || 'N/A'}</h2>
           <img className="user-avatar" src={user?.avatar || "/avatar.png"} alt="Avatar de usuario" />
           <button className="btn-logout text-ellipsis" onClick={() => { logout(); window.location.href = '/login'; }}>
             Cerrar sesión
@@ -151,16 +178,24 @@ export default function Perfil() {
                 <td className="text-ellipsis">{user?.nombre || 'N/A'}</td>
               </tr>
               <tr>
+                <td className="label"><strong>DNI:</strong></td>
+                <td className="text-ellipsis">{user?.dni || 'N/A'}</td>
+              </tr>
+              <tr>
                 <td className="label"><strong>Email:</strong></td>
                 <td className="text-ellipsis">{user?.email || 'N/A'}</td>
               </tr>
               <tr>
                 <td className="label"><strong>Teléfono:</strong></td>
-                <td className="text-ellipsis">{user?.telefono || 'N/A'}</td>
+                <td className="text-ellipsis">{user?.numTel || 'N/A'}</td>
               </tr>
               <tr>
                 <td className="label"><strong>Dirección:</strong></td>
                 <td className="text-ellipsis">{user?.direccion || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td className="label"><strong>Nacimiento:</strong></td>
+                <td className="text-ellipsis">{user?.fechaNacimiento || 'N/A'}</td>
               </tr>
             </tbody>
           </table>

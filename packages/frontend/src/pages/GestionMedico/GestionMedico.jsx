@@ -3,7 +3,7 @@ import './GestionMedico.css';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage';
 import { useState, useEffect } from 'react';
-import { getUserByToken } from '../../services/userService.js';
+import { getMe } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
@@ -38,16 +38,19 @@ const OPCIONES = [
 
 export function GestionMedico() {
   const navigate = useNavigate();
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (isAuthenticated) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+            nombre: data.perfil?.nombre,
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -58,7 +61,7 @@ export function GestionMedico() {
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;

@@ -4,6 +4,7 @@ import Toast from '../../components/Toast/Toast.jsx';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { login_back } from '../../services/authService.js';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 16, color: '#fff' }} spin />;
 
@@ -13,7 +14,7 @@ export default function Login() {
   const [toast, setToast] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login_front } = useAuth();
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
@@ -34,17 +35,14 @@ export default function Login() {
 
     setSubmitting(true);
     try {
-      // sendLoginData(formData); // Aca se envía la request al back
-      const respuesta = { codigo: 200, token: 'abc123' };
-
-      if (respuesta.codigo === 200) {
-        login(respuesta.token);
+      await login_back({ email: formData.email, password: formData.password });
+        login_front({ email: formData.email, password: formData.password });
         mostrarToast('Inicio de sesión exitoso', 'success');
         await new Promise((resolve) => setTimeout(resolve, 1000));
         window.location.href = '/';
-      } else {
-        mostrarToast('Error al iniciar sesión', 'error');
-      }
+    } catch (error) {
+      const mensaje = error.response?.data?.message ?? 'Email o contraseña incorrectos';
+      mostrarToast(mensaje, 'error');
     } finally {
       setSubmitting(false);
     }

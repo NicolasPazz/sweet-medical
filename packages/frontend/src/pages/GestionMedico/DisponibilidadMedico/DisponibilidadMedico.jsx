@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getMedicos, actualizarDisponibilidad } from '../../../services/turnoService.js';
 import './DisponibilidadMedico.css';
-import { getUserByToken } from '../../../services/userService.js';
+import { getMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
@@ -78,7 +78,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
 }
 
 export default function DisponibilidadMedico() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
   const [disponibilidades, setDisponibilidades] = useState([]);
@@ -114,17 +114,19 @@ export default function DisponibilidadMedico() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;

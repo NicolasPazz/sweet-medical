@@ -19,6 +19,10 @@ export class PacienteService {
     return await this.pacienteRepository.findByDniPaciente(dni);
   }
 
+  async findByUsuarioId(usuarioId) {
+    return await this.pacienteRepository.findByIdUsuario(usuarioId);
+  }
+
   async crearPaciente({ usuario }) {
     if (!usuario) {
       throw new Error('El usuario es obligatorio para crear un paciente');

@@ -3,7 +3,7 @@ import './HistorialTurnosMedico.css';
 import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
-import { getUserByToken } from '../../../services/userService.js';
+import { getMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -14,7 +14,7 @@ function formatFecha(fechaHora) {
 }
 
 export default function HistorialTurnosMedico() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('TODOS');
@@ -22,7 +22,6 @@ export default function HistorialTurnosMedico() {
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Simula carga asincrónica del mock (cuando se integre al backend, solo cambia el fetch)
   useEffect(() => {
     const timer = setTimeout(() => {
       setTurnos([...TURNOS_MEDICO_MOCK]);
@@ -33,17 +32,17 @@ export default function HistorialTurnosMedico() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;

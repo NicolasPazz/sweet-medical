@@ -11,8 +11,10 @@ export class UsuarioRepository {
     usuario.password = datos.password;
     usuario.roles = datos.roles ?? [];
     usuario.dni = datos.dni;
-    usuario.nombre = datos.nombre;
     usuario.activo = datos.activo ?? false;
+    usuario.numTel = datos.numTel;
+    usuario.direccion = datos.direccion;
+    usuario.fechaNacimiento = datos.fechaNacimiento;
     return usuario;
   }
 

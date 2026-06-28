@@ -15,6 +15,10 @@ export class MedicoService {
     return await this.medicoRepository.findByDni(dni);
   }
 
+  async findByUsuarioId(usuarioId) {
+    return await this.medicoRepository.findByUsuarioId(usuarioId);
+  }
+
   async findById(id) {
     return await this.medicoRepository.findById(id);
   }
