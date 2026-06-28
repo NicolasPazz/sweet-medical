@@ -1,6 +1,6 @@
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { usuarioService } from './UsuarioService.js';
-import { ConflictError, NotFoundError } from '../errors/AppError.js';
+import { ConflictError, NotFoundError, BadRequestError } from '../errors/AppError.js';
 
 export class MedicoService {
   constructor({
@@ -39,19 +39,62 @@ export class MedicoService {
     return await this.medicoRepository.findAll();
   }
 
-  async actualizarDisponibilidad(id_medico, disponibilidades) {
-    const medico = await this.medicoRepository.findById(id_medico);
+  async actualizarDisponibilidad(usuario, disponibilidades) {
+    const medico = await this.medicoRepository.findByIdUsuario(usuario.id);
 
     if (medico == null) {
       throw new NotFoundError('Medico no encontrado');
     }
 
-    medico.disponibilidades = disponibilidades.map((d) => ({
+    const normalizadas = disponibilidades.map((d) => ({
       ...d,
       diaSemana: d.diaSemana.trim().toUpperCase(),
     }));
 
-    this.medicoRepository.save(medico);
+    const toMin = (hora) => {
+      const [h, m] = hora.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    // Agrupar por día y dentro de cada día verificar que no haya franjas
+    // contenidas o exactamente iguales a otra
+    const porDia = {};
+    for (const franja of normalizadas) {
+      const dia = franja.diaSemana;
+      if (!porDia[dia]) porDia[dia] = [];
+      porDia[dia].push(franja);
+    }
+
+    for (const [dia, franjas] of Object.entries(porDia)) {
+      const ordenadas = [...franjas].sort(
+        (a, b) => toMin(a.horaDesde) - toMin(b.horaDesde),
+      );
+
+      for (let i = 0; i < ordenadas.length; i++) {
+        for (let j = 0; j < ordenadas.length; j++) {
+          if (i === j) continue;
+
+          const a = ordenadas[i];
+          const b = ordenadas[j];
+
+          const desdeA = toMin(a.horaDesde);
+          const hastaA = toMin(a.horaHasta);
+          const desdeB = toMin(b.horaDesde);
+          const hastaB = toMin(b.horaHasta);
+
+          // A está contenida en B (incluyendo iguales)
+          if (desdeA >= desdeB && hastaA <= hastaB && i !== j) {
+            throw new BadRequestError(
+              `En ${dia}: la franja ${a.horaDesde}-${a.horaHasta} está contenida o es igual a ${b.horaDesde}-${b.horaHasta}. Fusionalas antes de guardar.`,
+            );
+          }
+        }
+      }
+    }
+
+    medico.disponibilidades = normalizadas;
+
+    await this.medicoRepository.save(medico);
 
     return medico;
   }

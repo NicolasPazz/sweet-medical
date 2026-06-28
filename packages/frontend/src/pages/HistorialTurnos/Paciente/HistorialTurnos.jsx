@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
 import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
-import { getMe } from '../../../services/userService.js';
+import { getMe, getHistorialPacienteMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -26,12 +26,20 @@ export default function HistorialTurnos() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTurnos([...TURNOS_MOCK]);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
+    const load = async () => {
+      if (!email || !password) return;
+      try {
+        const data = await getHistorialPacienteMe({ email, password });
+        setTurnos(data ?? []);
+      } catch (err) {
+        console.error('Error al cargar turnos:', err);
+        setTurnos([...TURNOS_MOCK]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [email, password]);
 
   useEffect(() => {
     const fetchUser = async () => {

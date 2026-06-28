@@ -45,12 +45,15 @@ export const reservarTurno = async (data) => {
   return res.data;
 };
 
-export const getHistorialPaciente = async (idUsuario) => {
-  const res = await api.get(`/pacientes/${idUsuario}/turnos`);
+export const actualizarDisponibilidad = async (medicoId, disponibilidades) => {
+  const res = await api.patch('/medicos/disponibilidad', {
+    id_medico: medicoId,
+    disponibilidades,
+  });
   return res.data;
 };
 
-export const actualizarDisponibilidad = async (id_medico, disponibilidades) => {
-  const res = await api.patch('/medicos/disponibilidad', { id_medico, disponibilidades });
+export const getHistorialPaciente = async (idUsuario) => {
+  const res = await api.get(`/pacientes/${idUsuario}/turnos`);
   return res.data;
 };

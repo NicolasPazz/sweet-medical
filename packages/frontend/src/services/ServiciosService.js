@@ -1,33 +1,56 @@
-import api from "./api-client.js";
+import axios from 'axios';
+import { getApiBaseUrl } from '../lib/api-utils.js';
+import { generateBasicAuthHeader } from './ParserB64.js';
 
-export async function getAllEspecialidadesByMedic(id_usuario) {
-  const respuesta = await api.get(`/especialidades/all/${id_usuario}`);
-  return respuesta.data?.data ?? [];
+const authHeaders = (email, password) => ({
+  Authorization: generateBasicAuthHeader(email, password),
+  'Content-Type': 'application/json',
+});
+
+export async function getAllEspecialidadesByMedic({ email, password }) {
+  const res = await axios.get(`${getApiBaseUrl()}/especialidades/me`, {
+    headers: authHeaders(email, password),
+  });
+  return res.data?.data ?? [];
 }
 
-export async function getAllPracticaByMedic(id_usuario) {
-  const respuesta = await api.get(`/practicas/all/${id_usuario}`);
-  return respuesta.data?.data ?? [];
+export async function getAllPracticaByMedic({ email, password }) {
+  const res = await axios.get(`${getApiBaseUrl()}/practicas/me`, {
+    headers: authHeaders(email, password),
+  });
+  return res.data?.data ?? [];
 }
 
-export async function agregarEspecialidadAMedico(especialidad, id_usuario) {
-  const respuesta = await api.post(`/especialidades/usuario/${id_usuario}`, especialidad);
-  return respuesta.status;
+export async function agregarEspecialidadAMedico({ email, password, especialidad }) {
+  const res = await axios.post(
+    `${getApiBaseUrl()}/especialidades/me`,
+    { id: especialidad.id },
+    { headers: authHeaders(email, password) },
+  );
+  return res.status;
 }
 
-export async function agregarPracticaAMedico(practica, id_usuario) {
-  const respuesta = await api.post(`/practicas/usuario/${id_usuario}`, practica);
-  return respuesta.status;
+export async function agregarPracticaAMedico({ email, password, practica }) {
+  const res = await axios.post(
+    `${getApiBaseUrl()}/practicas/me`,
+    { id: practica.id },
+    { headers: authHeaders(email, password) },
+  );
+  return res.status;
 }
 
-export async function eliminarEspecialidadAMedico(especialidad, id_usuario) {
-  const respuesta = await api.delete(`/especialidades/usuario/${id_usuario}`, { data: especialidad });
-  return respuesta.status;
+export async function eliminarEspecialidadAMedico({ email, password, especialidad }) {
+  const res = await axios.delete(`${getApiBaseUrl()}/especialidades/me`, {
+    headers: authHeaders(email, password),
+    data: { id: especialidad.id },
+  });
+  return res.status;
 }
 
-export async function eliminarPracticaAMedico(practica, id_usuario) {
-  const respuesta = await api.delete(`/practicas/usuario/${id_usuario}`, { data: practica });
-  return respuesta.status;
+export async function eliminarPracticaAMedico({ email, password, practica }) {
+  const res = await axios.delete(`${getApiBaseUrl()}/practicas/me`, {
+    headers: authHeaders(email, password),
+    data: { id: practica.id },
+  });
+  return res.status;
 }
-
-

@@ -3,10 +3,11 @@ import './HistorialTurnosMedico.css';
 import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
-import { getMe } from '../../../services/userService.js';
+import { getMe, getTurnosMedico } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
+import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
@@ -23,12 +24,20 @@ export default function HistorialTurnosMedico() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTurnos([...TURNOS_MEDICO_MOCK]);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
+    const load = async () => {
+      if (!email || !password) return;
+      try {
+        const data = await getTurnosMedico({ email, password });
+        setTurnos(data ?? []);
+      } catch (err) {
+        console.error('Error al cargar turnos:', err);
+        setTurnos([...TURNOS_MEDICO_MOCK]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [email, password]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -122,6 +131,7 @@ export default function HistorialTurnosMedico() {
 
   return (
     <div className="historial-container">
+      <VolverGestion />
       <div className="historial-header">
         <h1 className="historial-title text-ellipsis">Turnos del Médico</h1>
         <p className="historial-subtitle text-ellipsis">Historial y próximos turnos de tus pacientes</p>

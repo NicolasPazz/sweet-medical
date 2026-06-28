@@ -1,5 +1,6 @@
 import express from 'express';
 import { MedicoController } from '../controllers/MedicoController.js';
+import { basicAuthUser } from '../middlewares/basicAuth.js';
 
 const medicoRouter = express.Router();
 const medicoController = new MedicoController();
@@ -101,6 +102,15 @@ medicoRouter.route('/all').get((req, res, next) => medicoController.leerMedicos(
  */
 medicoRouter
   .route('/disponibilidad')
-  .patch((req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
+  .patch(basicAuthUser, (req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
+
+// Turnos del médico autenticado por header
+medicoRouter
+  .route('/me/turnos')
+  .get(basicAuthUser, (req, res, next) => medicoController.obtenerTurnosMe(req, res, next));
+
+medicoRouter
+  .route('/')
+  .get(basicAuthUser, (req, res, next) => medicoController.getMedicoByUsuario(req, res, next));
 
 export default medicoRouter;

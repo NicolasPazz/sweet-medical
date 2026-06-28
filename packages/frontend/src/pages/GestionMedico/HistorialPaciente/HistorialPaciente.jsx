@@ -8,6 +8,7 @@ import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
+import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
@@ -221,6 +222,7 @@ export default function HistorialPaciente() {
 
   return (
     <div className="historial-container">
+      <VolverGestion />
       <div className="historial-header">
         <h1 className="historial-title text-ellipsis">Historial de Paciente</h1>
         <p className="historial-subtitle text-ellipsis">

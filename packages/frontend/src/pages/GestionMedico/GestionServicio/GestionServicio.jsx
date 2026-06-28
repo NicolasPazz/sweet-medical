@@ -10,6 +10,7 @@ import { getMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
+import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
@@ -289,14 +290,17 @@ export function GestionServicio() {
     const normalizar = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
     const cargar = async () => {
       try {
-        const [espRes, pracRes] = await Promise.all([getAllEspecialidadesByMedic(user.id), getAllPracticaByMedic(user.id)]);
-        const esp = espRes?.data ?? espRes ?? [];
-        const prac = pracRes?.data ?? pracRes ?? [];
+        const [espRes, pracRes] = await Promise.all([
+          getAllEspecialidadesByMedic({ email, password }),
+          getAllPracticaByMedic({ email, password }),
+        ]);
+        const esp = espRes ?? [];
+        const prac = pracRes ?? [];
         setEspecialidades(esp.map(normalizar));
         setPracticas(prac.map(normalizar));
       } catch (e) {
         console.error('[GestionServicio] Error al cargar servicios:', e);
-        setErrorCarga('No se pudieron cargar los servicios. Usando datos de ejemplo.');
+        setErrorCarga('No se pudieron cargar los servicios.');
         setEspecialidades([...especialidadesMock]);
         setPracticas([...practicasMock]);
       } finally {
@@ -333,9 +337,9 @@ export function GestionServicio() {
       if (!esEdicion) {
         let statusCode;
         if (tipo === 'ESPECIALIDAD') {
-          statusCode = await agregarEspecialidadAMedico(servicioGuardado, user.id);
+          statusCode = await agregarEspecialidadAMedico({ email, password, especialidad: servicioGuardado });
         } else {
-          statusCode = await agregarPracticaAMedico(servicioGuardado, user.id);
+          statusCode = await agregarPracticaAMedico({ email, password, practica: servicioGuardado });
         }
 
         if (statusCode === 200) {
@@ -376,9 +380,9 @@ export function GestionServicio() {
       const { tipo, id } = modalEliminar;
       let statusCode;
       if (tipo === 'ESPECIALIDAD') {
-        statusCode = await eliminarEspecialidadAMedico(modalEliminar, user.id);
+        statusCode = await eliminarEspecialidadAMedico({ email, password, especialidad: modalEliminar });
       } else {
-        statusCode = await eliminarPracticaAMedico(modalEliminar, user.id);
+        statusCode = await eliminarPracticaAMedico({ email, password, practica: modalEliminar });
       }
 
       if (statusCode === 200) {
@@ -406,6 +410,7 @@ export function GestionServicio() {
 return (
   <div className="gs-page">
     <div className="gs-container">
+      <VolverGestion />
       <div className="gs-header">
         <div>
           <h1 className="gs-title text-ellipsis">Gestión de Servicios</h1>
