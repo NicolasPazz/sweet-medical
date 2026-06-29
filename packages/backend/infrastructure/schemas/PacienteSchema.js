@@ -6,6 +6,7 @@ const pacienteSchema = new mongoose.Schema(
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     obraSocial: { type: mongoose.Schema.Types.ObjectId, ref: 'ObraSocial' },
     plan: { type: mongoose.Schema.Types.ObjectId, ref: 'Plan' },
+    nombre: { type: String, required: true, trim: true, minlength: 3, maxlength: 100 },
   },
   { timestamps: true, collection: 'pacientes' },
 );

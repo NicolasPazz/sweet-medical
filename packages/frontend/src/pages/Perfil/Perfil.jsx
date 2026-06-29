@@ -28,12 +28,12 @@ export default function Perfil() {
             direccion: data.usuario?.direccion,
             fechaNacimiento: data.usuario?.fechaNacimiento
               ? (() => {
-                  const d = new Date(data.usuario.fechaNacimiento);
-                  const dia = String(d.getUTCDate()).padStart(2, '0');
-                  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
-                  const anio = d.getUTCFullYear();
-                  return `${dia}/${mes}/${anio}`;
-                })()
+                const d = new Date(data.usuario.fechaNacimiento);
+                const dia = String(d.getUTCDate()).padStart(2, '0');
+                const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+                const anio = d.getUTCFullYear();
+                return `${dia}/${mes}/${anio}`;
+              })()
               : null,
             nombre: data.perfil?.nombre,
             matricula: data.perfil?.matricula,
@@ -89,7 +89,7 @@ export default function Perfil() {
 
       {/* --- CONTENEDOR DE INFORMACIÓN (DOS COLUMNAS) --- */}
       <div className="profile-container">
-        
+
         {/* COLUMNA IZQUIERDA: Dinámica según el Rol */}
         <div className="left-section">
           {user?.rol === 'Paciente' ? (

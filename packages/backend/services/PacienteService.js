@@ -23,7 +23,7 @@ export class PacienteService {
     return await this.pacienteRepository.findByIdUsuario(usuarioId);
   }
 
-  async crearPaciente({ usuario }) {
+  async crearPaciente({ usuario, nombre }) {
     if (!usuario) {
       throw new Error('El usuario es obligatorio para crear un paciente');
     }
@@ -32,6 +32,7 @@ export class PacienteService {
 
     return await this.pacienteRepository.save({
       usuario: usuarioId,
+      nombre: nombre
     });
   }
 
@@ -67,18 +68,18 @@ export class PacienteService {
 
       const historialTurnos = Array.isArray(t.historialEstados)
         ? t.historialEstados.map((h) => ({
-            id_cambio: h._id || h.id,
-            fechaHoraIngreso: h.fechaHoraIngreso,
-            estado: h.estado,
-            motivo: h.motivo,
-            usuario: h.usuario
-              ? {
-                  id: h.usuario._id || h.usuario.id || h.usuario,
-                  nombre: h.usuario.nombre || null,
-                  email: h.usuario.email || null,
-                }
-              : null,
-          }))
+          id_cambio: h._id || h.id,
+          fechaHoraIngreso: h.fechaHoraIngreso,
+          estado: h.estado,
+          motivo: h.motivo,
+          usuario: h.usuario
+            ? {
+              id: h.usuario._id || h.usuario.id || h.usuario,
+              nombre: h.usuario.nombre || null,
+              email: h.usuario.email || null,
+            }
+            : null,
+        }))
         : [];
 
       return {

@@ -36,7 +36,7 @@ export class AuthService {
       activo: false,
     });
 
-    const paciente = await this.pacienteService.crearPaciente({ usuario });
+    const paciente = await this.pacienteService.crearPaciente({ usuario, nombre });
 
     return { usuario, paciente };
   }
