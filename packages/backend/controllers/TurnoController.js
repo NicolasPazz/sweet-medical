@@ -31,6 +31,81 @@ export class TurnoController {
     return this.cancelarTurno(req, res, next, true);
   };
 
+  // Versiones autenticadas por header
+  cancelarTurnoMe = async (req, res, next) => {
+    try {
+      const idUsuario = req.usuarioAutenticado.id;
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+      const { motivo } = req.body;
+      if (!motivo) throw new BadRequestError('Debe escribir algún motivo');
+      const esMedico = req.usuarioAutenticado.roles?.includes('MEDICO');
+      await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
+      return res.status(200).json({ status: 'success', message: 'Turno cancelado exitosamente' });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  confirmarTurnoMe = async (req, res, next) => {
+    try {
+      const idUsuario = req.usuarioAutenticado.id;
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+      const idSede = req.body?.id_sede;
+      if (idSede) ValidadorId.validarIds(idSede);
+      await this.turnoService.confirmarTurno(idUsuario, idTurno, idSede);
+      return res.status(200).json({ status: 'success', message: 'Turno confirmado exitosamente' });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  finalizarTurnoMe = async (req, res, next) => {
+    try {
+      const idUsuario = req.usuarioAutenticado.id;
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+      await this.turnoService.finalizarTurno(idUsuario, idTurno);
+      return res.status(200).json({ status: 'success', message: 'Turno finalizado exitosamente' });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  proponerReprogramacionMe = async (req, res, next) => {
+    try {
+      const idUsuario = req.usuarioAutenticado.id;
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+      const { fecha, hora, motivo } = req.body;
+      if (!fecha || !hora || !motivo) throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
+      const [dia, mes, anio] = fecha.split('/').map(Number);
+      const [horas, minutos] = hora.split(':').map(Number);
+      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+      if (isNaN(nuevaFechaHora.getTime())) throw new BadRequestError('Formato de fecha u hora inválido. Use DD/MM/AAAA y HH:MM');
+      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+      return res.status(200).json({ status: 'success', message: 'Propuesta de reprogramación registrada' });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  responderReprogramacionMe = async (req, res, next) => {
+    try {
+      const idUsuario = req.usuarioAutenticado.id;
+      const idTurno = req.params.id_turno;
+      ValidadorId.validarIds(idTurno);
+      const { aceptado } = req.body;
+      if (aceptado === undefined || typeof aceptado !== 'boolean') throw new BadRequestError('Debe indicar si la propuesta fue aceptada (true/false)');
+      await this.turnoService.responderReprogramacion(idUsuario, idTurno, aceptado);
+      const msg = aceptado ? 'El turno ha sido reprogramado con éxito' : 'La propuesta fue rechazada';
+      return res.status(200).json({ status: 'success', message: msg });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   cancelarTurno = async (req, res, next, esMedico) => {
     try {
       const idUsuario = req.params.id_usuario;

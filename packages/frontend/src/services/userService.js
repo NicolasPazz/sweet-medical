@@ -30,6 +30,23 @@ export const getMe = async ({ email, password }) => {
   };
 };
 
+export const agregarSede = async ({ email, password, nombre, direccion }) => {
+  const response = await axios.post(
+    `${getApiBaseUrl()}/medicos/me/sedes`,
+    { nombre, direccion },
+    { headers: headers(email, password) },
+  );
+  return response.data;
+};
+
+export const getSedesMe = async ({ email, password }) => {
+  const response = await axios.get(
+    `${getApiBaseUrl()}/medicos/me/sedes`,
+    { headers: headers(email, password) },
+  );
+  return response.data.data;
+};
+
 export const getMedicoByUser = async ({ email, password }) => {
   const response = await axios.get(`${getApiBaseUrl()}/medicos/`, {
     headers: headers(email, password),

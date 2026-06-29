@@ -104,6 +104,11 @@ medicoRouter
   .route('/disponibilidad')
   .patch(basicAuthUser, (req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
 
+medicoRouter
+  .route('/me/sedes')
+  .get(basicAuthUser, (req, res, next) => medicoController.obtenerSedesMe(req, res, next))
+  .post(basicAuthUser, (req, res, next) => medicoController.agregarSedeMe(req, res, next));
+
 // Turnos del médico autenticado por header
 medicoRouter
   .route('/me/turnos')

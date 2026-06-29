@@ -14,6 +14,7 @@ import HistorialTurnosMedico from './pages/HistorialTurnos/Medico/HistorialTurno
 import { CartProvider } from './context/CartContext.jsx';
 import Perfil from './pages/Perfil/Perfil';
 import Login from './pages/Login/Login';
+import GestionSedes from './pages/GestionMedico/GestionSedes/GestionSedes.jsx';
 import './App.css';
 import Registro from './pages/Registro/Registro.jsx';
 import Contacto from './pages/Contacto.jsx';
@@ -33,6 +34,7 @@ function App() {
             <Route path="gestion-medico/mis-turnos" element={<HistorialTurnosMedico />} />
             <Route path="gestion-medico/historial-paciente" element={<HistorialPaciente />} />
             <Route path="gestion-medico/disponibilidad" element={<DisponibilidadMedico />} />
+            <Route path="gestion-medico/sedes" element={<GestionSedes />} />
             <Route path="solicitar-turno" element={<AgendarTurno />} />
             <Route path="solicitar-turno/:idServicio" element={<AgendarTurno />} />
             <Route path="historial-medico" element={<HistorialTurnos />} />

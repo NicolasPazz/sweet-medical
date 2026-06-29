@@ -23,6 +23,29 @@ export class MedicoService {
     return await this.medicoRepository.findById(id);
   }
 
+  async agregarSede(usuarioId, { nombre, direccion }) {
+    const medico = await this.medicoRepository.findByIdUsuario(usuarioId);
+    if (!medico) throw new NotFoundError('Médico no encontrado');
+
+    // Crear la sede
+    const { sedeRepository } = await import('../infrastructure/repositories/SedeRepository.js');
+    const sedeExistente = await sedeRepository.findAll().then((sedes) =>
+      sedes.find((s) => s.nombre.toLowerCase() === nombre.toLowerCase()),
+    );
+
+    const sede = sedeExistente ?? await sedeRepository.save({ nombre, direccion });
+
+    // Verificar que no la tenga ya
+    const yaLaTiene = medico.sedes?.some(
+      (s) => (s._id ?? s.id ?? s)?.toString() === (sede._id ?? sede.id)?.toString(),
+    );
+    if (yaLaTiene) throw new ConflictError(`El médico ya tiene la sede "${nombre}"`);
+
+    medico.sedes = [...(medico.sedes ?? []), sede];
+    await this.medicoRepository.save(medico);
+    return medico;
+  }
+
   async findByIdUsuario(usuarioId) {
     return await this.medicoRepository.findByIdUsuario(usuarioId);
   }

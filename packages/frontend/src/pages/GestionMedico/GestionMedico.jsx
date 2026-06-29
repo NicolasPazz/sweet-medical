@@ -34,6 +34,12 @@ const OPCIONES = [
     titulo: 'Mi Disponibilidad',
     descripcion: 'Consultá y administrá tu disponibilidad horaria por especialidad o práctica.',
   },
+  {
+    path: 'sedes',
+    icono: '📍',
+    titulo: 'Mis Sedes',
+    descripcion: 'Agregá las sedes donde atendés a tus pacientes.',
+  },
 ];
 
 export function GestionMedico() {

@@ -39,7 +39,7 @@ export default function Perfil() {
             matricula: data.perfil?.matricula,
             especialidades: data.perfil?.especialidades?.map((e) => e.nombre) ?? [],
             practicas: data.perfil?.practicas?.map((p) => p.nombre) ?? [],
-            sedes: data.perfil?.sedes?.map((s) => s.nombre) ?? [],
+            sedes: data.perfil?.sedes?.map((s) => s.nombre ? `${s.nombre} — ${s.direccion ?? ''}`.trim() : s) ?? [],
             obraSocial: data.perfil?.obraSocial?.nombre,
             plan: data.perfil?.plan?.nombre,
             coberturasEspecialidad: data.perfil?.plan?.coberturasEspecialidad?.map((c) => c.especialidad?.nombre) ?? [],
@@ -155,10 +155,22 @@ export default function Perfil() {
                   <td>
                     <strong>Prácticas:</strong>
                     <ul>
-                      {user?.practicas ? (
+                      {user?.practicas?.length ? (
                         user.practicas.map((practica, index) => <li key={index} className="text-ellipsis">{practica}</li>)
                       ) : (
                         <li className="text-ellipsis">N/A</li>
+                      )}
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Sedes:</strong>
+                    <ul>
+                      {user?.sedes?.length ? (
+                        user.sedes.map((sede, index) => <li key={index} className="text-ellipsis">{sede}</li>)
+                      ) : (
+                        <li className="text-ellipsis">Sin sedes registradas</li>
                       )}
                     </ul>
                   </td>

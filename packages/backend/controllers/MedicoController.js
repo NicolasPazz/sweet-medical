@@ -87,6 +87,33 @@ export class MedicoController {
     }
   };
 
+  obtenerSedesMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const medico = await this.medicoService.findByIdUsuario(usuario.id);
+      if (!medico) throw new NotFoundError('Médico no encontrado');
+      return res.status(200).json({ status: 'success', data: medico.sedes ?? [] });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarSedeMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { nombre, direccion } = req.body;
+
+      if (!nombre || !direccion) {
+        throw new BadRequestError('nombre y direccion son obligatorios');
+      }
+
+      const medico = await this.medicoService.agregarSede(usuario.id, { nombre, direccion });
+      return res.status(201).json({ status: 'success', data: medico });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   obtenerTurnosMe = async (req, res, next) => {
     try {
       const usuario = req.usuarioAutenticado;
