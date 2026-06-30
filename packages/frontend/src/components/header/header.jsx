@@ -10,43 +10,44 @@ import {
   FaUser,
   FaBars,
   FaTimes,
+  FaUserShield,
 } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from '../../components/AuthProvider.jsx';
-import { getUserByToken } from '../../services/userService.js';
 import CartDropdown from '../cart/CartDropdown.jsx';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 
 const Header = () => {
-  const { summary, cartItems, removeItem, clearCart } = useCart();
+  const { summary, clearCart } = useCart();
   const location = useLocation();
-
-  const { token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (token) {
-        try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-    };
-    fetchUser();
-  }, [token]);
 
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const cartButtonRef = useRef(null);
 
-  // Cierra el menú al navegar
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          setUser({ rol: getRolUsuario(data.usuario?.roles) });
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, [email, password]);
 
   const handleConfirmarReservaMasiva = () => {
     alert('¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!');
@@ -75,18 +76,20 @@ const Header = () => {
             <li>
               <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
                 <FaHome className="header-icon" />
-                <span className="header-label">Inicio</span>
+                <span className="header-label text-ellipsis">Inicio</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/solicitar-turno"
-                className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
-              >
-                <FaCalendarAlt className="header-icon" />
-                <span className="header-label">Agendar Turno</span>
-              </Link>
-            </li>
+            {user?.rol === 'Paciente' && (
+              <li>
+                <Link
+                  to="/solicitar-turno"
+                  className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
+                >
+                  <FaCalendarAlt className="header-icon" />
+                  <span className="header-label text-ellipsis">Agendar Turno</span>
+                </Link>
+              </li>
+            )}
             {user?.rol === 'Paciente' && (
               <li>
                 <Link
@@ -94,7 +97,7 @@ const Header = () => {
                   className={location.pathname === '/historial-medico' ? 'active' : ''}
                 >
                   <FaHistory className="header-icon" />
-                  <span className="header-label">Historial Médico</span>
+                  <span className="header-label text-ellipsis">Historial Médico</span>
                 </Link>
               </li>
             )}
@@ -105,14 +108,28 @@ const Header = () => {
                   className={location.pathname.startsWith('/gestion-medico') ? 'active' : ''}
                 >
                   <FaBriefcaseMedical className="header-icon" />
-                  <span className="header-label">Gestión médica</span>
+                  <span className="header-label text-ellipsis">Gestión médica</span>
                 </Link>
               </li>
             )}
+
+            {user?.rol === 'Admin' && (
+              <li>
+                <Link
+                  to="/gestion-admin"
+                  className={location.pathname.startsWith('/gestion-admin') ? 'active' : ''}
+                >
+                  <FaUserShield className='header-icon' />
+                  <span className="header-label text-ellipsis">Panel administrador</span>
+
+                </Link>
+              </li>
+            )}
+
             <li>
               <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
                 <FaEnvelope className="header-icon" />
-                <span className="header-label">Contacto</span>
+                <span className="header-label text-ellipsis">Contacto</span>
               </Link>
             </li>
           </ul>
@@ -127,22 +144,22 @@ const Header = () => {
               onClick={() => setCartOpen((prev) => !prev)}
             >
               <FaShoppingCart className="cart-icon" />
-              {summary?.count > 0 && <span className="cart-count">{summary.count}</span>}
+              {summary?.count > 0 && <span className="cart-count text-ellipsis">{summary.count}</span>}
             </button>
 
             <NotificationBell />
           </div>
 
           <div className="header-auth-row">
-            {useAuth().isAuthenticated ? (
+            {isAuthenticated ? (
               <Link id="iniciar-sesion" to="/perfil">
                 <FaUser className="auth-icon" />
-                <span>Mi Perfil</span>
+                <span className="text-ellipsis">Mi Perfil</span>
               </Link>
             ) : (
               <Link id="iniciar-sesion" to="/login">
                 <FaUser className="auth-icon" />
-                <span>Iniciar sesión</span>
+                <span className="text-ellipsis">Iniciar sesión</span>
               </Link>
             )}
           </div>

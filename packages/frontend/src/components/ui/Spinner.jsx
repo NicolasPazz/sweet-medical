@@ -22,7 +22,7 @@ export default function Spinner({ size = 'default', text = 'Cargando...', inline
     return (
       <span className="sm-spinner-inline">
         <Spin indicator={indicator} size={size} />
-        {text && <span className="sm-spinner-inline-text">{text}</span>}
+        {text && <span className="sm-spinner-inline-text text-ellipsis">{text}</span>}
       </span>
     );
   }
@@ -30,7 +30,7 @@ export default function Spinner({ size = 'default', text = 'Cargando...', inline
   return (
     <div className="sm-spinner-wrapper">
       <Spin indicator={indicator} size={size} />
-      {text && <span className="sm-spinner-text">{text}</span>}
+      {text && <span className="sm-spinner-text text-ellipsis">{text}</span>}
     </div>
   );
 }

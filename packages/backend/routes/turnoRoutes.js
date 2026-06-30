@@ -1,5 +1,6 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
+import { basicAuthUser } from '../middlewares/basicAuth.js';
 
 const turnoController = new TurnoController();
 const turnoRouter = express.Router();
@@ -53,6 +54,27 @@ const turnoRouter = express.Router();
 turnoRouter
   .route('/paciente/reserva')
   .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
+
+// Rutas autenticadas por header (sin id_usuario en ruta)
+turnoRouter
+  .route('/me/cancelacion/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.cancelarTurnoMe(req, res, next));
+
+turnoRouter
+  .route('/me/confirmar/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.confirmarTurnoMe(req, res, next));
+
+turnoRouter
+  .route('/me/realizado/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.finalizarTurnoMe(req, res, next));
+
+turnoRouter
+  .route('/me/propuesta-reprogramacion/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.proponerReprogramacionMe(req, res, next));
+
+turnoRouter
+  .route('/me/responder-reprogramacion/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.responderReprogramacionMe(req, res, next));
 
 /**
  * @swagger

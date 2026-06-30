@@ -71,6 +71,81 @@ export class EspecialidadController {
     }
   };
 
+  eliminarDeMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(id_usuario, especialidadId);
+      const resultado = await this.especialidadService.eliminarDeMedico(id_usuario, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarAMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(id_usuario, especialidadId);
+      const resultado = await this.especialidadService.agregarAMedico(id_usuario, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  obtenerTodosPorMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const especialidades = await this.especialidadService.obtenerTodosPorMedico(usuario.id);
+      return res.status(200).json({ status: 'success', data: especialidades });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarAMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(especialidadId);
+      const resultado = await this.especialidadService.agregarAMedico(usuario.id, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  eliminarDeMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { id: especialidadId } = req.body;
+      ValidadorId.validarIds(especialidadId);
+      const resultado = await this.especialidadService.eliminarDeMedico(usuario.id, especialidadId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  obtenerTodosPorMedico = async (req, res, next) => {
+    try{
+
+      const { id_usuario } = req.params;
+
+      ValidadorId.validarIds(id_usuario);
+
+      const especialidades = await this.especialidadService.obtenerTodosPorMedico(id_usuario);
+
+      console.log("especialidades: ", especialidades);
+
+      return res.status(200).json({status: 'success', data: especialidades});
+    } catch(error){
+      return next(error);
+    }
+  }
+
   _validarCuerpoCreacion(body) {
     if (typeof body.nombre !== 'string' || body.nombre.trim().length === 0) {
       throw new BadRequestError('El nombre no puede estar vacío');
@@ -110,4 +185,5 @@ export class EspecialidadController {
     }
     return datos;
   }
+
 }

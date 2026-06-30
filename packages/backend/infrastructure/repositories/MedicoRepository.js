@@ -30,6 +30,20 @@ export class MedicoRepository {
       .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
   }
 
+  async findByDni(dni) {
+    return await this.model
+      .findOne({ dni })
+      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+  }
+
+  async findByUsuarioId(usuarioId) {
+    return await this.model
+      .findOne({ usuario: usuarioId })
+      .populate('especialidades')
+      .populate('practicas')
+      .populate('sedes');
+  }
+
   // CREAR
   async save(medico) {
     const id = medico.id || medico._id;
@@ -46,6 +60,38 @@ export class MedicoRepository {
   // ACTUALIZAR
   async update(id, datosActualizados) {
     return await this.model.findByIdAndUpdate(id, datosActualizados, { new: true });
+  }
+
+  async agregarEspecialidadAMedico(medicoId, especialidadId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $addToSet: { especialidades: especialidadId } },
+      { new: true },
+    );
+  }
+
+  async eliminarEspecialidadDeMedico(medicoId, especialidadId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $pull: { especialidades: especialidadId } },
+      { new: true },
+    );
+  }
+
+  async agregarPracticaAMedico(medicoId, practicaId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $addToSet: { practicas: practicaId } },
+      { new: true },
+    );
+  }
+
+  async eliminarPracticaDeMedico(medicoId, practicaId) {
+    return await this.model.findByIdAndUpdate(
+      medicoId,
+      { $pull: { practicas: practicaId } },
+      { new: true },
+    );
   }
 
   // ELIMINAR

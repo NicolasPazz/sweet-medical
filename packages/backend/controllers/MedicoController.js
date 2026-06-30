@@ -1,7 +1,7 @@
 import { medicoService } from '../services/MedicoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
-import { BadRequestError } from '../errors/AppError.js';
+import { BadRequestError, NotFoundError } from '../errors/AppError.js';
 
 export class MedicoController {
   constructor({ medicoService: svc = medicoService } = {}) {
@@ -26,10 +26,10 @@ export class MedicoController {
           medico: turno.medico.nombre,
           servicio: turno.servicio
             ? {
-                nombre: turno.servicio.nombre,
-                codigo: turno.servicio.codigo || 'N/A',
-                id: turno.servicio ? turno.servicio._id : 'N/A',
-              }
+              nombre: turno.servicio.nombre,
+              codigo: turno.servicio.codigo || 'N/A',
+              id: turno.servicio ? turno.servicio._id : 'N/A',
+            }
             : 'N/A',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
           estado: turno.estado ? turno.estado.getEstadoNombre() : 'N/A',
@@ -50,9 +50,9 @@ export class MedicoController {
 
   actualizarDisponibilidad = async (req, res, next) => {
     try {
-      const { disponibilidades, id_medico } = req.body;
+      const { disponibilidades } = req.body;
 
-      ValidadorId.validarIds(id_medico);
+      const usuario = req.usuarioAutenticado;
 
       if (!Array.isArray(disponibilidades)) {
         throw new BadRequestError('Se esperaba una lista de disponibilidades');
@@ -77,7 +77,7 @@ export class MedicoController {
         throw new BadRequestError('Días de semana no válidos recibidos');
       }
 
-      await this.medicoService.actualizarDisponibilidad(id_medico, disponibilidades);
+      await this.medicoService.actualizarDisponibilidad(usuario, disponibilidades);
 
       return res
         .status(200)
@@ -86,4 +86,83 @@ export class MedicoController {
       return next(error);
     }
   };
+
+  obtenerSedesMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const medico = await this.medicoService.findByIdUsuario(usuario.id);
+      if (!medico) throw new NotFoundError('Médico no encontrado');
+      return res.status(200).json({ status: 'success', data: medico.sedes ?? [] });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarSedeMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { nombre, direccion } = req.body;
+
+      if (!nombre || !direccion) {
+        throw new BadRequestError('nombre y direccion son obligatorios');
+      }
+
+      const medico = await this.medicoService.agregarSede(usuario.id, { nombre, direccion });
+      return res.status(201).json({ status: 'success', data: medico });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  obtenerTurnosMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const medico = await this.medicoService.findByIdUsuario(usuario.id);
+      if (!medico) throw new NotFoundError('Médico no encontrado');
+
+      const turnos = (medico.turnosActualesYFuturos ?? []).map((turno) => ({
+        _id: turno.id || turno._id,
+        fechaHora: turno.fechaHora,
+        hora: turno.hora,
+        estado: typeof turno.estado === 'object' ? turno.estado.getEstadoNombre?.() ?? turno.estado.nombre ?? String(turno.estado) : turno.estado,
+        costo: turno.costo,
+        paciente: turno.paciente ? { nombre: turno.paciente.nombre ?? turno.paciente } : null,
+        servicio: turno.practica
+          ? { nombre: turno.practica.nombre }
+          : turno.especialidad
+          ? { nombre: turno.especialidad.nombre }
+          : turno.servicio
+          ? { nombre: turno.servicio.nombre ?? turno.servicio }
+          : null,
+        sede: turno.sede ? { nombre: turno.sede.nombre ?? turno.sede } : null,
+        propuestaCambio: turno.propuestaCambio ?? null,
+      }));
+
+      return res.status(200).json({ status: 'success', data: turnos });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  getMedicoByUsuario = async (req, res, next) => {
+
+    try {
+
+      const usuario = req.usuarioAutenticado;
+
+      const medico = await this.medicoService.findByIdUsuario(usuario.id);
+
+      return res.status(200).json({
+        id: medico.id,
+        nombre: medico.nombre,
+        matricula: medico.matricula,
+        disponibilidades: medico.disponibilidades
+      })
+
+    }
+    catch (error) {
+      return next(error);
+    }
+  }
+
 }

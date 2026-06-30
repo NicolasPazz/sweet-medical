@@ -61,7 +61,7 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
         <button className="cal-nav-btn" onClick={handlePrevMonth}>
           ‹
         </button>
-        <span className="cal-month">
+        <span className="cal-month text-ellipsis">
           {MONTHS[viewMonth]} {viewYear}
         </span>
         <button className="cal-nav-btn" onClick={handleNextMonth}>
@@ -71,7 +71,7 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
 
       <div className="cal-week-header">
         {WEEKDAYS.map((d) => (
-          <div className="cal-week-day" key={d}>
+          <div className="cal-week-day text-ellipsis" key={d}>
             {d}
           </div>
         ))}
@@ -96,18 +96,18 @@ export default function MiniCalendar({ selectedDate, onSelectDate, availableDate
               onClick={() => isAvailable && onSelectDate(dateStr)}
               className={`cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${isAvailable ? 'has-slots' : 'disabled'}`}
             >
-              <span className="day-number">{d}</span>
+              <span className="day-number text-ellipsis">{d}</span>
             </div>
           );
         })}
       </div>
 
       <div className="cal-legend">
-        <span className="legend-item">
+        <span className="legend-item text-ellipsis">
           <span className="legend-dot available" />
           Turnos disponibles
         </span>
-        <span className="legend-item">
+        <span className="legend-item text-ellipsis">
           <span className="legend-dot unavailable" />
           Sin disponibilidad
         </span>

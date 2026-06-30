@@ -38,18 +38,18 @@ const ErrorPage = ({ type = '404' }) => {
     <div className="error-page-container">
       <div className="error-card">
         <div className="error-icon-wrapper">{currentConfig.icon}</div>
-        <h1 className="error-code-text">{currentConfig.code}</h1>
-        <h2 className="error-title-text">{currentConfig.title}</h2>
-        <p className="error-message-text">{currentConfig.message}</p>
+        <h1 className="error-code-text text-ellipsis">{currentConfig.code}</h1>
+        <h2 className="error-title-text text-ellipsis">{currentConfig.title}</h2>
+        <p className="error-message-text text-ellipsis-multiline">{currentConfig.message}</p>
 
         <div className="error-actions-container">
           <button onClick={() => navigate(-1)} className="error-btn btn-secondary-error">
             <FaArrowLeft />
-            <span>Volver atrás</span>
+            <span className="text-ellipsis">Volver atrás</span>
           </button>
           <Link to="/" className="error-btn btn-primary-error">
             <FaHome />
-            <span>Ir al Inicio</span>
+            <span className="text-ellipsis">Ir al Inicio</span>
           </Link>
         </div>
       </div>

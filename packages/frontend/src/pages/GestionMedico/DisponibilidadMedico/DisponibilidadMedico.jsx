@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getMedicos, actualizarDisponibilidad } from '../../../services/turnoService.js';
 import './DisponibilidadMedico.css';
-import { getUserByToken } from '../../../services/userService.js';
+import { getMe, getMedicoByUser, actualizarDisponibilidad, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
-
-const MEDICO_SIMULADO_NOMBRE = 'Dr. Especialista 1';
+import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 
@@ -22,17 +20,68 @@ const DIAS_LABEL = {
 
 const EMPTY_DISP = () => ({ diaSemana: 'LUNES', horaDesde: '08:00', horaHasta: '12:00' });
 
+// Convierte 'HH:MM' a minutos para comparar
+const toMin = (hora) => {
+  const [h, m] = hora.split(':').map(Number);
+  return h * 60 + m;
+};
+
+// Fusiona franjas que se solapan o son contiguas en un mismo día
+const normalizarDisponibilidades = (lista) => {
+  const porDia = {};
+
+  for (const franja of lista) {
+    const dia = franja.diaSemana;
+    if (!porDia[dia]) porDia[dia] = [];
+    porDia[dia].push({ horaDesde: franja.horaDesde, horaHasta: franja.horaHasta });
+  }
+
+  const resultado = [];
+
+  for (const [dia, franjas] of Object.entries(porDia)) {
+    // Ordenar por horaDesde
+    const ordenadas = [...franjas].sort((a, b) => toMin(a.horaDesde) - toMin(b.horaDesde));
+
+    const fusionadas = [ordenadas[0]];
+
+    for (let i = 1; i < ordenadas.length; i++) {
+      const actual = ordenadas[i];
+      const ultima = fusionadas[fusionadas.length - 1];
+
+      const desdeActual = toMin(actual.horaDesde);
+      const hastaUltima = toMin(ultima.horaHasta);
+      const hastaActual = toMin(actual.horaHasta);
+
+      if (desdeActual <= hastaUltima) {
+        // Se solapan o son contiguas: fusionar extendiendo el fin si corresponde
+        if (hastaActual > hastaUltima) {
+          ultima.horaHasta = actual.horaHasta;
+        }
+        // Si hastaActual <= hastaUltima: la franja actual queda contenida, se descarta
+      } else {
+        fusionadas.push(actual);
+      }
+    }
+
+    for (const f of fusionadas) {
+      resultado.push({ diaSemana: dia, horaDesde: f.horaDesde, horaHasta: f.horaHasta });
+    }
+  }
+
+  return resultado;
+};
+
 function Toast({ msg, type, onClose }) {
   useEffect(() => {
     const t = setTimeout(onClose, 3000);
     return () => clearTimeout(t);
   }, [onClose]);
-  return <div className={`dm-toast dm-toast--${type}`}>{msg}</div>;
+  return <div className={`dm-toast dm-toast--${type} text-ellipsis`}>{msg}</div>;
 }
 
-function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
+function DisponibilidadRow({ disp, index, onChange, onRemove, onBlur, isEditing }) {
   return (
-    <div className="dm-row">
+    <div className="dm-row" onBlur={onBlur}>
       <select
         className="dm-select"
         value={disp.diaSemana}
@@ -47,7 +96,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
       </select>
 
       <div className="dm-time-group">
-        <label className="dm-time-label">Desde</label>
+        <label className="dm-time-label text-ellipsis">Desde</label>
         <input
           className="dm-input"
           type="time"
@@ -58,7 +107,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
       </div>
 
       <div className="dm-time-group">
-        <label className="dm-time-label">Hasta</label>
+        <label className="dm-time-label text-ellipsis">Hasta</label>
         <input
           className="dm-input"
           type="time"
@@ -78,7 +127,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, isEditing }) {
 }
 
 export default function DisponibilidadMedico() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
   const [disponibilidades, setDisponibilidades] = useState([]);
@@ -90,18 +139,13 @@ export default function DisponibilidadMedico() {
 
   useEffect(() => {
     const load = async () => {
+      if (!email || !password) return;
       setLoading(true);
       try {
-        const res = await getMedicos();
-        if (res?.status === 'success') {
-          const encontrado = (res.data || []).find((m) => m.nombre === MEDICO_SIMULADO_NOMBRE);
-          if (encontrado) {
-            setMedico(encontrado);
-            setDisponibilidades(encontrado.disponibilidades?.map((d) => ({ ...d })) || []);
-          } else {
-            setError(`No se encontró el médico "${MEDICO_SIMULADO_NOMBRE}" en el sistema.`);
-          }
-        }
+        const res = await getMedicoByUser({ email, password });
+        const medico = res?.data ?? res;
+        setMedico(medico);
+        setDisponibilidades(medico?.disponibilidades?.map((d) => ({ ...d })) || []);
       } catch (err) {
         console.error('Error al cargar médico:', err);
         setError('No se pudo conectar con el servidor.');
@@ -110,32 +154,39 @@ export default function DisponibilidadMedico() {
       }
     };
     load();
-  }, []);
+  }, [email, password]);
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (token) {
+      if (email && password) {
         try {
-          const userData = await getUserByToken(token);
-          setUser(userData);
+          const data = await getMe({ email, password });
+          setUser({
+            rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
+          });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
       }
     };
     fetchUser();
-  }, [token]);
+  }, [email, password]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
 
-  if (user?.rol !== 'Médico') {
+  if (user && user.rol !== 'MEDICO') {
     return <ErrorPage type="403" />;
   }
 
   const handleChange = (index, field, value) => {
     setDisponibilidades((prev) => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
+  };
+
+  // Se llama cuando el usuario termina de editar una franja (onBlur)
+  const handleNormalizar = () => {
+    setDisponibilidades((prev) => normalizarDisponibilidades(prev));
   };
 
   const handleAdd = () => {
@@ -174,10 +225,11 @@ export default function DisponibilidadMedico() {
     setSaving(true);
     setError(null);
     try {
-      await actualizarDisponibilidad(medico.id_medico, disponibilidades);
+      const normalizadas = normalizarDisponibilidades(disponibilidades);
+      await actualizarDisponibilidad({ email, password, disponibilidades: normalizadas });
 
-      const nuevasDisps = disponibilidades.map((d) => ({ ...d }));
-      setMedico((prev) => ({ ...prev, disponibilidades: nuevasDisps }));
+      setDisponibilidades(normalizadas);
+      setMedico((prev) => ({ ...prev, disponibilidades: normalizadas }));
 
       setIsEditing(false);
       setToast({ msg: 'Disponibilidad actualizada correctamente.', type: 'success' });
@@ -208,9 +260,10 @@ export default function DisponibilidadMedico() {
   return (
     <div className="dm-page">
       <div className="dm-container">
+        <VolverGestion />
         <div className="dm-header">
-          <h1 className="dm-title">Mi Disponibilidad</h1>
-          <p className="dm-subtitle">Consultá y administrá tus horarios de atención.</p>
+          <h1 className="dm-title text-ellipsis">Mi Disponibilidad</h1>
+          <p className="dm-subtitle text-ellipsis">Consultá y administrá tus horarios de atención.</p>
         </div>
 
         {loading ? (
@@ -218,30 +271,30 @@ export default function DisponibilidadMedico() {
             <Spinner size="md" text="Cargando disponibilidad..." />
           </div>
         ) : error && !medico ? (
-          <div className="dm-card dm-error-card">⚠️ {error}</div>
+          <div className="dm-card dm-error-card text-ellipsis-multiline">⚠️ {error}</div>
         ) : medico ? (
           <div className="dm-card">
             <div className="dm-card-header">
               <div className="dm-medico-info">
                 <div className="dm-medico-avatar">{getInitials(medico.nombre)}</div>
                 <div>
-                  <div className="dm-medico-nombre">{medico.nombre}</div>
+                  <div className="dm-medico-nombre text-ellipsis">{medico.nombre}</div>
                   {medico.matricula && (
-                    <div className="dm-medico-meta">Matrícula: {medico.matricula}</div>
+                    <div className="dm-medico-meta text-ellipsis">Matrícula: {medico.matricula}</div>
                   )}
                 </div>
               </div>
 
               {!isEditing ? (
-                <button className="dm-btn-edit" onClick={() => setIsEditing(true)}>
+                <button className="dm-btn-edit text-ellipsis" onClick={() => setIsEditing(true)}>
                   ✏️ Modificar disponibilidad
                 </button>
               ) : (
                 <div className="dm-edit-actions">
-                  <button className="dm-btn-secondary" onClick={handleCancelEdit} disabled={saving}>
+                  <button className="dm-btn-secondary text-ellipsis" onClick={handleCancelEdit} disabled={saving}>
                     Cancelar
                   </button>
-                  <button className="dm-btn-primary" onClick={handleSave} disabled={saving}>
+                  <button className="dm-btn-primary text-ellipsis" onClick={handleSave} disabled={saving}>
                     {saving ? (
                       <Spinner size="sm" text="Guardando..." inline />
                     ) : (
@@ -253,7 +306,7 @@ export default function DisponibilidadMedico() {
             </div>
 
             {error && (
-              <div className="dm-error">
+              <div className="dm-error text-ellipsis-multiline">
                 ⚠️ {error}
                 <button className="dm-error-close" onClick={() => setError(null)}>
                   ✕
@@ -267,8 +320,8 @@ export default function DisponibilidadMedico() {
                 {disponibilidades.length === 0 ? (
                   <div className="dm-empty">
                     <div className="dm-empty-icon">📅</div>
-                    <p>No tenés franjas horarias configuradas.</p>
-                    <button className="dm-btn-primary" onClick={() => setIsEditing(true)}>
+                    <p className="text-ellipsis">No tenés franjas horarias configuradas.</p>
+                    <button className="dm-btn-primary text-ellipsis" onClick={() => setIsEditing(true)}>
                       + Agregar disponibilidad
                     </button>
                   </div>
@@ -276,9 +329,9 @@ export default function DisponibilidadMedico() {
                   <div className="dm-days-grid">
                     {Object.entries(disByDay).map(([dia, franjas]) => (
                       <div key={dia} className="dm-day-card">
-                        <div className="dm-day-name">{DIAS_LABEL[dia]}</div>
+                        <div className="dm-day-name text-ellipsis">{DIAS_LABEL[dia]}</div>
                         {franjas.map((f, i) => (
-                          <div key={i} className="dm-day-franja">
+                          <div key={i} className="dm-day-franja text-ellipsis">
                             🕐 {f.horaDesde} – {f.horaHasta}
                           </div>
                         ))}
@@ -293,19 +346,19 @@ export default function DisponibilidadMedico() {
             {isEditing && (
               <div className="dm-edit-section">
                 <div className="dm-edit-header">
-                  <span className="dm-edit-hint">
+                  <span className="dm-edit-hint text-ellipsis">
                     {disponibilidades.length === 0
                       ? 'No hay franjas configuradas. Agregá una para comenzar.'
                       : `${disponibilidades.length} franja${disponibilidades.length !== 1 ? 's' : ''} configurada${disponibilidades.length !== 1 ? 's' : ''}`}
                   </span>
-                  <button className="dm-btn-add" onClick={handleAdd}>
+                  <button className="dm-btn-add text-ellipsis" onClick={handleAdd}>
                     + Agregar franja
                   </button>
                 </div>
 
                 <div className="dm-rows">
                   {disponibilidades.length === 0 ? (
-                    <div className="dm-empty-edit">
+                    <div className="dm-empty-edit text-ellipsis-multiline">
                       No hay franjas. Hacé clic en &quot;+ Agregar franja&quot; para empezar.
                     </div>
                   ) : (
@@ -316,6 +369,7 @@ export default function DisponibilidadMedico() {
                         index={i}
                         onChange={handleChange}
                         onRemove={handleRemove}
+                        onBlur={handleNormalizar}
                         isEditing={isEditing}
                       />
                     ))

@@ -7,8 +7,14 @@ export class UsuarioRepository {
     const usuario = Object.create(Usuario.prototype);
     usuario.id = (datos._id ?? datos.id)?.toString();
     usuario.nombreUsuario = datos.nombreUsuario;
+    usuario.email = datos.email;
     usuario.password = datos.password;
     usuario.roles = datos.roles ?? [];
+    usuario.dni = datos.dni;
+    usuario.activo = datos.activo ?? false;
+    usuario.numTel = datos.numTel;
+    usuario.direccion = datos.direccion;
+    usuario.fechaNacimiento = datos.fechaNacimiento;
     return usuario;
   }
 
@@ -39,6 +45,26 @@ export class UsuarioRepository {
     const usuario = await UsuarioModel.findById(id).lean();
     if (!usuario) throw new NotFoundError('Usuario no encontrado');
     return this.fromDB(usuario);
+  }
+
+  async findByEmail(email) {
+    const usuario = await UsuarioModel.findOne({ email: email.toLowerCase().trim() }).lean();
+    return usuario ? this.fromDB(usuario) : null;
+  }
+
+  async findByNombreUsuario(nombreUsuario) {
+    const usuario = await UsuarioModel.findOne({ nombreUsuario: nombreUsuario.trim() }).lean();
+    return usuario ? this.fromDB(usuario) : null;
+  }
+
+  async findByDni(dni) {
+    const usuario = await UsuarioModel.findOne({ dni: dni.trim() }).lean();
+    return usuario ? this.fromDB(usuario) : null;
+  }
+
+  async findByDniAndRole(dni, rol) {
+    const usuario = await UsuarioModel.findOne({ dni: dni.trim(), roles: rol }).lean();
+    return usuario ? this.fromDB(usuario) : null;
   }
 
   async findAll() {

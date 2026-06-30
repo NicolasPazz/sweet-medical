@@ -1,8 +1,14 @@
 export class Usuario {
   id;
   nombreUsuario;
+  email;
   password;
   roles;
+  dni;
+  activo;
+  numTel;
+  direccion;
+  fechaNacimiento;
 
   // Usuario del sistema para operaciones internas
   static USUARIO_SISTEMA = { id: null, _id: null, nombreUsuario: 'SISTEMA' };
@@ -15,5 +21,6 @@ export class Usuario {
     this.nombreUsuario = nombreUsuario;
     this.password = password;
     this.roles = [];
+    this.activo = false;
   }
 }

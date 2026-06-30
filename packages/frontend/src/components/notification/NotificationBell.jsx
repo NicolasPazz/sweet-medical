@@ -111,9 +111,9 @@ export default function NotificationBell() {
       {open && (
         <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(480, maxH) }}>
           <div className="nb-header">
-            <span className="nb-header__title">Notificaciones</span>
+            <span className="nb-header__title text-ellipsis">Notificaciones</span>
             {unreadCount > 0 && (
-              <button className="nb-header__mark-all" onClick={markAllAsRead}>
+              <button className="nb-header__mark-all text-ellipsis" onClick={markAllAsRead}>
                 Marcar todas como leídas
               </button>
             )}
@@ -123,7 +123,7 @@ export default function NotificationBell() {
             {unread.length === 0 ? (
               <div className="nb-empty">
                 <span className="nb-empty__icon">🔕</span>
-                <p>No tenés notificaciones sin leer</p>
+                <p className="text-ellipsis">No tenés notificaciones sin leer</p>
               </div>
             ) : (
               unread.map((n) => (
@@ -139,7 +139,7 @@ export default function NotificationBell() {
                   <span className="nb-item__icon">{inferirIcono(n.mensaje)}</span>
                   <div className="nb-item__body">
                     <p className="nb-item__message">{n.mensaje}</p>
-                    <p className="nb-item__time">{tiempoRelativo(n.fechaHoraCreacion)}</p>
+                    <p className="nb-item__time text-ellipsis">{tiempoRelativo(n.fechaHoraCreacion)}</p>
                   </div>
                   <span className="nb-item__dot" aria-hidden="true" />
                 </div>

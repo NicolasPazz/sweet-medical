@@ -1,5 +1,6 @@
 import express from 'express';
 import { PacienteController } from '../controllers/PacienteController.js';
+import { basicAuthUser } from '../middlewares/basicAuth.js';
 
 const pacienteRouter = express.Router();
 const pacienteController = new PacienteController();
@@ -37,6 +38,11 @@ const pacienteController = new PacienteController();
 pacienteRouter
   .route('/all')
   .get((req, res, next) => pacienteController.leerPacientes(req, res, next));
+
+// Historial del paciente autenticado por header
+pacienteRouter
+  .route('/me/turnos')
+  .get(basicAuthUser, (req, res, next) => pacienteController.obtenerHistorialMe(req, res, next));
 
 /**
  * @swagger

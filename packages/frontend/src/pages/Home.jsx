@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <div className="home-container">
       <main className="home-main">
-        <h1 className="home-title">Sweet Medical</h1>
+        <h1 className="home-title text-ellipsis">Sweet Medical</h1>
 
         <p className="home-subtitle">
           Plataforma para la gestión de turnos, profesionales y servicios de salud.

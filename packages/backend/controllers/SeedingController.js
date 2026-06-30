@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+
 import { Usuario } from '../domain/usuario/Usuario.js';
 import { Medico } from '../domain/usuario/Medico.js';
 import { Paciente } from '../domain/usuario/Paciente.js';
@@ -33,6 +35,8 @@ import { SedeModel } from '../infrastructure/schemas/SedeSchema.js';
 import { PlanModel } from '../infrastructure/schemas/PlanSchema.js';
 import { ObraSocialModel } from '../infrastructure/schemas/ObraSocialSchema.js';
 import { SlotModel } from '../infrastructure/schemas/SlotSchema.js';
+
+const SALT_ROUNDS = 10;
 
 export class SeedingController {
   constructor() {
@@ -165,12 +169,12 @@ export class SeedingController {
 
       const usuariosMedicosGenerados = [];
       const usuariosPacientesGenerados = [];
-      const usuariosAdminsGenerados = [];
 
       // NO TOCAR!!!!!!!!!!
-      const usuarioSistema = new Usuario('SISTEMA', '12345678');
+      const passwordSistema = await bcrypt.hash('12345678', SALT_ROUNDS);
+      const usuarioSistema = new Usuario('SISTEMA', passwordSistema);
+      usuarioSistema.email = 'sistema@sweetmedical.com';
       usuarioSistema.roles.push(Rol.ADMIN);
-      usuariosAdminsGenerados.push(usuarioSistema);
       //
 
       await this.usuarioRepository.saveAll(usuarioSistema);
@@ -179,11 +183,13 @@ export class SeedingController {
       const usuarioSistemaGuardado = await this.usuarioRepository.findUsuarioSistema();
       Usuario.setUsuarioSistema(usuarioSistemaGuardado);
 
-      logger.info(`Se cargó usuario admin_sweet.`);
+      logger.info(`Se cargó usuario SISTEMA.`);
 
       // Generar lotes de Médicos
       for (let i = 1; i <= 10; i++) {
-        const usuarioMedico = new Usuario(`medico${i}`, `pass123_${i}`);
+        const passwordHash = await bcrypt.hash(`pass123_${i}`, SALT_ROUNDS);
+        const usuarioMedico = new Usuario(`medico${i}`, passwordHash);
+        usuarioMedico.email = `medico${i}@sweetmedical.com`;
         usuarioMedico.roles.push(Rol.MEDICO);
         usuariosMedicosGenerados.push(usuarioMedico);
       }
@@ -192,7 +198,9 @@ export class SeedingController {
 
       // Generar lotes de Pacientes
       for (let i = 1; i <= 40; i++) {
-        const usuarioPaciente = new Usuario(`paciente${i}`, `pass123_${i}`);
+        const passwordHash = await bcrypt.hash(`pass123_${i}`, SALT_ROUNDS);
+        const usuarioPaciente = new Usuario(`paciente${i}`, passwordHash);
+        usuarioPaciente.email = `paciente${i}@sweetmedical.com`;
         usuarioPaciente.roles.push(Rol.PACIENTE);
         usuariosPacientesGenerados.push(usuarioPaciente);
       }

@@ -12,6 +12,18 @@ export class UsuarioService {
     return await this.usuarioRepository.findById(id);
   }
 
+  async findByEmail(email) {
+    return await this.usuarioRepository.findByEmail(email);
+  }
+
+  async findByDni(dni) {
+    return await this.usuarioRepository.findByDni(dni);
+  }
+
+  async findByDniAndRole(dni, rol){
+    return await this.usuarioRepository.findByDniAndRole(dni, rol);
+  }
+
   async save(datosUsuario) {
     return await this.usuarioRepository.save(datosUsuario);
   }

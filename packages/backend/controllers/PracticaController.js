@@ -68,6 +68,75 @@ export class PracticaController {
     }
   };
 
+  agregarAMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(id_usuario, practicaId);
+      const resultado = await this.practicaService.agregarAMedico(id_usuario, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  eliminarDeMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(id_usuario, practicaId);
+      const resultado = await this.practicaService.eliminarDeMedico(id_usuario, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  obtenerTodosPorMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const practicas = await this.practicaService.obtenerTodosPorMedico(usuario.id);
+      return res.status(200).json({ status: 'success', data: practicas });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  agregarAMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(practicaId);
+      const resultado = await this.practicaService.agregarAMedico(usuario.id, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  eliminarDeMedicoMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const { id: practicaId } = req.body;
+      ValidadorId.validarIds(practicaId);
+      const resultado = await this.practicaService.eliminarDeMedico(usuario.id, practicaId);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  obtenerTodosPorMedico = async (req, res, next) => {
+    try {
+      const { id_usuario } = req.params;
+      ValidadorId.validarIds(id_usuario);
+      const practicas = await this.practicaService.obtenerTodosPorMedico(id_usuario);
+      return res.status(200).json({ status: 'success', data: practicas });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   _validarCuerpoCreacion(body) {
     if (typeof body.codigo !== 'string' || body.codigo.trim().length === 0) {
       throw new BadRequestError('El código no puede estar vacío');

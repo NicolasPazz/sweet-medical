@@ -18,7 +18,7 @@ export default function HealthPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-zinc-900 p-6 text-zinc-100">
-      <Link to="/" className="mb-4 text-sm text-blue-400 hover:underline">
+      <Link to="/" className="mb-4 text-sm text-blue-400 hover:underline text-ellipsis">
         ← Volver al inicio
       </Link>
 
@@ -38,7 +38,7 @@ export default function HealthPage() {
           }}
         >
           <Spin indicator={spinIcon} />
-          <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }}>
+          <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }} className="text-ellipsis">
             Consultando estado del backend...
           </span>
         </div>

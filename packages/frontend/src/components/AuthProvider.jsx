@@ -3,22 +3,27 @@ import { createContext, useState, useContext } from 'react';
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [email, setEmailData] = useState(() => localStorage.getItem('email'));
+  const [password, setPasswordData] = useState(() => localStorage.getItem('password'));
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!email && !!password;
 
-  const login = (newToken) => {
-    setToken(newToken);
-    localStorage.setItem('token', newToken);
+  const login_front = ({email, password}) => {
+    setEmailData(email);
+    setPasswordData(password);
+    localStorage.setItem('email', email);
+    localStorage.setItem('password', password);
   };
 
   const logout = () => {
-    setToken(null);
-    localStorage.removeItem('token');
+    setEmailData(null);
+    setPasswordData(null);
+    localStorage.removeItem('email');
+    localStorage.removeItem('password');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, email, password, login_front, logout }}>
       {children}
     </AuthContext.Provider>
   );

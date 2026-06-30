@@ -6,6 +6,16 @@ export class PacienteController {
     this.pacienteService = svc;
   }
 
+  obtenerHistorialMe = async (req, res, next) => {
+    try {
+      const usuario = req.usuarioAutenticado;
+      const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.id);
+      return res.status(200).json({ status: 'success', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   obtenerHistorial = async (req, res, next) => {
     try {
       const idUsuario = req.params.id_usuario;
