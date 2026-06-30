@@ -1,5 +1,6 @@
 import express from 'express';
 import { NotificacionController } from '../controllers/NotificacionController.js';
+import { basicAuth, basicAuthUser } from '../middlewares/basicAuth.js';
 
 const notificacionController = new NotificacionController();
 const router = express.Router();
@@ -43,7 +44,7 @@ const router = express.Router();
  */
 router
   .route('/leidas/:idUsuario')
-  .get((req, res, next) => notificacionController.obtenerLeidas(req, res, next));
+  .get(basicAuthUser, (req, res, next) => notificacionController.obtenerLeidas(req, res, next));
 
 /**
  * @swagger
@@ -84,7 +85,7 @@ router
  */
 router
   .route('/no-leidas/:idUsuario')
-  .get((req, res, next) => notificacionController.obtenerNoLeidas(req, res, next));
+  .get(basicAuthUser, (req, res, next) => notificacionController.obtenerNoLeidas(req, res, next));
 
 /**
  * @swagger
@@ -129,8 +130,10 @@ router
  */
 router
   .route('/:id_notificacion/:id_destinatario')
-  .patch((req, res, next) => notificacionController.marcarComoLeida(req, res, next));
+  .patch(basicAuthUser, (req, res, next) => notificacionController.marcarComoLeida(req, res, next));
 
+
+// NO SÉ COMO MANEJAR ESTE CASO CON EL BASIC AUTH:
 /**
  * @swagger
  * /notificaciones:

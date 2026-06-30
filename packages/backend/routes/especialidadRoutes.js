@@ -1,6 +1,6 @@
 import express from 'express';
 import { EspecialidadController } from '../controllers/EspecialidadController.js';
-import { basicAuthUser } from '../middlewares/basicAuth.js';
+import { basicAuthMedico, basicAuthUser } from '../middlewares/basicAuth.js';
 
 const especialidadController = new EspecialidadController();
 const router = express.Router();
@@ -14,8 +14,8 @@ router
 router
   .route('/me')
   .get(basicAuthUser, (req, res, next) => especialidadController.obtenerTodosPorMedicoMe(req, res, next))
-  .post(basicAuthUser, (req, res, next) => especialidadController.agregarAMedicoMe(req, res, next))
-  .delete(basicAuthUser, (req, res, next) => especialidadController.eliminarDeMedicoMe(req, res, next));
+  .post(basicAuthMedico, (req, res, next) => especialidadController.agregarAMedicoMe(req, res, next))
+  .delete(basicAuthMedico, (req, res, next) => especialidadController.eliminarDeMedicoMe(req, res, next));
 
 router
   .route('/all/:id_usuario')

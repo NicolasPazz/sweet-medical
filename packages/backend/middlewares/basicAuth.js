@@ -43,7 +43,7 @@ async function resolverUsuario(req) {
 /**
  * Verifica credenciales Basic y que el usuario tenga rol ADMIN.
  */
-export async function basicAuth(req, res, next) {
+export async function basicAuthAdmin(req, res, next) {
   try {
     const usuario = await resolverUsuario(req);
 
@@ -64,6 +64,32 @@ export async function basicAuth(req, res, next) {
 export async function basicAuthUser(req, res, next) {
   try {
     const usuario = await resolverUsuario(req);
+    req.usuarioAutenticado = usuario;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function basicAuthPaciente(req, res, next) {
+  try {
+    const usuario = await resolverUsuario(req);
+    if (!usuario.roles?.includes('PACIENTE')) {
+      throw new ForbiddenError('No tenés permisos para realizar esta acción');
+    }
+    req.usuarioAutenticado = usuario;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function basicAuthMedico(req, res, next) {
+  try {
+    const usuario = await resolverUsuario(req);
+    if (!usuario.roles?.includes('MEDICO')) {
+      throw new ForbiddenError('No tenés permisos para realizar esta acción');
+    }
     req.usuarioAutenticado = usuario;
     next();
   } catch (error) {

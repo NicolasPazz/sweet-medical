@@ -1,10 +1,11 @@
 import express from 'express';
 import { PacienteController } from '../controllers/PacienteController.js';
-import { basicAuthUser } from '../middlewares/basicAuth.js';
+import { basicAuthMedico, basicAuthPaciente, basicAuthUser } from '../middlewares/basicAuth.js';
 
 const pacienteRouter = express.Router();
 const pacienteController = new PacienteController();
 
+// Creo que este endpoint ya no se va a usar más
 /**
  * @swagger
  * /pacientes/all:
@@ -42,7 +43,7 @@ pacienteRouter
 // Historial del paciente autenticado por header
 pacienteRouter
   .route('/me/turnos')
-  .get(basicAuthUser, (req, res, next) => pacienteController.obtenerHistorialMe(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) => pacienteController.obtenerHistorialMe(req, res, next));
 
 /**
  * @swagger
@@ -87,6 +88,6 @@ pacienteRouter
  */
 pacienteRouter
   .route('/:id_usuario/turnos')
-  .get((req, res, next) => pacienteController.obtenerHistorial(req, res, next));
+  .get(basicAuthMedico, (req, res, next) => pacienteController.obtenerHistorial(req, res, next));
 
 export default pacienteRouter;
