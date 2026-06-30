@@ -9,6 +9,7 @@ import { GestionServicio } from './pages/GestionMedico/GestionServicio/GestionSe
 import { GestionAdmin } from './pages/GestionAdmin/GestionAdmin';
 import { GenerarUsuario } from './pages/GestionAdmin/GenerarUsuario/GenerarUsuario';
 import { GestionServicioAdmin } from './pages/GestionAdmin/GestionServicio/GestionServicio';
+import { GestionSedesAdmin } from './pages/GestionAdmin/GestionSedes/GestionSedes';
 import HistorialPaciente from './pages/GestionMedico/HistorialPaciente/HistorialPaciente';
 import DisponibilidadMedico from './pages/GestionMedico/DisponibilidadMedico/DisponibilidadMedico';
 import AgendarTurno from './pages/AgendarTurno/AgendarTurno';
@@ -35,6 +36,7 @@ function App() {
             <Route path="gestion-admin" element={<GestionAdmin />} />
             <Route path="gestion-admin/usuarios" element={<GenerarUsuario />} />
             <Route path="gestion-admin/servicio" element={<GestionServicioAdmin />} />
+            <Route path="gestion-admin/sedes" element={<GestionSedesAdmin />} />
 
             {/* Panel médico */}
             <Route path="gestion-medico" element={<GestionMedico />} />

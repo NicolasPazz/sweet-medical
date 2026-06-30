@@ -37,6 +37,16 @@ export class UsuarioService {
     }
     return usuario;
   }
+
+  async verificarUsuarioAdmin(idUsuario) {
+    ValidadorId.validarIds(idUsuario);
+    const usuario = await this.usuarioRepository.findById(idUsuario);
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+    if (!usuario.roles?.includes('ADMIN')) {
+      throw new ForbiddenError('Solo un usuario con rol ADMIN puede realizar esta operación');
+    }
+    return usuario;
+  }
 }
 
 export const usuarioService = new UsuarioService();

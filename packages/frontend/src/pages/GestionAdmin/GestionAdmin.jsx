@@ -22,6 +22,12 @@ const OPCIONES = [
     titulo: 'ABM de Servicios',
     descripcion: 'Alta, modificación y baja de especialidades y prácticas del sistema.',
   },
+  {
+    path: 'sedes',
+    icono: '🏥',
+    titulo: 'ABM de Sedes',
+    descripcion: 'Alta, modificación y baja de las sedes de atención del sistema.',
+  },
 ];
 
 export function GestionAdmin() {
