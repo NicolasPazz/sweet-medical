@@ -22,6 +22,7 @@ import GestionSedes from './pages/GestionMedico/GestionSedes/GestionSedes.jsx';
 import './App.css';
 import Registro from './pages/Registro/Registro.jsx';
 import Contacto from './pages/Contacto.jsx';
+import OfertaMedica from './pages/OfertaMedica/OfertaMedica.jsx';
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
             <Route path="*" element={<ErrorPage type="404" />} />
             <Route path="404" element={<ErrorPage type="404" />} />
             <Route path="403" element={<ErrorPage type="403" />} />
+            <Route path="oferta-medica" element={<OfertaMedica />} />
             <Route path="contact" element={<Contacto />} />
           </Route>
         </Routes>

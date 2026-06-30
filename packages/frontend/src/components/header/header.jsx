@@ -11,6 +11,7 @@ import {
   FaBars,
   FaTimes,
   FaUserShield,
+  FaStethoscope,
 } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
@@ -77,6 +78,12 @@ const Header = () => {
               <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
                 <FaHome className="header-icon" />
                 <span className="header-label text-ellipsis">Inicio</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/oferta-medica" className={location.pathname === '/oferta-medica' ? 'active' : ''}>
+                <FaStethoscope className="header-icon" />
+                <span className="header-label text-ellipsis">Oferta Médica</span>
               </Link>
             </li>
             {user?.rol === 'Paciente' && (
