@@ -7,6 +7,19 @@ const headers = (email, password) => ({
   'Content-Type': 'application/json',
 });
 
+// Centraliza el cálculo del rol "de presentación" a partir de los roles crudos
+// del backend (que pueden incluir MEDICO, PACIENTE, ADMIN, etc).
+// Devuelve 'Médico' | 'Paciente' | 'Admin' | null.
+// IMPORTANTE: nunca asumir 'Paciente' por defecto si no se reconoce el rol,
+// para no exponer funcionalidades de paciente a roles como ADMIN.
+export const getRolUsuario = (roles) => {
+  if (!roles || roles.length === 0) return null;
+  if (roles.includes('ADMIN')) return 'Admin';
+  if (roles.includes('MEDICO')) return 'Médico';
+  if (roles.includes('PACIENTE')) return 'Paciente';
+  return null;
+};
+
 export const getMe = async ({ email, password }) => {
   const response = await axios.get(`${getApiBaseUrl()}/usuarios/me`, {
     headers: headers(email, password),

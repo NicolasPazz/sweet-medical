@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
 import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
-import { getMe, getHistorialPacienteMe } from '../../../services/userService.js';
+import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -46,7 +46,7 @@ export default function HistorialTurnos() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+          setUser({ rol: getRolUsuario(data.usuario?.roles) });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }

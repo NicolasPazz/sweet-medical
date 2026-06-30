@@ -14,7 +14,7 @@ import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
 import Spinner from '../../components/ui/Spinner.jsx';
-import { getMe } from '../../services/userService.js';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import './AgendarTurno.css';
@@ -62,7 +62,7 @@ export default function AgendarTurno() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+          setUser({ rol: getRolUsuario(data.usuario?.roles) });
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {

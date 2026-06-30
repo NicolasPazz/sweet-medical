@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './DisponibilidadMedico.css';
-import { getMe, getMedicoByUser, actualizarDisponibilidad } from '../../../services/userService.js';
+import { getMe, getMedicoByUser, actualizarDisponibilidad, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
@@ -162,7 +162,7 @@ export default function DisponibilidadMedico() {
         try {
           const data = await getMe({ email, password });
           setUser({
-            rol: data.usuario?.roles?.includes('MEDICO') ? 'MEDICO' : 'PACIENTE',
+            rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
           });
         } catch (error) {
           console.error('Error fetching user data:', error);

@@ -6,7 +6,7 @@ import {
 import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico ,eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
-import { getMe } from '../../../services/userService.js';
+import { getMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
@@ -271,7 +271,7 @@ export function GestionServicio() {
           const data = await getMe({ email, password });
           setUser({
             id: data.perfil?._id ?? data.perfil?.id,
-            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+            rol: getRolUsuario(data.usuario?.roles),
           });
         } catch (error) {
           console.error('Error fetching user data:', error);

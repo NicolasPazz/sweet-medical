@@ -3,7 +3,7 @@ import './GestionMedico.css';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage';
 import { useState, useEffect } from 'react';
-import { getMe } from '../../services/userService.js';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
@@ -54,7 +54,7 @@ export function GestionMedico() {
         try {
           const data = await getMe({ email, password });
           setUser({
-            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+            rol: getRolUsuario(data.usuario?.roles),
             nombre: data.perfil?.nombre,
           });
         } catch (error) {

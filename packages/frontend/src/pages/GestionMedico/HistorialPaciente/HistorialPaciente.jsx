@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PACIENTES_MOCK, HISTORIAL_POR_PACIENTE } from '../../../mockdata/pacientes.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
-import { getMe } from '../../../services/userService.js';
+import { getMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
@@ -136,7 +136,7 @@ export default function HistorialPaciente() {
         try {
           const data = await getMe({ email, password });
           setUser({
-            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+            rol: getRolUsuario(data.usuario?.roles),
           });
         } catch (error) {
           console.error('Error fetching user data:', error);

@@ -16,7 +16,7 @@ import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import CartDropdown from '../cart/CartDropdown.jsx';
-import { getMe } from '../../services/userService.js';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 
 const Header = () => {
   const { summary, clearCart } = useCart();
@@ -37,7 +37,7 @@ const Header = () => {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+          setUser({ rol: getRolUsuario(data.usuario?.roles) });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }

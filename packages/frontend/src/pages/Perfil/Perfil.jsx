@@ -4,7 +4,7 @@ import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
-import { getMe } from '../../services/userService.js';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
@@ -44,7 +44,7 @@ export default function Perfil() {
             plan: data.perfil?.plan?.nombre,
             coberturasEspecialidad: data.perfil?.plan?.coberturasEspecialidad?.map((c) => c.especialidad?.nombre) ?? [],
             coberturasPractica: data.perfil?.plan?.coberturasPractica?.map((c) => c.practica?.nombre) ?? [],
-            rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente',
+            rol: getRolUsuario(data.usuario?.roles),
           });
         } catch (error) {
           console.error('Error fetching user data:', error);

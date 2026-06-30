@@ -3,7 +3,7 @@ import './HistorialTurnosMedico.css';
 import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
-import { getMe, getTurnosMedico, getSedesMe } from '../../../services/userService.js';
+import { getMe, getTurnosMedico, getSedesMe, getRolUsuario } from '../../../services/userService.js';
 import { cancelarTurno, confirmarTurno, finalizarTurno, responderReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
@@ -108,7 +108,7 @@ export default function HistorialTurnosMedico() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+          setUser({ rol: getRolUsuario(data.usuario?.roles) });
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
