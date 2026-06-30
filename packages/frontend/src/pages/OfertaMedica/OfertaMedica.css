@@ -1,0 +1,175 @@
+/* ==========================================================================
+   Contenedor Principal y Header
+   ========================================================================== */
+.oferta-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.oferta-header {
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.oferta-header h1 {
+    color: #0d5c5a;
+    /* Verde azulado corporativo */
+    font-size: 2.2rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+}
+
+.oferta-header p {
+    color: #555;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* ==========================================================================
+   Barra de Navegación por Pestañas (Tabs)
+   ========================================================================== */
+.oferta-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+}
+
+.oferta-tabs button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+}
+
+.oferta-tabs button:hover {
+    color: #0d5c5a;
+    background-color: #f1f5f9;
+}
+
+/* Estado activo de la pestaña (combina con tu lógica de React) */
+.oferta-tabs button.active {
+    color: #ffffff;
+    background-color: #0d5c5a;
+    /* Fondo teal para destacar */
+    box-shadow: 0 4px 6px -1px rgba(13, 92, 90, 0.2);
+}
+
+/* ==========================================================================
+   Grilla Adaptativa (Layout de Tarjetas)
+   ========================================================================== */
+.oferta-contenido {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.grid-oferta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ==========================================================================
+   Diseño de Tarjetas (Cards)
+   ========================================================================== */
+.oferta-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.oferta-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
+}
+
+/* Elementos internos de la Card */
+.oferta-card__icon {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+}
+
+.oferta-card__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.oferta-card__subtitle {
+    font-size: 0.95rem;
+    color: #0d5c5a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.oferta-card__description {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Metadata o detalles extras (Ej: sedes, matrículas) */
+.oferta-card__meta {
+    margin-top: auto;
+    /* Empuja el elemento al fondo de la tarjeta */
+    font-size: 0.85rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Animación de entrada suave al cambiar de pestaña */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Media Queries (Responsive)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .oferta-container {
+        padding: 1rem;
+    }
+
+    .oferta-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .oferta-tabs {
+        flex-direction: column;
+        /* Pestañas en lista vertical en celulares */
+        gap: 0.5rem;
+        border-bottom: none;
+    }
+
+    .oferta-tabs button {
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem;
+    }
+}
