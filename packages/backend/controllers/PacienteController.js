@@ -1,3 +1,4 @@
+import { BadRequestError } from '../errors/AppError.js';
 import { pacienteService } from '../services/PacienteService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 
@@ -9,7 +10,7 @@ export class PacienteController {
   obtenerHistorialMe = async (req, res, next) => {
     try {
       const usuario = req.usuarioAutenticado;
-      const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.id);
+      const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.dni);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
       return next(error);
@@ -18,11 +19,11 @@ export class PacienteController {
 
   obtenerHistorial = async (req, res, next) => {
     try {
-      const idUsuario = req.params.id_usuario;
+      const dni = req.params.dni;
 
-      ValidadorId.validarIds(idUsuario);
+      this.validarDNI(dni);
 
-      const resultado = await this.pacienteService.obtenerHistorialTurnos(idUsuario);
+      const resultado = await this.pacienteService.obtenerHistorialTurnos(dni);
 
       return res.status(200).json({
         status: 'success',
@@ -32,6 +33,19 @@ export class PacienteController {
       return next(error);
     }
   };
+
+  validarDNI = (dni) => {
+
+    if (!dni) throw new BadRequestError("No se ingreso el DNI o es invalido");
+
+    const dniLimpio = String(dni).replaceAll(".", "").trim();
+
+    const regexDNI = /^\d+$/;
+
+    if (!regexDNI.test(dniLimpio)) {
+    throw new BadRequestError("DNI no válido ingresado. Debe contener solo números y puntos.");
+    }
+  }
 
   leerPacientes = async (req, res, next) => {
     try {

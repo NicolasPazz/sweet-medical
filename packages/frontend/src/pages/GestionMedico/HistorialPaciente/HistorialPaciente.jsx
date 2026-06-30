@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { PACIENTES_MOCK, HISTORIAL_POR_PACIENTE } from '../../../mockdata/pacientes.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
-import { getMe, getRolUsuario } from '../../../services/userService.js';
+import { getMe, getRolUsuario, getHistorialPacienteByMedico } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
@@ -81,8 +80,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <span className="turno-hora text-ellipsis">{turno.hora}</span>
                 </div>
                 <div className="turno-card-center">
-                  <span className="turno-servicio text-ellipsis">{turno.servicio_nombre}</span>
-                  <span className="turno-medico text-ellipsis">{turno.nombreMedico}</span>
+                  <span className = "turno-id text-ellipsis"> {turno.id_turno} </span>
+                  <span className="turno-servicio text-ellipsis">{turno.servicio}</span>
+                  <span className="turno-medico text-ellipsis">{turno.medico}</span>
                   {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
                 </div>
                 <div className="turno-card-right">
@@ -95,13 +95,13 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <div className="turno-historial" onClick={(e) => e.stopPropagation()}>
                     <p className="turno-historial-titulo text-ellipsis">Historial de estados</p>
                     <ul className="turno-historial-lista">
-                      {turno.historialEstados.map((h, i) => {
+                      {turno.historialTurnos.map((h, i) => {
                         const hCfg = ESTADO_CONFIG[h.estado] ?? { label: h.estado, color: '' };
                         return (
                           <li key={i} className="turno-historial-item">
                             <span className={`turno-estado ${hCfg.color} text-ellipsis`}>{hCfg.label}</span>
                             <span className="turno-historial-fecha text-ellipsis">
-                              {formatFecha(h.fechaHoraCambio)}
+                              {formatFecha(h.fechaHoraIngreso)}
                             </span>
                             <span className="turno-historial-motivo text-ellipsis">{h.motivo}</span>
                             <span className="turno-historial-actor text-ellipsis">@{h.actor}</span>
@@ -129,6 +129,7 @@ export default function HistorialPaciente() {
   const [historial, setHistorial] = useState([]);
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -178,25 +179,36 @@ export default function HistorialPaciente() {
     return <ErrorPage type="403" />;
   }
 
-  const handleBuscar = () => {
+  const handleBuscar = async () => {
     const trimmed = dni.trim();
     if (!trimmed) return;
 
+    console.log(trimmed + "..." + dni);
+
     setEstado('searching');
     // Simula latencia de búsqueda
-    setTimeout(() => {
-      const paciente = PACIENTES_MOCK.find((p) => p.dni === trimmed);
-      if (!paciente) {
+    
+      try{
+      const data = await getHistorialPacienteByMedico({email, password, dni: trimmed});
+
+      console.log(data.data.paciente);
+
+      if (!data.data.paciente) {
         setEstado('not_found');
         setPacienteEncontrado(null);
         setHistorial([]);
         return;
       }
-      const turnos = HISTORIAL_POR_PACIENTE[paciente.id_paciente] ?? [];
-      setPacienteEncontrado(paciente);
-      setHistorial(turnos);
+      setPacienteEncontrado(data.data.paciente);
+      setHistorial(data.data.turnos);
       setEstado('found');
-    }, 500);
+    } catch(error){
+      setError(error.response.data.message);
+      setEstado('error');
+      setPacienteEncontrado(null);
+      setHistorial([]);
+      return;
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -268,18 +280,12 @@ export default function HistorialPaciente() {
             No se encontró ningún paciente con el DNI <strong>{dni}</strong>.
           </p>
         )}
-      </div>
 
-      <div className="hp-hint">
-        <p className="hp-hint-titulo text-ellipsis">DNIs de prueba disponibles:</p>
-        <ul className="hp-hint-lista">
-          {PACIENTES_MOCK.map((p) => (
-            <li key={p.dni} className="hp-hint-item" onClick={() => setDni(p.dni)}>
-              <span className="hp-hint-dni text-ellipsis">{p.dni}</span>
-              <span className="hp-hint-nombre text-ellipsis">{p.nombre}</span>
-            </li>
-          ))}
-        </ul>
+        {estado === 'error' && (
+          <p className="hp-error text-ellipsis">
+            {error}.
+          </p>
+        )}
       </div>
     </div>
   );

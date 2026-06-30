@@ -89,3 +89,14 @@ export const actualizarDisponibilidad = async ({ email, password, disponibilidad
   );
   return response.data;
 };
+
+export const getHistorialPacienteByMedico = async({email, password, dni}) => {
+  
+  console.log("DNI: " + dni);
+
+  const response = await axios.get(
+    `${getApiBaseUrl()}/pacientes/${dni}/turnos`,
+    { headers: headers(email, password) }
+  );
+  return response.data;
+};

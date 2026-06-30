@@ -132,6 +132,13 @@
   font-weight: 600;
   color: #1e293b;
 }
+
+.turno-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
 .turno-medico {
   font-size: 12px;
   color: #64748b;

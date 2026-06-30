@@ -1,10 +1,15 @@
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
+import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
 import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 
 export class PacienteService {
-  constructor({ pacienteRepository: pacienteRepo = pacienteRepository } = {}) {
+  constructor({
+    pacienteRepository: pacienteRepo = pacienteRepository,
+    turnoRepository: turnoRepo = turnoRepository,
+  } = {}) {
     this.pacienteRepository = pacienteRepo;
+    this.turnoRepository = turnoRepo;
   }
 
   async findById(id) {
@@ -40,15 +45,15 @@ export class PacienteService {
     return await this.pacienteRepository.findAll();
   }
 
-  async obtenerHistorialTurnos(id) {
-    const paciente = await this.pacienteRepository.findByIdUsuario(id);
+  async obtenerHistorialTurnos(dni) {
+    const paciente = await this.findByDniPaciente(dni);
     if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }
 
-    const turnos = await this.turnoService.findAllByPatientId(paciente.id || paciente._id);
+    const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
 
-    return turnos.map((t) => {
+    const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       const turnoAdaptado = {
         ...t,
@@ -104,6 +109,20 @@ export class PacienteService {
         historialTurnos,
       };
     });
+
+    const pacienteFormateado = {
+      id_usuario: paciente.usuario?._id || paciente.usuario?.id || paciente.usuario,
+      id_paciente: paciente.id || paciente._id,
+      nombre: paciente.nombre,
+      dni: paciente.dni,
+      obraSocial: paciente.obraSocial ? paciente.obraSocial.nombre : 'N/A',
+      plan: paciente.plan ? paciente.plan.nombre : 'N/A',
+    };
+
+    return {
+      paciente: pacienteFormateado,
+      turnos: turnosFormateados,
+    };
   }
 }
 
