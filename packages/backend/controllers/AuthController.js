@@ -7,40 +7,6 @@ export class AuthController {
   }
 
   /**
-   * POST /auth/admin/crear-paciente
-   * Body: { dni, nombre }
-   */
-  crearPacienteAdmin = async (req, res, next) => {
-    try {
-      const { dni, nombre } = req.body;
-      if (!dni || !nombre) {
-        throw new BadRequestError('dni y nombre son obligatorios');
-      }
-      const resultado = await this.authService.crearPacienteAdmin({ dni, nombre });
-      return res.status(201).json({ status: 'success', data: resultado });
-    } catch (error) {
-      return next(error);
-    }
-  };
-
-  /**
-   * POST /auth/admin/crear-medico
-   * Body: { dni, nombre, matricula }
-   */
-  crearMedicoAdmin = async (req, res, next) => {
-    try {
-      const { dni, nombre, matricula } = req.body;
-      if (!dni || !nombre || !matricula) {
-        throw new BadRequestError('dni, nombre y matricula son obligatorios');
-      }
-      const resultado = await this.authService.crearMedicoAdmin({ dni, nombre, matricula });
-      return res.status(201).json({ status: 'success', data: resultado });
-    } catch (error) {
-      return next(error);
-    }
-  };
-
-  /**
    * POST /auth/register
    * Body: { dni, email, password }
    */

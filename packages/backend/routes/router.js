@@ -9,6 +9,7 @@ import notificacionRouter from './notificacionRoutes.js';
 import seedingRouter from './seedingRoutes.js';
 import authRouter from './authRouter.js';
 import usuarioRouter from './usuarioRoutes.js';
+import adminRouter from './adminRoutes.js';
 import { sedeRepository } from '../infrastructure/repositories/SedeRepository.js';
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.use('/notificaciones', notificacionRouter);
 router.use('/seeding', seedingRouter);
 router.use('/auth', authRouter);
 router.use('/usuarios', usuarioRouter);
+router.use('/admins', adminRouter);
 
 // New endpoint to fetch sedes for search filters
 router.get('/sedes', async (req, res, next) => {
