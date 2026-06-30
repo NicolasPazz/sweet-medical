@@ -81,6 +81,23 @@ export const getHistorialPacienteMe = async ({ email, password }) => {
   return response.data.data;
 };
 
+export const getNotificacionesNoLeidas = async ({ email, password }) => {
+  const response = await axios.get(
+    `${getApiBaseUrl()}/notificaciones/no-leidas`,
+    { headers: headers(email, password) },
+  );
+  return response.data.data;
+};
+
+export const marcarNotificacionLeida = async ({ email, password, idNotificacion }) => {
+  const response = await axios.patch(
+    `${getApiBaseUrl()}/notificaciones/${idNotificacion}`,
+    {},
+    { headers: headers(email, password) },
+  );
+  return response.data.data;
+};
+
 export const actualizarDisponibilidad = async ({ email, password, disponibilidades }) => {
   const response = await axios.patch(
     `${getApiBaseUrl()}/medicos/disponibilidad`,

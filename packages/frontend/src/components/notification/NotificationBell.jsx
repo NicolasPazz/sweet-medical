@@ -1,19 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Badge from '@mui/material/Badge';
 import IconButton from '@mui/material/IconButton';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import './NotificationBell.css';
-import { notificacionesMock } from '@/mockdata/notificaciones';
+import { useAuth } from '../AuthProvider.jsx';
+import {
+  getNotificacionesNoLeidas,
+  marcarNotificacionLeida,
+} from '../../services/userService.js';
 
-function inferirIcono(mensaje) {
-  const m = mensaje.toLowerCase();
-  if (m.includes('cancelado') || m.includes('cancelar')) return '❌';
-  if (m.includes('confirmado') || m.includes('confirmada')) return '✅';
-  if (m.includes('recordatorio') || m.includes('mañana')) return '⏰';
-  if (m.includes('reprogramar') || m.includes('propuesta')) return '🔄';
-  if (m.includes('reservado') || m.includes('nuevo turno')) return '📅';
-  return '🔔';
-}
+const POLL_INTERVAL_MS = 30_000;
 
 function tiempoRelativo(fecha) {
   const diff = Date.now() - new Date(fecha).getTime();
@@ -28,31 +24,58 @@ function tiempoRelativo(fecha) {
 }
 
 export default function NotificationBell() {
-  const [notifications, setNotifications] = useState(notificacionesMock);
+  const { isAuthenticated, email, password } = useAuth();
+
+  const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState({});
-  const containerRef = useRef(null);
+  const [cargando, setCargando] = useState(false);
 
-  const unread = notifications.filter((n) => !n.leida);
-  const unreadCount = unread.length;
+
+
+  const containerRef = useRef(null);
+  const pollRef = useRef(null);
+
+  // Fetch de notificaciones no leídas 
+  const fetchNotificaciones = useCallback(async () => {
+    if (!email || !password) return;
+    try {
+      const data = await getNotificacionesNoLeidas({ email, password });
+      setNotifications(data ?? []);
+    } catch (err) {
+      console.error('[NotificationBell] Error al obtener notificaciones:', err);
+    }
+  }, [email, password]);
+
+  // Polling automático mientras esté autenticado
+  // fetch inmediato al loguearse + intervalo cada POLL_INTERVAL_MS
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false);
-      }
+    if (!isAuthenticated) {
+      setNotifications([]);
+      clearInterval(pollRef.current);
+      return;
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+    // Fetch inmediato apenas isAuthenticated pasa a true
+    fetchNotificaciones();
+
+    // Luego cada POLL_INTERVAL_MS
+    pollRef.current = setInterval(fetchNotificaciones, POLL_INTERVAL_MS);
+
+    return () => clearInterval(pollRef.current);
+  }, [isAuthenticated, fetchNotificaciones]);
+
+
+  if (!isAuthenticated) return null;
+
+  const unreadCount = notifications.length;
 
   function toggleOpen() {
     if (!open && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const isMobile = window.innerWidth <= 768;
-
       if (isMobile) {
-        // En mobile: desplegar hacia abajo desde el botón
         setDropdownStyle({
           position: 'fixed',
           top: rect.bottom + 8,
@@ -61,7 +84,6 @@ export default function NotificationBell() {
           width: Math.min(360, window.innerWidth - 16),
         });
       } else {
-        // En desktop (sidebar): desplegar hacia arriba desde el botón
         setDropdownStyle({
           position: 'fixed',
           bottom: window.innerHeight - rect.top + 8,
@@ -73,27 +95,45 @@ export default function NotificationBell() {
     setOpen((prev) => !prev);
   }
 
-  function markAsRead(id) {
-    setNotifications((prev) =>
-      prev.map((n) => (n._id === id ? { ...n, leida: true, fechaHoraLeida: new Date() } : n)),
-    );
+  async function markAsRead(notif) {
+    const id = notif._id ?? notif.id;
+    setNotifications((prev) => prev.filter((n) => (n._id ?? n.id) !== id));
+    try {
+      await marcarNotificacionLeida({ email, password, idNotificacion: id });
+    } catch (err) {
+      console.error('[NotificationBell] Error al marcar como leída:', err);
+      fetchNotificaciones();
+    }
   }
 
-  function markAllAsRead() {
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, leida: true, fechaHoraLeida: new Date() })),
-    );
+  async function markAllAsRead() {
+    if (cargando || notifications.length === 0) return;
+    setCargando(true);
+    const todas = [...notifications];
+    setNotifications([]);
+    try {
+      await Promise.all(
+        todas.map((n) =>
+          marcarNotificacionLeida({ email, password, idNotificacion: n._id ?? n.id }),
+        ),
+      );
+    } catch (err) {
+      console.error('[NotificationBell] Error al marcar todas como leídas:', err);
+      fetchNotificaciones();
+    } finally {
+      setCargando(false);
+    }
   }
 
   const isMobile = window.innerWidth <= 768;
   const maxH = isMobile
     ? window.innerHeight - (containerRef.current?.getBoundingClientRect().bottom ?? 0) - 24
     : Math.min(
-        480,
-        window.innerHeight -
-          (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
-          16,
-      );
+      480,
+      window.innerHeight -
+      (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
+      16,
+    );
 
   return (
     <div className="nb-wrapper" ref={containerRef}>
@@ -113,37 +153,45 @@ export default function NotificationBell() {
           <div className="nb-header">
             <span className="nb-header__title text-ellipsis">Notificaciones</span>
             {unreadCount > 0 && (
-              <button className="nb-header__mark-all text-ellipsis" onClick={markAllAsRead}>
-                Marcar todas como leídas
+              <button
+                className="nb-header__mark-all text-ellipsis"
+                onClick={markAllAsRead}
+                disabled={cargando}
+              >
+                {cargando ? 'Marcando...' : 'Marcar todas como leídas'}
               </button>
             )}
           </div>
 
           <div className="nb-list">
-            {unread.length === 0 ? (
+            {unreadCount === 0 ? (
               <div className="nb-empty">
                 <span className="nb-empty__icon">🔕</span>
                 <p className="text-ellipsis">No tenés notificaciones sin leer</p>
               </div>
             ) : (
-              unread.map((n) => (
-                <div
-                  key={n._id}
-                  className="nb-item nb-item--unread"
-                  onClick={() => markAsRead(n._id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && markAsRead(n._id)}
-                  aria-label="Marcar como leída notificación"
-                >
-                  <span className="nb-item__icon">{inferirIcono(n.mensaje)}</span>
-                  <div className="nb-item__body">
-                    <p className="nb-item__message">{n.mensaje}</p>
-                    <p className="nb-item__time text-ellipsis">{tiempoRelativo(n.fechaHoraCreacion)}</p>
+              notifications.map((n) => {
+                const id = n._id ?? n.id;
+                return (
+                  <div
+                    key={id}
+                    className="nb-item nb-item--unread"
+                    onClick={() => markAsRead(n)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && markAsRead(n)}
+                    aria-label="Marcar como leída notificación"
+                  >
+                    <div className="nb-item__body">
+                      <p className="nb-item__message">{n.mensaje}</p>
+                      <p className="nb-item__time text-ellipsis">
+                        {tiempoRelativo(n.fechaHoraCreacion)}
+                      </p>
+                    </div>
+                    <span className="nb-item__dot" aria-hidden="true" />
                   </div>
-                  <span className="nb-item__dot" aria-hidden="true" />
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

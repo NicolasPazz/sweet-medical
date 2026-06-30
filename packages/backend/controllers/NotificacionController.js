@@ -9,7 +9,8 @@ export class NotificacionController {
 
   obtenerLeidas = async (req, res, next) => {
     try {
-      const idUsuario = req.params.idUsuario;
+      const usuario = req.usuarioAutenticado;
+      const idUsuario = usuario.id;
       ValidadorId.validarIds(idUsuario);
 
       const resultado = await this.notificacionService.obtenerLeidas(idUsuario);
@@ -24,7 +25,9 @@ export class NotificacionController {
 
   obtenerNoLeidas = async (req, res, next) => {
     try {
-      const idUsuario = req.params.idUsuario;
+      const usuario = req.usuarioAutenticado;
+      const idUsuario = usuario.id;
+      console.log("SOY UN ID DIVERTIDO: " + idUsuario);
       ValidadorId.validarIds(idUsuario);
 
       const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);
@@ -41,7 +44,8 @@ export class NotificacionController {
     try {
       const id = req.params.id_notificacion;
       ValidadorId.validarIds(id);
-      const idUsuario = req.params.id_destinatario;
+      const usuario = req.usuarioAutenticado;
+      const idUsuario = usuario.id;
       ValidadorId.validarIds(idUsuario);
       const resultado = await this.notificacionService.marcarComoLeida(id, idUsuario);
       return res.status(200).json({

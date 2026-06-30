@@ -43,7 +43,7 @@ const router = express.Router();
  *         description: Error interno del servidor
  */
 router
-  .route('/leidas/:idUsuario')
+  .route('/leidas')
   .get(basicAuthUser, (req, res, next) => notificacionController.obtenerLeidas(req, res, next));
 
 /**
@@ -84,7 +84,7 @@ router
  *         description: Error interno del servidor
  */
 router
-  .route('/no-leidas/:idUsuario')
+  .route('/no-leidas')
   .get(basicAuthUser, (req, res, next) => notificacionController.obtenerNoLeidas(req, res, next));
 
 /**
@@ -129,7 +129,7 @@ router
  *         description: Error interno del servidor
  */
 router
-  .route('/:id_notificacion/:id_destinatario')
+  .route('/:id_notificacion')
   .patch(basicAuthUser, (req, res, next) => notificacionController.marcarComoLeida(req, res, next));
 
 
