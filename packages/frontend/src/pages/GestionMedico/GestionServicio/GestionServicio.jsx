@@ -23,7 +23,7 @@ function AsignarServicioModal({ onClose, onAsignado, especialidadesUsuario, prac
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const cargarCatalogo = async () => {
+    const cargarCatalogo = async () => { 
       setLoadingCatalogo(true);
       setError('');
       try {

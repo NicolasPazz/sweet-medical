@@ -39,7 +39,8 @@ const medicoController = new MedicoController();
  */
 medicoRouter
   .route('/all')
-  .get(basicAuthPaciente, (req, res, next) => medicoController.leerMedicos(req, res, next));
+  // Que se pueda ver cartilla
+  .get((req, res, next) => medicoController.leerMedicos(req, res, next));
 
 /**
  * @swagger

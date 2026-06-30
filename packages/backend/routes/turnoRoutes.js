@@ -547,7 +547,7 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/responder-reprogramacion/:id_turno')
-  .patch((req, res, next) => turnoController.responderReprogramacion(req, res, next));
+  .patch(basicAuthUser, (req, res, next) => turnoController.responderReprogramacion(req, res, next));
 
 /**
  * @swagger
@@ -594,7 +594,7 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/disponibilidad/:id_servicio')
-  .get((req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
 
 /**
  * @swagger
@@ -635,8 +635,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/all')
-  .get((req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
 
+// No debería llamarse
 /**
  * @swagger
  * /turnos/all:
@@ -716,10 +717,10 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  *       500:
  *         description: Error interno del servidor
  */
-turnoRouter.route('/disponibles').get(turnoController.buscarTurnos());
+turnoRouter.route('/disponibles').get(basicAuthPaciente, turnoController.buscarTurnos());
 
-turnoRouter.route('/disponibilidad/fechas').get(turnoController.obtenerFechasDisponibles());
+turnoRouter.route('/disponibilidad/fechas').get(basicAuthPaciente, turnoController.obtenerFechasDisponibles());
 
-turnoRouter.route('/disponibilidad/horarios').get(turnoController.obtenerHorariosDisponibles());
+turnoRouter.route('/disponibilidad/horarios').get(basicAuthPaciente, turnoController.obtenerHorariosDisponibles());
 
 export default turnoRouter;
