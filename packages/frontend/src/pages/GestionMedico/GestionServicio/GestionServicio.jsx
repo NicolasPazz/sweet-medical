@@ -3,7 +3,7 @@ import {
   especialidadesMock,
   practicasMock,
 } from '../../../mockdata/servicios.js';
-import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico ,eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
+import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico, eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getMe, getRolUsuario } from '../../../services/userService.js';
@@ -14,178 +14,104 @@ import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
-const EMPTY_FORM = () => ({
-  tipo: 'ESPECIALIDAD',
-  nombre: '',
-  duracionTurnoEnMins: '',
-  costo: '',
-  codigo: '',
-});
-
-// ─── Modal crear / editar ──────────────────────────────────────────────────
-function ServicioModal({ servicio, onClose, onSaved, especialidadesUsuario = [], practicasUsuario = [] }) {
-  const esEdicion = !!servicio;
-  const [form, setForm] = useState(
-    esEdicion
-      ? {
-        tipo: servicio.tipo,
-        nombre: servicio.nombre,
-        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-        costo: String(servicio.costo),
-        codigo: servicio.codigo ?? '',
-      }
-      : EMPTY_FORM(),
-  );
+// ─── Modal asignar servicio existente ──────────────────────────────────────
+function AsignarServicioModal({ onClose, onAsignado, especialidadesUsuario, practicasUsuario }) {
+  const [tipo, setTipo] = useState('ESPECIALIDAD');
   const [catalogoServicios, setCatalogoServicios] = useState([]);
   const [loadingCatalogo, setLoadingCatalogo] = useState(false);
+  const [asignandoId, setAsignandoId] = useState(null);
   const [error, setError] = useState('');
 
-  // Al crear: carga el catálogo global según el tipo seleccionado
   useEffect(() => {
-    if (esEdicion) return;
     const cargarCatalogo = async () => {
       setLoadingCatalogo(true);
-      setCatalogoServicios([]);
-      setForm((f) => ({ ...f, servicioId: '', nombre: '', duracionTurnoEnMins: '', costo: '', codigo: '' }));
+      setError('');
       try {
-        const res = form.tipo === 'ESPECIALIDAD'
-          ? await getEspecialidades()
-          : await getPracticas();
+        const res = tipo === 'ESPECIALIDAD' ? await getEspecialidades() : await getPracticas();
         const lista = res?.data ?? [];
-        const serviciosYaAsignados = form.tipo === 'ESPECIALIDAD' ? especialidadesUsuario : practicasUsuario;
+        const serviciosYaAsignados = tipo === 'ESPECIALIDAD' ? especialidadesUsuario : practicasUsuario;
         const idsYaAsignados = new Set(serviciosYaAsignados.map((s) => s.id ?? s._id?.toString()));
         setCatalogoServicios(lista.filter((serv) => !idsYaAsignados.has(serv._id?.toString() ?? serv.id)));
       } catch (e) {
         console.error('Error cargando catálogo:', e);
+        setError('No se pudo cargar el catálogo de servicios.');
       } finally {
         setLoadingCatalogo(false);
       }
     };
     cargarCatalogo();
-  }, [form.tipo, esEdicion]);
+  }, [tipo, especialidadesUsuario, practicasUsuario]);
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
-
-  // Al seleccionar del catálogo, autocompleta los campos
-  const handleSeleccionCatalogo = (e) => {
-    const id = e.target.value;
-    const seleccionado = catalogoServicios.find((s) => String(s._id ?? s.id) === id);
-    if (!seleccionado) return;
-    setForm((f) => ({
-      ...f,
-      servicioId: id,
-      nombre: seleccionado.nombre,
-      duracionTurnoEnMins: String(seleccionado.duracionTurnoEnMins),
-      costo: String(seleccionado.costo),
-      codigo: seleccionado.codigo ?? '',
-    }));
-  };
-
-  const tipoFinal = esEdicion ? servicio.tipo : form.tipo;
-
-  const handleSubmit = () => {
+  const handleAsignar = async (servicio) => {
+    const id = servicio._id ?? servicio.id;
+    setAsignandoId(id);
     setError('');
-    if (!esEdicion && !form.servicioId) return setError('Seleccioná un servicio del catálogo.');
-    if (
-      !form.duracionTurnoEnMins ||
-      !Number.isInteger(Number(form.duracionTurnoEnMins)) ||
-      Number(form.duracionTurnoEnMins) <= 0
-    )
-      return setError('La duración debe ser un entero positivo.');
-    if (form.costo === '' || isNaN(Number(form.costo)) || Number(form.costo) < 0)
-      return setError('El costo debe ser un número no negativo.');
-
-    const servicioGuardado = {
-      id: esEdicion ? servicio.id : form.servicioId,
-      tipo: tipoFinal,
-      nombre: form.nombre,
-      duracionTurnoEnMins: Number(form.duracionTurnoEnMins),
-      costo: Number(form.costo),
-      ...(tipoFinal === 'PRACTICA' && { codigo: form.codigo }),
-    };
-
-    onSaved(servicioGuardado, esEdicion);
+    try {
+      await onAsignado({
+        id,
+        tipo,
+        nombre: servicio.nombre,
+        duracionTurnoEnMins: servicio.duracionTurnoEnMins,
+        costo: servicio.costo,
+        ...(tipo === 'PRACTICA' && { codigo: servicio.codigo }),
+      });
+      setCatalogoServicios((prev) => prev.filter((s) => (s._id ?? s.id) !== id));
+    } catch (e) {
+      setError('No se pudo asignar el servicio. Intentá de nuevo.');
+    } finally {
+      setAsignandoId(null);
+    }
   };
 
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title text-ellipsis">
-          {esEdicion ? '✏️ Editar servicio' : '➕ Nuevo servicio'}
-        </div>
+        <div className="gs-modal-title text-ellipsis">➕ Asignarme un servicio</div>
 
         {error && <div className="gs-error text-ellipsis-multiline">{error}</div>}
 
-        {!esEdicion && (
-          <>
-            <label className="gs-label text-ellipsis">Tipo de servicio</label>
-            <select className="gs-select" value={form.tipo} onChange={set('tipo')}>
-              <option value="ESPECIALIDAD">Especialidad</option>
-              <option value="PRACTICA">Práctica</option>
-            </select>
+        <label className="gs-label text-ellipsis">Tipo de servicio</label>
+        <select className="gs-select" value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          <option value="ESPECIALIDAD">Especialidad</option>
+          <option value="PRACTICA">Práctica</option>
+        </select>
 
-            <label className="gs-label text-ellipsis">Seleccioná del catálogo</label>
-            <select
-              className="gs-select"
-              value={form.servicioId ?? ''}
-              onChange={handleSeleccionCatalogo}
-              disabled={loadingCatalogo}
-            >
-              <option value="" disabled>
-                {loadingCatalogo ? 'Cargando...' : 'Elegí un servicio'}
-              </option>
-              {catalogoServicios.map((s) => (
-                <option key={s._id ?? s.id} value={s._id ?? s.id} className="text-ellipsis">
-                  {s.nombre}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        <label className="gs-label text-ellipsis" htmlFor="duracionTurnoInput">Duración del turno (minutos)</label>
-        <input
-          className="gs-input"
-          id="duracionTurnoInput"
-          type="number"
-          min="1"
-          value={form.duracionTurnoEnMins}
-          onChange={set('duracionTurnoEnMins')}
-          placeholder="Ej: 30"
-          readOnly={!esEdicion && !!form.servicioId}
-        />
-
-        <label className="gs-label text-ellipsis" htmlFor='costoInput'>Costo ($)</label>
-        <input
-          className="gs-input"
-          id="costoInput"
-          type="number"
-          min="0"
-          step="0.01"
-          value={form.costo}
-          onChange={set('costo')}
-          placeholder="Ej: 7000"
-          readOnly={!esEdicion && !!form.servicioId}
-        />
-
-        {tipoFinal === 'PRACTICA' && form.codigo && (
-          <>
-            <label className="gs-label text-ellipsis" htmlFor='codigoInput'>Código</label>
-            <input
-              className="gs-input"
-              id="codigoInput"
-              value={form.codigo}
-              disabled
-            />
-          </>
-        )}
+        <div className="gs-catalogo-list">
+          {loadingCatalogo ? (
+            <div className="gs-catalogo-empty text-ellipsis">Cargando...</div>
+          ) : catalogoServicios.length === 0 ? (
+            <div className="gs-catalogo-empty text-ellipsis">
+              No hay servicios disponibles para asignar.
+            </div>
+          ) : (
+            catalogoServicios.map((s) => {
+              const id = s._id ?? s.id;
+              return (
+                <div className="gs-catalogo-item" key={id}>
+                  <div className="gs-catalogo-item-info">
+                    <div className="gs-catalogo-item-nombre text-ellipsis">{s.nombre}</div>
+                    <div className="gs-catalogo-item-meta">
+                      <span className="text-ellipsis">⏱ {s.duracionTurnoEnMins} min</span>
+                      <span className="text-ellipsis">💲 ${Number(s.costo).toLocaleString('es-AR')}</span>
+                      {s.codigo && <span className="text-ellipsis">🔖 {s.codigo}</span>}
+                    </div>
+                  </div>
+                  <button
+                    className="gs-btn-edit text-ellipsis"
+                    disabled={asignandoId === id}
+                    onClick={() => handleAsignar(s)}
+                  >
+                    {asignandoId === id ? 'Asignando...' : 'Asignarme'}
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
 
         <div className="gs-modal-footer">
           <button className="gs-btn-secondary text-ellipsis" onClick={onClose}>
-            Cancelar
-          </button>
-          <button className="gs-btn-primary text-ellipsis" onClick={handleSubmit}>
-            {esEdicion ? 'Guardar cambios' : 'Agregar'}
+            Cerrar
           </button>
         </div>
       </div>
@@ -198,17 +124,17 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
   return (
     <div className="gs-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gs-modal">
-        <div className="gs-modal-title text-ellipsis">🗑️ Eliminar servicio</div>
+        <div className="gs-modal-title text-ellipsis">🗑️ Eliminar asignación</div>
         <p className="gs-modal-body text-ellipsis-multiline">
-          ¿Estás seguro que querés eliminar <strong>{servicio.nombre}</strong>? Esta acción no se
-          puede deshacer.
+          ¿Estás seguro que querés dejar de ofrecer <strong>{servicio.nombre}</strong>? Vas a
+          poder volver a asignártelo más adelante si querés.
         </p>
         <div className="gs-modal-footer">
           <button className="gs-btn-secondary text-ellipsis" onClick={onClose}>
             Cancelar
           </button>
           <button className="gs-btn-primary gs-btn-danger text-ellipsis" onClick={onDeleted}>
-            Sí, eliminar
+            Aceptar
           </button>
         </div>
       </div>
@@ -217,7 +143,7 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
 }
 
 // ─── Tarjeta de servicio ───────────────────────────────────────────────────
-function ServicioCard({ servicio, onEdit, onDelete }) {
+function ServicioCard({ servicio, onDelete }) {
   const badgeClass =
     servicio.tipo === 'ESPECIALIDAD' ? 'gs-badge--especialidad' : 'gs-badge--practica';
   return (
@@ -232,11 +158,8 @@ function ServicioCard({ servicio, onEdit, onDelete }) {
         </div>
       </div>
       <div className="gs-card-actions">
-        <button className="gs-btn-edit text-ellipsis" onClick={() => onEdit(servicio)}>
-          Editar
-        </button>
         <button className="gs-btn-delete text-ellipsis" onClick={() => onDelete(servicio)}>
-          Eliminar
+          Eliminar asignación
         </button>
       </div>
     </div>
@@ -258,8 +181,7 @@ export function GestionServicio() {
   const [errorCarga, setErrorCarga] = useState(null);
   const [user, setUser] = useState(null);
 
-  const [modalCrear, setModalCrear] = useState(false);
-  const [modalEditar, setModalEditar] = useState(null);
+  const [modalAsignar, setModalAsignar] = useState(false);
   const [modalEliminar, setModalEliminar] = useState(null);
   const [toast, setToast] = useState(null);
   const [filtro, setFiltro] = useState('TODOS');
@@ -330,48 +252,37 @@ export function GestionServicio() {
   const todos = [...conTipo(especialidades, 'ESPECIALIDAD'), ...conTipo(practicas, 'PRACTICA')];
   const serviciosFiltrados = todos.filter((s) => filtro === 'TODOS' || s.tipo === filtro);
 
-  const handleSaved = async (servicioGuardado, esEdicion) => {
-    const { tipo, ...sinTipo } = servicioGuardado;
+  const handleAsignado = async (servicio) => {
+    const { tipo, ...sinTipo } = servicio;
 
     try {
-      if (!esEdicion) {
-        let statusCode;
-        if (tipo === 'ESPECIALIDAD') {
-          statusCode = await agregarEspecialidadAMedico({ email, password, especialidad: servicioGuardado });
-        } else {
-          statusCode = await agregarPracticaAMedico({ email, password, practica: servicioGuardado });
-        }
-
-        if (statusCode === 200) {
-          mostrarToast('Servicio agregado con éxito.', 'success');
-        } else {
-          mostrarToast('Respuesta inesperada del servidor.', 'error');
-        }
+      let statusCode;
+      if (tipo === 'ESPECIALIDAD') {
+        statusCode = await agregarEspecialidadAMedico({ email, password, especialidad: servicio });
       } else {
-        mostrarToast('Servicio actualizado correctamente.', 'success');
+        statusCode = await agregarPracticaAMedico({ email, password, practica: servicio });
+      }
+
+      if (statusCode === 200) {
+        mostrarToast('Servicio asignado con éxito.', 'success');
+      } else {
+        mostrarToast('Respuesta inesperada del servidor.', 'error');
       }
 
       if (tipo === 'ESPECIALIDAD') {
-        setEspecialidades((prev) =>
-          esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
-        );
+        setEspecialidades((prev) => [...prev, sinTipo]);
       } else {
-        setPracticas((prev) =>
-          esEdicion ? prev.map((s) => (s.id === sinTipo.id ? sinTipo : s)) : [...prev, sinTipo],
-        );
+        setPracticas((prev) => [...prev, sinTipo]);
       }
-
-      setModalCrear(false);
-      setModalEditar(null);
-
     } catch (error) {
-      console.error('Error al guardar el servicio:', error);
+      console.error('Error al asignar el servicio:', error);
       if (error.response) {
         const mensajeBackend = error.response.data?.mensaje || 'Error en los datos enviados.';
         mostrarToast(`Error (${error.response.status}): ${mensajeBackend}`, 'error');
       } else {
         mostrarToast('No se pudo conectar con el servidor. Revisá tu conexión.', 'error');
       }
+      throw error;
     }
   };
 
@@ -407,82 +318,81 @@ export function GestionServicio() {
     }
   };
 
-return (
-  <div className="gs-page">
-    <div className="gs-container">
-      <VolverGestion />
-      <div className="gs-header">
-        <div>
-          <h1 className="gs-title text-ellipsis">Gestión de Servicios</h1>
-          <p className="gs-subtitle text-ellipsis">Administrá tus especialidades y prácticas.</p>
-        </div>
-        <button className="gs-btn-primary text-ellipsis" onClick={() => setModalCrear(true)}>
-          + Nuevo servicio
-        </button>
-      </div>
-
-      {errorCarga && (
-        <div
-          className="gs-toast gs-toast--error text-ellipsis-multiline"
-          style={{ position: 'static', marginBottom: '16px' }}
-        >
-          ⚠️ {errorCarga}
-        </div>
-      )}
-
-      <div className="gs-filters">
-        {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
-          <button
-            key={op}
-            className={`gs-filter-btn${filtro === op ? ' active' : ''} text-ellipsis`}
-            onClick={() => setFiltro(op)}
-          >
-            {op === 'TODOS' ? 'Todos' : op === 'ESPECIALIDAD' ? 'Especialidades' : 'Prácticas'}
-            {op !== 'TODOS' && (
-              <span className="gs-filter-count text-ellipsis">
-                ({(op === 'ESPECIALIDAD' ? especialidades : practicas).length})
-              </span>
-            )}
+  return (
+    <div className="gs-page">
+      <div className="gs-container">
+        <VolverGestion />
+        <div className="gs-header">
+          <div>
+            <h1 className="gs-title text-ellipsis">Gestión de Servicios</h1>
+            <p className="gs-subtitle text-ellipsis">Elegí qué especialidades y prácticas ofrecés.</p>
+          </div>
+          <button className="gs-btn-primary text-ellipsis" onClick={() => setModalAsignar(true)}>
+            + Asignarme servicio
           </button>
-        ))}
+        </div>
+
+        {errorCarga && (
+          <div
+            className="gs-toast gs-toast--error text-ellipsis-multiline"
+            style={{ position: 'static', marginBottom: '16px' }}
+          >
+            ⚠️ {errorCarga}
+          </div>
+        )}
+
+        <div className="gs-filters">
+          {['TODOS', 'ESPECIALIDAD', 'PRACTICA'].map((op) => (
+            <button
+              key={op}
+              className={`gs-filter-btn${filtro === op ? ' active' : ''} text-ellipsis`}
+              onClick={() => setFiltro(op)}
+            >
+              {op === 'TODOS' ? 'Todos' : op === 'ESPECIALIDAD' ? 'Especialidades' : 'Prácticas'}
+              {op !== 'TODOS' && (
+                <span className="gs-filter-count text-ellipsis">
+                  ({(op === 'ESPECIALIDAD' ? especialidades : practicas).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <SkeletonServicioList count={4} />
+        ) : serviciosFiltrados.length === 0 ? (
+          <div className="gs-empty">
+            <div className="gs-empty-icon">🩺</div>
+            <div className="text-ellipsis">No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} asignados.</div>
+          </div>
+        ) : (
+          serviciosFiltrados.map((serv) => (
+            <ServicioCard
+              key={serv.id}
+              servicio={serv}
+              onDelete={setModalEliminar}
+            />
+          ))
+        )}
       </div>
 
-      {loading ? (
-        <SkeletonServicioList count={4} />
-      ) : serviciosFiltrados.length === 0 ? (
-        <div className="gs-empty">
-          <div className="gs-empty-icon">🩺</div>
-          <div className="text-ellipsis">No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} registrados.</div>
-        </div>
-      ) : (
-        serviciosFiltrados.map((serv) => (
-          <ServicioCard
-            key={serv.id}
-            servicio={serv}
-            onEdit={setModalEditar}
-            onDelete={setModalEliminar}
-          />
-        ))
+      {modalAsignar && (
+        <AsignarServicioModal
+          onClose={() => setModalAsignar(false)}
+          onAsignado={handleAsignado}
+          especialidadesUsuario={especialidades}
+          practicasUsuario={practicas}
+        />
       )}
+      {modalEliminar && (
+        <ConfirmDeleteModal
+          servicio={modalEliminar}
+          onClose={() => setModalEliminar(null)}
+          onDeleted={handleDeleted}
+        />
+      )}
+
+      {toast && <Toast msg={toast.msg} type={toast.type} />}
     </div>
-
-    {modalCrear && <ServicioModal onClose={() => setModalCrear(false)} onSaved={handleSaved} especialidadesUsuario={especialidades} practicasUsuario={practicas} />}
-    {modalEditar && (
-      <ServicioModal
-        servicio={modalEditar}
-        onClose={() => setModalEditar(null)}
-        onSaved={handleSaved}
-      />
-    )}
-    {modalEliminar && (
-      <ConfirmDeleteModal
-        servicio={modalEliminar}
-        onClose={() => setModalEliminar(null)}
-        onDeleted={handleDeleted}
-      />
-    )}
-
-    {toast && <Toast msg={toast.msg} type={toast.type} />}
-  </div>
-);
+  );
 }
