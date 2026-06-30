@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError, BadRequestError, UnauthorizedError } from
 import { usuarioService } from './UsuarioService.js';
 import { medicoService } from './MedicoService.js';
 import { pacienteService } from './PacienteService.js';
+import { Rol } from '../domain/usuario/Rol.js';
 
 export class AdminService {
     constructor({
@@ -25,9 +26,9 @@ export class AdminService {
             throw new BadRequestError('dni y nombre son obligatorios');
         }
 
-        const existente = await this.usuarioService.findByDni(dni);
+        const existente = await this.usuarioService.findByDniAndRole(dni, Rol.PACIENTE);
         if (existente) {
-            throw new ConflictError(`Ya existe un usuario con DNI ${dni}`);
+            throw new ConflictError(`Ya existe un usuario paciente con DNI ${dni}`);
         }
 
         const usuario = await this.usuarioService.save({
@@ -51,9 +52,9 @@ export class AdminService {
             throw new BadRequestError('dni, nombre y matricula son obligatorios');
         }
 
-        const existente = await this.usuarioService.findByDni(dni);
+        const existente = await this.usuarioService.findByDniAndRole(dni, Rol.MEDICO);
         if (existente) {
-            throw new ConflictError(`Ya existe un usuario con DNI ${dni}`);
+            throw new ConflictError(`Ya existe un usuario médico con DNI ${dni}`);
         }
 
         const usuario = await this.usuarioService.save({

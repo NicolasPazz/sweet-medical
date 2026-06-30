@@ -62,6 +62,11 @@ export class UsuarioRepository {
     return usuario ? this.fromDB(usuario) : null;
   }
 
+  async findByDniAndRole(dni, rol) {
+    const usuario = await UsuarioModel.findOne({ dni: dni.trim(), roles: rol }).lean();
+    return usuario ? this.fromDB(usuario) : null;
+  }
+
   async findAll() {
     const usuarios = await UsuarioModel.find().lean();
     return this._hidratarColeccion(usuarios);

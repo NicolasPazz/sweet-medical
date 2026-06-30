@@ -41,7 +41,6 @@ const usuarioSchema = new mongoose.Schema(
     dni: {
       type: String,
       required: false,
-      unique: true,
       sparse: true,
       trim: true,
       minlength: 7,
