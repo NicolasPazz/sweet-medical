@@ -10,6 +10,7 @@ import {
   FaUser,
   FaBars,
   FaTimes,
+  FaUserShield,
 } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
@@ -111,6 +112,20 @@ const Header = () => {
                 </Link>
               </li>
             )}
+
+            {user?.rol === 'Admin' && (
+              <li>
+                <Link
+                  to="/gestion-admin"
+                  className={location.pathname.startsWith('/gestion-admin') ? 'active' : ''}
+                >
+                  <FaUserShield className='header-icon' />
+                  <span className="header-label text-ellipsis">Panel administrador</span>
+
+                </Link>
+              </li>
+            )}
+
             <li>
               <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
                 <FaEnvelope className="header-icon" />

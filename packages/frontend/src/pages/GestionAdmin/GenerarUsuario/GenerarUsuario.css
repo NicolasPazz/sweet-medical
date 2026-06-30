@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&display=swap');
+
+.gu-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Roboto Mono', monospace;
+  padding-top: 80px;
+}
+
+.gu-container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.gu-volver {
+  background: none;
+  border: none;
+  color: #271f92;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  padding: 0;
+}
+.gu-volver:hover {
+  text-decoration: underline;
+}
+
+.gu-header {
+  margin-bottom: 24px;
+}
+
+.gu-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.gu-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.gu-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Toggle de rol ──────────────────────────────────────────────────────── */
+.gu-rol-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.gu-rol-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gu-rol-btn:hover {
+  border-color: #271f92;
+  color: #271f92;
+}
+.gu-rol-btn.active {
+  background: #271f92;
+  border-color: #271f92;
+  color: #ffffff;
+}
+
+/* ─── Formulario ─────────────────────────────────────────────────────────── */
+.gu-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gu-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+  background: #f8fafc;
+  transition: border-color 0.15s;
+}
+.gu-input:focus {
+  border-color: #271f92;
+}
+.gu-input-error {
+  border-color: #dc2626;
+}
+
+.gu-error-text {
+  display: block;
+  font-size: 11px;
+  color: #dc2626;
+  margin-bottom: 12px;
+}
+
+.gu-btn-primary {
+  width: 100%;
+  background: #271f92;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 12px;
+}
+.gu-btn-primary:hover {
+  background: #160ca3;
+}
+.gu-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

@@ -6,6 +6,9 @@ import HealthPage from './pages/HealthPage/HealthPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage.jsx';
 import { GestionMedico } from './pages/GestionMedico/GestionMedico';
 import { GestionServicio } from './pages/GestionMedico/GestionServicio/GestionServicio';
+import { GestionAdmin } from './pages/GestionAdmin/GestionAdmin';
+import { GenerarUsuario } from './pages/GestionAdmin/GenerarUsuario/GenerarUsuario';
+import { GestionServicioAdmin } from './pages/GestionAdmin/GestionServicio/GestionServicio';
 import HistorialPaciente from './pages/GestionMedico/HistorialPaciente/HistorialPaciente';
 import DisponibilidadMedico from './pages/GestionMedico/DisponibilidadMedico/DisponibilidadMedico';
 import AgendarTurno from './pages/AgendarTurno/AgendarTurno';
@@ -27,6 +30,11 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="health" element={<HealthPage />} />
+
+            {/* Panel administrador */}
+            <Route path="gestion-admin" element={<GestionAdmin />} />
+            <Route path="gestion-admin/usuarios" element={<GenerarUsuario />} />
+            <Route path="gestion-admin/servicio" element={<GestionServicioAdmin />} />
 
             {/* Panel médico */}
             <Route path="gestion-medico" element={<GestionMedico />} />
