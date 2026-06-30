@@ -76,9 +76,11 @@ export default function Home() {
           un solo lugar.
         </p>
         <div className="home-hero-cta">
-          <Link to="/solicitar-turno" className="cta-primary text-ellipsis">
-            <FaCalendarAlt /> Agendar turno
-          </Link>
+          {user?.rol === 'Paciente' && (
+            <Link to="/solicitar-turno" className="cta-primary text-ellipsis">
+              <FaCalendarAlt /> Agendar turno
+            </Link>
+          )}
           {user?.rol === 'Paciente' && (
             <Link to="/historial-medico" className="cta-secondary text-ellipsis">
               Ver historial <FaArrowRight />
@@ -94,16 +96,18 @@ export default function Home() {
 
       {/* Cards de acceso rápido */}
       <section className="home-cards">
-        <Link to="/solicitar-turno" className="home-card home-card--accent">
-          <div className="home-card-icon">
-            <FaCalendarAlt />
-          </div>
-          <div className="home-card-body">
-            <span className="home-card-title text-ellipsis">Agendar Turno</span>
-            <span className="home-card-desc text-ellipsis">Elegí servicio, médico y horario disponible</span>
-          </div>
-          <FaArrowRight className="home-card-arrow" />
-        </Link>
+        {user?.rol === 'Paciente' && (
+          <Link to="/solicitar-turno" className="home-card home-card--accent">
+            <div className="home-card-icon">
+              <FaCalendarAlt />
+            </div>
+            <div className="home-card-body">
+              <span className="home-card-title text-ellipsis">Agendar Turno</span>
+              <span className="home-card-desc text-ellipsis">Elegí servicio, médico y horario disponible</span>
+            </div>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
+        )}
 
         {user?.rol === 'Paciente' && (
           <Link to="/historial-medico" className="home-card">

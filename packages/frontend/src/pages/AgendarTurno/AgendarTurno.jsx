@@ -14,6 +14,9 @@ import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
 import Spinner from '../../components/ui/Spinner.jsx';
+import { getMe } from '../../services/userService.js';
+import { useAuth } from '../../components/AuthProvider.jsx';
+import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import './AgendarTurno.css';
 
 // Meta información dinámica para especialidades y prácticas
@@ -49,6 +52,28 @@ const getInitials = (name) => {
 export default function AgendarTurno() {
   const { items: cartItems, addTurn, removeTurn, clearCart } = useCart();
   const location = useLocation();
+  const { isAuthenticated, email, password } = useAuth();
+
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          setUser({ rol: data.usuario?.roles?.includes('MEDICO') ? 'Médico' : 'Paciente' });
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setLoadingUser(false);
+        }
+      } else {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [email, password]);
 
   // Listas de datos del backend
   const [pacientes, setPacientes] = useState([]);
@@ -257,6 +282,19 @@ export default function AgendarTurno() {
       setStep(5);
     }
   }, [location.state]);
+
+  // Validación de rol: si no está logueado o no es Paciente, no se puede agendar
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (loadingUser) {
+    return null;
+  }
+
+  if (user?.rol !== 'Paciente') {
+    return <ErrorPage type="403" />;
+  }
 
   // Filtrado de médicos según el servicio seleccionado
   const medicosFiltrados = medicos.filter((m) => {

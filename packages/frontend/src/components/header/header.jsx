@@ -78,15 +78,17 @@ const Header = () => {
                 <span className="header-label text-ellipsis">Inicio</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/solicitar-turno"
-                className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
-              >
-                <FaCalendarAlt className="header-icon" />
-                <span className="header-label text-ellipsis">Agendar Turno</span>
-              </Link>
-            </li>
+            {user?.rol === 'Paciente' && (
+              <li>
+                <Link
+                  to="/solicitar-turno"
+                  className={location.pathname.startsWith('/solicitar-turno') ? 'active' : ''}
+                >
+                  <FaCalendarAlt className="header-icon" />
+                  <span className="header-label text-ellipsis">Agendar Turno</span>
+                </Link>
+              </li>
+            )}
             {user?.rol === 'Paciente' && (
               <li>
                 <Link
