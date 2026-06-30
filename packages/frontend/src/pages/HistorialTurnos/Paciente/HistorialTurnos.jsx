@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
-import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
+import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
@@ -22,18 +22,23 @@ export default function HistorialTurnos() {
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      if (!email || !password) return;
+      if (!email || !password) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
       try {
         const data = await getHistorialPacienteMe({ email, password });
         setTurnos(data ?? []);
       } catch (err) {
         console.error('Error al cargar turnos:', err);
-        setTurnos([...TURNOS_MOCK]);
+        setTurnos([]);
       } finally {
         setLoading(false);
       }
@@ -43,17 +48,29 @@ export default function HistorialTurnos() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (email && password) {
-        try {
-          const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        setUser({ rol: getRolUsuario(data.usuario?.roles) });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password]);
+  }, [email, password, isAuthenticated]);
+
+  if (loadingUser) {
+    return (
+      <div className="historial-container">
+        <SkeletonTurnoList count={5} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -65,8 +82,13 @@ export default function HistorialTurnos() {
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
-  const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
+  let turnosFiltrados = null;
 
+  if(turnos){
+  turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
+  } else {
+    turnosFiltrados = null;
+  }
   const handleAbrirDetalle = (turno) => {
     setTurnoSeleccionado(turno);
     setVista('DETALLE');

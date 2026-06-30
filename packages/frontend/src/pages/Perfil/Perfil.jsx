@@ -1,5 +1,6 @@
 import './Perfil.css';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../components/AuthProvider.jsx';
@@ -10,6 +11,7 @@ const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spi
 
 export default function Perfil() {
   const { isAuthenticated, email, password, logout } = useAuth();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -73,6 +75,14 @@ export default function Perfil() {
     );
   }
 
+  const handleLogout = () => {
+    // Primero navegamos: Perfil se desmonta de inmediato, todavía con sesión
+    // activa, así que nunca llega a re-renderizarse con isAuthenticated=false.
+    navigate('/login');
+    // Recién después, ya en /login (que no depende de la sesión), limpiamos el auth.
+    setTimeout(() => logout(), 0);
+  };
+
   return (
     <div className="perfil-page">
       {/* --- HEADER --- */}
@@ -81,7 +91,7 @@ export default function Perfil() {
         <div className="header-right">
           <h2 className="user-name text-ellipsis">{user?.nombreUsuario || user?.nombre || 'N/A'}</h2>
           <img className="user-avatar" src={user?.avatar || "/avatar.png"} alt="Avatar de usuario" />
-          <button className="btn-logout text-ellipsis" onClick={() => { logout(); window.location.href = '/login'; }}>
+          <button className="btn-logout text-ellipsis" onClick={handleLogout}>
             Cerrar sesión
           </button>
         </div>

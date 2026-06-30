@@ -211,6 +211,7 @@ export function GestionServicioAdmin() {
   const navigate = useNavigate();
   const { isAuthenticated, email, password } = useAuth();
   const [admin, setAdmin] = useState(null);
+  const [loadingAdmin, setLoadingAdmin] = useState(true);
   const [especialidades, setEspecialidades] = useState([]);
   const [practicas, setPracticas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -246,16 +247,20 @@ export function GestionServicioAdmin() {
 
   useEffect(() => {
     const fetchAdmin = async () => {
-      if (isAuthenticated) {
-        try {
-          const data = await getMe({ email, password });
-          setAdmin({
-            rol: getRolUsuario(data.usuario?.roles),
-            idUsuario: data.usuario?.id,
-          });
-        } catch (error) {
-          console.error('Error fetching admin data:', error);
-        }
+      if (!isAuthenticated) {
+        setLoadingAdmin(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        setAdmin({
+          rol: getRolUsuario(data.usuario?.roles),
+          idUsuario: data.usuario?.id,
+        });
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+      } finally {
+        setLoadingAdmin(false);
       }
     };
     fetchAdmin();
@@ -265,7 +270,17 @@ export function GestionServicioAdmin() {
     return <ErrorPage type="401" />;
   }
 
-  if (admin && admin.rol !== 'Admin') {
+  if (loadingAdmin) {
+    return (
+      <div className="gs-page">
+        <div className="gs-container">
+          <SkeletonServicioList count={4} />
+        </div>
+      </div>
+    );
+  }
+
+  if (admin?.rol !== 'Admin') {
     return <ErrorPage type="403" />;
   }
 

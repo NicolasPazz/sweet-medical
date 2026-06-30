@@ -129,6 +129,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, onBlur, isEditing 
 export default function DisponibilidadMedico() {
   const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [medico, setMedico] = useState(null);
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -139,7 +140,10 @@ export default function DisponibilidadMedico() {
 
   useEffect(() => {
     const load = async () => {
-      if (!email || !password) return;
+      if (!email || !password) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await getMedicoByUser({ email, password });
@@ -158,25 +162,41 @@ export default function DisponibilidadMedico() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (email && password) {
-        try {
-          const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
-          });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        setUser({
+          rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password]);
+  }, [email, password, isAuthenticated]);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
 
-  if (user && user.rol !== 'MEDICO') {
+  if (loadingUser) {
+    return (
+      <div className="dm-page">
+        <div className="dm-container">
+          <div className="dm-card">
+            <Spinner size="md" text="Cargando..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.rol !== 'MEDICO') {
     return <ErrorPage type="403" />;
   }
 

@@ -4,7 +4,7 @@ import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
 import { getMe, getTurnosMedico, getSedesMe, getRolUsuario } from '../../../services/userService.js';
-import { cancelarTurno, confirmarTurno, finalizarTurno, responderReprogramacion } from '../../../services/turnoService.js';
+import { cancelarTurno, confirmarTurno, finalizarTurno, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -79,6 +79,7 @@ export default function HistorialTurnosMedico() {
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [toast, setToast] = useState(null);
   const [turnoAConfirmar, setTurnoAConfirmar] = useState(null);
 
@@ -105,17 +106,29 @@ export default function HistorialTurnosMedico() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (email && password) {
-        try {
-          const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        setUser({ rol: getRolUsuario(data.usuario?.roles) });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password]);
+  }, [email, password, isAuthenticated]);
+
+  if (loadingUser) {
+    return (
+      <div className="historial-container">
+        <SkeletonTurnoList count={5} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -205,6 +218,36 @@ export default function HistorialTurnosMedico() {
     }
   };
 
+  const handleProponerReprogramacion = async (idTurno, fecha, hora, motivo) => {
+    try {
+      await proponerReprogramacion(idTurno, fecha, hora, motivo, email, password);
+
+      const [dia, mes, anio] = fecha.split('/').map(Number);
+      const [horas, minutos] = hora.split(':').map(Number);
+      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === idTurno
+            ? {
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                },
+              }
+            : t,
+        ),
+      );
+      mostrarToast('Propuesta de reprogramación enviada exitosamente');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al proponer la reprogramación', 'error');
+      throw err;
+    }
+  };
+
   if (vista === 'DETALLE' && turnoSeleccionado) {
     const turnoActualizado = turnos.find((t) => t._id === turnoSeleccionado._id);
     return (
@@ -219,6 +262,9 @@ export default function HistorialTurnosMedico() {
         onCancelar={(motivo) => handleCancelar(turnoActualizado._id, motivo)}
         onAceptarReprogramacion={() => handleAceptarReprogramacion(turnoActualizado._id)}
         onRechazarReprogramacion={() => handleRechazarReprogramacion(turnoActualizado._id)}
+        onProponerReprogramacion={(fecha, hora, motivo) =>
+          handleProponerReprogramacion(turnoActualizado._id, fecha, hora, motivo)
+        }
       />
     );
   }

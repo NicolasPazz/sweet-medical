@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../components/AuthProvider.jsx';
-import { agregarSede, getSedesMe } from '../../../services/userService.js';
+import { agregarSede, getSedesMe, getMe, getRolUsuario } from '../../../services/userService.js';
 import { getSedes } from '../../../services/turnoService.js';
 import Toast from '../../../components/Toast/Toast.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import Spinner from '../../../components/ui/Spinner.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import './GestionSedes.css';
 
 export default function GestionSedes() {
-  const { email, password } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const [todasLasSedes, setTodasLasSedes] = useState([]);
   const [misSedesIds, setMisSedesIds] = useState(new Set());
@@ -23,7 +27,29 @@ export default function GestionSedes() {
   };
 
   useEffect(() => {
+    const fetchUser = async () => {
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        setUser({ rol: getRolUsuario(data.usuario?.roles) });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [email, password, isAuthenticated]);
+
+  useEffect(() => {
     const cargar = async () => {
+      if (!email || !password) {
+        setCargando(false);
+        return;
+      }
       try {
         const [todasRes, misRes] = await Promise.all([
           getSedes(),
@@ -42,6 +68,24 @@ export default function GestionSedes() {
     };
     cargar();
   }, [email, password]);
+
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (loadingUser) {
+    return (
+      <div className="gs-sedes-page">
+        <div className="gs-sedes-container">
+          <Spinner size="md" text="Cargando..." />
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.rol !== 'Médico') {
+    return <ErrorPage type="403" />;
+  }
 
   // Sedes disponibles = todas menos las que ya tengo
   const sedesDisponibles = todasLasSedes.filter(
