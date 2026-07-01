@@ -11,6 +11,10 @@ function createWrapper() {
 }
 
 describe('useCart', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it('lanza error claro si se usa fuera de CartProvider', () => {
     expect(() => renderHook(() => useCart())).toThrow(
       'useCart debe usarse dentro de <CartProvider>',
@@ -106,5 +110,50 @@ describe('useCart', () => {
 
     expect(result.current.summary.hasPendingCost).toBe(true);
     expect(result.current.summary.totalCost).toBe(1500);
+  });
+
+  it('persiste el carrito en localStorage al agregar un turno', () => {
+    const { result } = renderHook(() => useCart(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.addTurn(turnoA);
+    });
+
+    const stored = JSON.parse(window.localStorage.getItem('sweet-medical:cart'));
+    expect(stored.items).toEqual([turnoA]);
+  });
+
+  it('recupera el carrito guardado en localStorage al montar el provider', () => {
+    window.localStorage.setItem(
+      'sweet-medical:cart',
+      JSON.stringify({ items: [turnoA, turnoB] }),
+    );
+
+    const { result } = renderHook(() => useCart(), { wrapper: createWrapper() });
+
+    expect(result.current.items).toEqual([turnoA, turnoB]);
+    expect(result.current.summary.totalCost).toBe(4000);
+  });
+
+  it('ignora datos corruptos en localStorage y arranca vacío', () => {
+    window.localStorage.setItem('sweet-medical:cart', '{not-json');
+
+    const { result } = renderHook(() => useCart(), { wrapper: createWrapper() });
+
+    expect(result.current.items).toEqual([]);
+  });
+
+  it('limpia el localStorage al vaciar el carrito', () => {
+    const { result } = renderHook(() => useCart(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.addTurn(turnoA);
+    });
+    act(() => {
+      result.current.clearCart();
+    });
+
+    const stored = JSON.parse(window.localStorage.getItem('sweet-medical:cart'));
+    expect(stored.items).toEqual([]);
   });
 });
