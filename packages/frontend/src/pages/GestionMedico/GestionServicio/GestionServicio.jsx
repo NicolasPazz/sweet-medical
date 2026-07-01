@@ -11,6 +11,7 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
@@ -180,6 +181,8 @@ export function GestionServicio() {
   const [loadingUser, setLoadingUser] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
   const [user, setUser] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   const [modalAsignar, setModalAsignar] = useState(false);
   const [modalEliminar, setModalEliminar] = useState(null);
@@ -191,21 +194,38 @@ export function GestionServicio() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            id: data.perfil?._id ?? data.perfil?.id,
-            rol: getRolUsuario(data.usuario?.roles),
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, id: data.perfil?._id ?? data.perfil?.id });
+          } else {
+            setUser({ rol: getRolUsuario(roles), id: data.perfil?._id ?? data.perfil?.id});
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
-        } finally {
+          setMultiplesFiltros(false);
+          setUser(null);
+        }
+        finally {
           setLoadingUser(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoadingUser(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
 
   useEffect(() => {
     if (!user) return;
@@ -240,7 +260,7 @@ export function GestionServicio() {
     return null;
   }
 
-  if (user?.rol !== 'Médico') {
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 

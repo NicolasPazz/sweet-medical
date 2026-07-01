@@ -8,6 +8,7 @@ import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
@@ -130,26 +131,46 @@ export default function HistorialPaciente() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles),
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
-        } finally {
+          setMultiplesFiltros(false);
+          setUser(null);
+        }
+        finally {
           setLoadingUser(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoadingUser(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -175,7 +196,7 @@ export default function HistorialPaciente() {
     );
   }
 
-  if (user?.rol !== 'Médico') {
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 

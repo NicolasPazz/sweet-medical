@@ -6,6 +6,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
@@ -14,6 +15,8 @@ export default function Perfil() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,10 +24,14 @@ export default function Perfil() {
         try {
           const data = await getMe({ email, password });
           // Aplanamos los datos para que el template los consuma igual
+
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+          setMultiplesFiltros(esMultiRol);
+
           setUser({
             email: data.usuario?.email,
             dni: data.usuario?.dni,
-            roles: data.usuario?.roles,
             nombreUsuario: data.usuario?.nombreUsuario,
             numTel: data.usuario?.numTel,
             direccion: data.usuario?.direccion,
@@ -45,9 +52,22 @@ export default function Perfil() {
             obraSocial: data.perfil?.obraSocial?.nombre,
             plan: data.perfil?.plan?.nombre,
             coberturasEspecialidad: data.perfil?.plan?.coberturasEspecialidad?.map((c) => c.especialidad?.nombre) ?? [],
-            coberturasPractica: data.perfil?.plan?.coberturasPractica?.map((c) => c.practica?.nombre) ?? [],
-            rol: getRolUsuario(data.usuario?.roles),
+            coberturasPractica: data.perfil?.plan?.coberturasPractica?.map((c) => c.practica?.nombre) ?? []
           });
+
+          if (esMultiRol) {
+            setUser(estadoAnterior => ({
+              ...estadoAnterior,
+              roles: roles
+            }));
+          } else {
+            setUser(estadoAnterior => ({
+              ...estadoAnterior,
+              rol: getRolUsuario(roles)
+            }));
+          }
+
+
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -59,6 +79,10 @@ export default function Perfil() {
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-paciente' ? 'Paciente' : 'Médico')
+    : user?.rol;
 
   // Protección de ruta: si no está autenticado, va a la página de error 401
   if (!isAuthenticated) {
@@ -102,7 +126,7 @@ export default function Perfil() {
 
         {/* COLUMNA IZQUIERDA: Dinámica según el Rol */}
         <div className="left-section">
-          {user?.rol === 'Paciente' ? (
+          {rolVisible === 'Paciente' ? (
             <>
               <h2 className="section-title text-ellipsis">🏥 Mi Cobertura</h2>
               <div className="cobertura-row">
@@ -147,7 +171,7 @@ export default function Perfil() {
                 </tr>
               </thead>
               <tbody>
-                <tr><td className="text-ellipsis"><strong>Rol:</strong> {user?.rol || 'N/A'}</td></tr>
+                <tr><td className="text-ellipsis"><strong>Rol:</strong> {rolVisible || 'N/A'}</td></tr>
                 <tr><td className="text-ellipsis"><strong>Años de antigüedad:</strong> {user?.antiguedad || 'N/A'}</td></tr>
                 <tr>
                   <td>

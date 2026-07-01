@@ -19,16 +19,19 @@ import NotificationBell from '../notification/NotificationBell.jsx';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import CartDropdown from '../cart/CartDropdown.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
+import ToggleSwitchBotton from '../toggle-switch-botton/toggle-switch-botton.jsx';
+import { useModoVista } from '../ModoVistaContext.jsx';
 
 const Header = () => {
   const { summary, clearCart } = useCart();
   const location = useLocation();
   const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
-
+  const { modo, setModo } = useModoVista();
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const cartButtonRef = useRef(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -39,16 +42,38 @@ const Header = () => {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles });
+          } else {
+            setUser({ rol: getRolUsuario(roles) });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
         }
       } else {
         setUser(null);
+        setMultiplesFiltros(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  // Rol efectivo para decidir qué mostrar en el nav:
+  // - Si el usuario tiene un solo rol relevante, se usa ese rol directamente.
+  // - Si tiene múltiples (Paciente Y Médico a la vez), se filtra por la
+  //   opción colocada en el switch (modo), no por el rol del usuario.
+  const rolVisible = multiplesFiltros
+  ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+  : user?.rol;
 
   const handleConfirmarReservaMasiva = () => {
     alert('¡Todos los turnos de tu carrito han sido preseleccionados y guardados con éxito!');
@@ -65,11 +90,27 @@ const Header = () => {
       />
 
       <header className="header">
+
+      <div className = "up-section">
         <div className="logo-container">
           <a href="/">
             <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
           </a>
         </div>
+
+        {multiplesFiltros && (
+          <div className="logo-toggle-row">
+            <p className="logo-toggle-label">
+              {modo === 'modo-paciente' ? 'Modo Paciente' : 'Modo Médico'}
+            </p>
+            <ToggleSwitchBotton
+              checked={modo === 'modo-medico'}
+              onChange={(checked) => setModo(checked ? 'modo-medico' : 'modo-paciente')}
+              ariaLabel="Cambiar entre modo paciente y modo médico"
+            />
+          </div>
+        )}
+      </div>
 
         {/* Navegación (sidebar en desktop / drawer en mobile) */}
         <nav className={`header-nav ${menuOpen ? 'open' : ''}`}>
@@ -86,7 +127,7 @@ const Header = () => {
                 <span className="header-label text-ellipsis">Oferta Médica</span>
               </Link>
             </li>
-            {user?.rol === 'Paciente' && (
+            {rolVisible === 'Paciente' && (
               <li>
                 <Link
                   to="/solicitar-turno"
@@ -97,7 +138,7 @@ const Header = () => {
                 </Link>
               </li>
             )}
-            {user?.rol === 'Paciente' && (
+            {rolVisible === 'Paciente' && (
               <li>
                 <Link
                   to="/historial-medico"
@@ -108,7 +149,7 @@ const Header = () => {
                 </Link>
               </li>
             )}
-            {user?.rol === 'Médico' && (
+            {rolVisible === 'Médico' && (
               <li>
                 <Link
                   to="/gestion-medico"

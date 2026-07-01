@@ -28,9 +28,33 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 24px 10px;
+  padding: 0 24px;
+}
+
+/* Fila divisoria bajo el logo: el switch queda incluido en la misma
+   raya que antes solo delimitaba el logo del resto del sidebar. */
+.logo-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px 16px;
+}
+
+.up-section{
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 24px;
+}
+
+.logo-toggle-label {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .logo-img {
@@ -271,7 +295,6 @@
   /* Logo compacto */
   .logo-container {
     padding: 0;
-    border-bottom: none;
     margin-bottom: 0;
     flex: 1;
     min-width: 0;
@@ -343,4 +366,50 @@
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     margin-left: 4px;
   }
+}
+
+:root {
+  --bg-container: #1e293b;
+  --bg-slider: #10b981; /* Verde esmeralda */
+  --text-color: #94a3b8;
+  --text-active: #ffffff;
+}
+
+.switch-container {
+  position: relative;
+  display: flex;
+  background-color: var(--bg-container);
+  padding: 4px; /* Un pequeño margen interno para la palanca */
+  border-radius: 50px;
+  width: 400px; /* Podés cambiar el ancho libremente */
+  user-select: none;
+}
+
+.switch-option {
+  flex: 1; /* Hace que todos los botones midan exactamente lo mismo */
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 10px 0;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.switch-option.active {
+  color: var(--text-active);
+}
+
+/* La palanca deslizante */
+.switch-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: calc(100% - 8px); /* Descuenta el padding del contenedor */
+  background-color: var(--bg-slider);
+  border-radius: 50px;
+  z-index: 1;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s ease;
 }

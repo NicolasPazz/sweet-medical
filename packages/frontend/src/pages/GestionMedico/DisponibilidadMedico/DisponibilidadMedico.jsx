@@ -5,6 +5,7 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 
@@ -137,6 +138,8 @@ export default function DisponibilidadMedico() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const load = async () => {
@@ -160,25 +163,43 @@ export default function DisponibilidadMedico() {
     load();
   }, [email, password]);
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchUser = async () => {
-      if (!isAuthenticated) {
-        setLoadingUser(false);
-        return;
-      }
-      try {
-        const data = await getMe({ email, password });
-        setUser({
-          rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
-        });
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
+        }
+        finally {
+          setLoadingUser(false);
+        }
+      } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password, isAuthenticated]);
+  }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -196,7 +217,7 @@ export default function DisponibilidadMedico() {
     );
   }
 
-  if (user?.rol !== 'MEDICO') {
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 

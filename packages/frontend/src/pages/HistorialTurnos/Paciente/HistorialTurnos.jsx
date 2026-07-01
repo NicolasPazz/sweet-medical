@@ -7,9 +7,9 @@ import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
-
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
@@ -25,6 +25,8 @@ export default function HistorialTurnos() {
   const [loadingUser, setLoadingUser] = useState(true);
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const load = async () => {
@@ -54,9 +56,22 @@ export default function HistorialTurnos() {
       }
       try {
         const data = await getMe({ email, password });
-        setUser({ rol: getRolUsuario(data.usuario?.roles) });
+        const roles = data.usuario?.roles ?? [];
+        const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+        setMultiplesFiltros(esMultiRol);
+
+        if (esMultiRol) {
+          // Con múltiples roles no colapsamos a un único "rol": el nav se
+          // filtra más abajo según el switch (modo), no según el rol.
+          setUser({ roles, nombre: data.perfil?.nombre });
+        } else {
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        setMultiplesFiltros(false);
+        setUser(null);
       } finally {
         setLoadingUser(false);
       }
@@ -76,7 +91,11 @@ export default function HistorialTurnos() {
     return <ErrorPage type="401" />;
   }
 
-  if (user?.rol !== 'Paciente') {
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-paciente' ? 'Paciente' : 'Médico')
+    : user?.rol;
+
+  if (rolVisible !== 'Paciente') {
     return <ErrorPage type="403" />;
   }
 

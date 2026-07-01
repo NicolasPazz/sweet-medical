@@ -27,7 +27,6 @@ export class NotificacionController {
     try {
       const usuario = req.usuarioAutenticado;
       const idUsuario = usuario.id;
-      console.log("SOY UN ID DIVERTIDO: " + idUsuario);
       ValidadorId.validarIds(idUsuario);
 
       const resultado = await this.notificacionService.obtenerNoLeidas(idUsuario);

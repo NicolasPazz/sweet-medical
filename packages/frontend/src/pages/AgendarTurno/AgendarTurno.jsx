@@ -18,6 +18,7 @@ import { getMe, getRolUsuario } from '../../services/userService.js';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import './AgendarTurno.css';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 // Meta información dinámica para especialidades y prácticas
 const SERVICE_META = {
@@ -53,6 +54,8 @@ export default function AgendarTurno() {
   const { items: cartItems, addTurn, removeTurn, clearCart } = useCart();
   const location = useLocation();
   const { isAuthenticated, email, password } = useAuth();
+  const { modo } = useModoVista();
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
 
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
@@ -62,18 +65,38 @@ export default function AgendarTurno() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles });
+          } else {
+            setUser({ rol: getRolUsuario(roles) });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
-        } finally {
+          setMultiplesFiltros(false);
+          setUser(null);
+        }
+        finally {
           setLoadingUser(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoadingUser(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
 
   // Listas de datos del backend
   const [pacientes, setPacientes] = useState([]);
@@ -292,7 +315,7 @@ export default function AgendarTurno() {
     return null;
   }
 
-  if (user?.rol !== 'Paciente') {
+  if (rolVisible !== 'Paciente') {
     return <ErrorPage type="403" />;
   }
 
@@ -358,7 +381,7 @@ export default function AgendarTurno() {
       console.error('Error al realizar la reserva:', err);
       setError(
         err.response?.data?.message ||
-          'Ocurrió un error al reservar el turno. Verifique los parámetros.',
+        'Ocurrió un error al reservar el turno. Verifique los parámetros.',
       );
     } finally {
       setLoading(false);

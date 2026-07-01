@@ -10,6 +10,7 @@ import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 function ModalSede({ onConfirmar, onCerrar, email, password }) {
   const [sedes, setSedes] = useState([]);
@@ -82,6 +83,8 @@ export default function HistorialTurnosMedico() {
   const [loadingUser, setLoadingUser] = useState(true);
   const [toast, setToast] = useState(null);
   const [turnoAConfirmar, setTurnoAConfirmar] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
@@ -112,9 +115,22 @@ export default function HistorialTurnosMedico() {
       }
       try {
         const data = await getMe({ email, password });
-        setUser({ rol: getRolUsuario(data.usuario?.roles) });
+        const roles = data.usuario?.roles ?? [];
+        const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+        setMultiplesFiltros(esMultiRol);
+
+        if (esMultiRol) {
+          // Con múltiples roles no colapsamos a un único "rol": el nav se
+          // filtra más abajo según el switch (modo), no según el rol.
+          setUser({ roles, nombre: data.perfil?.nombre });
+        } else {
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        setMultiplesFiltros(false);
+        setUser(null);
       } finally {
         setLoadingUser(false);
       }
@@ -134,7 +150,11 @@ export default function HistorialTurnosMedico() {
     return <ErrorPage type="401" />;
   }
 
-  if (user?.rol !== 'Médico') {
+  const rolVisible = multiplesFiltros
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
+
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 
