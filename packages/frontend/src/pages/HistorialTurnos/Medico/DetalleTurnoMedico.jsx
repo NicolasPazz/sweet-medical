@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react';
 import './HistorialTurnosMedico.css';
 import CancelarTurnoModal from '../../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
 import { getSedesMe } from '../../../services/userService.js';
-import { proponerReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 
 function ModalReprogramacion({ onConfirmar, onCerrar }) {
-  const { email, password } = useAuth();
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
   const [motivo, setMotivo] = useState('');
   const [errores, setErrores] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState('');
 
   const handleFechaChange = (e) => {
     let v = e.target.value.replace(/\D/g, '');
@@ -30,8 +29,11 @@ function ModalReprogramacion({ onConfirmar, onCerrar }) {
     setErrores(e);
     if (Object.keys(e).length > 0) return;
     setSubmitting(true);
+    setErrorEnvio('');
     try {
-      await onConfirmar({ fecha, hora, motivo, email, password });
+      await onConfirmar({ fecha, hora, motivo });
+    } catch (err) {
+      setErrorEnvio(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación');
     } finally {
       setSubmitting(false);
     }
@@ -73,6 +75,7 @@ function ModalReprogramacion({ onConfirmar, onCerrar }) {
           style={{ resize: 'none', fontFamily: 'inherit' }}
         />
         {errores.motivo && <span className="modal-error">⚠ El motivo es obligatorio</span>}
+        {errorEnvio && <span className="modal-error">⚠ {errorEnvio}</span>}
 
         <div className="modal-acciones">
           <button className="btn-cancelar-accion" onClick={onCerrar}>Cancelar</button>
@@ -166,6 +169,7 @@ export default function DetalleTurnoMedico({
   onCancelar,
   onAceptarReprogramacion,
   onRechazarReprogramacion,
+  onProponerReprogramacion,
 }) {
   const [modalCancelar, setModalCancelar] = useState(false);
   const [modalSede, setModalSede] = useState(false);
@@ -309,8 +313,8 @@ export default function DetalleTurnoMedico({
       )}
       {modalReprogramacion && (
         <ModalReprogramacion
-          onConfirmar={async ({ fecha, hora, motivo, email, password }) => {
-            await proponerReprogramacion(turno._id, fecha, hora, motivo, email, password);
+          onConfirmar={async ({ fecha, hora, motivo }) => {
+            await onProponerReprogramacion(fecha, hora, motivo);
             setModalReprogramacion(false);
           }}
           onCerrar={() => setModalReprogramacion(false)}
