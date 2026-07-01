@@ -2,14 +2,17 @@ import { pacienteRepository } from '../infrastructure/repositories/PacienteRepos
 import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
 import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
+import { usuarioService } from './UsuarioService.js';
 
 export class PacienteService {
   constructor({
     pacienteRepository: pacienteRepo = pacienteRepository,
     turnoRepository: turnoRepo = turnoRepository,
+    usuarioService: usuarioSvc = usuarioService,
   } = {}) {
     this.pacienteRepository = pacienteRepo;
     this.turnoRepository = turnoRepo;
+    this.usuarioService = usuarioSvc;
   }
 
   async findById(id) {
@@ -46,7 +49,7 @@ export class PacienteService {
   }
 
   async obtenerHistorialTurnos(dni) {
-    const paciente = await this.findByDniPaciente(dni);
+    const paciente = await usuarioService.findByDni(dni);
     if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }

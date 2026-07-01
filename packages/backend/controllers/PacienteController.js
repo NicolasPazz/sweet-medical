@@ -10,6 +10,7 @@ export class PacienteController {
   obtenerHistorialMe = async (req, res, next) => {
     try {
       const usuario = req.usuarioAutenticado;
+      console.log("DNI: " + usuario.dni);
       const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.dni);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
@@ -43,7 +44,7 @@ export class PacienteController {
     const regexDNI = /^\d+$/;
 
     if (!regexDNI.test(dniLimpio)) {
-    throw new BadRequestError("DNI no válido ingresado. Debe contener solo números y puntos.");
+      throw new BadRequestError("DNI no válido ingresado. Debe contener solo números y puntos.");
     }
   }
 

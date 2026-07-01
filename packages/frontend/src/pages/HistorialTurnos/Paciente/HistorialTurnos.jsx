@@ -35,7 +35,7 @@ export default function HistorialTurnos() {
       setLoading(true);
       try {
         const data = await getHistorialPacienteMe({ email, password });
-        setTurnos(data ?? []);
+        setTurnos(data?.turnos ?? []);
       } catch (err) {
         console.error('Error al cargar turnos:', err);
         setTurnos([]);
