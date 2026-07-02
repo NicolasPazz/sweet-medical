@@ -10,11 +10,9 @@ export class PacienteController {
   obtenerHistorialMe = async (req, res, next) => {
     try {
       const usuario = req.usuarioAutenticado;
-      console.log("DNI: " + usuario.dni);
       const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.dni);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
-      console.log("SOY UN ESTORBO");
       return next(error);
     }
   };

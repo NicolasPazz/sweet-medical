@@ -12,10 +12,14 @@ export class TurnoController {
     try {
       const dtoReserva = req.body;
 
-      ValidadorId.validarIds(dtoReserva.id_usuario);
+      console.log(dtoReserva);
+
+      console.log("Usuario autenticado id: " + req.usuarioAutenticado.id);
+
+      ValidadorId.validarIds(req.usuarioAutenticado.id);
       ValidadorId.validarIds(dtoReserva.id_servicio);
 
-      await this.turnoService.reservarTurno(dtoReserva);
+      await this.turnoService.reservarTurno(req.usuarioAutenticado, dtoReserva);
 
       return res.status(200).json({ status: 'success', message: 'Turno reservado exitosamente' });
     } catch (error) {

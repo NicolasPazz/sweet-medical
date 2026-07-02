@@ -53,7 +53,7 @@ const turnoRouter = express.Router();
  */
 turnoRouter
   .route('/paciente/reserva')
-  .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
+  .patch(basicAuthPaciente, (req, res, next) => turnoController.reservarTurno(req, res, next));
 
 // Rutas autenticadas por header (sin id_usuario en ruta)
 turnoRouter

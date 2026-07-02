@@ -44,14 +44,9 @@ export class TurnoService {
     this.servicioService = servicioSvc;
   }
 
-  async reservarTurno(dtoReserva) {
-    const usuario = await this.usuarioService.findById(dtoReserva.id_usuario);
+  async reservarTurno(usuario, dtoReserva) {
 
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
-
-    const paciente = await this.pacienteService.findByIdUsuario(dtoReserva.id_usuario);
+    const paciente = await this.pacienteService.findByIdUsuario(usuario.id);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
@@ -70,9 +65,11 @@ export class TurnoService {
       throw new BadRequestError('Debe proporcionar una lista de IDs de slots para reservar');
     }
 
+    let cont = 0;
     let slots = [];
-
     for (const id_slot of dtoReserva.slotsIds) {
+      console.log("cont: " + cont);
+      cont = cont + 1;
       ValidadorId.validarIds(id_slot);
       const slot = await this.slotRepository.findById(id_slot);
       if (slot == null) {
@@ -678,9 +675,9 @@ export class TurnoService {
       // Contrato unificado: misma estructura exacta que el slot
       sede: tieneSedeValida
         ? {
-            id_sede: t.sede._id ? t.sede._id.toString() : null,
-            nombre: t.sede.nombre || 'N/A',
-          }
+          id_sede: t.sede._id ? t.sede._id.toString() : null,
+          nombre: t.sede.nombre || 'N/A',
+        }
         : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
@@ -713,9 +710,9 @@ export class TurnoService {
       estado: s.estado,
       sede: tieneSedeValida
         ? {
-            id_sede: s.sede._id ? s.sede._id.toString() : null,
-            nombre: s.sede.nombre || 'N/A',
-          }
+          id_sede: s.sede._id ? s.sede._id.toString() : null,
+          nombre: s.sede.nombre || 'N/A',
+        }
         : null,
 
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,

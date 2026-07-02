@@ -9,12 +9,13 @@ import {
   buscarTurnosDisponibles,
   reservarTurno,
   getHistorialPaciente,
+  getHistorialPacienteMe,
 } from '../../services/turnoService';
 import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
 import Spinner from '../../components/ui/Spinner.jsx';
-import { getHistorialPacienteMe, getMe, getRolUsuario } from '../../services/userService.js';
+import { getMe, getRolUsuario } from '../../services/userService.js';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import './AgendarTurno.css';
@@ -178,15 +179,13 @@ export default function AgendarTurno() {
 
   // 2. Cargar historial del usuario
   const cargarHistorial = async () => {
-
     setLoadingHistorial(true);
     try {
       const res = await getHistorialPacienteMe(email, password);
-      if (res?.status === 'success') {
-        setHistorialCitas(res.data || []);
-      }
+      setHistorialCitas(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error('Error cargando historial de citas:', err);
+      setHistorialCitas([]);
     } finally {
       setLoadingHistorial(false);
     }
@@ -208,7 +207,7 @@ export default function AgendarTurno() {
 
   // 3. Cargar fechas disponibles cuando se selecciona Especialidad/Práctica y/o Médico
   useEffect(() => {
-    if (step < 3 || !selectedService) return;
+    if (step < 3 || !selectedService || !email || !password) return;
 
     const fetchDates = async () => {
       setLoading(true);
@@ -236,11 +235,11 @@ export default function AgendarTurno() {
     };
 
     fetchDates();
-  }, [selectedService, selectedMedico, step]);
+  }, [selectedService, selectedMedico, step, email, password]);
 
   // 4. Cargar slots/horarios disponibles cuando se selecciona una fecha
   useEffect(() => {
-    if (step < 4 || !selectedDate || !selectedService || !selectedPaciente) return;
+    if (step < 4 || !selectedDate || !selectedService || !selectedPaciente || !email || !password) return;
 
     const fetchSlots = async () => {
       setLoading(true);
@@ -274,7 +273,7 @@ export default function AgendarTurno() {
     };
 
     fetchSlots();
-  }, [selectedDate, selectedService, selectedMedico, step, selectedPaciente]);
+  }, [selectedDate, selectedService, selectedMedico, step, selectedPaciente, email, password]);
 
   // Escuchador global para redirigir al Paso 5 desde el CarritoDropdown (cuando ya estamos en la página)
   useEffect(() => {

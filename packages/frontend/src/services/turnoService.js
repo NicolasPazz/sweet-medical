@@ -33,15 +33,19 @@ export const getPacientes = async () => {
   return res.data;
 };
 
-export const buscarTurnosDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibles', { params });
+export const buscarTurnosDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibles', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
 export const getFechasDisponibles = async (params, email, password) => {
-  const res = await api.get('/turnos/disponibilidad/fechas', { params },
-    { headers: authHeaders(email, password) }
-  );
+  const res = await api.get('/turnos/disponibilidad/fechas', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
@@ -109,4 +113,11 @@ export const responderReprogramacion = async (id_turno, aceptado, email, passwor
 export const getHistorialPaciente = async (idUsuario) => {
   const res = await api.get(`/pacientes/${idUsuario}/turnos`);
   return res.data;
+};
+
+export const getHistorialPacienteMe = async (email, password) => {
+  const res = await axios.get(`${getApiBaseUrl()}/pacientes/me/turnos`, {
+    headers: authHeaders(email, password),
+  });
+  return res.data.data;
 };
