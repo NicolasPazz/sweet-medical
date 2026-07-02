@@ -36,6 +36,7 @@ export default function HistorialTurnos() {
       }
       setLoading(true);
       try {
+        console.log(email + ", " + password);
         const data = await getHistorialPacienteMe({ email, password });
         setTurnos(data?.turnos ?? []);
       } catch (err) {
@@ -103,8 +104,8 @@ export default function HistorialTurnos() {
 
   let turnosFiltrados = null;
 
-  if(turnos){
-  turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
+  if (turnos) {
+    turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
   } else {
     turnosFiltrados = null;
   }

@@ -80,6 +80,10 @@ export default function AgendarTurno() {
           } else {
             setUser({ dni, rol: getRolUsuario(roles) });
           }
+
+          console.log("HOLA SOY EL PACIENTE con dni: " + data.usuario.dni);
+          handleSelectPaciente(data.usuario);
+
         } catch (error) {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
@@ -102,7 +106,6 @@ export default function AgendarTurno() {
     : user?.rol;
 
   // Listas de datos del backend
-  const [pacientes, setPacientes] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
   const [practicas, setPracticas] = useState([]);
   const [medicos, setMedicos] = useState([]);
@@ -191,7 +194,7 @@ export default function AgendarTurno() {
 
   const handleSelectPaciente = (pac) => {
     setSelectedPaciente(pac);
-    cargarHistorial(pac);
+    cargarHistorial();
     setStep(1);
     clearCart();
     setSelectedService(null);
@@ -202,18 +205,6 @@ export default function AgendarTurno() {
     setError(null);
   };
 
-  const handlePacienteDropdownChange = (e) => {
-    const selectedId = e.target.value;
-    if (!selectedId) {
-      setSelectedPaciente(null);
-      setStep(0);
-      setHistorialCitas([]);
-      clearCart();
-    } else {
-      const pac = pacientes.find((p) => p.id_paciente === selectedId);
-      handleSelectPaciente(pac);
-    }
-  };
 
   // 3. Cargar fechas disponibles cuando se selecciona Especialidad/Práctica y/o Médico
   useEffect(() => {
@@ -369,7 +360,7 @@ export default function AgendarTurno() {
       setConfirmed(true);
       setStep(5);
       clearCart();
-      cargarHistorial(selectedPaciente);
+      cargarHistorial();
     } catch (err) {
       console.error('Error al realizar la reserva:', err);
       setError(
@@ -403,26 +394,7 @@ export default function AgendarTurno() {
   if (confirmed && step === 5) {
     return (
       <div className="agendar-container">
-        <div className="paciente-select-container">
-          <label className="paciente-select-label text-ellipsis">👤 Paciente de Simulación:</label>
-          <select
-            className="paciente-select-dropdown"
-            value={selectedPaciente ? selectedPaciente.id_paciente : ''}
-            onChange={handlePacienteDropdownChange}
-          >
-            <option value="">Seleccione un paciente de prueba...</option>
-            {pacientes.map((pac) => (
-              <option key={pac.id_paciente} value={pac.id_paciente}>
-                {pac.nombre} (DNI: {pac.dni})
-              </option>
-            ))}
-          </select>
-          {selectedPaciente && (
-            <div className="paciente-selected-info text-ellipsis">
-              Cobertura: {selectedPaciente.obraSocial} ({selectedPaciente.plan})
-            </div>
-          )}
-        </div>
+
 
         <div className="card">
           <div className="success-screen">
@@ -488,47 +460,15 @@ export default function AgendarTurno() {
     <div className="agendar-container">
       <header className="agendar-wizard-header">
         <h1 className="agendar-wizard-title text-ellipsis">Agendar Cita Médica</h1>
-        <p className="agendar-wizard-subtitle text-ellipsis">
-          {selectedPaciente
-            ? `Asistente de reserva interactivo para: ${selectedPaciente.nombre}`
-            : 'Selecciona un paciente de simulación del menú desplegable para comenzar'}
-        </p>
+
       </header>
 
-      <div className="paciente-select-container">
-        <label className="paciente-select-label text-ellipsis">👤 Paciente de Simulación:</label>
-        <select
-          className="paciente-select-dropdown"
-          value={selectedPaciente ? selectedPaciente.id_paciente : ''}
-          onChange={handlePacienteDropdownChange}
-        >
-          <option value="">Seleccione un paciente de prueba...</option>
-          {pacientes.map((pac) => (
-            <option key={pac.id_paciente} value={pac.id_paciente}>
-              {pac.nombre} (DNI: {pac.dni})
-            </option>
-          ))}
-        </select>
-        {selectedPaciente && (
-          <div className="paciente-selected-info text-ellipsis">
-            Cobertura: {selectedPaciente.obraSocial} ({selectedPaciente.plan})
-          </div>
-        )}
-      </div>
 
-      {!selectedPaciente ? (
+      {!isAuthenticated ? (
         <div className="card">
           <div className="card-body no-patient-selected">
-            <div className="no-patient-icon">👤</div>
-            <h3 className="text-ellipsis">Selección de Paciente para Simulación</h3>
-            <p className="text-ellipsis-multiline">
-              Para iniciar el asistente de agendamiento de turnos, por favor selecciona un paciente
-              de prueba del menú desplegable superior.
-            </p>
-            <p className="no-patient-sub text-ellipsis-multiline">
-              Esto nos permitirá calcular las coberturas correspondientes, copagos y costos en
-              tiempo real durante cada uno de los pasos de búsqueda.
-            </p>
+            <div className="no-patient-icon">soy un estorbo</div>
+
           </div>
         </div>
       ) : (
@@ -1076,14 +1016,14 @@ function renderHistorialSection(historial, loadingHistorial, paciente) {
   return (
     <div className="historial-paciente-seccion">
       <div className="historial-header-title text-ellipsis">
-        <span>📅</span> Turnos Registrados del Paciente ({paciente.nombre})
+        <span>📅</span> Sus turnos registrados
       </div>
 
       {loadingHistorial ? (
-        <div className="historial-cargando text-ellipsis">Cargando turnos reservados del paciente...</div>
+        <div className="historial-cargando text-ellipsis">Cargando sus turnos reservados...</div>
       ) : historial.length === 0 ? (
         <div className="historial-vacio text-ellipsis-multiline">
-          El paciente no posee citas registradas o reservadas en el sistema.
+          Usted no posee citas registradas o reservadas en el sistema.
         </div>
       ) : (
         <div className="historial-tabla-wrapper">

@@ -14,6 +14,7 @@ export class PacienteController {
       const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.dni);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
+      console.log("SOY UN ESTORBO");
       return next(error);
     }
   };
