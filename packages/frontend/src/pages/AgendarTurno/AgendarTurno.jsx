@@ -181,8 +181,8 @@ export default function AgendarTurno() {
   const cargarHistorial = async () => {
     setLoadingHistorial(true);
     try {
-      const res = await getHistorialPacienteMe(email, password);
-      setHistorialCitas(Array.isArray(res) ? res : []);
+      const res = await getHistorialPacienteMe({ email, password });
+      setHistorialCitas(Array.isArray(res.turnos) ? res.turnos : []);
     } catch (err) {
       console.error('Error cargando historial de citas:', err);
       setHistorialCitas([]);

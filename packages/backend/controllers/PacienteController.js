@@ -10,7 +10,7 @@ export class PacienteController {
   obtenerHistorialMe = async (req, res, next) => {
     try {
       const usuario = req.usuarioAutenticado;
-      const resultado = await this.pacienteService.obtenerHistorialTurnos(usuario.dni);
+      const resultado = await this.pacienteService.obtenerHistorialTurnosIdUsuario(usuario.id);
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
       return next(error);
@@ -23,7 +23,7 @@ export class PacienteController {
 
       this.validarDNI(dni);
 
-      const resultado = await this.pacienteService.obtenerHistorialTurnos(dni);
+      const resultado = await this.pacienteService.obtenerHistorialTurnosDni(dni);
 
       return res.status(200).json({
         status: 'success',

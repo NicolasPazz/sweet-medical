@@ -20,6 +20,9 @@ async function resolverUsuario(req) {
   const identificador = decoded.slice(0, separatorIndex);
   const password = decoded.slice(separatorIndex + 1);
 
+  console.log("IDENTIFICADOR: " + identificador);
+  console.log("PASSWORD: " + password);
+
   if (!identificador || !password) {
     throw new UnauthorizedError('Usuario y contraseña son obligatorios');
   }

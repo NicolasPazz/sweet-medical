@@ -115,9 +115,12 @@ export const getHistorialPaciente = async (idUsuario) => {
   return res.data;
 };
 
-export const getHistorialPacienteMe = async (email, password) => {
+export const getHistorialPacienteMe = async ({ email, password }) => {
   const res = await axios.get(`${getApiBaseUrl()}/pacientes/me/turnos`, {
     headers: authHeaders(email, password),
   });
+  console.log("RES: " + res);
+  console.log("RES.DATA: " + res.data);
+  console.log("RES.DATA.TURNOS: " + res.data.data.turnos);
   return res.data.data;
 };

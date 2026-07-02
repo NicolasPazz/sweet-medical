@@ -24,7 +24,7 @@ export class PacienteService {
   }
 
   async findByDniPaciente(dni) {
-    return await this.pacienteRepository.findByDniPaciente(dni);
+    return await this.usuarioService.findByDni(dni);
   }
 
   async findByUsuarioId(usuarioId) {
@@ -48,11 +48,30 @@ export class PacienteService {
     return await this.pacienteRepository.findAll();
   }
 
-  async obtenerHistorialTurnos(dni) {
-    const paciente = await usuarioService.findByDni(dni);
+  async obtenerHistorialTurnosDni(dni) {
+    const paciente = await this.findByDniPaciente(dni);
     if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }
+
+    return this.obtenerHistorialTurnos(paciente);
+  }
+
+  async obtenerHistorialTurnosIdUsuario(idUsuario) {
+    const paciente = await this.findByIdUsuario(idUsuario);
+    if (!paciente) {
+      throw new NotFoundError('Paciente no encontrado');
+    }
+
+    return this.obtenerHistorialTurnos(paciente);
+  }
+
+
+
+  async obtenerHistorialTurnos(paciente) {
+
+
+    console.log("paciente: " + paciente.id);
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
 
@@ -89,6 +108,7 @@ export class PacienteService {
             : null,
         }))
         : [];
+
 
       return {
         id_turno: t.id || t._id,

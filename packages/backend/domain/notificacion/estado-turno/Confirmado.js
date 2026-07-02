@@ -30,6 +30,7 @@ export class Confirmado {
         fecha: this.turno.fechaHora?.toLocaleDateString() || '',
         sede: this.turno.sede.nombre,
         medico: this.turno.medico.nombre,
+        interpolation: { escapeValue: false } // <- Evita que cambie las "/" por "&#x2F;"
       }),
     );
   }
