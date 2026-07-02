@@ -14,7 +14,7 @@ import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
 import Spinner from '../../components/ui/Spinner.jsx';
-import { getMe, getRolUsuario } from '../../services/userService.js';
+import { getHistorialPacienteMe, getMe, getRolUsuario } from '../../services/userService.js';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import './AgendarTurno.css';
@@ -60,6 +60,7 @@ export default function AgendarTurno() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  // 1) Cargar datos del usuario (el que está logueado)
   useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
@@ -70,12 +71,14 @@ export default function AgendarTurno() {
 
           setMultiplesFiltros(esMultiRol);
 
+          const dni = data.usuario.dni;
+
           if (esMultiRol) {
             // Con múltiples roles no colapsamos a un único "rol": el nav se
             // filtra más abajo según el switch (modo), no según el rol.
-            setUser({ roles });
+            setUser({ dni, roles });
           } else {
-            setUser({ rol: getRolUsuario(roles) });
+            setUser({ dni, rol: getRolUsuario(roles) });
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -136,17 +139,8 @@ export default function AgendarTurno() {
     { n: 5, label: 'Paso 5', name: 'Confirmar' },
   ];
 
-  // 1. Cargar datos iniciales de forma independiente
+  // 2. Cargar datos iniciales de forma independiente
   useEffect(() => {
-    const loadPacientes = async () => {
-      try {
-        const res = await getPacientes();
-        if (res?.status === 'success') setPacientes(res.data || []);
-      } catch (err) {
-        console.error('Error al cargar pacientes de la DB:', err);
-      }
-    };
-
     const loadEspecialidades = async () => {
       try {
         const res = await getEspecialidades();
@@ -174,18 +168,17 @@ export default function AgendarTurno() {
       }
     };
 
-    loadPacientes();
     loadEspecialidades();
     loadPracticas();
     loadMedicos();
   }, []);
 
-  // 2. Cargar historial del paciente al seleccionarlo
-  const cargarHistorial = async (paciente) => {
-    if (!paciente) return;
+  // 2. Cargar historial del usuario
+  const cargarHistorial = async () => {
+
     setLoadingHistorial(true);
     try {
-      const res = await getHistorialPaciente(paciente.id_usuario);
+      const res = await getHistorialPacienteMe(email, password);
       if (res?.status === 'success') {
         setHistorialCitas(res.data || []);
       }
@@ -239,7 +232,7 @@ export default function AgendarTurno() {
           params.profesionalId = selectedMedico.id_medico;
         }
 
-        const res = await getFechasDisponibles(params);
+        const res = await getFechasDisponibles(params, email, password);
         if (res?.status === 'success') {
           setAvailableDates(res.data || []);
         }
@@ -277,7 +270,7 @@ export default function AgendarTurno() {
           params.profesionalId = selectedMedico.id_medico;
         }
 
-        const res = await buscarTurnosDisponibles(params);
+        const res = await buscarTurnosDisponibles(params, email, password);
         if (res?.status === 'success') {
           setSlots(res.data || []);
         }
@@ -367,7 +360,7 @@ export default function AgendarTurno() {
           id_servicio: item.id_servicio_seleccionado || selectedService._id,
           slotsIds: slotsIds,
         };
-        return reservarTurno(dataReserva);
+        return reservarTurno(dataReserva, email, password);
       });
 
       await Promise.all(promesas);

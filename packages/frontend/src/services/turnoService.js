@@ -38,13 +38,17 @@ export const buscarTurnosDisponibles = async (params) => {
   return res.data;
 };
 
-export const getFechasDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibilidad/fechas', { params });
+export const getFechasDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibilidad/fechas', { params },
+    { headers: authHeaders(email, password) }
+  );
   return res.data;
 };
 
-export const getHorariosDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibilidad/horarios', { params });
+export const getHorariosDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibilidad/horarios', { params },
+    { headers: authHeaders(email, password) }
+  );
   return res.data;
 };
 
