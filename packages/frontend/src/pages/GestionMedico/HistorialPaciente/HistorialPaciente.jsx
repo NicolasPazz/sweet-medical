@@ -81,7 +81,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <span className="turno-hora text-ellipsis">{turno.hora}</span>
                 </div>
                 <div className="turno-card-center">
-                  <span className = "turno-id text-ellipsis"> {turno.id_turno} </span>
+                  <span className="turno-id text-ellipsis"> {turno.id_turno} </span>
                   <span className="turno-servicio text-ellipsis">{turno.servicio}</span>
                   <span className="turno-medico text-ellipsis">{turno.medico}</span>
                   {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
@@ -208,12 +208,12 @@ export default function HistorialPaciente() {
 
     setEstado('searching');
     // Simula latencia de búsqueda
-    
-      try{
-      const data = await getHistorialPacienteByMedico({email, password, dni: trimmed});
+
+    try {
+      const data = await getHistorialPacienteByMedico({ email, password, dni: trimmed });
 
       console.log(data.data.paciente);
-
+      console.log(data.data.turnos);
       if (!data.data.paciente) {
         setEstado('not_found');
         setPacienteEncontrado(null);
@@ -223,7 +223,7 @@ export default function HistorialPaciente() {
       setPacienteEncontrado(data.data.paciente);
       setHistorial(data.data.turnos);
       setEstado('found');
-    } catch(error){
+    } catch (error) {
       setError(error.response.data.message);
       setEstado('error');
       setPacienteEncontrado(null);

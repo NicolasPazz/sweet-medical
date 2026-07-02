@@ -49,12 +49,13 @@ export class PacienteService {
   }
 
   async obtenerHistorialTurnosDni(dni) {
-    const paciente = await this.findByDniPaciente(dni);
-    if (!paciente) {
-      throw new NotFoundError('Paciente no encontrado');
+    const usuario = await this.findByDniPaciente(dni);
+    if (!usuario) {
+      throw new NotFoundError('Usuario no encontrado');
     }
 
-    return this.obtenerHistorialTurnos(paciente);
+    return this.obtenerHistorialTurnosIdUsuario(usuario.id);
+
   }
 
   async obtenerHistorialTurnosIdUsuario(idUsuario) {
@@ -62,7 +63,6 @@ export class PacienteService {
     if (!paciente) {
       throw new NotFoundError('Paciente no encontrado');
     }
-
     return this.obtenerHistorialTurnos(paciente);
   }
 
@@ -74,7 +74,7 @@ export class PacienteService {
     console.log("paciente: " + paciente.id);
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
-
+    console.log("TURNOS: " + turnos);
     const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       const turnoAdaptado = {
@@ -141,7 +141,7 @@ export class PacienteService {
       obraSocial: paciente.obraSocial ? paciente.obraSocial.nombre : 'N/A',
       plan: paciente.plan ? paciente.plan.nombre : 'N/A',
     };
-
+    console.log("TURNOS FORMATEADOS: " + turnosFormateados);
     return {
       paciente: pacienteFormateado,
       turnos: turnosFormateados,

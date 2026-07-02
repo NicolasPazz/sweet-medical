@@ -129,7 +129,7 @@ export default function NotificationBell() {
   const maxH = isMobile
     ? window.innerHeight - (containerRef.current?.getBoundingClientRect().bottom ?? 0) - 24
     : Math.min(
-      480,
+      600,
       window.innerHeight -
       (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
       16,
@@ -149,7 +149,7 @@ export default function NotificationBell() {
       </IconButton>
 
       {open && (
-        <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(480, maxH) }}>
+        <div className="nb-dropdown" style={{ ...dropdownStyle, maxHeight: Math.min(600, maxH) }}>
           <div className="nb-header">
             <span className="nb-header__title text-ellipsis">Notificaciones</span>
             {unreadCount > 0 && (

@@ -22,7 +22,6 @@ export class PacienteController {
       const dni = req.params.dni;
 
       this.validarDNI(dni);
-
       const resultado = await this.pacienteService.obtenerHistorialTurnosDni(dni);
 
       return res.status(200).json({
