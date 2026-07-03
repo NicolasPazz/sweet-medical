@@ -6,7 +6,6 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
@@ -24,12 +23,6 @@ function formatFecha(fechaHora) {
 function HistorialPacienteListado({ paciente, turnos, onVolver }) {
   const [filtro, setFiltro] = useState('TODOS');
   const [turnoExpandido, setTurnoExpandido] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
   const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
@@ -60,9 +53,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
         ))}
       </div>
 
-      {loading ? (
-        <SkeletonTurnoList count={4} />
-      ) : turnosFiltrados.length === 0 ? (
+      {turnosFiltrados.length === 0 ? (
         <p className="historial-vacio text-ellipsis-multiline">
           {turnos.length === 0
             ? 'Este paciente no tiene turnos registrados.'

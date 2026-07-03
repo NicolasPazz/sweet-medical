@@ -257,7 +257,13 @@ export function GestionServicio() {
   }
 
   if (loadingUser) {
-    return null;
+    return (
+      <div className="gs-page">
+        <div className="gs-container">
+          <SkeletonServicioList count={4} />
+        </div>
+      </div>
+    );
   }
 
   if (rolVisible !== 'Médico') {

@@ -100,7 +100,7 @@ export default function GestionSedes() {
     return (
       <div className="gs-sedes-page">
         <div className="gs-sedes-container">
-          <Spinner size="md" text="Cargando..." />
+          <Spinner size="default" text="Cargando..." />
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function GestionSedes() {
 
           <div className="gs-sedes-form">
             {cargando ? (
-              <p className="gs-cargando">Cargando sedes...</p>
+              <Spinner size="default" text="Cargando sedes..." />
             ) : sedesDisponibles.length === 0 ? (
               <p className="gs-sin-sedes">
                 Ya tenés todas las sedes disponibles agregadas, o no hay sedes en el sistema.

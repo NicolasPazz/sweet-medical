@@ -210,7 +210,7 @@ export default function DisponibilidadMedico() {
       <div className="dm-page">
         <div className="dm-container">
           <div className="dm-card">
-            <Spinner size="md" text="Cargando..." />
+            <Spinner size="default" text="Cargando..." />
           </div>
         </div>
       </div>
@@ -309,7 +309,7 @@ export default function DisponibilidadMedico() {
 
         {loading ? (
           <div className="dm-card">
-            <Spinner size="md" text="Cargando disponibilidad..." />
+            <Spinner size="default" text="Cargando disponibilidad..." />
           </div>
         ) : error && !medico ? (
           <div className="dm-card dm-error-card text-ellipsis-multiline">⚠️ {error}</div>
@@ -337,7 +337,7 @@ export default function DisponibilidadMedico() {
                   </button>
                   <button className="dm-btn-primary text-ellipsis" onClick={handleSave} disabled={saving}>
                     {saving ? (
-                      <Spinner size="sm" text="Guardando..." inline />
+                      <Spinner size="small" text="Guardando..." inline />
                     ) : (
                       '💾 Guardar cambios'
                     )}

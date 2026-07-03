@@ -295,7 +295,11 @@ export default function AgendarTurno() {
   }
 
   if (loadingUser) {
-    return null;
+    return (
+      <div className="agendar-container">
+        <Spinner size="large" text="Cargando..." />
+      </div>
+    );
   }
 
   if (rolVisible !== 'Paciente') {
@@ -675,7 +679,7 @@ export default function AgendarTurno() {
                   </div>
 
                   {loading ? (
-                    <Spinner size="md" text="Cargando disponibilidad..." />
+                    <Spinner size="default" text="Cargando disponibilidad..." />
                   ) : (
                     <MiniCalendar
                       selectedDate={selectedDate}
@@ -743,7 +747,7 @@ export default function AgendarTurno() {
                   </div>
 
                   {loading ? (
-                    <Spinner size="md" text="Consultando horarios disponibles..." />
+                    <Spinner size="default" text="Consultando horarios disponibles..." />
                   ) : (
                     <>
                       <div className="slots-grid">

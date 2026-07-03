@@ -24,44 +24,44 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [multiplesFiltros, setMultiplesFiltros] = useState(false);
-  const {modo} = useModoVista(); // Estado para el modo de vista
+  const { modo } = useModoVista(); // Estado para el modo de vista
 
   useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
-              try {
-                const data = await getMe({ email, password });
-                const roles = data.usuario?.roles ?? [];
-                const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
-      
-                setMultiplesFiltros(esMultiRol);
-      
-                if (esMultiRol) {
-                  // Con múltiples roles no colapsamos a un único "rol": el nav se
-                  // filtra más abajo según el switch (modo), no según el rol.
-                  setUser({ roles });
-                } else {
-                  setUser({ rol: getRolUsuario(roles) });
-                }
-              } catch (error) {
-                console.error('Error fetching user data:', error);
-                setMultiplesFiltros(false);
-                setUser(null);
-              } finally{
-                setLoading(false);
-              }
-            } else {
-              setUser(null);
-              setMultiplesFiltros(false);
-              setLoading(false);
-            }
+        try {
+          const data = await getMe({ email, password });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles });
+          } else {
+            setUser({ rol: getRolUsuario(roles) });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setUser(null);
+        setMultiplesFiltros(false);
+        setLoading(false);
+      }
     };
     fetchUser();
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-  ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
-  : user?.rol;
+    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    : user?.rol;
 
   if (loading) {
     return (
@@ -101,11 +101,13 @@ export default function Home() {
               <FaCalendarAlt /> Agendar turno
             </Link>
           )}
+          {/*
           {rolVisible === 'Médico' && (
             <Link to="/historial-medico" className="cta-secondary text-ellipsis">
               Ver historial <FaArrowRight />
             </Link>
-          )}
+          )*/}
+
           {rolVisible === 'Médico' && (
             <Link to="/gestion-medico" className="cta-secondary text-ellipsis">
               Gestión médica <FaArrowRight />
