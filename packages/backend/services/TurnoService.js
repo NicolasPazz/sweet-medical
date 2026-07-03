@@ -168,13 +168,9 @@ export class TurnoService {
     return;
   }
 
-  async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
+  async cancelarTurno(usuario, id_turno, esMedico, motivo) {
     const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
-    const usuario = await this.usuarioService.findById(id_usuario);
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
 
     const turno = await this.turnoRepository.findById(id_turno);
     if (turno == null) {

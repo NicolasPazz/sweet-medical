@@ -29,28 +29,27 @@ export class Turno {
     this.slotsAsociados = [];
   }
 
-  actualizarEstado(quien, nuevoEstado, motivo) {
-    console.log('QUIEN LLAMA? ', quien);
+  actualizarEstado(usuario, nuevoEstado, motivo) {
 
     const estadoEnum = nuevoEstado.getEstadoNombre();
 
-    const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, quien, motivo);
+    const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, usuario, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(quien, this);
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuario, this);
     return notificacion;
   }
 
-  solicitarReprogramacion(usuarioQueLlama, nuevaFechaHora, motivo) {
+  solicitarReprogramacion(usuario, nuevaFechaHora, motivo) {
     this.propuestaCambio = {
       nuevaFechaHora,
       motivo,
-      proponenteId: usuarioQueLlama.id || usuarioQueLlama._id,
+      proponenteId: usuario.id || usuario._id,
     };
 
     const notificacion = this.actualizarEstado(
-      usuarioQueLlama,
+      usuario,
       new PendienteReprogramacion(this),
       `Solicitud de reprogramación para el ${nuevaFechaHora.toLocaleDateString('es-AR')}`,
     );

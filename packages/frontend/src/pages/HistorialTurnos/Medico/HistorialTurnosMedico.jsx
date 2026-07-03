@@ -4,7 +4,7 @@ import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
 import { getMe, getTurnosMedico, getSedesMe, getRolUsuario } from '../../../services/userService.js';
-import { cancelarTurno, confirmarTurno, finalizarTurno, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
+import { cancelarTurno, cancelarTurnoMedico, cancelarTurnoPaciente, confirmarTurno, finalizarTurno, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -192,7 +192,10 @@ export default function HistorialTurnosMedico() {
 
   const handleCancelar = async (idTurno, motivo) => {
     try {
-      await cancelarTurno(idTurno, motivo, email, password);
+      if (rolVisible === 'Médico') {
+        await cancelarTurnoMedico(idTurno, motivo, email, password);
+      }
+
       setTurnos((prev) =>
         prev.map((t) =>
           t._id === idTurno ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo } : t,
@@ -253,14 +256,14 @@ export default function HistorialTurnosMedico() {
         prev.map((t) =>
           t._id === idTurno
             ? {
-                ...t,
-                estado: 'PENDIENTE_REPROGRAMACION',
-                propuestaCambio: {
-                  nuevaFechaHora,
-                  nuevaHora: hora,
-                  motivo,
-                },
-              }
+              ...t,
+              estado: 'PENDIENTE_REPROGRAMACION',
+              propuestaCambio: {
+                nuevaFechaHora,
+                nuevaHora: hora,
+                motivo,
+              },
+            }
             : t,
         ),
       );
@@ -295,107 +298,107 @@ export default function HistorialTurnosMedico() {
   return (
     <>
       <div className="historial-container">
-      <VolverGestion />
-      <div className="historial-header">
-        <h1 className="historial-title text-ellipsis">Turnos del Médico</h1>
-        <p className="historial-subtitle text-ellipsis">Historial y próximos turnos de tus pacientes</p>
-      </div>
+        <VolverGestion />
+        <div className="historial-header">
+          <h1 className="historial-title text-ellipsis">Turnos del Médico</h1>
+          <p className="historial-subtitle text-ellipsis">Historial y próximos turnos de tus pacientes</p>
+        </div>
 
-      <div className="filtros">
-        {estados.map((e) => (
-          <button
-            key={e}
-            className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
-            onClick={() => setFiltro(e)}
-          >
-            {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
-          </button>
-        ))}
-      </div>
+        <div className="filtros">
+          {estados.map((e) => (
+            <button
+              key={e}
+              className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
+              onClick={() => setFiltro(e)}
+            >
+              {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
+            </button>
+          ))}
+        </div>
 
-      {loading ? (
-        <SkeletonTurnoList count={5} />
-      ) : turnosFiltrados.length === 0 ? (
-        <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
-      ) : (
-        <ul className="turnos-lista">
-          {turnosFiltrados.map((turno) => {
-            const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
-            const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
-            const puedeConfirmar = turno.estado === 'RESERVADO';
-            const puedeFinalizar =
-              turno.estado === 'CONFIRMADO' && new Date(turno.fechaHora) <= new Date();
+        {loading ? (
+          <SkeletonTurnoList count={5} />
+        ) : turnosFiltrados.length === 0 ? (
+          <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
+        ) : (
+          <ul className="turnos-lista">
+            {turnosFiltrados.map((turno) => {
+              const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
+              const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
+              const puedeConfirmar = turno.estado === 'RESERVADO';
+              const puedeFinalizar =
+                turno.estado === 'CONFIRMADO' && new Date(turno.fechaHora) <= new Date();
 
-            return (
-              <li
-                key={turno._id}
-                className="turno-card"
-                onClick={() => handleAbrirDetalle(turno)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="turno-card-left">
-                  <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
-                  <span className="turno-hora text-ellipsis">{turno.hora}</span>
-                </div>
-                <div className="turno-card-center">
-                  <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
-                  <span className="turno-medico text-ellipsis">{turno.paciente?.nombre}</span>
-                  {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
-                  {esPendiente && turno.propuestaCambio && (
-                    <span className="turno-propuesta text-ellipsis">
-                      → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
-                      {turno.propuestaCambio.nuevaHora}
-                    </span>
-                  )}
-                </div>
-                <div className="turno-card-right">
-                  <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
-                  <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
-                </div>
-
-                {puedeConfirmar && (
-                  <button
-                    className="btn-confirmar-inline text-ellipsis"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setTurnoAConfirmar(turno._id);
-                    }}
-                  >
-                    ✓ Confirmar
-                  </button>
-                )}
-                {esPendiente && (
-                  <div className="btns-reprogramacion-inline" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      className="btn-aceptar-inline text-ellipsis"
-                      onClick={() => handleAceptarReprogramacion(turno._id)}
-                    >
-                      ✓ Aceptar
-                    </button>
-                    <button
-                      className="btn-rechazar-inline text-ellipsis"
-                      onClick={() => handleRechazarReprogramacion(turno._id)}
-                    >
-                      ✕ Rechazar
-                    </button>
+              return (
+                <li
+                  key={turno._id}
+                  className="turno-card"
+                  onClick={() => handleAbrirDetalle(turno)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="turno-card-left">
+                    <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
+                    <span className="turno-hora text-ellipsis">{turno.hora}</span>
                   </div>
-                )}
-                {puedeFinalizar && (
-                  <button
-                    className="btn-finalizar-inline text-ellipsis"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFinalizar(turno._id);
-                    }}
-                  >
-                    ✔ Finalizar
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  <div className="turno-card-center">
+                    <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
+                    <span className="turno-medico text-ellipsis">{turno.paciente?.nombre}</span>
+                    {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
+                    {esPendiente && turno.propuestaCambio && (
+                      <span className="turno-propuesta text-ellipsis">
+                        → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                        {turno.propuestaCambio.nuevaHora}
+                      </span>
+                    )}
+                  </div>
+                  <div className="turno-card-right">
+                    <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
+                    <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
+                  </div>
+
+                  {puedeConfirmar && (
+                    <button
+                      className="btn-confirmar-inline text-ellipsis"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTurnoAConfirmar(turno._id);
+                      }}
+                    >
+                      ✓ Confirmar
+                    </button>
+                  )}
+                  {esPendiente && (
+                    <div className="btns-reprogramacion-inline" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        className="btn-aceptar-inline text-ellipsis"
+                        onClick={() => handleAceptarReprogramacion(turno._id)}
+                      >
+                        ✓ Aceptar
+                      </button>
+                      <button
+                        className="btn-rechazar-inline text-ellipsis"
+                        onClick={() => handleRechazarReprogramacion(turno._id)}
+                      >
+                        ✕ Rechazar
+                      </button>
+                    </div>
+                  )}
+                  {puedeFinalizar && (
+                    <button
+                      className="btn-finalizar-inline text-ellipsis"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFinalizar(turno._id);
+                      }}
+                    >
+                      ✔ Finalizar
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
       <Toast mensaje={toast?.mensaje} tipo={toast?.tipo} />
       {turnoAConfirmar && (

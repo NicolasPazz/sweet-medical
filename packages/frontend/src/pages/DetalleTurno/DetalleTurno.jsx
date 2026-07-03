@@ -46,12 +46,12 @@ export default function DetalleTurno({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Especialidad / Servicio:</span>
-          <span className="detalle-value text-ellipsis">{turno.servicio?.nombre || 'General'}</span>
+          <span className="detalle-value text-ellipsis">{turno.servicio?.nombre ?? turno.servicio ?? 'General'}</span>
         </div>
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Profesional Médico:</span>
-          <span className="detalle-value text-ellipsis">{turno.medico?.nombre}</span>
+          <span className="detalle-value text-ellipsis">{turno.medico?.nombre ?? turno.medico ?? 'N/A'}</span>
         </div>
 
         <div className="detalle-info-row">
@@ -66,7 +66,7 @@ export default function DetalleTurno({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Sede de atención:</span>
-          <span className="detalle-value text-ellipsis">{turno.sede?.nombre || 'No asignada'}</span>
+          <span className="detalle-value text-ellipsis">{turno.sede?.nombre ?? turno.sede ?? 'No asignada'}</span>
         </div>
 
         <div className="detalle-info-row">

@@ -18,7 +18,9 @@ export class Cancelado {
     const servicio = this.turno.obtenerNombreServicio();
 
     const actorId = actor?.id || actor?._id;
-    const pacienteUsuarioId = this.turno.paciente ? this.turno.paciente.id : null;
+    const pacienteUsuarioId = this.turno.paciente
+      ? this.turno.paciente.usuario?.id || this.turno.paciente.usuario?._id || this.turno.paciente.usuario
+      : null;
 
     if (
       !(pacienteUsuarioId == null) &&
@@ -44,6 +46,7 @@ export class Cancelado {
           t('CANCELACION_A_PACIENTE', {
             fecha: this.turno.fechaHora?.toLocaleDateString() || '',
             servicio,
+            interpolation: { escapeValue: false }
           }),
         );
       } else {

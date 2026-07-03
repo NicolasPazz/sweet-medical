@@ -28,23 +28,21 @@ export class TurnoController {
   };
 
   cancelarTurnoPaciente = async (req, res, next) => {
-    return this.cancelarTurno(req, res, next, false);
+    return this.cancelarTurnoMe(req, res, next, false);
   };
 
   cancelarTurnoMedico = async (req, res, next) => {
-    return this.cancelarTurno(req, res, next, true);
+    return this.cancelarTurnoMe(req, res, next, true);
   };
 
   // Versiones autenticadas por header
-  cancelarTurnoMe = async (req, res, next) => {
+  cancelarTurnoMe = async (req, res, next, esMedico) => {
     try {
-      const idUsuario = req.usuarioAutenticado.id;
+      const usuario = req.usuarioAutenticado;
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { motivo } = req.body;
-      if (!motivo) throw new BadRequestError('Debe escribir algún motivo');
-      const esMedico = req.usuarioAutenticado.roles?.includes('MEDICO');
-      await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
+      await this.turnoService.cancelarTurno(usuario, idTurno, esMedico, motivo);
       return res.status(200).json({ status: 'success', message: 'Turno cancelado exitosamente' });
     } catch (error) {
       return next(error);

@@ -136,7 +136,7 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/paciente/:id_usuario/cancelacion/:id_turno')
+  .route('/paciente/cancelacion/:id_turno')
   .patch(basicAuthPaciente, (req, res, next) => turnoController.cancelarTurnoPaciente(req, res, next));
 
 /**
@@ -188,7 +188,7 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/medico/:id_usuario/cancelacion/:id_turno')
+  .route('/medico/cancelacion/:id_turno')
   .patch(basicAuthMedico, (req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
 
 /**

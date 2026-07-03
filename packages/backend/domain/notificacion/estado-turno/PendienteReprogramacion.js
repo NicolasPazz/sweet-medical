@@ -39,6 +39,7 @@ export class PendienteReprogramacion {
           servicio,
           fecha: fechaFormateada,
           motivo,
+          interpolation: { escapeValue: false }
         }),
       );
     }

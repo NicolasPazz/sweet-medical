@@ -74,6 +74,25 @@ export const cancelarTurno = async (id_turno, motivo, email, password) => {
   return res.data;
 };
 
+export const cancelarTurnoPaciente = async (id_turno, motivo, email, password) => {
+  const res = await axios.patch(
+    `${getApiBaseUrl()}/turnos/paciente/cancelacion/${id_turno}`,
+    { motivo },
+    { headers: authHeaders(email, password) },
+  );
+  return res.data;
+};
+
+export const cancelarTurnoMedico = async (id_turno, motivo, email, password) => {
+  const res = await axios.patch(
+    `${getApiBaseUrl()}/turnos/medico/cancelacion/${id_turno}`,
+    { motivo },
+    { headers: authHeaders(email, password) },
+  );
+  return res.data;
+};
+
+
 export const confirmarTurno = async (id_turno, email, password, id_sede) => {
   const res = await axios.patch(
     `${getApiBaseUrl()}/turnos/me/confirmar/${id_turno}`,

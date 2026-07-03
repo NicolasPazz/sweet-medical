@@ -1,31 +1,46 @@
 import React, { useState } from 'react';
 import './ReprogramarTurno.css';
 
-export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
+export default function ReprogramarTurno({ turno, onVolver, onFinalizar, onEnviarSolicitud }) {
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const [errorMotivo, setErrorMotivo] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState('');
 
   // Listado de horarios disponibles simulados
   const slotsSimulados = ['08:30', '10:00', '11:30', '14:00', '15:30', '17:00'];
 
-  const handleConfirmarSolicitud = () => {
+  const handleConfirmarSolicitud = async () => {
     if (!fecha || !hora) return;
+    if (!motivo.trim()) {
+      setErrorMotivo(true);
+      return;
+    }
 
-    // 1. Guardamos la nueva fecha y hora propuestas
-    turno.fechaHora = `${fecha}T00:00:00`;
-    turno.hora = hora;
+    // Formato DD/MM/AAAA requerido por el backend (input date da AAAA-MM-DD)
+    const fechaFormateada = fecha.split('-').reverse().join('/');
 
-    // 2. CORREGIDO: Usamos la propiedad exacta definida en tu ESTADO_CONFIG
-    turno.estado = 'PENDIENTE_REPROGRAMACION';
-
-    // 3. Notificación informativa de solicitud para el paciente
-    alert(
-      `¡Solicitud de reprogramación enviada!\n\n` +
-        `Tu propuesta para el día ${fecha.split('-').reverse().join('/')} a las ${hora} hs ` +
-        `quedó registrada correctamente.`,
-    );
-
-    onFinalizar(); // Te redirige al listado principal
+    if (onEnviarSolicitud) {
+      setEnviando(true);
+      setErrorEnvio('');
+      try {
+        await onEnviarSolicitud(fechaFormateada, hora, motivo.trim());
+        setEnviando(false);
+        onFinalizar();
+      } catch (err) {
+        setErrorEnvio(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación');
+        setEnviando(false);
+        return;
+      }
+    } else {
+      // Fallback local (sin integración con backend)
+      turno.fechaHora = `${fecha}T00:00:00`;
+      turno.hora = hora;
+      turno.estado = 'PENDIENTE_REPROGRAMACION';
+      onFinalizar();
+    }
   };
 
   return (
@@ -38,7 +53,7 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
           Solicitar Reprogramación
         </h1>
         <p className="historial-subtitle text-ellipsis">
-          Enviá una propuesta de cambio para tu cita con el {turno.medico?.nombre}
+          Enviá una propuesta de cambio para tu cita con el {turno.medico?.nombre ?? turno.medico}
         </p>
       </div>
 
@@ -77,13 +92,38 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
           </div>
         )}
 
+        {/* Paso 3: Motivo */}
+        {fecha && hora && (
+          <div className="reprogramar-paso-section">
+            <label className="reprogramar-paso-title text-ellipsis">3. Contanos el motivo:</label>
+            <textarea
+              className="reprogramar-input-fecha"
+              rows={3}
+              placeholder="Ej: Conflicto de horario laboral..."
+              value={motivo}
+              onChange={(e) => {
+                setMotivo(e.target.value);
+                setErrorMotivo(false);
+              }}
+              style={{ resize: 'none', fontFamily: 'inherit', width: '100%' }}
+            />
+            {errorMotivo && (
+              <span style={{ color: '#b91c1c', fontSize: 12 }}>⚠ El motivo es obligatorio</span>
+            )}
+          </div>
+        )}
+
+        {errorEnvio && (
+          <p style={{ color: '#b91c1c', fontSize: 13 }}>⚠ {errorEnvio}</p>
+        )}
+
         {/* Botón finalizador de flujo transformado a Solicitud */}
         <button
           className="btn-confirmar-cambio text-ellipsis"
-          disabled={!fecha || !hora}
+          disabled={!fecha || !hora || enviando}
           onClick={handleConfirmarSolicitud}
         >
-          Enviar Solicitud de Cambio ✓
+          {enviando ? 'Enviando...' : 'Enviar Solicitud de Cambio ✓'}
         </button>
       </div>
     </div>

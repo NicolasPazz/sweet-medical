@@ -111,6 +111,7 @@ export class PacienteService {
 
 
       return {
+        _id: t.id || t._id,
         id_turno: t.id || t._id,
         fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
         diaSemana: t.diaSemana,
