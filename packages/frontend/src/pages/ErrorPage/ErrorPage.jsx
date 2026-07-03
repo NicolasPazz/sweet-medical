@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaExclamationTriangle, FaShieldAlt, FaHome, FaArrowLeft, FaLock } from 'react-icons/fa';
-import './errorPage.css';
+import './ErrorPage.css';
 
 const ErrorPage = ({ type = '404' }) => {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import './header.css';
+import './Header.css';
 import {
   FaShoppingCart,
   FaHome,
@@ -15,7 +15,7 @@ import {
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../notification/NotificationBell.jsx';
-import { useAuth } from '../../components/AuthProvider.jsx';
+import { useAuth } from '../AuthProvider.jsx';
 import CartDropdown from '../cart/CartDropdown.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 
