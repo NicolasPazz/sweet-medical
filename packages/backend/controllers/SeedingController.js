@@ -21,7 +21,7 @@ import { especialidadRepository } from '../infrastructure/repositories/Especiali
 import { practicaRepository } from '../infrastructure/repositories/PracticaRepository.js';
 import { sedeRepository } from '../infrastructure/repositories/SedeRepository.js';
 import { planRepository } from '../infrastructure/repositories/PlanRepository.js';
-import { obraSocialRepository } from '../infrastructure/repositories/obraSocialRepository.js';
+import { obraSocialRepository } from '../infrastructure/repositories/ObraSocialRepository.js';
 import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
 
 import { turnoService } from '../services/TurnoService.js';
