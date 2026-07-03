@@ -7,8 +7,8 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
