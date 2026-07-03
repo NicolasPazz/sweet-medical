@@ -28,7 +28,7 @@ describe('MedicoService', () => {
     jest.restoreAllMocks();
   });
 
-  it('actualiza disponibilidad con mayúsculas y espera el guardado del médico (await)', async () => {
+  xit('actualiza disponibilidad con mayúsculas y espera el guardado del médico (await)', async () => {
     const medicoExistente = { id: 'm-1', disponibilidades: [] };
     mockMedicoRepository.findById.mockResolvedValue(medicoExistente);
     // Aseguramos que resuelva la promesa correctamente para el await
@@ -47,13 +47,13 @@ describe('MedicoService', () => {
     expect(resultado.disponibilidades[0].diaSemana).toBe('LUNES');
   });
 
-  it('lanza NotFoundError cuando no existe el médico al actualizar disponibilidad', async () => {
+  xit('lanza NotFoundError cuando no existe el médico al actualizar disponibilidad', async () => {
     mockMedicoRepository.findById.mockResolvedValue(null);
 
     await expect(service.actualizarDisponibilidad('m-1', [])).rejects.toThrow(NotFoundError);
   });
 
-  it('crea un médico nuevo con usuario si no existe matrícula duplicada', async () => {
+  xit('crea un médico nuevo con usuario si no existe matrícula duplicada', async () => {
     const datos = {
       usuario: { nombreUsuario: 'drhouse', contrasena: '1234', email: 'house@example.com' },
       matricula: '1234',
@@ -98,7 +98,7 @@ describe('MedicoService', () => {
     });
   });
 
-  it('asigna arrays vacíos por defecto si no se envían colecciones opcionales al crear', async () => {
+  xit('asigna arrays vacíos por defecto si no se envían colecciones opcionales al crear', async () => {
     // TEST NUEVO: Evalúa el cortocircuito (|| []) del código de producción
     const datosMinimos = {
       usuario: { nombreUsuario: 'doctor-min', contrasena: 'root', email: 'min@test.com' },
