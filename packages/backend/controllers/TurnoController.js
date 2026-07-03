@@ -1,7 +1,7 @@
 import { BadRequestError } from '../errors/AppError.js';
 import { turnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
-import { logger } from '../utils/Logger.js';
+import { logger } from '../utils/logger.js';
 
 export class TurnoController {
   constructor({ turnoService: svc = turnoService } = {}) {
