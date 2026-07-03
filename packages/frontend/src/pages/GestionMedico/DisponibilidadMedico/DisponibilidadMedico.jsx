@@ -8,8 +8,8 @@ import {
 } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import Spinner from '../../../components/ui/Spinner.jsx';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import Spinner from '../../../components/UI/Spinner.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 

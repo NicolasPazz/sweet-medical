@@ -6,7 +6,7 @@ import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
+import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
 
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { getApiBaseUrl } from '@/lib/api-utils';
-import TurnoSearchBar from '../components/turnoSearchBar/TurnoSearchBar.jsx';
+import TurnoSearchBar from '../components/TurnoSearchBar/TurnoSearchBar.jsx';
 import './Home.css';
 
 export default function Home() {

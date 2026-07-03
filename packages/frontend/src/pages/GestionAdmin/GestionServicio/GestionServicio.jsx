@@ -13,7 +13,7 @@ import {
 import { getMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
+import { SkeletonServicioList } from '../../../components/UI/Skeleton.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 
@@ -31,12 +31,12 @@ function ServicioModal({ servicio, onClose, onSubmit, guardando }) {
   const [form, setForm] = useState(
     esEdicion
       ? {
-          tipo: servicio.tipo,
-          nombre: servicio.nombre,
-          duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-          costo: String(servicio.costo),
-          codigo: servicio.codigo ?? '',
-        }
+        tipo: servicio.tipo,
+        nombre: servicio.nombre,
+        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
+        costo: String(servicio.costo),
+        codigo: servicio.codigo ?? '',
+      }
       : EMPTY_FORM(),
   );
   const [error, setError] = useState('');
