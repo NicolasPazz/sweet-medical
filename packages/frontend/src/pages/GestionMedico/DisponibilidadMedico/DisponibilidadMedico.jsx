@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import './DisponibilidadMedico.css';
-import { getMe, getMedicoByUser, actualizarDisponibilidad, getRolUsuario } from '../../../services/userService.js';
+import {
+  getMe,
+  getMedicoByUser,
+  actualizarDisponibilidad,
+  getRolUsuario,
+} from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
@@ -263,7 +268,9 @@ export default function DisponibilidadMedico() {
         <VolverGestion />
         <div className="dm-header">
           <h1 className="dm-title text-ellipsis">Mi Disponibilidad</h1>
-          <p className="dm-subtitle text-ellipsis">Consultá y administrá tus horarios de atención.</p>
+          <p className="dm-subtitle text-ellipsis">
+            Consultá y administrá tus horarios de atención.
+          </p>
         </div>
 
         {loading ? (
@@ -280,7 +287,9 @@ export default function DisponibilidadMedico() {
                 <div>
                   <div className="dm-medico-nombre text-ellipsis">{medico.nombre}</div>
                   {medico.matricula && (
-                    <div className="dm-medico-meta text-ellipsis">Matrícula: {medico.matricula}</div>
+                    <div className="dm-medico-meta text-ellipsis">
+                      Matrícula: {medico.matricula}
+                    </div>
                   )}
                 </div>
               </div>
@@ -291,10 +300,18 @@ export default function DisponibilidadMedico() {
                 </button>
               ) : (
                 <div className="dm-edit-actions">
-                  <button className="dm-btn-secondary text-ellipsis" onClick={handleCancelEdit} disabled={saving}>
+                  <button
+                    className="dm-btn-secondary text-ellipsis"
+                    onClick={handleCancelEdit}
+                    disabled={saving}
+                  >
                     Cancelar
                   </button>
-                  <button className="dm-btn-primary text-ellipsis" onClick={handleSave} disabled={saving}>
+                  <button
+                    className="dm-btn-primary text-ellipsis"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
                     {saving ? (
                       <Spinner size="sm" text="Guardando..." inline />
                     ) : (
@@ -321,7 +338,10 @@ export default function DisponibilidadMedico() {
                   <div className="dm-empty">
                     <div className="dm-empty-icon">📅</div>
                     <p className="text-ellipsis">No tenés franjas horarias configuradas.</p>
-                    <button className="dm-btn-primary text-ellipsis" onClick={() => setIsEditing(true)}>
+                    <button
+                      className="dm-btn-primary text-ellipsis"
+                      onClick={() => setIsEditing(true)}
+                    >
                       + Agregar disponibilidad
                     </button>
                   </div>

@@ -79,13 +79,17 @@ export class TurnoController {
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { fecha, hora, motivo } = req.body;
-      if (!fecha || !hora || !motivo) throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
+      if (!fecha || !hora || !motivo)
+        throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
       const [dia, mes, anio] = fecha.split('/').map(Number);
       const [horas, minutos] = hora.split(':').map(Number);
       const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
-      if (isNaN(nuevaFechaHora.getTime())) throw new BadRequestError('Formato de fecha u hora inválido. Use DD/MM/AAAA y HH:MM');
+      if (isNaN(nuevaFechaHora.getTime()))
+        throw new BadRequestError('Formato de fecha u hora inválido. Use DD/MM/AAAA y HH:MM');
       await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
-      return res.status(200).json({ status: 'success', message: 'Propuesta de reprogramación registrada' });
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Propuesta de reprogramación registrada' });
     } catch (error) {
       return next(error);
     }
@@ -97,9 +101,12 @@ export class TurnoController {
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { aceptado } = req.body;
-      if (aceptado === undefined || typeof aceptado !== 'boolean') throw new BadRequestError('Debe indicar si la propuesta fue aceptada (true/false)');
+      if (aceptado === undefined || typeof aceptado !== 'boolean')
+        throw new BadRequestError('Debe indicar si la propuesta fue aceptada (true/false)');
       await this.turnoService.responderReprogramacion(idUsuario, idTurno, aceptado);
-      const msg = aceptado ? 'El turno ha sido reprogramado con éxito' : 'La propuesta fue rechazada';
+      const msg = aceptado
+        ? 'El turno ha sido reprogramado con éxito'
+        : 'La propuesta fue rechazada';
       return res.status(200).json({ status: 'success', message: msg });
     } catch (error) {
       return next(error);

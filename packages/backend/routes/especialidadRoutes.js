@@ -13,9 +13,13 @@ router
 // Rutas autenticadas por header — DEBEN ir antes de /:id
 router
   .route('/me')
-  .get(basicAuthUser, (req, res, next) => especialidadController.obtenerTodosPorMedicoMe(req, res, next))
+  .get(basicAuthUser, (req, res, next) =>
+    especialidadController.obtenerTodosPorMedicoMe(req, res, next),
+  )
   .post(basicAuthUser, (req, res, next) => especialidadController.agregarAMedicoMe(req, res, next))
-  .delete(basicAuthUser, (req, res, next) => especialidadController.eliminarDeMedicoMe(req, res, next));
+  .delete(basicAuthUser, (req, res, next) =>
+    especialidadController.eliminarDeMedicoMe(req, res, next),
+  );
 
 router
   .route('/all/:id_usuario')

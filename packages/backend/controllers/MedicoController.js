@@ -26,10 +26,10 @@ export class MedicoController {
           medico: turno.medico.nombre,
           servicio: turno.servicio
             ? {
-              nombre: turno.servicio.nombre,
-              codigo: turno.servicio.codigo || 'N/A',
-              id: turno.servicio ? turno.servicio._id : 'N/A',
-            }
+                nombre: turno.servicio.nombre,
+                codigo: turno.servicio.codigo || 'N/A',
+                id: turno.servicio ? turno.servicio._id : 'N/A',
+              }
             : 'N/A',
           sede: turno.sede ? turno.sede.nombre : 'N/A', // Solo el nombre de la sede para evitar objetos pesados [cite: 1201]
           estado: turno.estado ? turno.estado.getEstadoNombre() : 'N/A',
@@ -124,16 +124,19 @@ export class MedicoController {
         _id: turno.id || turno._id,
         fechaHora: turno.fechaHora,
         hora: turno.hora,
-        estado: typeof turno.estado === 'object' ? turno.estado.getEstadoNombre?.() ?? turno.estado.nombre ?? String(turno.estado) : turno.estado,
+        estado:
+          typeof turno.estado === 'object'
+            ? (turno.estado.getEstadoNombre?.() ?? turno.estado.nombre ?? String(turno.estado))
+            : turno.estado,
         costo: turno.costo,
         paciente: turno.paciente ? { nombre: turno.paciente.nombre ?? turno.paciente } : null,
         servicio: turno.practica
           ? { nombre: turno.practica.nombre }
           : turno.especialidad
-          ? { nombre: turno.especialidad.nombre }
-          : turno.servicio
-          ? { nombre: turno.servicio.nombre ?? turno.servicio }
-          : null,
+            ? { nombre: turno.especialidad.nombre }
+            : turno.servicio
+              ? { nombre: turno.servicio.nombre ?? turno.servicio }
+              : null,
         sede: turno.sede ? { nombre: turno.sede.nombre ?? turno.sede } : null,
         propuestaCambio: turno.propuestaCambio ?? null,
       }));
@@ -145,9 +148,7 @@ export class MedicoController {
   };
 
   getMedicoByUsuario = async (req, res, next) => {
-
     try {
-
       const usuario = req.usuarioAutenticado;
 
       const medico = await this.medicoService.findByIdUsuario(usuario.id);
@@ -156,13 +157,10 @@ export class MedicoController {
         id: medico.id,
         nombre: medico.nombre,
         matricula: medico.matricula,
-        disponibilidades: medico.disponibilidades
-      })
-
-    }
-    catch (error) {
+        disponibilidades: medico.disponibilidades,
+      });
+    } catch (error) {
       return next(error);
     }
-  }
-
+  };
 }

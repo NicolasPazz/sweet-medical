@@ -4,7 +4,9 @@ export default function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-24 dark:bg-black min-h-[calc(100vh-64px)]">
       <div className="text-center">
-        <p className="text-base font-semibold text-blue-600 dark:text-blue-400 text-ellipsis">404</p>
+        <p className="text-base font-semibold text-blue-600 dark:text-blue-400 text-ellipsis">
+          404
+        </p>
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl text-ellipsis">
           Página no encontrada
         </h1>

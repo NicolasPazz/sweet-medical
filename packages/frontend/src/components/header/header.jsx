@@ -119,9 +119,8 @@ const Header = () => {
                   to="/gestion-admin"
                   className={location.pathname.startsWith('/gestion-admin') ? 'active' : ''}
                 >
-                  <FaUserShield className='header-icon' />
+                  <FaUserShield className="header-icon" />
                   <span className="header-label text-ellipsis">Panel administrador</span>
-
                 </Link>
               </li>
             )}
@@ -144,7 +143,9 @@ const Header = () => {
               onClick={() => setCartOpen((prev) => !prev)}
             >
               <FaShoppingCart className="cart-icon" />
-              {summary?.count > 0 && <span className="cart-count text-ellipsis">{summary.count}</span>}
+              {summary?.count > 0 && (
+                <span className="cart-count text-ellipsis">{summary.count}</span>
+              )}
             </button>
 
             <NotificationBell />

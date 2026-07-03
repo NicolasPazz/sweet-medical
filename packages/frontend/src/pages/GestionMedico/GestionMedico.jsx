@@ -86,7 +86,10 @@ export function GestionMedico() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
           Cargando...
         </span>
       </div>
@@ -102,7 +105,9 @@ export function GestionMedico() {
       <div className="gm-container">
         <div className="gm-header">
           <h1 className="gm-title text-ellipsis">Gestión Médica</h1>
-          <p className="gm-subtitle text-ellipsis">Seleccioná una sección para administrar tu actividad.</p>
+          <p className="gm-subtitle text-ellipsis">
+            Seleccioná una sección para administrar tu actividad.
+          </p>
         </div>
 
         <div className="gm-grid">

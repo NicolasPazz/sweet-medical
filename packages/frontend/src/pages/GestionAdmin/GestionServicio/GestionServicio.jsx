@@ -295,7 +295,11 @@ export function GestionServicioAdmin() {
             password,
             idUsuario: admin.idUsuario,
             id: modalEditar.id,
-            datos: { nombre: resto.nombre, duracionTurnoEnMins: resto.duracionTurnoEnMins, costo: resto.costo },
+            datos: {
+              nombre: resto.nombre,
+              duracionTurnoEnMins: resto.duracionTurnoEnMins,
+              costo: resto.costo,
+            },
           });
           setEspecialidades((prev) =>
             prev.map((s) => (s.id === modalEditar.id ? normalizar(actualizada) : s)),
@@ -306,7 +310,11 @@ export function GestionServicioAdmin() {
             password,
             idUsuario: admin.idUsuario,
             id: modalEditar.id,
-            datos: { nombre: resto.nombre, duracionTurnoEnMins: resto.duracionTurnoEnMins, costo: resto.costo },
+            datos: {
+              nombre: resto.nombre,
+              duracionTurnoEnMins: resto.duracionTurnoEnMins,
+              costo: resto.costo,
+            },
           });
           setPracticas((prev) =>
             prev.map((s) => (s.id === modalEditar.id ? normalizar(actualizada) : s)),

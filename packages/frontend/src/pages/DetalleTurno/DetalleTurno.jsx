@@ -35,13 +35,17 @@ export default function DetalleTurno({
         <h1 className="historial-title text-ellipsis" style={{ marginTop: '15px' }}>
           Detalle del Turno
         </h1>
-        <p className="historial-subtitle text-ellipsis">Comprobante e información de tu cita médica</p>
+        <p className="historial-subtitle text-ellipsis">
+          Comprobante e información de tu cita médica
+        </p>
       </div>
 
       <div className="detalle-card">
         <div className="detalle-header-block">
           <span className="detalle-id text-ellipsis">ID de Turno: #{turno._id}</span>
-          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>{cfgEstado?.label}</span>
+          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>
+            {cfgEstado?.label}
+          </span>
         </div>
 
         <div className="detalle-info-row">
@@ -78,7 +82,10 @@ export default function DetalleTurno({
 
         {esModificable && (
           <div className="detalle-acciones-group">
-            <button className="btn-cancelar-accion text-ellipsis" onClick={() => setModalCancelar(true)}>
+            <button
+              className="btn-cancelar-accion text-ellipsis"
+              onClick={() => setModalCancelar(true)}
+            >
               ❌ Cancelar Cita
             </button>
             <button

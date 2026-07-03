@@ -36,10 +36,10 @@ export default function Login() {
     setSubmitting(true);
     try {
       await login_back({ email: formData.email, password: formData.password });
-        login_front({ email: formData.email, password: formData.password });
-        mostrarToast('Inicio de sesión exitoso', 'success');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        window.location.href = '/';
+      login_front({ email: formData.email, password: formData.password });
+      mostrarToast('Inicio de sesión exitoso', 'success');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      window.location.href = '/';
     } catch (error) {
       const mensaje = error.response?.data?.message ?? 'Email o contraseña incorrectos';
       mostrarToast(mensaje, 'error');
@@ -61,7 +61,9 @@ export default function Login() {
 
         <div className="login-form">
           <div>
-            <label htmlFor="email" className="text-ellipsis">Correo electrónico:</label>
+            <label htmlFor="email" className="text-ellipsis">
+              Correo electrónico:
+            </label>
             <div className="input-wrapper">
               <input
                 type="email"
@@ -80,7 +82,9 @@ export default function Login() {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-ellipsis">Contraseña:</label>
+            <label htmlFor="password" className="text-ellipsis">
+              Contraseña:
+            </label>
             <div className="input-wrapper">
               <input
                 type="password"

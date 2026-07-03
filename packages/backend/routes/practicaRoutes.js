@@ -13,7 +13,9 @@ router
 // Rutas autenticadas por header — DEBEN ir antes de /:id
 router
   .route('/me')
-  .get(basicAuthUser, (req, res, next) => practicaController.obtenerTodosPorMedicoMe(req, res, next))
+  .get(basicAuthUser, (req, res, next) =>
+    practicaController.obtenerTodosPorMedicoMe(req, res, next),
+  )
   .post(basicAuthUser, (req, res, next) => practicaController.agregarAMedicoMe(req, res, next))
   .delete(basicAuthUser, (req, res, next) => practicaController.eliminarDeMedicoMe(req, res, next));
 

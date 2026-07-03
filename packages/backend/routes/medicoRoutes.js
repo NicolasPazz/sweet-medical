@@ -102,7 +102,9 @@ medicoRouter.route('/all').get((req, res, next) => medicoController.leerMedicos(
  */
 medicoRouter
   .route('/disponibilidad')
-  .patch(basicAuthUser, (req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    medicoController.actualizarDisponibilidad(req, res, next),
+  );
 
 medicoRouter
   .route('/me/sedes')

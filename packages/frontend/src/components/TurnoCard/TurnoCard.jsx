@@ -19,9 +19,13 @@ export default function TurnoCard({ turno, cfg, onClickTurno }) {
         <span className="turno-hora text-ellipsis">{turno.hora}</span>
       </div>
       <div className="turno-card-center">
-        <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre ?? turno.servicio}</span>
+        <span className="turno-servicio text-ellipsis">
+          {turno.servicio?.nombre ?? turno.servicio}
+        </span>
         <span className="turno-medico text-ellipsis">{turno.medico?.nombre ?? turno.medico}</span>
-        {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede?.nombre ?? turno.sede}</span>}
+        {turno.sede && (
+          <span className="turno-sede text-ellipsis">{turno.sede?.nombre ?? turno.sede}</span>
+        )}
       </div>
       <div className="turno-card-right">
         <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>

@@ -59,7 +59,10 @@ function ModalReprogramacion({ onConfirmar, onCerrar }) {
           className={`modal-input${errores.hora ? ' input-error' : ''}`}
           type="time"
           value={hora}
-          onChange={(e) => { setHora(e.target.value); setErrores((p) => ({ ...p, hora: false })); }}
+          onChange={(e) => {
+            setHora(e.target.value);
+            setErrores((p) => ({ ...p, hora: false }));
+          }}
         />
         {errores.hora && <span className="modal-error">⚠ El horario es obligatorio</span>}
 
@@ -69,13 +72,18 @@ function ModalReprogramacion({ onConfirmar, onCerrar }) {
           placeholder="Motivo de la reprogramación"
           rows={3}
           value={motivo}
-          onChange={(e) => { setMotivo(e.target.value); setErrores((p) => ({ ...p, motivo: false })); }}
+          onChange={(e) => {
+            setMotivo(e.target.value);
+            setErrores((p) => ({ ...p, motivo: false }));
+          }}
           style={{ resize: 'none', fontFamily: 'inherit' }}
         />
         {errores.motivo && <span className="modal-error">⚠ El motivo es obligatorio</span>}
 
         <div className="modal-acciones">
-          <button className="btn-cancelar-accion" onClick={onCerrar}>Cancelar</button>
+          <button className="btn-cancelar-accion" onClick={onCerrar}>
+            Cancelar
+          </button>
           <button className="btn-confirmar-accion" onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Enviando...' : '→ Proponer'}
           </button>
@@ -107,7 +115,10 @@ function ModalSede({ onConfirmar, onCerrar }) {
   }, [email, password]);
 
   const handleSubmit = () => {
-    if (!sedeSeleccionada) { setError(true); return; }
+    if (!sedeSeleccionada) {
+      setError(true);
+      return;
+    }
     onConfirmar(sedeSeleccionada);
   };
 
@@ -127,7 +138,10 @@ function ModalSede({ onConfirmar, onCerrar }) {
           <select
             className={`modal-input${error ? ' input-error' : ''}`}
             value={sedeSeleccionada}
-            onChange={(e) => { setSedeSeleccionada(e.target.value); setError(false); }}
+            onChange={(e) => {
+              setSedeSeleccionada(e.target.value);
+              setError(false);
+            }}
             autoFocus
           >
             <option value="">-- Seleccioná una sede --</option>
@@ -140,7 +154,9 @@ function ModalSede({ onConfirmar, onCerrar }) {
         )}
         {error && <span className="modal-error">⚠ Debes seleccionar una sede</span>}
         <div className="modal-acciones">
-          <button className="btn-cancelar-accion" onClick={onCerrar}>Cancelar</button>
+          <button className="btn-cancelar-accion" onClick={onCerrar}>
+            Cancelar
+          </button>
           <button
             className="btn-confirmar-accion"
             onClick={handleSubmit}
@@ -214,7 +230,9 @@ export default function DetalleTurnoMedico({
       <div className="detalle-card">
         <div className="detalle-header-block">
           <span className="detalle-id text-ellipsis">ID de Turno: #{turno._id}</span>
-          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>{cfgEstado?.label}</span>
+          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>
+            {cfgEstado?.label}
+          </span>
         </div>
 
         <div className="detalle-info-row">
@@ -260,19 +278,27 @@ export default function DetalleTurnoMedico({
             </div>
             <div className="detalle-info-row">
               <span className="detalle-label text-ellipsis">Nuevo horario:</span>
-              <span className="detalle-value text-ellipsis">{turno.propuestaCambio.nuevaHora} hs</span>
+              <span className="detalle-value text-ellipsis">
+                {turno.propuestaCambio.nuevaHora} hs
+              </span>
             </div>
           </div>
         )}
 
         <div className="detalle-acciones-group">
           {puedeCancelar && !esPendiente && (
-            <button className="btn-cancelar-accion text-ellipsis" onClick={() => setModalCancelar(true)}>
+            <button
+              className="btn-cancelar-accion text-ellipsis"
+              onClick={() => setModalCancelar(true)}
+            >
               ✕ Cancelar Turno
             </button>
           )}
           {PUEDE_REPROGRAMAR.includes(turno.estado) && (
-            <button className="btn-reprogramar-accion text-ellipsis" onClick={() => setModalReprogramacion(true)}>
+            <button
+              className="btn-reprogramar-accion text-ellipsis"
+              onClick={() => setModalReprogramacion(true)}
+            >
               📅 Reprogramar
             </button>
           )}
@@ -302,10 +328,7 @@ export default function DetalleTurnoMedico({
         />
       )}
       {modalSede && (
-        <ModalSede
-          onConfirmar={handleConfirmarConSede}
-          onCerrar={() => setModalSede(false)}
-        />
+        <ModalSede onConfirmar={handleConfirmarConSede} onCerrar={() => setModalSede(false)} />
       )}
       {modalReprogramacion && (
         <ModalReprogramacion

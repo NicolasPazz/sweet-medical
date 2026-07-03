@@ -49,11 +49,9 @@ export const getHorariosDisponibles = async (params) => {
 };
 
 export const reservarTurno = async (data, email, password) => {
-  const res = await axios.patch(
-    `${getApiBaseUrl()}/turnos/paciente/reserva`,
-    data,
-    { headers: authHeaders(email, password) },
-  );
+  const res = await axios.patch(`${getApiBaseUrl()}/turnos/paciente/reserva`, data, {
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 

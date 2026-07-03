@@ -83,11 +83,15 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                 <div className="turno-card-center">
                   <span className="turno-servicio text-ellipsis">{turno.servicio_nombre}</span>
                   <span className="turno-medico text-ellipsis">{turno.nombreMedico}</span>
-                  {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
+                  {turno.sede && (
+                    <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>
+                  )}
                 </div>
                 <div className="turno-card-right">
                   <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
-                  <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
+                  <span className="turno-costo text-ellipsis">
+                    ${turno.costo?.toLocaleString('es-AR')}
+                  </span>
                 </div>
                 <span className="turno-chevron">{expandido ? '▲' : '▼'}</span>
 
@@ -99,7 +103,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                         const hCfg = ESTADO_CONFIG[h.estado] ?? { label: h.estado, color: '' };
                         return (
                           <li key={i} className="turno-historial-item">
-                            <span className={`turno-estado ${hCfg.color} text-ellipsis`}>{hCfg.label}</span>
+                            <span className={`turno-estado ${hCfg.color} text-ellipsis`}>
+                              {hCfg.label}
+                            </span>
                             <span className="turno-historial-fecha text-ellipsis">
                               {formatFecha(h.fechaHoraCambio)}
                             </span>
@@ -167,7 +173,10 @@ export default function HistorialPaciente() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
           Cargando...
         </span>
       </div>

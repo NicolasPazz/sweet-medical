@@ -9,7 +9,7 @@ export class EspecialidadService {
   constructor({
     especialidadRepository: especialidadRepo = especialidadRepository,
     usuarioService: usuarioSvc = usuarioService,
-    medicoService: medicoSvc = medicoService
+    medicoService: medicoSvc = medicoService,
   } = {}) {
     this.especialidadRepository = especialidadRepo;
     this.usuarioService = usuarioSvc;
@@ -68,13 +68,14 @@ export class EspecialidadService {
     if (!medico) throw new NotFoundError('Médico no encontrado');
     const especialidad = await this.especialidadRepository.findById(especialidadId);
     if (!especialidad) throw new NotFoundError('Especialidad no encontrada');
-    const yaLaTiene = medico.especialidades.some((e) => e._id?.toString() === especialidadId || e.toString() === especialidadId);
+    const yaLaTiene = medico.especialidades.some(
+      (e) => e._id?.toString() === especialidadId || e.toString() === especialidadId,
+    );
     if (yaLaTiene) throw new ConflictError('El médico ya tiene asignada esa especialidad');
     return await this.medicoService.agregarEspecialidadAMedico(medico._id, especialidadId);
   }
 
-  async obtenerTodosPorMedico(id_usuario){
-
+  async obtenerTodosPorMedico(id_usuario) {
     ValidadorId.validarIds(id_usuario);
 
     const medico = await this.medicoService.findByIdUsuario(id_usuario);
@@ -83,7 +84,6 @@ export class EspecialidadService {
 
     return medico.especialidades;
   }
-
 }
 
 export const especialidadService = new EspecialidadService();

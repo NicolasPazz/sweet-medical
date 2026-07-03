@@ -7,7 +7,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,7 +20,7 @@
   padding: 28px 24px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -59,7 +59,7 @@
 
 .modal-input:focus {
   border-color: #12979f;
-  box-shadow: 0 0 0 3px rgba(18,151,159,0.1);
+  box-shadow: 0 0 0 3px rgba(18, 151, 159, 0.1);
 }
 
 .modal-input.input-error {

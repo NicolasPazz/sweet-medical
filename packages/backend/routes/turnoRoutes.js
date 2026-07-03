@@ -70,11 +70,15 @@ turnoRouter
 
 turnoRouter
   .route('/me/propuesta-reprogramacion/:id_turno')
-  .patch(basicAuthUser, (req, res, next) => turnoController.proponerReprogramacionMe(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.proponerReprogramacionMe(req, res, next),
+  );
 
 turnoRouter
   .route('/me/responder-reprogramacion/:id_turno')
-  .patch(basicAuthUser, (req, res, next) => turnoController.responderReprogramacionMe(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.responderReprogramacionMe(req, res, next),
+  );
 
 /**
  * @swagger

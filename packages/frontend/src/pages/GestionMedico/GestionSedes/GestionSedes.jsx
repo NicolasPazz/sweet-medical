@@ -25,10 +25,7 @@ export default function GestionSedes() {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const [todasRes, misRes] = await Promise.all([
-          getSedes(),
-          getSedesMe({ email, password }),
-        ]);
+        const [todasRes, misRes] = await Promise.all([getSedes(), getSedesMe({ email, password })]);
         const todas = todasRes?.data ?? todasRes ?? [];
         const mias = misRes ?? [];
         setTodasLasSedes(todas);
@@ -55,9 +52,7 @@ export default function GestionSedes() {
       return;
     }
 
-    const sede = todasLasSedes.find(
-      (s) => (s._id ?? s.id)?.toString() === sedeSeleccionada,
-    );
+    const sede = todasLasSedes.find((s) => (s._id ?? s.id)?.toString() === sedeSeleccionada);
 
     setSubmitting(true);
     try {
@@ -118,15 +113,15 @@ export default function GestionSedes() {
                         </option>
                       ))}
                     </select>
-                    {error && <span className="gs-icono-error" title="Campo requerido">⚠</span>}
+                    {error && (
+                      <span className="gs-icono-error" title="Campo requerido">
+                        ⚠
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <button
-                  className="gs-sedes-btn"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                >
+                <button className="gs-sedes-btn" onClick={handleSubmit} disabled={submitting}>
                   {submitting ? 'Agregando...' : '+ Agregar sede'}
                 </button>
               </>

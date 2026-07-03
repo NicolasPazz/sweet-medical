@@ -45,7 +45,9 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
       <div className="reprogramar-card">
         {/* Paso 1: Selección de Fecha */}
         <div className="reprogramar-paso-section">
-          <label className="reprogramar-paso-title text-ellipsis">1. Seleccioná el nuevo día propuesto:</label>
+          <label className="reprogramar-paso-title text-ellipsis">
+            1. Seleccioná el nuevo día propuesto:
+          </label>
           <input
             type="date"
             className="reprogramar-input-fecha"
@@ -61,7 +63,9 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar }) {
         {/* Paso 2: Selección de Horario */}
         {fecha && (
           <div className="reprogramar-paso-section">
-            <label className="reprogramar-paso-title text-ellipsis">2. Seleccioná un horario disponible:</label>
+            <label className="reprogramar-paso-title text-ellipsis">
+              2. Seleccioná un horario disponible:
+            </label>
             <div className="grid-horarios">
               {slotsSimulados.map((slot) => (
                 <button

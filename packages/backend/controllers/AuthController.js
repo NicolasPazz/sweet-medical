@@ -17,7 +17,13 @@ export class AuthController {
         throw new BadRequestError('dni, email y password son obligatorios');
       }
       const resultado = await this.authService.register({
-        dni, email, password, nombreUsuario, numTel, direccion, fechaNacimiento,
+        dni,
+        email,
+        password,
+        nombreUsuario,
+        numTel,
+        direccion,
+        fechaNacimiento,
       });
       return res.status(200).json({ status: 'success', data: resultado });
     } catch (error) {
@@ -40,8 +46,6 @@ export class AuthController {
       return next(error);
     }
   };
-
-
 }
 
 export const authController = new AuthController();

@@ -23,16 +23,22 @@ export default function TurnosTable({ turnos }) {
             return (
               <tr key={t.id || idx}>
                 <td>
-                  <span className="nombre-profesional text-ellipsis">{t.medico?.nombre || 'No asignado'}</span>
+                  <span className="nombre-profesional text-ellipsis">
+                    {t.medico?.nombre || 'No asignado'}
+                  </span>
                 </td>
                 <td>
-                  <span className="nombre-servicio text-ellipsis">{t.especialidad || t.practica || 'N/A'}</span>
+                  <span className="nombre-servicio text-ellipsis">
+                    {t.especialidad || t.practica || 'N/A'}
+                  </span>
                 </td>
                 <td className="text-ellipsis">{displayDate}</td>
                 <td className="celda-hora text-ellipsis">{t.hora}</td>
                 <td className="text-ellipsis">{t.sede?.nombre || 'Sede Central'}</td>
                 <td>
-                  <span className="badge etiqueta-estado text-ellipsis">{t.estado || 'Disponible'}</span>
+                  <span className="badge etiqueta-estado text-ellipsis">
+                    {t.estado || 'Disponible'}
+                  </span>
                 </td>
                 <td>
                   <CoverageBadge cobertura={t.cobertura} />

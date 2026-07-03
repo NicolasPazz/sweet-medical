@@ -139,7 +139,9 @@ export default function NotificationBell() {
                   <span className="nb-item__icon">{inferirIcono(n.mensaje)}</span>
                   <div className="nb-item__body">
                     <p className="nb-item__message">{n.mensaje}</p>
-                    <p className="nb-item__time text-ellipsis">{tiempoRelativo(n.fechaHoraCreacion)}</p>
+                    <p className="nb-item__time text-ellipsis">
+                      {tiempoRelativo(n.fechaHoraCreacion)}
+                    </p>
                   </div>
                   <span className="nb-item__dot" aria-hidden="true" />
                 </div>

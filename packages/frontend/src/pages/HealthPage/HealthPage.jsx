@@ -38,7 +38,10 @@ export default function HealthPage() {
           }}
         >
           <Spin indicator={spinIcon} />
-          <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }} className="text-ellipsis">
+          <span
+            style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 13 }}
+            className="text-ellipsis"
+          >
             Consultando estado del backend...
           </span>
         </div>
