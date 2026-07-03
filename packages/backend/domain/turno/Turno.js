@@ -37,7 +37,7 @@ export class Turno {
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
 
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuario, this);
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuario, this, motivo);
     return notificacion;
   }
 

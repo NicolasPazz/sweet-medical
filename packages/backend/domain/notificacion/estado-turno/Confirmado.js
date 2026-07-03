@@ -13,7 +13,7 @@ export class Confirmado {
     return EstadoTurno.CONFIRMADO;
   }
 
-  generarNotificacion(remitente) {
+  generarNotificacion(remitente, _motivo) {
     const servicio = this.turno.obtenerNombreServicio();
 
     // LOG: Registro técnico en consola
@@ -28,7 +28,7 @@ export class Confirmado {
       t('CONFIRMACION_TURNO_DETALLADA', {
         servicio: servicio,
         fecha: this.turno.fechaHora?.toLocaleDateString() || '',
-        sede: this.turno.sede.nombre,
+        sede: this.turno.sede?.nombre || '(Sin asignar)',
         medico: this.turno.medico.nombre,
         interpolation: { escapeValue: false } // <- Evita que cambie las "/" por "&#x2F;"
       }),

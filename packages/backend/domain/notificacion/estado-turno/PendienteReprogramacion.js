@@ -13,11 +13,14 @@ export class PendienteReprogramacion {
     return EstadoTurno.PENDIENTE_REPROGRAMACION;
   }
 
-  notificar(remitente) {
+  notificar(remitente, _m) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
 
-    const actorId = actor?.id || actor?._id;
+    // obtenerUltimoActor() puede devolver un ObjectId crudo (recién casteado al pushear
+    // al historial) y ObjectId.id NO es el hex string sino un buffer interno.
+    // Por eso hay que priorizar ._id / el propio valor, y nunca .id.
+    const actorId = actor?._id || actor;
     const pacienteUsuarioId = this.turno.paciente?.usuario?.id || this.turno.paciente?.usuario?._id;
     const medicoUsuarioId = this.turno.medico?.usuario?.id || this.turno.medico?.usuario?._id;
 

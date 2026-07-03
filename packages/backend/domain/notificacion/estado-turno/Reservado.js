@@ -13,7 +13,7 @@ export class Reservado {
     return EstadoTurno.RESERVADO;
   }
 
-  generarNotificacion(remitente) {
+  generarNotificacion(remitente, _motivo) {
     const servicio = this.turno.obtenerNombreServicio();
 
     logger.debug(

@@ -13,14 +13,18 @@ export class Cancelado {
     return EstadoTurno.CANCELADO;
   }
 
-  generarNotificacion(remitente) {
+  generarNotificacion(remitente, motivo) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
 
-    const actorId = actor?.id || actor?._id;
+    // obtenerUltimoActor() puede devolver un ObjectId crudo (recién casteado al pushear
+    // al historial) y ObjectId.id NO es el hex string sino un buffer interno.
+    // Por eso hay que priorizar ._id / el propio valor, y nunca .id.
+    const actorId = actor?._id || actor;
     const pacienteUsuarioId = this.turno.paciente
       ? this.turno.paciente.usuario?.id || this.turno.paciente.usuario?._id || this.turno.paciente.usuario
       : null;
+
 
     if (
       !(pacienteUsuarioId == null) &&
@@ -35,6 +39,7 @@ export class Cancelado {
         t('CANCELACION_A_MEDICO', {
           nombre: this.turno.paciente.nombre,
           servicio,
+          motivo
         }),
       );
     } else {
@@ -44,8 +49,10 @@ export class Cancelado {
           this.turno.paciente.usuario,
           remitente,
           t('CANCELACION_A_PACIENTE', {
+            nombre: this.turno.medico.nombre,
             fecha: this.turno.fechaHora?.toLocaleDateString() || '',
             servicio,
+            motivo,
             interpolation: { escapeValue: false }
           }),
         );
