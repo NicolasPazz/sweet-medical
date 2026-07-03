@@ -137,8 +137,6 @@ export class EspecialidadController {
 
       const especialidades = await this.especialidadService.obtenerTodosPorMedico(id_usuario);
 
-      console.log('especialidades: ', especialidades);
-
       return res.status(200).json({ status: 'success', data: especialidades });
     } catch (error) {
       return next(error);

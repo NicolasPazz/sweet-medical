@@ -1,6 +1,7 @@
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
+import { logger } from '../utils/logger.js';
 
 export class PacienteService {
   constructor({ pacienteRepository: pacienteRepo = pacienteRepository } = {}) {
@@ -63,7 +64,7 @@ export class PacienteService {
         cobertura = resultado.tipoCobertura;
         costoEstimado = resultado.costoEstimado;
       } catch (error) {
-        console.log('Error calculando cobertura para turno', t.id || t._id, ':', error.message);
+        logger.error('Error calculando cobertura para turno', t.id || t._id, ':', error.message);
       }
 
       const historialTurnos = Array.isArray(t.historialEstados)

@@ -143,7 +143,7 @@ export class Agenda {
     const slotsEliminados = this.eliminarSlotsDesactualizados(medico, slotsDisponibles);
 
     slotsEliminados.forEach((slot) =>
-      console.log(`Slot eliminado: ${slot.fecha} ${slot.horaInicio}`),
+      logger.debug(`Slot eliminado: ${slot.fecha} ${slot.horaInicio}`),
     );
 
     const slotsNuevos = this.generarSlotsNuevos(
@@ -208,8 +208,8 @@ export class Agenda {
         // Si la hora actual ya superó el inicio de la disponibilidad,
         // este día no sirve: saltamos a la siguiente semana.
         if (ahoraEnMinutos >= horaInicioEnMinutos) {
-          console.log('AHORA: ' + calcularHoraDesdeMinutos(ahoraEnMinutos));
-          console.log('HORA INICIO DISPONIBILIDAD: ' + horaDesdeStr);
+          logger.debug('AHORA: ' + calcularHoraDesdeMinutos(ahoraEnMinutos));
+          logger.debug('HORA INICIO DISPONIBILIDAD: ' + horaDesdeStr);
 
           return Agenda.fechaMasCercanaConDiaSemana(
             diaSemanaDeseado,
@@ -339,7 +339,7 @@ export class Agenda {
 
   static configurarFechaCercana(diaSemanaDeseado, horaInicioStr) {
     if (!diaSemanaDeseado || !horaInicioStr) {
-      console.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
+      logger.error(`[ERROR] Datos incompletos: Dia=${diaSemanaDeseado}, Hora=${horaInicioStr}`);
       return new Date();
     }
 

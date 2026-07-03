@@ -10,7 +10,9 @@ export const logger = {
   },
 
   error: (message, ...args) => {
-    console.error(`[ERROR]`, message, ...args);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(`[ERROR]`, message, ...args);
+    }
   },
 
   debug: (message, ...args) => {

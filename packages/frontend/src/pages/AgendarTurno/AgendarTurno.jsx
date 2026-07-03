@@ -358,7 +358,7 @@ export default function AgendarTurno() {
       console.error('Error al realizar la reserva:', err);
       setError(
         err.response?.data?.message ||
-        'Ocurrió un error al reservar el turno. Verifique los parámetros.',
+          'Ocurrió un error al reservar el turno. Verifique los parámetros.',
       );
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { usuarioService } from './UsuarioService.js';
 import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { medicoService } from '../services/MedicoService.js';
+import { logger } from '../utils/logger.js';
 
 export class EspecialidadService {
   constructor({
@@ -80,7 +81,7 @@ export class EspecialidadService {
 
     const medico = await this.medicoService.findByIdUsuario(id_usuario);
 
-    console.log(medico);
+    logger.debug(medico);
 
     return medico.especialidades;
   }

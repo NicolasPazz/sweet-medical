@@ -125,8 +125,8 @@ export class TurnoService {
 
     const tiempoRecolectado = slotsAOcupar.reduce((acc, s) => acc + s.duracionMins, 0);
 
-    console.log('TIEMPO RECOLECTADO: ', tiempoRecolectado);
-    console.log('DURACION SERVICIO: ', servicio.duracionTurnoEnMins);
+    logger.debug('TIEMPO RECOLECTADO: ', tiempoRecolectado);
+    logger.debug('DURACION SERVICIO: ', servicio.duracionTurnoEnMins);
 
     if (tiempoRecolectado < servicio.duracionTurnoEnMins) {
       throw new BadRequestError(
@@ -554,14 +554,14 @@ export class TurnoService {
     const duracionSlot = parseInt(process.env.DURACION_SLOT_MINUTOS) || 30;
     const semanasMaxGeneracionSlots = parseInt(process.env.NUM_SEMANAS_GENERAR_SLOTS) || 4;
 
-    console.log(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
+    logger.debug(`[BATCH START] ${new Date().toISOString()} - Inicio de refresco de turnos.`);
 
     try {
       const medicos = await this.medicoService.findAll();
       metricas.total = medicos?.length || 0;
 
       if (metricas.total === 0) {
-        console.log('[BATCH] No hay médicos para procesar.');
+        logger.debug('[BATCH] No hay médicos para procesar.');
         return;
       }
 
@@ -575,7 +575,7 @@ export class TurnoService {
                 medico.id || medico._id,
               );
 
-              console.log('MEDICO: ' + medico.nombre);
+              logger.debug('MEDICO: ' + medico.nombre);
 
               const { slotsEliminados, slotsNuevos } = Agenda.refrescarSlots(
                 medico,
@@ -600,12 +600,12 @@ export class TurnoService {
           }),
         );
 
-        console.log(
+        logger.debug(
           `[BATCH PROGRESS] Lote completado. Progreso: ${metricas.procesados + metricas.fallidos}/${metricas.total}`,
         );
       }
 
-      console.log(`
+      logger.debug(`
         --- RESUMEN DEL PROCESO BATCH ---
         Finalizado: ${new Date().toISOString()}
         Total Médicos: ${metricas.total}

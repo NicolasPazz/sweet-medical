@@ -30,7 +30,7 @@ export class Turno {
   }
 
   actualizarEstado(quien, nuevoEstado, motivo) {
-    console.log('QUIEN LLAMA? ', quien);
+    logger.debug('QUIEN LLAMA? ', quien);
 
     const estadoEnum = nuevoEstado.getEstadoNombre();
 

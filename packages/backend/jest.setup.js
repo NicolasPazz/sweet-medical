@@ -1,11 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ silent: true });
 
 // Setup global Jest fixtures for backend tests.
 beforeAll(async () => {
-  const connectionString = `${process.env.MONGODB_URI}/${process.env.MONGODB_DB_NAME}_test?authSource=admin`;
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME;
+
+  const connectionString = `${uri}/${dbName}_test?authSource=admin`;
   await mongoose.connect(connectionString);
 });
 
@@ -15,5 +18,5 @@ afterEach(() => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
+  await mongoose.disconnect();
 });

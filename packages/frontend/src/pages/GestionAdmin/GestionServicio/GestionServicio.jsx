@@ -31,12 +31,12 @@ function ServicioModal({ servicio, onClose, onSubmit, guardando }) {
   const [form, setForm] = useState(
     esEdicion
       ? {
-        tipo: servicio.tipo,
-        nombre: servicio.nombre,
-        duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
-        costo: String(servicio.costo),
-        codigo: servicio.codigo ?? '',
-      }
+          tipo: servicio.tipo,
+          nombre: servicio.nombre,
+          duracionTurnoEnMins: String(servicio.duracionTurnoEnMins),
+          costo: String(servicio.costo),
+          codigo: servicio.codigo ?? '',
+        }
       : EMPTY_FORM(),
   );
   const [error, setError] = useState('');
