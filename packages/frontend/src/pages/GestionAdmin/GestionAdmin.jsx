@@ -14,7 +14,7 @@ const OPCIONES = [
     path: 'usuarios',
     icono: '🧑‍⚕️',
     titulo: 'Generación de Usuarios',
-    descripcion: 'Dá de alta nuevos usuarios Paciente o Médico (quedan inactivos hasta asignarles credenciales).',
+    descripcion: 'Dá de alta nuevos usuarios con uno o más roles (Paciente y/o Médico). Quedan inactivos hasta asignarles credenciales.',
   },
   {
     path: 'servicio',

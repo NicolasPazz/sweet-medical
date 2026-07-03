@@ -68,6 +68,70 @@ export class AdminService {
         return { usuario, medico };
     }
 
+    /**
+     * POST /admin/usuario
+     * Crear un usuario con uno o más roles (Paciente y/o Médico).
+     * Si se selecciona Paciente, crea el perfil Paciente.
+     * Si se selecciona Médico, crea el perfil Médico.
+     */
+    async crearUsuarioAdmin({ dni, nombre, matricula, roles = [] }) {
+        if (!dni || !nombre) {
+            throw new BadRequestError('dni y nombre son obligatorios');
+        }
+
+        if (!Array.isArray(roles) || roles.length === 0) {
+            throw new BadRequestError('Debés seleccionar al menos un rol (PACIENTE o MEDICO)');
+        }
+
+        const rolesValidos = ['PACIENTE', 'MEDICO'];
+        const rolesNormalizados = roles
+            .map((r) => r.toUpperCase())
+            .filter((r) => rolesValidos.includes(r));
+
+        if (rolesNormalizados.length === 0) {
+            throw new BadRequestError('Los roles deben ser PACIENTE o MEDICO');
+        }
+
+        if (rolesNormalizados.includes('MEDICO') && !matricula) {
+            throw new BadRequestError('matricula es obligatoria para crear un Médico');
+        }
+
+        // Verificar que no exista usuario con ese DNI para esos roles
+        for (const rol of rolesNormalizados) {
+            const existente = await this.usuarioService.findByDniAndRole(dni, rol);
+            if (existente) {
+                throw new ConflictError(`Ya existe un usuario ${rol} con DNI ${dni}`);
+            }
+        }
+
+        // Crear el usuario base con todos los roles seleccionados
+        const usuario = await this.usuarioService.save({
+            dni,
+            roles: rolesNormalizados,
+            activo: false,
+        });
+
+        const resultado = { usuario, paciente: null, medico: null };
+
+        // Crear el perfil Paciente si está en los roles
+        if (rolesNormalizados.includes('PACIENTE')) {
+            resultado.paciente = await this.pacienteService.crearPaciente({
+                usuario,
+                nombre,
+            });
+        }
+
+        // Crear el perfil Médico si está en los roles
+        if (rolesNormalizados.includes('MEDICO')) {
+            resultado.medico = await this.medicoService.crearMedico({
+                usuario,
+                matricula: matricula.trim(),
+                nombre,
+            });
+        }
+
+        return resultado;
+    }
 }
 
 export const adminService = new AdminService();

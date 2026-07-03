@@ -4,7 +4,7 @@ import './GenerarUsuario.css';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
-import { crearPacienteAdmin, crearMedicoAdmin } from '../../../services/adminService.js';
+import { crearUsuarioAdmin } from '../../../services/adminService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
@@ -16,7 +16,7 @@ export function GenerarUsuario() {
   const navigate = useNavigate();
   const { isAuthenticated, email, password } = useAuth();
 
-  const [rol, setRol] = useState('PACIENTE');
+  const [roles, setRoles] = useState({ paciente: true, medico: false });
   const [form, setForm] = useState(EMPTY_FORM);
   const [errores, setErrores] = useState({});
   const [enviando, setEnviando] = useState(false);
@@ -36,18 +36,21 @@ export function GenerarUsuario() {
     if (errores[campo]) setErrores((er) => ({ ...er, [campo]: false }));
   };
 
-  const cambiarRol = (nuevoRol) => {
-    setRol(nuevoRol);
-    setForm(EMPTY_FORM);
-    setErrores({});
+  const toggleRol = (rol) => {
+    setRoles((r) => ({
+      ...r,
+      [rol]: !r[rol],
+    }));
   };
 
   const validar = () => {
+    const tieneRol = roles.paciente || roles.medico;
     const nuevosErrores = {
       dni: !form.dni.trim() || !/^\d{7,9}$/.test(form.dni.trim()),
       nombre: !form.nombre.trim(),
+      roles: !tieneRol,
     };
-    if (rol === 'MEDICO') {
+    if (roles.medico) {
       nuevosErrores.matricula = !form.matricula.trim();
     }
     setErrores(nuevosErrores);
@@ -62,28 +65,36 @@ export function GenerarUsuario() {
 
     setEnviando(true);
     try {
-      if (rol === 'PACIENTE') {
-        await crearPacienteAdmin({
-          email,
-          password,
-          dni: form.dni.trim(),
-          nombre: form.nombre.trim(),
-        });
-      } else {
-        await crearMedicoAdmin({
-          email,
-          password,
-          dni: form.dni.trim(),
-          nombre: form.nombre.trim(),
-          matricula: form.matricula.trim(),
-        });
-      }
+      const rolesSeleccionados = [
+        roles.paciente && 'PACIENTE',
+        roles.medico && 'MEDICO',
+      ].filter(Boolean);
+
+      // Crear el usuario con todos los roles seleccionados en una sola operación,
+      // para que quede un único Usuario con ambos roles en vez de dos usuarios separados.
+      await crearUsuarioAdmin({
+        email,
+        password,
+        dni: form.dni.trim(),
+        nombre: form.nombre.trim(),
+        matricula: roles.medico ? form.matricula.trim() : undefined,
+        roles: rolesSeleccionados,
+      });
+
+      const rolesCreados = [
+        roles.paciente && 'Paciente',
+        roles.medico && 'Médico',
+      ]
+        .filter(Boolean)
+        .join(' y ');
+
       mostrarToast(
-        `Usuario ${rol === 'PACIENTE' ? 'Paciente' : 'Médico'} creado correctamente (inactivo).`,
+        `Usuario ${rolesCreados} creado correctamente (inactivo).`,
         'success',
       );
       setForm(EMPTY_FORM);
       setErrores({});
+      setRoles({ paciente: true, medico: false });
     } catch (error) {
       const mensaje =
         error.response?.data?.message ?? 'No se pudo crear el usuario. Verificá los datos.';
@@ -103,27 +114,34 @@ export function GenerarUsuario() {
         <div className="gu-header">
           <h1 className="gu-title text-ellipsis">Generación de Usuarios</h1>
           <p className="gu-subtitle text-ellipsis">
-            Creá un nuevo usuario Paciente o Médico. El usuario queda inactivo hasta que se le
-            asignen credenciales.
+            Generá un nuevo usuario
           </p>
         </div>
 
         <div className="gu-card">
-          <div className="gu-rol-toggle">
-            <button
-              type="button"
-              className={`gu-rol-btn${rol === 'PACIENTE' ? ' active' : ''}`}
-              onClick={() => cambiarRol('PACIENTE')}
-            >
-              🧍 Paciente
-            </button>
-            <button
-              type="button"
-              className={`gu-rol-btn${rol === 'MEDICO' ? ' active' : ''}`}
-              onClick={() => cambiarRol('MEDICO')}
-            >
-              🩺 Médico
-            </button>
+          <div className="gu-roles-section">
+            <label className="gu-label">Roles (seleccioná al menos uno) *</label>
+            <div className="gu-checkboxes-group">
+              <label className="gu-checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  checked={roles.paciente}
+                  onChange={() => toggleRol('paciente')}
+                />
+                <span className="gu-checkbox-label">Paciente</span>
+              </label>
+              <label className="gu-checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  checked={roles.medico}
+                  onChange={() => toggleRol('medico')}
+                />
+                <span className="gu-checkbox-label">Médico</span>
+              </label>
+            </div>
+            {errores.roles && (
+              <span className="gu-error-text">Debés seleccionar al menos un rol.</span>
+            )}
           </div>
 
           <label className="gu-label">DNI</label>
@@ -145,7 +163,7 @@ export function GenerarUsuario() {
           />
           {errores.nombre && <span className="gu-error-text">El nombre es obligatorio.</span>}
 
-          {rol === 'MEDICO' && (
+          {roles.medico && (
             <>
               <label className="gu-label">Matrícula</label>
               <input
@@ -171,7 +189,7 @@ export function GenerarUsuario() {
                 <Spin indicator={spinIcon} /> Creando...
               </>
             ) : (
-              `Crear usuario ${rol === 'PACIENTE' ? 'Paciente' : 'Médico'}`
+              'Crear usuario'
             )}
           </button>
         </div>

@@ -34,6 +34,20 @@ export class AdminController {
       return next(error);
     }
   };
+
+  /**
+   * POST /admins/usuario
+   * El admin da de alta un usuario con uno o más roles (Paciente y/o Médico).
+   */
+  crearUsuarioAdmin = async (req, res, next) => {
+    try {
+      const { dni, nombre, matricula, roles } = req.body;
+      const resultado = await this.adminService.crearUsuarioAdmin({ dni, nombre, matricula, roles });
+      return res.status(201).json({ status: 'created', data: resultado });
+    } catch (error) {
+      return next(error);
+    }
+  };
 }
 
 export const adminController = new AdminController();
