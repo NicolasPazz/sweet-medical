@@ -25,6 +25,7 @@ const mockUsuarioRepository = {
 
 const mockPacienteRepository = {
   findByIdUsuario: jest.fn(),
+  findByDniPaciente: jest.fn(),
 };
 
 const mockNotificacionRepository = {
@@ -50,34 +51,57 @@ const mockServicioRepository = {
   findById: jest.fn(),
 };
 
-describe('TurnoService', () => {
-  let service;
+const mockUsuarioService = {
+  findById: jest.fn((id) => mockUsuarioRepository.findById(id)),
+};
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+const mockPacienteService = {
+  findByIdUsuario: jest.fn((id) => mockPacienteRepository.findByIdUsuario(id)),
+  findByDniPaciente: jest.fn((dni) => mockPacienteRepository.findByDniPaciente(dni)),
+};
 
-    // Inyección limpia de dependencias mockeadas
-    service = new TurnoService({
-      turnoRepository: mockTurnoRepository,
-      usuarioRepository: mockUsuarioRepository,
-      pacienteRepository: mockPacienteRepository,
-      notificacionRepository: mockNotificacionRepository,
-      medicoRepository: mockMedicoRepository,
-      slotRepository: mockSlotRepository,
-      servicioRepository: mockServicioRepository,
-    });
+const mockNotificacionService = {
+  save: jest.fn((notificacion) => mockNotificacionRepository.save(notificacion)),
+};
 
-    // Env para la simulación del batch por defecto
-    process.env.DURACION_SLOT_MINUTOS = '30';
-    process.env.NUM_SEMANAS_GENERAR_SLOTS = '4';
+const mockMedicoService = {
+  findById: jest.fn((id) => mockMedicoRepository.findById(id)),
+  findByIdUsuario: jest.fn((id) => mockMedicoRepository.findByIdUsuario(id)),
+  findAll: jest.fn((...args) => mockMedicoRepository.findAll(...args)),
+  save: jest.fn((entity) => mockMedicoRepository.save(entity)),
+};
+
+const mockServicioService = {
+  findById: jest.fn((id) => mockServicioRepository.findById(id)),
+};
+
+let service;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+
+  // Inyección limpia de dependencias mockeadas
+  service = new TurnoService({
+    turnoRepository: mockTurnoRepository,
+    slotRepository: mockSlotRepository,
+    usuarioService: mockUsuarioService,
+    pacienteService: mockPacienteService,
+    notificacionService: mockNotificacionService,
+    medicoService: mockMedicoService,
+    servicioService: mockServicioService,
   });
+  service.pacienteService = mockPacienteService;
+
+  // Env para la simulación del batch por defecto
+  process.env.DURACION_SLOT_MINUTOS = '30';
+  process.env.NUM_SEMANAS_GENERAR_SLOTS = '4';
 });
 
 // ==========================================
 // TESTS: RESERVA DE TURNOS
 // ==========================================
 describe('reservarTurno', () => {
-  xit('falla al reservar un turno cuando el paciente no existe', async () => {
+  it('falla al reservar un turno cuando el paciente no existe', async () => {
     mockUsuarioRepository.findById.mockResolvedValue({ id: 'u-1' });
     mockPacienteRepository.findByIdUsuario.mockResolvedValue(null);
     const dto = { id_usuario: 'u-1', id_servicio: 's-1', slotsIds: ['slot-1'] };
@@ -90,11 +114,11 @@ describe('reservarTurno', () => {
 // TESTS: CANCELACIÓN DE TURNOS
 // ==========================================
 describe('cancelarTurno', () => {
-  xit('falla al cancelar un turno con menos de una hora de antelación', async () => {
+  it('falla al cancelar un turno con menos de una hora de antelación', async () => {
     const usuario = { id: 'u-paciente', roles: [Rol.PACIENTE] };
     const turno = {
       estado: new Reservado({}),
-      fechaHora: new Date(Date.now() + 30 * 60 * 1000), // 30 minutos al futuro
+      fechaHora: new Date(Date.now() + 30 * 60 * 1000),
     };
     mockUsuarioRepository.findById.mockResolvedValue(usuario);
     mockTurnoRepository.findById.mockResolvedValue(turno);
@@ -109,7 +133,7 @@ describe('cancelarTurno', () => {
 // TESTS: HISTORIAL Y LISTADOS (MAPEO DE DTOS)
 // ==========================================
 describe('Mapeo de Historial y Listados', () => {
-  xit('obtiene todos los turnos mapeados correctamente', async () => {
+  it('obtiene todos los turnos mapeados correctamente', async () => {
     const turnoMock = {
       id: 't-3',
       medico: { id: 'm-2', nombre: 'Dr. Brown' },
@@ -141,13 +165,13 @@ describe('Mapeo de Historial y Listados', () => {
 // TESTS: CONTROL DE ACCESO AL CONFIRMAR
 // ==========================================
 describe('confirmarTurno - Reglas de Negocio Globales', () => {
-  xit('lanza ForbiddenError si un usuario no médico intenta confirmar un turno', async () => {
+  it('lanza ForbiddenError si un usuario no médico intenta confirmar un turno', async () => {
     mockUsuarioRepository.findById.mockResolvedValue({ id: 'u-1', roles: [Rol.PACIENTE] });
 
     await expect(service.confirmarTurno('u-1', 't-1', 'sede-1')).rejects.toThrow(ForbiddenError);
   });
 
-  xit('lanza ConflictError si se intenta confirmar un turno no reservado', async () => {
+  it('lanza ConflictError si se intenta confirmar un turno no reservado', async () => {
     const usuarioMedico = { id: 'u-medico', roles: [Rol.MEDICO] };
     const turnoNoReservado = {
       id: 't-1',
@@ -167,7 +191,7 @@ describe('confirmarTurno - Reglas de Negocio Globales', () => {
 // TESTS: RESERVA, CANCELACIÓN, HISTORIAL Y BATCH
 // ==========================================
 
-xit('reserva un turno disponible con éxito', async () => {
+it('reserva un turno disponible con éito', async () => {
   const usuario = { id: '507f1f77bcf86cd799439011', roles: [Rol.PACIENTE] };
   const paciente = {
     id: '507f1f77bcf86cd799439012',
@@ -222,7 +246,7 @@ xit('reserva un turno disponible con éxito', async () => {
   expect(mockSlotRepository.findById).toHaveBeenCalledWith('507f1f77bcf86cd799439015');
 });
 
-xit('falla al reservar si el slot no está disponible', async () => {
+it('falla al reservar si el slot no está disponible', async () => {
   const usuario = { id: '507f1f77bcf86cd799439011', roles: [Rol.PACIENTE] };
   const paciente = {
     id: '507f1f77bcf86cd799439012',
@@ -259,13 +283,13 @@ xit('falla al reservar si el slot no está disponible', async () => {
   await expect(service.reservarTurno(dto)).rejects.toThrow(ConflictError);
 });
 
-xit('falla al reservar un turno cuando el usuario no existe', async () => {
+it('falla al reservar un turno cuando el usuario no existe', async () => {
   mockUsuarioRepository.findById.mockResolvedValue(null);
   const dto = { id_usuario: '507f1f77bcf86cd799439011', id_servicio: 's-1', slotsIds: ['slot-1'] };
   await expect(service.reservarTurno(dto)).rejects.toThrow(NotFoundError);
 });
 
-xit('cancela un turno reservado con más de una hora de antelación', async () => {
+it('cancela un turno reservado con más de una hora de antelación', async () => {
   jest.useFakeTimers();
   jest.setSystemTime(new Date('2026-05-17T10:00:00Z'));
 
@@ -309,13 +333,13 @@ xit('cancela un turno reservado con más de una hora de antelación', async () =
   jest.useRealTimers();
 });
 
-xit('refresca slots sin médicos sin fallar', async () => {
+it('refresca slots sin médicos sin fallar', async () => {
   mockMedicoRepository.findAll.mockResolvedValue([]);
   await expect(service.refrescarSlots()).resolves.toBeUndefined();
   expect(mockMedicoRepository.findAll).toHaveBeenCalled();
 });
 
-xit('obtiene historial de turno mapeado para un paciente y un médico existentes', async () => {
+it('obtiene historial de turno mapeado para un paciente y un médico existentes', async () => {
   const medico = { id: 'm-1', _id: 'm-1', nombre: 'Dr. House', usuario: { _id: 'um-1' } };
   const paciente = { id: 'p-1', usuario: { _id: 'u-paciente' } };
   const turno = {
@@ -333,13 +357,13 @@ xit('obtiene historial de turno mapeado para un paciente y un médico existentes
   };
 
   mockMedicoRepository.findByIdUsuario.mockResolvedValue(medico);
-  mockPacienteRepository.findByIdUsuario.mockResolvedValue(paciente);
+  mockPacienteRepository.findByDniPaciente.mockResolvedValue(paciente);
   mockTurnoRepository.findAllByPatientId.mockResolvedValue([turno]);
 
   const resultado = await service.obtenerHistorial('p-1', 'um-1');
 
   expect(mockMedicoRepository.findByIdUsuario).toHaveBeenCalledWith('um-1');
-  expect(mockPacienteRepository.findByIdUsuario).toHaveBeenCalledWith('p-1');
+  expect(mockPacienteRepository.findByDniPaciente).toHaveBeenCalledWith('p-1');
   expect(mockTurnoRepository.findAllByPatientId).toHaveBeenCalledWith('p-1');
   expect(resultado).toEqual([
     {
@@ -363,7 +387,7 @@ xit('obtiene historial de turno mapeado para un paciente y un médico existentes
   ]);
 });
 
-xit('confirma un turno reservado con éxito', async () => {
+it('confirma un turno reservado con éito', async () => {
   const usuario = { id: 'u-medico', roles: [Rol.MEDICO] };
   const medico = {
     _id: 'm-1',
@@ -400,7 +424,7 @@ xit('confirma un turno reservado con éxito', async () => {
   expect(mockTurnoRepository.save).toHaveBeenCalledWith(turno);
 });
 
-xit('finaliza un turno confirmado y actualiza el médico', async () => {
+it('finaliza un turno confirmado y actualiza el médico', async () => {
   const usuario = { id: 'u-medico', roles: [Rol.MEDICO] };
   const medico = {
     _id: 'm-1',
@@ -435,7 +459,7 @@ xit('finaliza un turno confirmado y actualiza el médico', async () => {
 });
 
 describe('Lógica de Reprogramación', () => {
-  xit('falla si el mismo usuario que propuso el cambio intenta responder la propuesta', async () => {
+  it('falla si el mismo usuario que propuso el cambio intenta responder la propuesta', async () => {
     const usuario = { id: 'u-paciente' };
     const turno = {
       id: 't-1',
@@ -517,7 +541,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     jest.useRealTimers();
   });
 
-  xit('falla con BadRequestError si es el primer turno del día y no se envía sede en el body', async () => {
+  it('falla con BadRequestError si es el primer turno del día y no se envía sede en el body', async () => {
     mockSlotRepository.findAllSlotsByMedicId.mockResolvedValue([]);
 
     await expect(service.confirmarTurno('u-medico', 't-confirmar', undefined)).rejects.toThrow(
@@ -527,7 +551,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockTurnoRepository.save).not.toHaveBeenCalled();
   });
 
-  xit('propone una reprogramación con éxito si hay bache disponible y coincide la especialidad', async () => {
+  it('propone una reprogramación con éito si hay bache disponible y coincide la especialidad', async () => {
     const slotDestinoBache = {
       _id: 's-bache',
       id: 's-bache',
@@ -563,7 +587,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(resultado).toBe(turnoOriginal);
   });
 
-  xit('falla al proponer una reprogramación con menos de 1 hora de antelación', async () => {
+  it('falla al proponer una reprogramación con menos de 1 hora de antelación', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-05-24T12:30:00.000Z')); // Menos de una hora de 13:00
 
@@ -577,7 +601,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockTurnoRepository.save).not.toHaveBeenCalled();
   });
 
-  xit('propaga la sede a los slots disponibles si es el primer turno del día y viene la sede en el body', async () => {
+  it('propaga la sede a los slots disponibles si es el primer turno del día y viene la sede en el body', async () => {
     const slotDisponible = {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
@@ -596,7 +620,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockSlotRepository.save).toHaveBeenCalledWith(slotDisponible);
   });
 
-  xit('falla con ConflictError si ya hay una sede seteada en el día e intenta mandar una distinta', async () => {
+  it('falla con ConflictError si ya hay una sede seteada en el día e intenta mandar una distinta', async () => {
     const slotConSedePrevia = {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
@@ -612,7 +636,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockTurnoRepository.save).not.toHaveBeenCalled();
   });
 
-  xit('hereda automáticamente la sede si ya se seteó antes y el body viene vacío', async () => {
+  it('hereda automáticamente la sede si ya se seteó antes y el body viene vacío', async () => {
     const slotConSedePrevia = {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
@@ -628,7 +652,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockTurnoRepository.save).toHaveBeenCalled();
   });
 
-  xit('permite confirmar si ya hay una sede seteada y vuelve a mandar exactamente el mismo ID', async () => {
+  it('permite confirmar si ya hay una sede seteada y vuelve a mandar exactamente el mismo ID', async () => {
     const slotConSedePrevia = {
       id: 's-1',
       fecha: new Date('2026-05-24T00:00:00.000Z'),
@@ -644,7 +668,7 @@ describe('Restricción de Sede al Confirmar Turno', () => {
     expect(mockTurnoRepository.save).toHaveBeenCalled();
   });
 
-  xit('acepta la propuesta de reprogramación, actualiza la fecha y limpia la propuesta', async () => {
+  it('acepta la propuesta de reprogramación, actualiza la fecha y limpia la propuesta', async () => {
     turnoOriginal.propuestaCambio = {
       nuevaFechaHora: fechaFuturaValida,
       proponenteId: 'u-paciente',

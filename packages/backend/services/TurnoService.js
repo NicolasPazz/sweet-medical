@@ -678,9 +678,9 @@ export class TurnoService {
       // Contrato unificado: misma estructura exacta que el slot
       sede: tieneSedeValida
         ? {
-          id_sede: t.sede._id ? t.sede._id.toString() : null,
-          nombre: t.sede.nombre || 'N/A',
-        }
+            id_sede: t.sede._id ? t.sede._id.toString() : null,
+            nombre: t.sede.nombre || 'N/A',
+          }
         : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
@@ -713,9 +713,9 @@ export class TurnoService {
       estado: s.estado,
       sede: tieneSedeValida
         ? {
-          id_sede: s.sede._id ? s.sede._id.toString() : null,
-          nombre: s.sede.nombre || 'N/A',
-        }
+            id_sede: s.sede._id ? s.sede._id.toString() : null,
+            nombre: s.sede.nombre || 'N/A',
+          }
         : null,
 
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
