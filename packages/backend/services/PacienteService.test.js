@@ -39,7 +39,7 @@ describe('PacienteService', () => {
         medico: { nombre: 'Dr. House' },
         servicio: { codigo: 'RX-001', nombre: 'Resonancia', costo: 2000 },
         sede: { Generic: 'Sede Principal', nombre: 'Sede Principal' },
-        estado: { getCondition: () => { }, getEstadoNombre: () => 'CONFIRMADO' },
+        estado: { getCondition: () => {}, getEstadoNombre: () => 'CONFIRMADO' },
         costo: 2000,
       },
     ]);

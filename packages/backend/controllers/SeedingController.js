@@ -304,7 +304,7 @@ export class SeedingController {
 
   correrProcesoBatch = async (req, res, next) => {
     try {
-      console.log('Proceso GARCH iniciado manualmente');
+      logger.info('Proceso batch iniciado manualmente');
 
       await this.turnoService.refrescarSlots();
 

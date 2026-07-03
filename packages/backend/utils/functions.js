@@ -1,6 +1,7 @@
 // utils/dateUtils.js
 import { Disponible } from '../domain/notificacion/estado-turno/Disponible.js';
 import { EstadoTurno } from '../domain/turno/EstadoTurno.js';
+import { logger } from './logger.js';
 
 export {
   crearFechaDesdeAtributos,
@@ -172,8 +173,8 @@ const obtenerDisponibilidadesLibres = (disponibilidades, turnosNoDisponibles) =>
       fragmentosLibres = nuevosFragmentos;
     });
 
-    console.log('FRAGMENTOS LIBRES: ');
-    console.log(fragmentosLibres);
+    logger.debug('FRAGMENTOS LIBRES: ');
+    logger.debug(fragmentosLibres);
 
     fragmentosLibres.forEach((f) => {
       todosLosHuecos.push({
