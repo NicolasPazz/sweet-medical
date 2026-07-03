@@ -11,32 +11,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-verify-app:
+  verify-app:
     name: ${{ matrix.package }} (${{ matrix.task }})
     runs-on: ubuntu-latest
-    
+
     services:
       mongodb:
         image: mongo:6.0
         ports:
           - 27017:27017
-          
+
     strategy:
       fail-fast: false
       matrix:
         package: [backend, frontend]
         task: [lint, test]
-        
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Instalar Dependencias
         run: npm ci
-        
+
       - name: Ejecutar Tarea
         env:
           MONGODB_URI: 'mongodb://127.0.0.1:27017'
