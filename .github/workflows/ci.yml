@@ -11,67 +11,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
+verify-app:
+    name: ${{ matrix.package }} (${{ matrix.task }})
     runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+          
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [backend, frontend]
+        task: [lint, test]
+        
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Clean Install
+          
+      - name: Instalar Dependencias
         run: npm ci
-
-  backend-lint:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint:backend
-
-  test-backend:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run test:backend
-
-  frontend-lint:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint:frontend
-
-  test-frontend:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run test:frontend
+        
+      - name: Ejecutar Tarea
+        env:
+          MONGODB_URI: 'mongodb://127.0.0.1:27017'
+          MONGODB_DB_NAME: 'sweetmedical_ci_test'
+        run: npm run ${{ matrix.task }}:${{ matrix.package }}
 
   e2e-tests:
-    needs: [backend-lint, frontend-lint]
+    needs: verify-app
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -87,7 +60,23 @@ jobs:
       - name: Instalar Dependencias del Monorepo
         run: npm ci
 
-      - name: Instalar Navegadores de Playwright
+      - name: Obtener versión de Playwright
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Caché de Navegadores Playwright
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-ubuntu-${{ steps.playwright-version.outputs.version }}
+
+      - name: Instalar Dependencias del Sistema de Chromium (Si hay caché)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Instalar Chromium Completo (Si NO hay caché)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Ejecutar Pruebas E2E en Producción
