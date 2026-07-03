@@ -13,8 +13,8 @@ import './GestionServicio.css';
 import { getMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { SkeletonServicioList } from '../../../components/UI/Skeleton.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 
 const conTipo = (lista, tipo) => lista.map((s) => ({ ...s, tipo }));
 

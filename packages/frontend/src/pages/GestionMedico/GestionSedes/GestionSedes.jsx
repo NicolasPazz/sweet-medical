@@ -3,7 +3,7 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import { agregarSede, getSedesMe } from '../../../services/userService.js';
 import { getSedes } from '../../../services/turnoService.js';
 import Toast from '../../../components/Toast/Toast.jsx';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 import './GestionSedes.css';
 
 export default function GestionSedes() {

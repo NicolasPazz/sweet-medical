@@ -14,9 +14,9 @@ import {
 } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
-import NotificationBell from '../notification/NotificationBell.jsx';
+import NotificationBell from '../Notification/NotificationBell.jsx';
 import { useAuth } from '../AuthProvider.jsx';
-import CartDropdown from '../cart/CartDropdown.jsx';
+import CartDropdown from '../Cart/CartDropdown.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 
 const Header = () => {

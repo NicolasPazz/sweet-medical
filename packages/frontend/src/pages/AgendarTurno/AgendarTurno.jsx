@@ -13,7 +13,7 @@ import {
 import { useCart } from '../../context/CartContext.jsx';
 import MiniCalendar from './components/MiniCalendar';
 import PreselSidebar from './components/PreselSidebar';
-import Spinner from '../../components/ui/Spinner.jsx';
+import Spinner from '../../components/UI/Spinner.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
@@ -358,7 +358,7 @@ export default function AgendarTurno() {
       console.error('Error al realizar la reserva:', err);
       setError(
         err.response?.data?.message ||
-          'Ocurrió un error al reservar el turno. Verifique los parámetros.',
+        'Ocurrió un error al reservar el turno. Verifique los parámetros.',
       );
     } finally {
       setLoading(false);
