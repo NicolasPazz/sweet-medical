@@ -48,8 +48,6 @@ const Header = () => {
           setMultiplesFiltros(esMultiRol);
 
           if (esMultiRol) {
-            // Con múltiples roles no colapsamos a un único "rol": el nav se
-            // filtra más abajo según el switch (modo), no según el rol.
             setUser({ roles });
           } else {
             setUser({ rol: getRolUsuario(roles) });
@@ -67,30 +65,23 @@ const Header = () => {
     fetchUser();
   }, [email, password]);
 
-  // Rol efectivo para decidir qué mostrar en el nav:
-  // - Si el usuario tiene un solo rol relevante, se usa ese rol directamente.
-  // - Si tiene múltiples (Paciente Y Médico a la vez), se filtra por la
-  //   opción colocada en el switch (modo), no por el rol del usuario.
   const rolVisible = multiplesFiltros
     ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
     : user?.rol;
 
-
   return (
     <>
-      {/* Overlay para cerrar el menú al tocar afuera en mobile */}
       <div
         className={`nav-overlay ${menuOpen ? 'visible' : ''}`}
         onClick={() => setMenuOpen(false)}
       />
 
       <header className="header">
-
         <div className="up-section">
           <div className="logo-container">
-            <a href="/">
-              <img src="/logoSweetMedical.png" alt="Logo" className="logo-img" />
-            </a>
+            <Link to="/">
+              <img src="/logoSweetMedical.png" alt="Logo Sweet Medical" className="logo-img" />
+            </Link>
           </div>
 
           {multiplesFiltros && (
@@ -107,7 +98,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* Navegación (sidebar en desktop / drawer en mobile) */}
         <nav className={`header-nav ${menuOpen ? 'open' : ''}`}>
           <ul>
             <li>
@@ -155,7 +145,6 @@ const Header = () => {
                 </Link>
               </li>
             )}
-
             {user?.rol === 'Admin' && (
               <li>
                 <Link
@@ -164,11 +153,9 @@ const Header = () => {
                 >
                   <FaUserShield className='header-icon' />
                   <span className="header-label text-ellipsis">Panel administrador</span>
-
                 </Link>
               </li>
             )}
-
             <li>
               <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
                 <FaEnvelope className="header-icon" />
@@ -191,7 +178,6 @@ const Header = () => {
                 {summary?.count > 0 && <span className="cart-count text-ellipsis">{summary.count}</span>}
               </button>
             )}
-
             <NotificationBell />
           </div>
 
@@ -199,27 +185,25 @@ const Header = () => {
             {isAuthenticated ? (
               <Link id="iniciar-sesion" to="/perfil">
                 <FaUser className="auth-icon" />
-                <span className="text-ellipsis">Mi Perfil</span>
+                <span className="auth-text text-ellipsis">Mi Perfil</span>
               </Link>
             ) : (
               <Link id="iniciar-sesion" to="/login">
                 <FaUser className="auth-icon" />
-                <span className="text-ellipsis">Iniciar sesión</span>
+                <span className="auth-text text-ellipsis">Iniciar sesión</span>
               </Link>
             )}
           </div>
+
+          <button
+            className="hamburger-btn"
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            {menuOpen ? <FaTimes /> : <FaBars />}
+          </button>
         </div>
 
-        {/* Botón hamburger — solo visible en mobile */}
-        <button
-          className="hamburger-btn"
-          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-          onClick={() => setMenuOpen((prev) => !prev)}
-        >
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-
-        {/* Carrito desplegable */}
         {rolVisible === 'Paciente' && (
           <CartDropdown
             open={cartOpen}
