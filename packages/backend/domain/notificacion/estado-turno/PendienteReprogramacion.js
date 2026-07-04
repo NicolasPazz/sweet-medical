@@ -25,9 +25,7 @@ export class PendienteReprogramacion {
     const medicoUsuarioId = this.turno.medico?.usuario?.id || this.turno.medico?.usuario?._id;
 
     const prop = this.turno.propuestaCambio;
-    const fechaFormateada = prop
-      ? `${new Date(prop.nuevaFechaHora).toLocaleDateString('es-AR')} a las ${new Date(prop.nuevaFechaHora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`
-      : 'una nueva fecha';
+    const fechaFormateada = prop ? DateUtil.formatearFechaAR(prop.nuevaFechaHora, { conHora: true }) : 'una nueva fecha';
 
     const motivo = prop?.motivo || 'No especificado';
 

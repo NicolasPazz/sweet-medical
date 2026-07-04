@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './DetalleTurno.css';
 import CancelarTurnoModal from '../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
+import { formatHoraLocal } from '../../lib/dateTime.js';
 
 export default function DetalleTurno({
   turno,
@@ -61,7 +62,7 @@ export default function DetalleTurno({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Horario:</span>
-          <span className="detalle-value text-ellipsis">{turno.hora} hs</span>
+          <span className="detalle-value text-ellipsis">{formatHoraLocal(turno.fechaHora)} hs</span>
         </div>
 
         <div className="detalle-info-row">

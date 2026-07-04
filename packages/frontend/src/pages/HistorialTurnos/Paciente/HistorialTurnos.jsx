@@ -12,14 +12,7 @@ import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
-
-function formatFecha(fechaHora) {
-  const d = new Date(fechaHora);
-  const dia = String(d.getUTCDate()).padStart(2, '0');
-  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const anio = d.getUTCFullYear();
-  return `${dia}/${mes}/${anio}`;
-}
+import { formatFechaLocal } from '../../../lib/dateTime.js';
 
 export default function HistorialTurnos() {
   const [filtro, setFiltro] = useState('TODOS');
@@ -184,7 +177,7 @@ export default function HistorialTurnos() {
           cfgEstado={
             ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
           }
-          formatFecha={formatFecha}
+          formatFecha={formatFechaLocal}
           onVolver={() => setVista('LISTADO')}
           onIrAReprogramar={() => setVista('REPROGRAMAR')}
           onCancelar={handleCancelar}

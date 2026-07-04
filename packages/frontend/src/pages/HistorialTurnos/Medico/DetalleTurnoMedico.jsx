@@ -3,6 +3,7 @@ import './HistorialTurnosMedico.css';
 import CancelarTurnoModal from '../../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
 import { getSedesMe } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
+import { formatHoraLocal } from '../../../lib/dateTime.js';
 
 function ModalReprogramacion({ onConfirmar, onCerrar }) {
   const [fecha, setFecha] = useState('');
@@ -238,7 +239,7 @@ export default function DetalleTurnoMedico({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Horario:</span>
-          <span className="detalle-value text-ellipsis">{turno.hora} hs</span>
+          <span className="detalle-value text-ellipsis">{formatHoraLocal(turno.fechaHora)} hs</span>
         </div>
 
         <div className="detalle-info-row">

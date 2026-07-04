@@ -50,7 +50,7 @@ export class MedicoController {
 
   actualizarDisponibilidad = async (req, res, next) => {
     try {
-      const { disponibilidades } = req.body;
+      const { disponibilidades, offsetMinutos } = req.body;
 
       const usuario = req.usuarioAutenticado;
 
@@ -77,7 +77,12 @@ export class MedicoController {
         throw new BadRequestError('Días de semana no válidos recibidos');
       }
 
-      await this.medicoService.actualizarDisponibilidad(usuario, disponibilidades);
+      // offsetMinutos: resultado de `new Date().getTimezoneOffset()` en el
+      // navegador que envió la request. Si no viene (clientes viejos / Postman),
+      // se asume 0 (es decir, se toman las horas tal cual como si ya fueran UTC).
+      const offsetNumerico = Number.isFinite(Number(offsetMinutos)) ? Number(offsetMinutos) : 0;
+
+      await this.medicoService.actualizarDisponibilidad(usuario, disponibilidades, offsetNumerico);
 
       return res
         .status(200)
@@ -120,21 +125,22 @@ export class MedicoController {
       const medico = await this.medicoService.findByIdUsuario(usuario.id);
       if (!medico) throw new NotFoundError('Médico no encontrado');
 
+      
       const turnos = (medico.turnosActualesYFuturos ?? []).map((turno) => ({
         _id: turno.id || turno._id,
         fechaHora: turno.fechaHora,
         hora: turno.hora,
         estado: typeof turno.estado === 'object' ? turno.estado.getEstadoNombre?.() ?? turno.estado.nombre ?? String(turno.estado) : turno.estado,
         costo: turno.costo,
-        paciente: turno.paciente ? { nombre: turno.paciente.nombre ?? turno.paciente } : null,
+        paciente: turno.paciente ? { nombre: turno.paciente.nombre ?? 'N/A' } : null,
         servicio: turno.practica
           ? { nombre: turno.practica.nombre }
           : turno.especialidad
           ? { nombre: turno.especialidad.nombre }
           : turno.servicio
-          ? { nombre: turno.servicio.nombre ?? turno.servicio }
+          ? { nombre: turno.servicio.nombre ?? 'N/A' }
           : null,
-        sede: turno.sede ? { nombre: turno.sede.nombre ?? turno.sede } : null,
+        sede: turno.sede ? { nombre: turno.sede.nombre ?? 'N/A' } : null,
         propuestaCambio: turno.propuestaCambio ?? null,
       }));
 

@@ -65,7 +65,12 @@ const turnoSchema = new mongoose.Schema(
 );
 
 turnoSchema.pre(/^find/, function (next) {
-  if (this.options?._populatingFromMedico) return next();
+  // Nota: antes acá se cortaba el populate de 'medico'/'paciente' cuando el turno
+  // se traía desde el virtual `turnosActualesYFuturos` de Medico (flag _populatingFromMedico),
+  // lo que dejaba esos campos como ObjectId sin hidratar. Se verificó que ni MedicoSchema,
+  // ni PacienteSchema, ni sus dependencias (Usuario, Especialidad, Practica, Sede, ObraSocial,
+  // Plan) vuelven a poblar 'turnosActualesYFuturos', por lo que no existe riesgo de recursión
+  // infinita al poblar siempre estos campos.
   this.populate('medico')
     .populate('paciente')
     .populate('slotsAsociados')

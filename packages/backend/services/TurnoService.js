@@ -666,6 +666,7 @@ export class TurnoService {
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
       nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
+      nombrePaciente: t.paciente ? t.paciente.nombre : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
 
       // Contrato unificado: misma estructura exacta que el slot

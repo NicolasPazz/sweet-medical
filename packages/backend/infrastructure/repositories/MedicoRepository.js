@@ -7,33 +7,25 @@ export class MedicoRepository {
 
   // LEER
   async findAll() {
-    return await this.model
-      .find()
-      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+    return await this.model.find().populate('turnosActualesYFuturos');
   }
 
   async findById(id) {
-    return await this.model
-      .findById(id)
-      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+    return await this.model.findById(id).populate('turnosActualesYFuturos');
   }
 
   async findByIdUsuario(usuarioId) {
     return await this.model
       .findOne({ usuario: usuarioId })
-      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+      .populate('turnosActualesYFuturos');
   }
 
   async findByMatricula(matricula) {
-    return await this.model
-      .findOne({ matricula })
-      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+    return await this.model.findOne({ matricula }).populate('turnosActualesYFuturos');
   }
 
   async findByDni(dni) {
-    return await this.model
-      .findOne({ dni })
-      .populate({ path: 'turnosActualesYFuturos', options: { _populatingFromMedico: true } });
+    return await this.model.findOne({ dni }).populate('turnosActualesYFuturos');
   }
 
   async findByUsuarioId(usuarioId) {

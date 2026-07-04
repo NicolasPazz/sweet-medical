@@ -6,6 +6,7 @@ import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
+import { convertirDisponibilidadALocal, getOffsetMinutosNavegador } from '../../../lib/dateTime.js';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 
@@ -152,7 +153,13 @@ export default function DisponibilidadMedico() {
         const res = await getMedicoByUser({ email, password });
         const medico = res?.data ?? res;
         setMedico(medico);
-        setDisponibilidades(medico?.disponibilidades?.map((d) => ({ ...d })) || []);
+        // El backend devuelve la disponibilidad en UTC; se convierte a hora
+        // local del navegador para mostrarla/editarla. Una franja UTC puede
+        // desdoblarse en 2 franjas locales si el cruce de día cae distinto.
+        const disponibilidadesLocal = (medico?.disponibilidades || []).flatMap((d) =>
+          convertirDisponibilidadALocal(d),
+        );
+        setDisponibilidades(disponibilidadesLocal);
       } catch (err) {
         console.error('Error al cargar médico:', err);
         setError('No se pudo conectar con el servidor.');

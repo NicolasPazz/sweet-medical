@@ -1,6 +1,7 @@
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { usuarioService } from './UsuarioService.js';
 import { ConflictError, NotFoundError, BadRequestError } from '../errors/AppError.js';
+import { DateUtil } from '../utils/DateUtil.js';
 
 export class MedicoService {
   constructor({
@@ -62,7 +63,22 @@ export class MedicoService {
     return await this.medicoRepository.findAll();
   }
 
-  async actualizarDisponibilidad(usuario, disponibilidades) {
+  /**
+   * Actualiza la disponibilidad del médico.
+   *
+   * IMPORTANTE: `disponibilidades` llega en hora LOCAL del navegador de quien
+   * hizo la solicitud (tal cual la tipeó el médico en el formulario). Este
+   * método la valida en esos términos (para que los mensajes de error tengan
+   * sentido para el usuario) y recién después la convierte a UTC usando
+   * `offsetMinutos` (el resultado de `new Date().getTimezoneOffset()` en el
+   * navegador que hizo la request) antes de persistirla. Todo lo que se
+   * guarda en base queda siempre en UTC.
+   *
+   * @param {object} usuario
+   * @param {Array<{diaSemana:string, horaDesde:string, horaHasta:string}>} disponibilidades - en hora local
+   * @param {number} [offsetMinutos=0] - `Date.prototype.getTimezoneOffset()` del navegador emisor
+   */
+  async actualizarDisponibilidad(usuario, disponibilidades, offsetMinutos = 0) {
     const medico = await this.medicoRepository.findByIdUsuario(usuario.id);
 
     if (medico == null) {
@@ -80,7 +96,11 @@ export class MedicoService {
     };
 
     // Agrupar por día y dentro de cada día verificar que no haya franjas
-    // contenidas o exactamente iguales a otra
+    // contenidas o exactamente iguales a otra.
+    // Esta validación se hace SIEMPRE sobre las franjas en hora LOCAL (tal
+    // cual las cargó el médico), no sobre el resultado convertido a UTC —
+    // así los mensajes de error ("la franja 08:00-10:00 está contenida en...")
+    // tienen sentido para quien los está leyendo.
     const porDia = {};
     for (const franja of normalizadas) {
       const dia = franja.diaSemana;
@@ -115,7 +135,13 @@ export class MedicoService {
       }
     }
 
-    medico.disponibilidades = normalizadas;
+    // Conversión a UTC recién acá, para persistir. Una franja puede convertirse
+    // en 2 si el offset la hace cruzar la medianoche (ver DateUtil).
+    const enUTC = normalizadas.flatMap((franja) =>
+      DateUtil.convertirDisponibilidadAUTC(franja, offsetMinutos),
+    );
+
+    medico.disponibilidades = enUTC;
 
     await this.medicoRepository.save(medico);
 

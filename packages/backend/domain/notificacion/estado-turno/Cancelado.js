@@ -50,7 +50,7 @@ export class Cancelado {
           remitente,
           t('CANCELACION_A_PACIENTE', {
             nombre: this.turno.medico.nombre,
-            fecha: this.turno.fechaHora?.toLocaleDateString() || '',
+            fecha: DateUtil.formatearFechaAR(this.turno.fechaHora) || '',
             servicio,
             motivo,
             interpolation: { escapeValue: false }

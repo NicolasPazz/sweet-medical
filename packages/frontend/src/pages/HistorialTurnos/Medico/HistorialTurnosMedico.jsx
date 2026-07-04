@@ -11,6 +11,7 @@ import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
+import { formatFechaLocal, formatHoraLocal } from '../../../lib/dateTime.js';
 
 function ModalSede({ onConfirmar, onCerrar, email, password }) {
   const [sedes, setSedes] = useState([]);
@@ -67,14 +68,6 @@ function ModalSede({ onConfirmar, onCerrar, email, password }) {
   );
 }
 
-function formatFecha(fechaHora) {
-  const d = new Date(fechaHora);
-  const dia = String(d.getUTCDate()).padStart(2, '0');
-  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const anio = d.getUTCFullYear();
-  return `${dia}/${mes}/${anio}`;
-}
-
 export default function HistorialTurnosMedico() {
   const { isAuthenticated, email, password } = useAuth();
   const [turnos, setTurnos] = useState([]);
@@ -98,6 +91,7 @@ export default function HistorialTurnosMedico() {
     const load = async () => {
       if (!email || !password) return;
       try {
+        console.log("HOLAAAAAA");
         const data = await getTurnosMedico({ email, password });
         setTurnos(data ?? []);
       } catch (err) {
@@ -282,7 +276,7 @@ export default function HistorialTurnosMedico() {
         cfgEstado={
           ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
         }
-        formatFecha={formatFecha}
+        formatFecha={formatFechaLocal}
         onVolver={() => setVista('LISTADO')}
         onConfirmar={(sede) => handleConfirmar(turnoActualizado._id, sede)}
         onCancelar={(motivo) => handleCancelar(turnoActualizado._id, motivo)}
@@ -337,8 +331,8 @@ export default function HistorialTurnosMedico() {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="turno-card-left">
-                    <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
-                    <span className="turno-hora text-ellipsis">{turno.hora}</span>
+                    <span className="turno-fecha text-ellipsis">{formatFechaLocal(turno.fechaHora)}</span>
+                    <span className="turno-hora text-ellipsis">{formatHoraLocal(turno.fechaHora)}</span>
                   </div>
                   <div className="turno-card-center">
                     <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
@@ -346,7 +340,7 @@ export default function HistorialTurnosMedico() {
                     {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
                     {esPendiente && turno.propuestaCambio && (
                       <span className="turno-propuesta text-ellipsis">
-                        → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                        → {formatFechaLocal(turno.propuestaCambio.nuevaFechaHora)}{' '}
                         {turno.propuestaCambio.nuevaHora}
                       </span>
                     )}

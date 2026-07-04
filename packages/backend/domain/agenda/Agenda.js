@@ -13,15 +13,18 @@ import { Disponible } from '../notificacion/estado-turno/Disponible.js';
 import { Cancelado } from '../notificacion/estado-turno/Cancelado.js';
 import { Slot } from '../turno/Slot.js';
 import { EstadoTurno } from '../turno/EstadoTurno.js';
-
+import { DateUtil } from '../../utils/DateUtil.js';
 /**
- * Convierte un objeto Date a string 'YYYY-MM-DD' usando la fecha LOCAL del servidor,
- * evitando el desfase de zona horaria que produce toISOString() (que usa UTC).
+ * Convierte un objeto Date a string 'YYYY-MM-DD' usando sus componentes UTC.
+ * Todo el sistema de agenda (disponibilidad, slots, turnos) opera en UTC, así
+ * que las fechas de calendario se derivan siempre de los componentes UTC del
+ * Date, nunca de los componentes locales del servidor (que podrían no ser UTC
+ * según dónde esté desplegado).
  */
-function fechaLocalAString(date) {
-  const anio = date.getFullYear();
-  const mes = String(date.getMonth() + 1).padStart(2, '0');
-  const dia = String(date.getDate()).padStart(2, '0');
+function fechaUTCAString(date) {
+  const anio = date.getUTCFullYear();
+  const mes = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dia = String(date.getUTCDate()).padStart(2, '0');
   return `${anio}-${mes}-${dia}`;
 }
 
@@ -60,13 +63,26 @@ export class Agenda {
   static eliminarSlotsDesactualizados(medico, slotsDisponibles) {
     const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
     const slotsEliminados = [];
+    const ahora = new Date();
 
     for (let i = slotsDisponibles.length - 1; i >= 0; i--) {
       const slot = slotsDisponibles[i];
 
-      // Los slots ya no tienen diaSemana — se deriva desde la fecha
+      // 1. Chequeo de fecha real: si el slot ya pasó (fecha+hora anterior a "ahora"),
+      // se elimina sin importar si sigue matcheando la disponibilidad semanal vigente.
+      // Esto es lo que evita que un slot de un viernes ya pasado quede DISPONIBLE
+      // para siempre solo porque el médico sigue atendiendo los viernes.
+      const fechaHoraSlot = Agenda.combinarFechaYHora(slot.fecha, slot.horaInicio);
+      if (fechaHoraSlot < ahora) {
+        slotsEliminados.push(slot);
+        continue;
+      }
+
+      // 2. Chequeo de disponibilidad vigente: si el médico cambió su disponibilidad
+      // y este slot (futuro) ya no cae dentro de ningún rango, también se elimina.
+      // Los slots ya no tienen diaSemana — se deriva desde la fecha (UTC)
       const [anio, mes, dia] = slot.fecha.split('-').map(Number);
-      const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
+      const diaSemanaSlot = diasSemana[new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay()];
 
       const sigueSiendoValido = medico.disponibilidades.some((disp) =>
         estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp),
@@ -79,10 +95,23 @@ export class Agenda {
     return slotsEliminados;
   }
 
+  /**
+   * Combina un string de fecha 'YYYY-MM-DD' y hora 'HH:MM' (ambos en UTC,
+   * igual que se persiste toda la agenda) en un único objeto Date, para poder
+   * compararlo contra `new Date()`. Usa `Date.UTC(...)` en vez de componentes
+   * locales para que el resultado no dependa del huso horario en el que corra
+   * el proceso de Node (server-local != UTC en muchos entornos de despliegue).
+   */
+  static combinarFechaYHora(fechaStr, horaStr) {
+    const [anio, mes, dia] = fechaStr.split('-').map(Number);
+    const [horas, minutos] = horaStr.split(':').map(Number);
+    return new Date(Date.UTC(anio, mes - 1, dia, horas, minutos, 0, 0));
+  }
+
   static generarSlotsNuevos(medico, slotsTotales, duracionSlot, semanasMaxGeneracionSlots) {
     const slotsNuevos = [];
     const offset = duracionSlot;
-
+    const MS_POR_DIA = 24 * 60 * 60 * 1000;
     const slotsOcupados = slotsTotales.filter((s) => s.estado !== 'DISPONIBLE');
     const slotsDisponibles = slotsTotales.filter((s) => s.estado === 'DISPONIBLE');
 
@@ -90,11 +119,13 @@ export class Agenda {
       const tiempoLimite = horaAMinutos(disponibilidad.horaHasta);
       const diaDeseadoNumero = Agenda.parsearDiaSemanaANumero(disponibilidad.diaSemana);
 
-      // Se pasa horaDesde para que, si hoy coincide con el día de disponibilidad,
-      // se valide que el horario de inicio aún no haya pasado.
+      const ahora = new Date();
+
+      // Se pasa horaDesde para que, si hoy (en UTC) coincide con el día de
+      // disponibilidad, se valide que el horario de inicio aún no haya pasado.
       const diasHastaPrimerDia = Agenda.fechaMasCercanaConDiaSemana(
         diaDeseadoNumero,
-        new Date(),
+        ahora,
         0,
         disponibilidad.horaDesde,
       );
@@ -102,9 +133,12 @@ export class Agenda {
       for (let i = 0; i < semanasMaxGeneracionSlots; i++) {
         let actualMinutos = horaAMinutos(disponibilidad.horaDesde);
 
-        const fechaSlot = new Date();
-        fechaSlot.setDate(fechaSlot.getDate() + diasHastaPrimerDia + 7 * i);
-        const fechaSlotStr = fechaLocalAString(fechaSlot);
+        // Aritmética de días en milisegundos UTC (sin DST, sin depender del
+        // huso horario del servidor) en vez de setDate()/getDate() locales.
+        const fechaSlot = new Date(
+          ahora.getTime() + (diasHastaPrimerDia + 7 * i) * MS_POR_DIA,
+        );
+        const fechaSlotStr = fechaUTCAString(fechaSlot);
 
         while (actualMinutos + offset <= tiempoLimite) {
           const horaInicioStr = calcularHoraDesdeMinutos(actualMinutos);
@@ -181,36 +215,38 @@ export class Agenda {
    * Devuelve cuántos días hay que sumar a fechaBase para llegar al próximo
    * día de la semana deseado que sea válido para generar slots.
    *
-   * Cuando la fecha candidata resulta ser HOY (mismo año/mes/día local que fechaBase),
-   * verifica que la hora actual local sea estrictamente menor que horaDesdeStr.
+   * Todas las comparaciones son en UTC (día de semana, "es hoy", hora actual),
+   * porque la disponibilidad del médico se persiste en UTC. Usar getDay()/
+   * getHours() locales acá haría depender el resultado del huso horario en el
+   * que corra el proceso de Node.
+   *
+   * Cuando la fecha candidata resulta ser HOY (mismo año/mes/día UTC que fechaBase),
+   * verifica que la hora actual UTC sea estrictamente menor que horaDesdeStr.
    * Si ya pasó ese horario, descarta hoy y busca la siguiente semana.
    *
    * @param {number} diaSemanaDeseado  - Número 0-6 (domingo=0)
    * @param {Date}   fechaBase         - Fecha desde la cual buscar (normalmente new Date())
    * @param {number} diasASumar        - Acumulador recursivo, iniciar en 0
-   * @param {string} horaDesdeStr      - Horario de inicio de la disponibilidad ('HH:MM')
+   * @param {string} horaDesdeStr      - Horario de inicio de la disponibilidad ('HH:MM', UTC)
    */
   static fechaMasCercanaConDiaSemana(diaSemanaDeseado, fechaBase, diasASumar = 0, horaDesdeStr) {
-    const fechaTentativa = new Date(fechaBase);
-    fechaTentativa.setDate(fechaTentativa.getDate() + diasASumar);
+    const MS_POR_DIA = 24 * 60 * 60 * 1000;
+    const fechaTentativa = new Date(fechaBase.getTime() + diasASumar * MS_POR_DIA);
 
-    if (fechaTentativa.getDay() === diaSemanaDeseado) {
-      // Comprueba si la fecha tentativa es el mismo día local que fechaBase
+    if (fechaTentativa.getUTCDay() === diaSemanaDeseado) {
+      // Comprueba si la fecha tentativa es el mismo día UTC que fechaBase
       const esHoy =
-        fechaTentativa.getFullYear() === fechaBase.getFullYear() &&
-        fechaTentativa.getMonth() === fechaBase.getMonth() &&
-        fechaTentativa.getDate() === fechaBase.getDate();
+        fechaTentativa.getUTCFullYear() === fechaBase.getUTCFullYear() &&
+        fechaTentativa.getUTCMonth() === fechaBase.getUTCMonth() &&
+        fechaTentativa.getUTCDate() === fechaBase.getUTCDate();
 
       if (esHoy && horaDesdeStr) {
-        const ahoraEnMinutos = fechaBase.getHours() * 60 + fechaBase.getMinutes();
+        const ahoraEnMinutos = fechaBase.getUTCHours() * 60 + fechaBase.getUTCMinutes();
         const horaInicioEnMinutos = horaAMinutos(horaDesdeStr);
 
         // Si la hora actual ya superó el inicio de la disponibilidad,
         // este día no sirve: saltamos a la siguiente semana.
         if (ahoraEnMinutos >= horaInicioEnMinutos) {
-          console.log('AHORA: ' + calcularHoraDesdeMinutos(ahoraEnMinutos));
-          console.log('HORA INICIO DISPONIBILIDAD: ' + horaDesdeStr);
-
           return Agenda.fechaMasCercanaConDiaSemana(
             diaSemanaDeseado,
             fechaBase,
@@ -238,7 +274,7 @@ export class Agenda {
 
     copiaFecha.setDate(copiaFecha.getDate() + diasFinales);
 
-    return { fechaSlot: fechaLocalAString(copiaFecha), diasTotales: diasFinales };
+    return { fechaSlot: fechaUTCAString(copiaFecha), diasTotales: diasFinales };
   }
 
   static saltarDiasNoLaborales(fechaBase, diasASumar, diasNoLaborales) {
@@ -413,6 +449,30 @@ export class Agenda {
       .map(([, slotsDelDia]) => slotsDelDia);
   }
 
+  /**
+ * Parsea un string de hora (HH:mm) y lo aplica al día actual o a una fecha base.
+ * @param {string} horaString - El string con la hora (ej: "8:00", "14:30").
+ * @param {Date} [fechaBase=new Date()] - Opcional. La fecha sobre la cual aplicar la hora. Por defecto es hoy.
+ * @returns {Date} El objeto Date modificado con la hora especificada.
+ */
+ parsearHoraADate(horaString, fechaBase = new Date()) {
+  // 1. Separar el string en componentes de hora y minuto usando split
+  const [horas, minutos] = horaString.split(':').map(Number);
+
+  // Validar que el formato sea correcto y los números sean válidos
+  if (isNaN(horas) || isNaN(minutos) || horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
+    throw new Error("Formato de hora inválido. Debe ser HH:mm entre 00:00 y 23:59");
+  }
+
+  // 2. Clonar la fecha base para no mutar el objeto original si se pasa por parámetro
+  const nuevaFecha = new Date(fechaBase.getTime());
+
+  // 3. Establecer horas, minutos, y limpiar segundos/milisegundos para una comparación limpia
+  nuevaFecha.setHours(horas, minutos, 0, 0);
+
+  return nuevaFecha;
+}
+
   static generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
     const turnosGenerados = [];
 
@@ -431,6 +491,14 @@ export class Agenda {
       while (i < slotsDelDia.length) {
         const slotInicio = slotsDelDia[i];
 
+        // Un slot DISPONIBLE de hoy cuya hora de inicio ya pasó no debe ofrecerse
+        // como turno reservable, aunque el cronjob de limpieza (3am) todavía no haya
+        // corrido para borrarlo. Se compara fecha+hora real contra "ahora".
+        const fechaHoraSlot = Agenda.combinarFechaYHora(slotInicio.fecha, slotInicio.horaInicio);
+        if (fechaHoraSlot < new Date()) {
+          i++;
+          continue;
+        }
         // 1. Validar Alineación de Grilla Fija
         const [horaStr, minStr] = slotInicio.horaInicio.split(':');
         const minutoInicio = parseInt(horaStr, 10) * 60 + parseInt(minStr, 10);
