@@ -51,6 +51,10 @@ export class DateUtil {
   /**
    * Calcula el límite superior (fechaHasta) sumando N días a una fecha base.
    * Retorna formato YYYY-MM-DD.
+   *
+   * Usa aritmética en milisegundos UTC (`getTime()` + N*86400000) en vez de
+   * `getDate()/setDate()` (que son locales del servidor donde corra Node),
+   * para que el resultado no dependa del huso horario del proceso.
    * @param {string|Date} baseDate
    * @param {number} daysToAdd
    * @returns {string}
@@ -59,8 +63,9 @@ export class DateUtil {
     const d = new Date(baseDate);
     if (isNaN(d.getTime())) return null;
 
-    d.setDate(d.getDate() + daysToAdd);
-    return this.toYYYYMMDD(d);
+    const MS_POR_DIA = 24 * 60 * 60 * 1000;
+    const resultado = new Date(d.getTime() + daysToAdd * MS_POR_DIA);
+    return this.toYYYYMMDD(resultado);
   }
 
   /**

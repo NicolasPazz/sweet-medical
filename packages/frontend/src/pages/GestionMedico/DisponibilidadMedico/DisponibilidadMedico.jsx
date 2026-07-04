@@ -306,7 +306,10 @@ export default function DisponibilidadMedico() {
         <VolverGestion />
         <div className="dm-header">
           <h1 className="dm-title text-ellipsis">Mi Disponibilidad</h1>
-          <p className="dm-subtitle text-ellipsis">Consultá y administrá tus horarios de atención.</p>
+          <p className="dm-subtitle text-ellipsis">
+            Consultá y administrá tus horarios de atención. Los horarios se ingresan y muestran en
+            hora UTC (no la hora local de tu navegador).
+          </p>
         </div>
 
         {loading ? (

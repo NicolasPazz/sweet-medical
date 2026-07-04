@@ -224,7 +224,8 @@ export class TurnoService {
     // Liberar o eliminar los slots según si la disponibilidad del médico sigue vigente
     for (const slot of turno.slotsAsociados) {
       const [anio, mes, dia] = slot.fecha.split('-').map(Number);
-      const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
+      // UTC, no local: la disponibilidad y los slots se persisten en UTC.
+      const diaSemanaSlot = diasSemana[new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay()];
 
       const sigueSiendoValido = turno.medico.disponibilidades.some((disp) =>
         estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp),
@@ -343,17 +344,19 @@ export class TurnoService {
     const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
 
     // Función interna para formatear de forma segura cualquier variante de fecha de la DB
+    // Usamos DateUtil.toYYYYMMDD (UTC) en vez de toDateString() (que usa el
+    // huso horario LOCAL del servidor) para que la comparación de "mismo día"
+    // no dependa de dónde esté desplegado el proceso de Node.
     const parsearFechaSegura = (fechaInput) => {
-      if (!fechaInput) return new Date(NaN);
-      if (fechaInput instanceof Date) return fechaInput;
+      if (!fechaInput) return null;
       if (typeof fechaInput === 'string' && fechaInput.includes('/')) {
         const partes = fechaInput.split('/');
-        return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
+        return `${partes[2]}-${partes[1]}-${partes[0]}`;
       }
-      return new Date(fechaInput);
+      return DateUtil.toYYYYMMDD(fechaInput);
     };
 
-    const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha).toDateString();
+    const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha);
 
     logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
     logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
@@ -363,7 +366,7 @@ export class TurnoService {
 
     // CORRECCIÓN RESTRICCIÓN: Evaluamos que realmente exista una sede física grabada (con _id válido)
     const slotConSedeExistente = slotsDelMedico.find((s) => {
-      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
       return (
         fechaSlotStr === fechaTurnoTarget &&
         s.sede &&
@@ -425,7 +428,7 @@ export class TurnoService {
 
       logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
       const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
-        const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+        const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
         return fechaSlotStr === fechaTurnoTarget && s.estado === 'DISPONIBLE';
       });
 
@@ -472,7 +475,7 @@ export class TurnoService {
 
     // 4. Actualizamos el slot físico exacto que pertenece al horario de este turno
     const slotActual = slotsDelMedico.find((s) => {
-      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
       return fechaSlotStr === fechaTurnoTarget && s.horaInicio === turno.hora;
     });
 
@@ -918,16 +921,32 @@ export class TurnoService {
     return turno;
   }
 
+  /**
+   * Devuelve el instante UTC correspondiente a las 00:00:00.000 del día
+   * siguiente a `fecha`. Usa `Date.UTC(...)` en vez de `setDate()/setHours()`
+   * locales, para que el resultado no dependa del huso horario del servidor
+   * (todo el sistema opera en UTC).
+   */
   obtenerHoraInicio(fecha) {
-    const inicioDeMañana = new Date(fecha);
-    inicioDeMañana.setDate(fecha.getDate() + 1);
-    return inicioDeMañana.setHours(0, 0, 0, 0);
+    return Date.UTC(
+      fecha.getUTCFullYear(),
+      fecha.getUTCMonth(),
+      fecha.getUTCDate() + 1,
+      0, 0, 0, 0,
+    );
   }
 
+  /**
+   * Devuelve el instante UTC correspondiente a las 23:59:59.999 del día
+   * siguiente a `fecha`. Ver nota de `obtenerHoraInicio`.
+   */
   obtenerHoraFin(fecha) {
-    const finDeMañana = new Date(fecha);
-    finDeMañana.setDate(fecha.getDate() + 1);
-    return finDeMañana.setHours(23, 59, 59, 999);
+    return Date.UTC(
+      fecha.getUTCFullYear(),
+      fecha.getUTCMonth(),
+      fecha.getUTCDate() + 1,
+      23, 59, 59, 999,
+    );
   }
 
   async obtenerTurnosParaManiana() {
@@ -1041,8 +1060,10 @@ export class TurnoService {
           ? b.costoEstimado - a.costoEstimado
           : a.costoEstimado - b.costoEstimado;
       } else {
-        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`).getTime();
-        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`).getTime();
+        // Sufijo 'Z' explícito: fecha/hora ya son UTC, no hay que dejarlo ambiguo
+        // (un ISO sin offset se interpreta como hora local según el motor de JS).
+        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}:00Z`).getTime();
+        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}:00Z`).getTime();
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
       }
     });
