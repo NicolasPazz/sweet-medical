@@ -28,7 +28,7 @@ export class Confirmado {
       remitente,
       t('CONFIRMACION_TURNO_DETALLADA', {
         servicio: servicio,
-        fecha: DateUtil.formatearFechaAR(this.turno.fechaHora) || '',
+        fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + "(" + this.turno.hora + ")",
         sede: this.turno.sede?.nombre || '(Sin asignar)',
         medico: this.turno.medico.nombre,
         interpolation: { escapeValue: false } // <- Evita que cambie las "/" por "&#x2F;"

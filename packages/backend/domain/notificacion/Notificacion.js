@@ -25,7 +25,7 @@ export class Notificacion {
     this.fechaHoraLeida = new Date();
 
     logger.debug(
-      `Notificación ${this.id || 'sin ID'} marcada como leída el: ${this.fechaHoraLeida.toLocaleString('es-AR')}`,
+      `Notificación ${this.id || 'sin ID'} marcada como leída el: ${this.fechaHoraLeida}`,
     );
   }
 }

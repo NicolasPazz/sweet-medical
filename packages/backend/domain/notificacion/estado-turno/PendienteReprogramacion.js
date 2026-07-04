@@ -2,6 +2,7 @@ import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unificar
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
+import { DateUtil } from '../../../utils/DateUtil.js';
 
 export class PendienteReprogramacion {
   id;
@@ -25,7 +26,7 @@ export class PendienteReprogramacion {
     const medicoUsuarioId = this.turno.medico?.usuario?.id || this.turno.medico?.usuario?._id;
 
     const prop = this.turno.propuestaCambio;
-    const fechaFormateada = prop ? DateUtil.formatearFechaAR(prop.nuevaFechaHora, { conHora: true }) : 'una nueva fecha';
+    const fechaFormateada = prop ? DateUtil.toDDMMYYYY(prop.nuevaFechaHora) : 'una nueva fecha';
 
     const motivo = prop?.motivo || 'No especificado';
 
@@ -56,6 +57,7 @@ export class PendienteReprogramacion {
           servicio,
           fecha: fechaFormateada,
           motivo,
+          interpolation: { escapeValue: false }
         }),
       );
     } else {

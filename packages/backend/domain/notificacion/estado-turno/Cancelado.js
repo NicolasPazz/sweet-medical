@@ -1,8 +1,8 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
-
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 'import { DateUtil } from '../../../utils/DateUtil.js';
+import { DateUtil } from '../../../utils/DateUtil.js';
 export class Cancelado {
   id;
   constructor(turno) {
@@ -24,8 +24,6 @@ export class Cancelado {
     const pacienteUsuarioId = this.turno.paciente
       ? this.turno.paciente.usuario?.id || this.turno.paciente.usuario?._id || this.turno.paciente.usuario
       : null;
-
-
     if (
       !(pacienteUsuarioId == null) &&
       this.turno.paciente &&
@@ -38,8 +36,10 @@ export class Cancelado {
         remitente,
         t('CANCELACION_A_MEDICO', {
           nombre: this.turno.paciente.nombre,
+          fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + ' (' + DateUtil.toHHMM(this.turno.fechaHora) + ')',
           servicio,
-          motivo
+          motivo,
+          interpolation: { escapeValue: false }
         }),
       );
     } else {
@@ -50,7 +50,7 @@ export class Cancelado {
           remitente,
           t('CANCELACION_A_PACIENTE', {
             nombre: this.turno.medico.nombre,
-            fecha: DateUtil.formatearFechaAR(this.turno.fechaHora) || '',
+            fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + "(" + this.turno.hora + ")",
             servicio,
             motivo,
             interpolation: { escapeValue: false }

@@ -2,7 +2,7 @@ import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { t } from '../../../utils/i18n/i18n.js'; // <-- Unificado a 't'
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-
+import { DateUtil } from '../../../utils/DateUtil.js';
 export class Reservado {
   id;
   constructor(turno) {
@@ -31,6 +31,8 @@ export class Reservado {
         // <-- Cambiado a 't'
         nombre: this.turno.paciente.nombre,
         servicio,
+        fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + "(" + this.turno.hora + ")",
+        interpolation: { escapeValue: false }
       }),
     );
   }

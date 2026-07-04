@@ -70,7 +70,7 @@ export class Turno {
     const notificacion = this.actualizarEstado(
       usuario,
       new PendienteReprogramacion(this),
-      `Solicitud de reprogramación para el ${DateUtil.formatearFechaAR(nuevaFechaHora)}`,
+      `Solicitud de reprogramación para el ${(nuevaFechaHora)}`,
     );
 
     return notificacion;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './CancelarTurnoModal.css';
+import { formatFechaUTC, formatHoraUTC } from '../../lib/dateTime.js';
 
 /**
  * Modal reutilizable para cancelar un turno.
@@ -26,13 +27,6 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
     onConfirm(motivo.trim());
   };
 
-  const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-
   return (
     <div className="ctm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="ctm-modal">
@@ -54,8 +48,8 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
         ) : (
           <>
             <p className="ctm-body">
-              Estás por cancelar el turno del <strong>{fechaFormateada}</strong> a las{' '}
-              <strong>{turno.hora} hs</strong>. Esta acción no se puede deshacer.
+              Estás por cancelar el turno del <strong>{formatFechaUTC(turno.fechaHora)}</strong> a las{' '}
+              <strong>{formatHoraUTC(turno.fechaHora)} hs</strong>. Esta acción no se puede deshacer.
             </p>
 
             <label className="ctm-label text-ellipsis">

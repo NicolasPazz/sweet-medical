@@ -12,7 +12,7 @@ import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
-import { formatFechaLocal } from '../../../lib/dateTime.js';
+import { formatFechaUTC } from '../../../lib/dateTime.js';
 
 export default function HistorialTurnos() {
   const [filtro, setFiltro] = useState('TODOS');
@@ -177,7 +177,7 @@ export default function HistorialTurnos() {
           cfgEstado={
             ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
           }
-          formatFecha={formatFechaLocal}
+          formatFecha={formatFechaUTC}
           onVolver={() => setVista('LISTADO')}
           onIrAReprogramar={() => setVista('REPROGRAMAR')}
           onCancelar={handleCancelar}

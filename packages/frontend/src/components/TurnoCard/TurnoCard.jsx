@@ -1,6 +1,6 @@
 import React from 'react';
 import './TurnoCard.css';
-import { formatFechaLocal, formatHoraLocal } from '../../lib/dateTime.js';
+import { formatFechaUTC, formatHoraUTC } from '../../lib/dateTime.js';
 
 export default function TurnoCard({ turno, cfg, onClickTurno }) {
   return (
@@ -11,8 +11,8 @@ export default function TurnoCard({ turno, cfg, onClickTurno }) {
       style={{ cursor: 'pointer' }}
     >
       <div className="turno-card-left">
-        <span className="turno-fecha text-ellipsis">{formatFechaLocal(turno.fechaHora)}</span>
-        <span className="turno-hora text-ellipsis">{formatHoraLocal(turno.fechaHora)}</span>
+        <span className="turno-fecha text-ellipsis">{formatFechaUTC(turno.fechaHora)}</span>
+        <span className="turno-hora text-ellipsis">{formatHoraUTC(turno.fechaHora)}</span>
       </div>
       <div className="turno-card-center">
         <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre ?? turno.servicio}</span>

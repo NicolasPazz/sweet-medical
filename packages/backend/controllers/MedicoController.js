@@ -50,7 +50,7 @@ export class MedicoController {
 
   actualizarDisponibilidad = async (req, res, next) => {
     try {
-      const { disponibilidades, offsetMinutos } = req.body;
+      const { disponibilidades } = req.body;
 
       const usuario = req.usuarioAutenticado;
 
@@ -77,12 +77,7 @@ export class MedicoController {
         throw new BadRequestError('Días de semana no válidos recibidos');
       }
 
-      // offsetMinutos: resultado de `new Date().getTimezoneOffset()` en el
-      // navegador que envió la request. Si no viene (clientes viejos / Postman),
-      // se asume 0 (es decir, se toman las horas tal cual como si ya fueran UTC).
-      const offsetNumerico = Number.isFinite(Number(offsetMinutos)) ? Number(offsetMinutos) : 0;
-
-      await this.medicoService.actualizarDisponibilidad(usuario, disponibilidades, offsetNumerico);
+      await this.medicoService.actualizarDisponibilidad(usuario, disponibilidades);
 
       return res
         .status(200)

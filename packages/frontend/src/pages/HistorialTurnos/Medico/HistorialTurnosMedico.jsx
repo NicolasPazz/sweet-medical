@@ -11,7 +11,7 @@ import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import VolverGestion from '../../../components/ui/VolverGestion.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
-import { formatFechaLocal, formatHoraLocal } from '../../../lib/dateTime.js';
+import { formatFechaUTC, formatHoraUTC } from '../../../lib/dateTime.js';
 
 function ModalSede({ onConfirmar, onCerrar, email, password }) {
   const [sedes, setSedes] = useState([]);
@@ -276,7 +276,7 @@ export default function HistorialTurnosMedico() {
         cfgEstado={
           ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
         }
-        formatFecha={formatFechaLocal}
+        formatFecha={formatFechaUTC}
         onVolver={() => setVista('LISTADO')}
         onConfirmar={(sede) => handleConfirmar(turnoActualizado._id, sede)}
         onCancelar={(motivo) => handleCancelar(turnoActualizado._id, motivo)}
@@ -331,8 +331,8 @@ export default function HistorialTurnosMedico() {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="turno-card-left">
-                    <span className="turno-fecha text-ellipsis">{formatFechaLocal(turno.fechaHora)}</span>
-                    <span className="turno-hora text-ellipsis">{formatHoraLocal(turno.fechaHora)}</span>
+                    <span className="turno-fecha text-ellipsis">{formatFechaUTC(turno.fechaHora)}</span>
+                    <span className="turno-hora text-ellipsis">{formatHoraUTC(turno.fechaHora)}</span>
                   </div>
                   <div className="turno-card-center">
                     <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
@@ -340,7 +340,7 @@ export default function HistorialTurnosMedico() {
                     {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
                     {esPendiente && turno.propuestaCambio && (
                       <span className="turno-propuesta text-ellipsis">
-                        → {formatFechaLocal(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                        → {formatFechaUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
                         {turno.propuestaCambio.nuevaHora}
                       </span>
                     )}
