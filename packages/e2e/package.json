@@ -5,7 +5,6 @@
   "scripts": {
     "test:e2e": "npx playwright test",
     "test:e2e:headed": "npx playwright test --headed",
-    "test:e2e:slow": "npx playwright test --headed --project=chromium --timeout=60000",
     "test:e2e:debug": "npx playwright test --debug",
     "test:e2e:ui": "npx playwright test --ui",
     "report": "npx playwright show-report"

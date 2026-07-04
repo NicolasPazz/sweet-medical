@@ -36,7 +36,6 @@
     "// --- PRUEBAS E2E (LOCAL) ---": "--------------------------------------------------",
     "test:e2e": "npm run test:e2e -w @sweet-medical/e2e",
     "test:e2e:headed": "npm run test:e2e:headed -w @sweet-medical/e2e",
-    "test:e2e:slow": "npm run test:e2e:slow -w @sweet-medical/e2e",
     "test:e2e:debug": "npm run test:e2e:debug -w @sweet-medical/e2e",
     "test:e2e:ui": "npm run test:e2e:ui -w @sweet-medical/e2e",
     "// --- PRUEBAS E2E (PRODUCCIÓN) ---": "------------------------------------",
