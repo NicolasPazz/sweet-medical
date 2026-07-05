@@ -139,6 +139,8 @@ export class TurnoService {
 
     slotsAOcupar.forEach((s) => (s.estado = 'RESERVADO'));
 
+    
+
     const turno = new Turno(
       medico,
       paciente,

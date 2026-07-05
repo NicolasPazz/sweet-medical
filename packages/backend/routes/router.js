@@ -11,6 +11,7 @@ import authRouter from './authRouter.js';
 import usuarioRouter from './usuarioRoutes.js';
 import adminRouter from './adminRoutes.js';
 import sedeRouter from './sedeRoutes.js';
+import obraSocialRouter from './obraSocialRoutes.js';
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.use('/auth', authRouter);
 router.use('/usuarios', usuarioRouter);
 router.use('/admins', adminRouter);
 router.use('/sedes', sedeRouter);
+router.use('/obras-sociales', obraSocialRouter);
 
 export default router;

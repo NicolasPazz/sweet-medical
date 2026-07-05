@@ -26,7 +26,6 @@ export const getMe = async ({ email, password }) => {
   });
 
   const { usuario, perfil } = response.data.data;
-
   return {
     usuario: {
       id: usuario.id,

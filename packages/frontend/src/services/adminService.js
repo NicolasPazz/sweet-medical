@@ -28,10 +28,10 @@ export const crearMedicoAdmin = async ({ email, password, dni, nombre, matricula
 };
 
 // El admin da de alta un usuario con uno o más roles (Paciente y/o Médico) en una sola operación.
-export const crearUsuarioAdmin = async ({ email, password, dni, nombre, matricula, roles }) => {
+export const crearUsuarioAdmin = async ({ email, password, dni, nombre, matricula, obraSocial, plan, roles }) => {
   const res = await axios.post(
     `${getApiBaseUrl()}/admins/usuario`,
-    { dni, nombre, matricula, roles },
+    { dni, nombre, matricula, obraSocial, plan, roles },
     { headers: headers(email, password) },
   );
   return res.data?.data ?? res.data;

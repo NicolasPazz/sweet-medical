@@ -28,6 +28,11 @@ export const getSedes = async () => {
   return res.data;
 };
 
+export const getObrasSociales = async () => {
+  const res = await api.get('/obras-sociales');
+  return res.data;
+};
+
 export const getPacientes = async () => {
   const res = await api.get('/pacientes/all');
   return res.data;

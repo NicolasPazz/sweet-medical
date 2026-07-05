@@ -31,7 +31,7 @@ export class PacienteService {
     return await this.pacienteRepository.findByIdUsuario(usuarioId);
   }
 
-  async crearPaciente({ usuario, nombre }) {
+  async crearPaciente({ usuario, nombre, obraSocial, plan }) {
     if (!usuario) {
       throw new Error('El usuario es obligatorio para crear un paciente');
     }
@@ -40,7 +40,9 @@ export class PacienteService {
 
     return await this.pacienteRepository.save({
       usuario: usuarioId,
-      nombre: nombre
+      nombre: nombre,
+      obraSocial: obraSocial,
+      plan: plan
     });
   }
 

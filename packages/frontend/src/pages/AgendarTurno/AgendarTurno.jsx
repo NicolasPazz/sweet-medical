@@ -81,7 +81,25 @@ export default function AgendarTurno() {
             setUser({ dni, rol: getRolUsuario(roles) });
           }
 
-          handleSelectPaciente(data.usuario);
+          // El perfil que devuelve /usuarios/me viene con el shape "crudo" de Mongo
+          // (_id, obraSocial/plan poblados como objeto completo). El resto del wizard
+          // (fetchSlots, reservarTurno, pantalla de confirmación) espera el mismo shape
+          // normalizado que ya usa /pacientes/all (id_paciente, id_usuario, obraSocial
+          // como texto). Lo normalizamos acá para no tener dos formas distintas de
+          // representar un paciente dando vueltas por el front.
+          const perfil = data.perfil;
+          const pacienteNormalizado = perfil
+            ? {
+                id_usuario: data.usuario.id,
+                id_paciente: perfil.id ?? perfil._id,
+                nombre: perfil.nombre,
+                dni,
+                obraSocial: perfil.obraSocial?.nombre ?? 'N/A',
+                plan: perfil.plan?.nombre ?? 'N/A',
+              }
+            : null;
+
+          handleSelectPaciente(pacienteNormalizado, perfil);
 
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -109,6 +127,7 @@ export default function AgendarTurno() {
   const [medicos, setMedicos] = useState([]);
 
   const [selectedPaciente, setSelectedPaciente] = useState(null);
+  const [selectedPerfil, setSelectedPerfil] = useState(null);
   const [step, setStep] = useState(0);
   const [searchMode, setSearchMode] = useState('ESPECIALIDAD');
   const [selectedService, setSelectedService] = useState(null);
@@ -182,8 +201,9 @@ export default function AgendarTurno() {
     }
   };
 
-  const handleSelectPaciente = (pac) => {
+  const handleSelectPaciente = (pac, perfil) => {
     setSelectedPaciente(pac);
+    setSelectedPerfil(perfil)
     cargarHistorial();
     setStep(1);
     clearCart();
@@ -1012,7 +1032,7 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
     <div className="historial-paciente-seccion">
       <div className="historial-header-container">
         <div className="historial-header-title">
-          <FaCalendarAlt style={{color: 'var(--brand)'}}/> Sus turnos registrados
+          <FaCalendarAlt style={{ color: 'var(--brand)' }} /> Sus turnos registrados
         </div>
         {!loadingHistorial && safeHistorial.length > 0 && (
           <div className="historial-sort-controls">
@@ -1088,7 +1108,7 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
               </tbody>
             </table>
           </div>
-          
+
           <div className="historial-pagination">
             <span className="pagination-info">Mostrando página <strong>{currentPage}</strong> de <strong>{totalPages}</strong></span>
             <div className="pagination-buttons">

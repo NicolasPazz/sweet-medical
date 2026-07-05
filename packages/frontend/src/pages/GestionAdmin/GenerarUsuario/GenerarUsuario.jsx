@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GenerarUsuario.css';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
 import { crearUsuarioAdmin } from '../../../services/adminService.js';
+import { getObrasSociales } from '../../../services/turnoService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 16, color: '#fff' }} spin />;
 
-const EMPTY_FORM = { dni: '', nombre: '', matricula: '' };
+const EMPTY_FORM = { dni: '', nombre: '', matricula: '', obraSocial: '', plan: '' };
 
 export function GenerarUsuario() {
   const navigate = useNavigate();
@@ -21,10 +22,29 @@ export function GenerarUsuario() {
   const [errores, setErrores] = useState({});
   const [enviando, setEnviando] = useState(false);
   const [toast, setToast] = useState(null);
+  const [obrasSociales, setObrasSociales] = useState([]);
+  const [cargandoObrasSociales, setCargandoObrasSociales] = useState(true);
+
+  useEffect(() => {
+    const fetchObrasSociales = async () => {
+      try {
+        const body = await getObrasSociales();
+        setObrasSociales(body?.data ?? []);
+      } catch (error) {
+        mostrarToast('No se pudieron cargar las obras sociales.', 'error');
+      } finally {
+        setCargandoObrasSociales(false);
+      }
+    };
+    fetchObrasSociales();
+  }, []);
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
+
+  const obraSocialSeleccionada = obrasSociales.find((os) => os._id === form.obraSocial);
+  const planesDisponibles = obraSocialSeleccionada?.planes ?? [];
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
@@ -34,6 +54,14 @@ export function GenerarUsuario() {
   const set = (campo) => (e) => {
     setForm((f) => ({ ...f, [campo]: e.target.value }));
     if (errores[campo]) setErrores((er) => ({ ...er, [campo]: false }));
+  };
+
+  // Al cambiar la obra social hay que resetear el plan, ya que los planes
+  // disponibles dependen de la obra social elegida (relación one-to-many).
+  const setObraSocial = (e) => {
+    const obraSocial = e.target.value;
+    setForm((f) => ({ ...f, obraSocial, plan: '' }));
+    if (errores.obraSocial) setErrores((er) => ({ ...er, obraSocial: false }));
   };
 
   const toggleRol = (rol) => {
@@ -52,6 +80,10 @@ export function GenerarUsuario() {
     };
     if (roles.medico) {
       nuevosErrores.matricula = !form.matricula.trim();
+    }
+    if (roles.paciente) {
+      nuevosErrores.obraSocial = !form.obraSocial;
+      nuevosErrores.plan = !form.plan;
     }
     setErrores(nuevosErrores);
     return !Object.values(nuevosErrores).some(Boolean);
@@ -78,6 +110,8 @@ export function GenerarUsuario() {
         dni: form.dni.trim(),
         nombre: form.nombre.trim(),
         matricula: roles.medico ? form.matricula.trim() : undefined,
+        obraSocial: roles.paciente ? form.obraSocial : undefined,
+        plan: roles.paciente ? form.plan : undefined,
         roles: rolesSeleccionados,
       });
 
@@ -162,6 +196,48 @@ export function GenerarUsuario() {
             placeholder="Ej: Juan Pérez"
           />
           {errores.nombre && <span className="gu-error-text">El nombre es obligatorio.</span>}
+
+          {roles.paciente && (
+            <>
+              <label className="gu-label">Obra Social</label>
+              <select
+                className={`gu-input${errores.obraSocial ? ' gu-input-error' : ''}`}
+                value={form.obraSocial}
+                onChange={setObraSocial}
+                disabled={cargandoObrasSociales}
+              >
+                <option value="">
+                  {cargandoObrasSociales ? 'Cargando...' : 'Seleccione obra social'}
+                </option>
+                {obrasSociales.map((os) => (
+                  <option key={os._id} value={os._id}>
+                    {os.nombre}
+                  </option>
+                ))}
+              </select>
+              {errores.obraSocial && (
+                <span className="gu-error-text">La obra social es obligatoria.</span>
+              )}
+
+              <label className="gu-label">Plan</label>
+              <select
+                className={`gu-input${errores.plan ? ' gu-input-error' : ''}`}
+                value={form.plan}
+                onChange={set('plan')}
+                disabled={!form.obraSocial}
+              >
+                <option value="">
+                  {form.obraSocial ? 'Seleccione plan' : 'Elegí primero una obra social'}
+                </option>
+                {planesDisponibles.map((plan) => (
+                  <option key={plan._id} value={plan._id}>
+                    {plan.nombre}
+                  </option>
+                ))}
+              </select>
+              {errores.plan && <span className="gu-error-text">El plan es obligatorio.</span>}
+            </>
+          )}
 
           {roles.medico && (
             <>

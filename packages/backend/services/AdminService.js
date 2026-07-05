@@ -21,7 +21,7 @@ export class AdminService {
        * El admin da de alta un paciente: crea el Usuario con DNI + nombre (inactivo).
        * El perfil Paciente se crea vacío apuntando al Usuario.
        */
-    async crearPacienteAdmin({ dni, nombre }) {
+    async crearPacienteAdmin({ dni, nombre, obraSocial, plan }) {
         if (!dni || !nombre) {
             throw new BadRequestError('dni y nombre son obligatorios');
         }
@@ -37,7 +37,7 @@ export class AdminService {
             activo: false,
         });
 
-        const paciente = await this.pacienteService.crearPaciente({ usuario, nombre });
+        const paciente = await this.pacienteService.crearPaciente({ usuario, nombre, obraSocial, plan });
 
         return { usuario, paciente };
     }
@@ -74,7 +74,7 @@ export class AdminService {
      * Si se selecciona Paciente, crea el perfil Paciente.
      * Si se selecciona Médico, crea el perfil Médico.
      */
-    async crearUsuarioAdmin({ dni, nombre, matricula, roles = [] }) {
+    async crearUsuarioAdmin({ dni, nombre, matricula, obraSocial, plan, roles = [] }) {
         if (!dni || !nombre) {
             throw new BadRequestError('dni y nombre son obligatorios');
         }
@@ -94,6 +94,13 @@ export class AdminService {
 
         if (rolesNormalizados.includes('MEDICO') && !matricula) {
             throw new BadRequestError('matricula es obligatoria para crear un Médico');
+        }
+
+        console.log("OBRA SOCIAL: " + obraSocial);
+        console.log("PLAN: " + plan);
+
+        if (rolesNormalizados.includes('PACIENTE') && (!obraSocial || !plan)) {
+            throw new BadRequestError('Debe indicarse obra social y plan');
         }
 
         // Verificar que no exista usuario con ese DNI para esos roles
@@ -118,6 +125,8 @@ export class AdminService {
             resultado.paciente = await this.pacienteService.crearPaciente({
                 usuario,
                 nombre,
+                obraSocial,
+                plan
             });
         }
 
