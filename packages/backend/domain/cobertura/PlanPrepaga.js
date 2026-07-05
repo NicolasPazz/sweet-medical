@@ -8,11 +8,14 @@ export class PlanPrepaga extends Plan {
   }
 
   calcularCosto(prestacion, tipo) {
+
     let nivel = NivelCobertura.NO_CUBIERTA;
 
-    if (tipo === 'especialidad') {
+    console.log("SOY UN TIPO DIVERTIDO ", tipo);
+
+    if (tipo === 'ESPECIALIDAD') {
       nivel = this.obtenerCoberturaPorEspecialidad(prestacion) || NivelCobertura.NO_CUBIERTA;
-    } else if (tipo === 'practica') {
+    } else if (tipo === 'PRACTICA') {
       nivel = this.obtenerCoberturaPorPractica(prestacion) || NivelCobertura.NO_CUBIERTA;
     }
 

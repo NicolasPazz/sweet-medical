@@ -139,8 +139,6 @@ export class TurnoService {
 
     slotsAOcupar.forEach((s) => (s.estado = 'RESERVADO'));
 
-    
-
     const turno = new Turno(
       medico,
       paciente,
@@ -150,6 +148,14 @@ export class TurnoService {
       servicio,
       servicio.costo,
     );
+
+    console.log("ENTRO A MOTOR COSTOS DESDE RESERVAR TURNO");
+
+    const { costoEstimado } = MotorCostos.calcularPara(turno, paciente);
+
+    turno.costo = costoEstimado;
+
+    console.log("ESTE ES EL COSTO DIVERTIDO: ", turno.costo);
 
     turno.slotsAsociados.push(...slotsAOcupar);
 
@@ -1045,7 +1051,11 @@ export class TurnoService {
     }
 
     const dtosMapeados = turnosFiltrados.map((turno) => {
-      const esPractica = turno.servicio?.tipo === 'PRACTICA';
+      // Usamos turno.servicio.esTipo() (método real via loadClass en
+      // Especialidad/Practica) en vez de turno.servicio?.tipo: ese campo
+      // nunca se persiste en el schema de Especialidad/Practica, así que
+      // siempre daba undefined y esPractica quedaba mal calculado.
+      const esPractica = turno.servicio?.esTipo?.() === 'PRACTICA';
       const turnoAdaptado = {
         ...turno,
         practica: esPractica ? turno.servicio : null,

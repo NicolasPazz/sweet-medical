@@ -79,10 +79,14 @@ export class PacienteService {
     console.log("TURNOS: " + turnos);
     const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
+      // 'esTipo' ya no se parchea acá: ahora vive directamente en el sub-schema
+      // del servicio embebido (ver TurnoSchema.js), así que t.servicio.esTipo()
+      // funciona nativamente para cualquier turno persistido.
       const turnoAdaptado = {
         ...t,
         practica: esPractica ? t.servicio : null,
         especialidad: !esPractica ? t.servicio : null,
+        servicio: t.servicio,
       };
 
       let cobertura;

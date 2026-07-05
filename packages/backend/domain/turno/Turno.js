@@ -24,7 +24,11 @@ export class Turno {
     this.fechaHora = Turno.combinarFechaYHoraUTC(fecha, horaInicio);
     this.hora = horaInicio;
     this.sede = sede;
-    this.servicio = servicio?.costo ? servicio : null;
+    // OJO: no usar `servicio?.costo ? servicio : null` acá. Un servicio con
+    // costo=0 (ej: consulta gratuita, promoción) es válido y NO debería
+    // descartarse solo porque su precio es un valor falsy en JS. Lo único que
+    // importa acá es si el servicio existe.
+    this.servicio = servicio ?? null;
     this.historialEstados = [];
     this.costo = costo;
     this.slotsAsociados = [];

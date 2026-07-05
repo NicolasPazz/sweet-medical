@@ -21,17 +21,34 @@ const cambioEstadoTurnoSchema = new mongoose.Schema(
 
 cambioEstadoTurnoSchema.loadClass(CambioEstadoTurno);
 
+// Sub-schema del servicio embebido en el Turno (snapshot inmutable de la
+// Especialidad/Practica al momento de reservar). No usa `loadClass` de
+// Especialidad/Practica porque este objeto NO es una Especialidad/Practica
+// completa (le faltan varios campos) — es sólo el snapshot definido acá.
+// Por eso `esTipo()` se define explícitamente en este sub-schema: así
+// `turno.servicio.esTipo()` funciona siempre para CUALQUIER turno persistido,
+// sin necesidad de parches externos (turnoAdaptado, etc.) en los services.
+const servicioEmbebidoSchema = new mongoose.Schema(
+  {
+    _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+    codigo: { type: String, trim: true },
+    nombre: { type: String, required: true, trim: true, maxlength: 100 },
+    costo: { type: Number, required: true, min: 0 },
+    duracionTurnoEnMins: { type: Number, required: true, min: 1 },
+  },
+  { _id: false },
+);
+
+servicioEmbebidoSchema.methods.esTipo = function () {
+  // Solo las Practicas tienen 'codigo' (ver domain/servicios/Practica.js vs Especialidad.js)
+  return this.codigo ? 'PRACTICA' : 'ESPECIALIDAD';
+};
+
 const turnoSchema = new mongoose.Schema(
   {
     medico: { type: mongoose.Schema.Types.ObjectId, ref: 'Medico', required: true },
     paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente', default: null },
-    servicio: {
-      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-      codigo: { type: String, trim: true },
-      nombre: { type: String, required: true, trim: true, maxlength: 100 },
-      costo: { type: Number, required: true, min: 0 },
-      duracionTurnoEnMins: { type: Number, required: true, min: 1 },
-    },
+    servicio: servicioEmbebidoSchema,
     sede: {
       _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede' },
       nombre: { type: String, trim: true, maxlength: 100 },
