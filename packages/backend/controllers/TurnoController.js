@@ -2,10 +2,12 @@ import { BadRequestError } from '../errors/AppError.js';
 import { turnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/Logger.js';
+import { PacienteService } from '../services/PacienteService.js';
 
 export class TurnoController {
-  constructor({ turnoService: svc = turnoService } = {}) {
+  constructor({ turnoService: svc = turnoService, pacienteService: pSvc = PacienteService } = {}) {
     this.turnoService = svc;
+    this.pacienteService = pSvc;
   }
 
   reservarTurno = async (req, res, next) => {
@@ -250,7 +252,7 @@ export class TurnoController {
   proponerReprogramacion = async (req, res, next) => {
     try {
       const usuarioAutenticado = req.usuarioAutenticado;
-      
+
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
 
@@ -329,7 +331,6 @@ export class TurnoController {
           limit = '10',
           sortBy = 'costo',
           sortOrder = 'asc',
-          pacienteId,
         } = req.query;
 
         // Parseo
@@ -384,10 +385,11 @@ export class TurnoController {
           sortOrder: sortOrderNormalized,
         };
 
-        let paciente = req.user?.paciente ?? null;
+        const usuario = req.usuarioAutenticado;
+        let paciente;
 
-        if (!paciente && pacienteId) {
-          paciente = await this.turnoService.buscarPacientePorId(pacienteId);
+        if (!usuario && usuario.roles.includes('PACIENTE')) {
+          paciente = await this.pacienteService.findByIdUsuario(usuario.id);
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');

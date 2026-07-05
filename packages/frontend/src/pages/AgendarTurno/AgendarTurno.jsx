@@ -255,7 +255,6 @@ export default function AgendarTurno() {
         const params = {
           fechaDesde: selectedDate,
           fechaHasta: selectedDate,
-          pacienteId: selectedPaciente.id_paciente,
           // Este paso ya viene acotado a UN solo día (fechaDesde === fechaHasta).
           // Sin este límite explícito, /turnos/disponibles usa el default de
           // paginación (limit=10), cortando la grilla de horarios a mitad de
