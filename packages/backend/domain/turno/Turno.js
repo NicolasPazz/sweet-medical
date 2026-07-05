@@ -71,6 +71,11 @@ export class Turno {
       proponenteId: usuario.id || usuario._id,
     };
 
+
+    console.log("usuario: ", usuario);
+    console.log("nuevaFechaHora: ",nuevaFechaHora);
+    console.log("motivo: ", motivo);
+
     const notificacion = this.actualizarEstado(
       usuario,
       new PendienteReprogramacion(this),

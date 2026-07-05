@@ -1,21 +1,39 @@
 import React, { useState } from 'react';
 import './DetalleTurno.css';
 import CancelarTurnoModal from '../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
+import ReprogramacionModal from '../../components/ReprogramacionModal/ReprogramacionModal.jsx';
 import { formatHoraUTC } from '../../lib/dateTime.js';
 
 export default function DetalleTurno({
   turno,
+  usuarioId,
   cfgEstado,
   formatFecha,
   onVolver,
-  onIrAReprogramar,
+  onProponerReprogramacion,
   onCancelar,
+  onAceptarReprogramacion,
+  onRechazarReprogramacion,
 }) {
   const [modalCancelar, setModalCancelar] = useState(false);
+  const [modalReprogramacion, setModalReprogramacion] = useState(false);
+
+  const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
+  // Si fue el propio paciente quien propuso el cambio, no puede aceptar ni
+  // rechazar su propia propuesta: solo puede esperar la respuesta del médico.
+  const esPropuestaPropia =
+    esPendiente &&
+    !!turno.propuestaCambio &&
+    String(turno.propuestaCambio.proponenteId) === String(usuarioId);
 
   const esModificable = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE_REPROGRAMACION'].includes(
     turno.estado,
   );
+  // Mientras haya una propuesta pendiente (propia o ajena) no tiene sentido
+  // dejar pedir OTRA reprogramación encima; sólo se puede cancelar o, si la
+  // propuso el médico, responderla.
+  const puedeReprogramar = ['RESERVADO', 'CONFIRMADO'].includes(turno.estado);
+  const puedeCancelar = esModificable;
 
   const handleConfirmarCancelacion = (motivo) => {
     setModalCancelar(false);
@@ -77,20 +95,61 @@ export default function DetalleTurno({
           </span>
         </div>
 
-        {esModificable && (
-          <div className="detalle-acciones-group">
+        {esPendiente && turno.propuestaCambio && (
+          <div className="detalle-propuesta-bloque">
+            <p className="detalle-propuesta-titulo text-ellipsis">
+              📅 {esPropuestaPropia ? 'Tu propuesta de reprogramación' : 'Propuesta del médico'}
+            </p>
+            <div className="detalle-info-row">
+              <span className="detalle-label text-ellipsis">Nueva fecha propuesta:</span>
+              <span className="detalle-value text-ellipsis">
+                {formatFecha(turno.propuestaCambio.nuevaFechaHora)}
+              </span>
+            </div>
+            <div className="detalle-info-row">
+              <span className="detalle-label text-ellipsis">Nuevo horario:</span>
+              <span className="detalle-value text-ellipsis">
+                {turno.propuestaCambio.nuevaHora || formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)} hs
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="detalle-acciones-group">
+          {puedeCancelar && !esPendiente && (
             <button className="btn-cancelar-accion text-ellipsis" onClick={() => setModalCancelar(true)}>
               ❌ Cancelar Cita
             </button>
+          )}
+          {puedeReprogramar && (
             <button
               className="btn-nuevo-turno text-ellipsis"
               style={{ position: 'static', margin: '0' }}
-              onClick={onIrAReprogramar}
+              onClick={() => setModalReprogramacion(true)}
             >
               🔄 Reprogramar Fecha
             </button>
-          </div>
-        )}
+          )}
+          {esPendiente && !esPropuestaPropia && (
+            <>
+              <button className="btn-cancelar-accion text-ellipsis" onClick={onRechazarReprogramacion}>
+                ✕ Rechazar
+              </button>
+              <button
+                className="btn-nuevo-turno text-ellipsis"
+                style={{ position: 'static', margin: '0' }}
+                onClick={onAceptarReprogramacion}
+              >
+                ✓ Aceptar reprogramación
+              </button>
+            </>
+          )}
+          {esPendiente && esPropuestaPropia && (
+            <span className="detalle-propuesta-espera text-ellipsis">
+              ⏳ Esperando respuesta del médico
+            </span>
+          )}
+        </div>
       </div>
 
       {modalCancelar && (
@@ -98,6 +157,16 @@ export default function DetalleTurno({
           turno={turno}
           onClose={() => setModalCancelar(false)}
           onConfirm={handleConfirmarCancelacion}
+        />
+      )}
+      {modalReprogramacion && (
+        <ReprogramacionModal
+          turno={turno}
+          onConfirmar={async ({ fecha, hora, motivo }) => {
+            await onProponerReprogramacion(fecha, hora, motivo);
+            setModalReprogramacion(false);
+          }}
+          onCerrar={() => setModalReprogramacion(false)}
         />
       )}
     </div>

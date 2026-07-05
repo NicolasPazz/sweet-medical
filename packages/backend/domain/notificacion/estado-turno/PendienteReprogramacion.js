@@ -14,7 +14,7 @@ export class PendienteReprogramacion {
     return EstadoTurno.PENDIENTE_REPROGRAMACION;
   }
 
-  notificar(remitente, _m) {
+  generarNotificacion(remitente, _m) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
 

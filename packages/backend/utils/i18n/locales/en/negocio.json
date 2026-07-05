@@ -1,13 +1,14 @@
 {
-  "CONFIRMACION_TURNO": "Hello {{paciente}}, your appointment with Dr. {{medico}} for {{especialidad}} has been confirmed for {{fecha}}.",
+  "CONFIRMACION_TURNO": "Hi {{paciente}}, your appointment with Dr. {{medico}} for {{especialidad}} has been confirmed for {{fecha}}.",
   "CONFIRMACION_TURNO_DETALLADA": "Your appointment for {{servicio}} on {{fecha}} at {{sede}} with Dr. {{medico}} has been confirmed.",
-  "RECORDATORIO_MEDICO": "Reminder: You have an appointment tomorrow with {{nombre}}.",
+  "RECORDATORIO_MEDICO": "Reminder: Tomorrow you have an appointment with {{nombre}}.",
   "RECORDATORIO_PACIENTE": "Reminder: Tomorrow is your appointment with Dr. {{nombre}}.",
-  "CANCELACION_A_MEDICO": "Patient {{nombre}} has cancelled their appointment for {{servicio}}.",
-  "CANCELACION_A_PACIENTE": "The professional has cancelled your appointment on {{fecha}} at {{sede}} for {{servicio}}.",
-  "RESERVA_A_MEDICO": "New appointment reserved by patient {{nombre}} for {{servicio}}.",
-
-  "PROPUESTA_ACEPTADA": "Rescheduling proposal successfully accepted.",
-  "PROPUESTA_RECHAZADA": "Rescheduling proposal rejected by the counterparty.",
-  "PROPUESTA_RECIBIDA": "The {{rolProponente}} has requested to reschedule the appointment for {{fecha}}."
+  "CANCELACION_A_MEDICO": "Patient {{nombre}} has canceled their appointment on {{fecha}} for {{servicio}}. Reason: {{motivo}}",
+  "CANCELACION_A_PACIENTE": "Dr. {{nombre}} has canceled your appointment on {{fecha}} for {{servicio}}. Reason: {{motivo}}",
+  "RESERVA_A_MEDICO": "New appointment booked by patient {{nombre}} for {{servicio}} on {{fecha}}.",
+  "PROPUESTA_REPROGRAMACION_A_PACIENTE": "Patient {{nombre}} requested to reschedule their appointment for {{servicio}} on {{fecha}}. Reason: {{motivo}}",
+  "PROPUESTA_REPROGRAMACION_A_MEDICO": "Dr. {{nombre}} requested to reschedule their appointment for {{servicio}} on {{fecha}}. Reason: {{motivo}}",
+  "PROPUESTA_ACEPTADA": "Reschedule proposal accepted successfully.",
+  "PROPUESTA_RECHAZADA": "Reschedule proposal rejected by the other party.",
+  "PROPUESTA_RECIBIDA": "The {{rolProponente}} has requested to reschedule the appointment to {{fecha}}."
 }

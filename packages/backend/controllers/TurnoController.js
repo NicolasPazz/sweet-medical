@@ -77,16 +77,18 @@ export class TurnoController {
 
   proponerReprogramacionMe = async (req, res, next) => {
     try {
-      const idUsuario = req.usuarioAutenticado.id;
+      const usuarioAutenticado = req.usuarioAutenticado;
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { fecha, hora, motivo } = req.body;
       if (!fecha || !hora || !motivo) throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
       const [dia, mes, anio] = fecha.split('/').map(Number);
       const [horas, minutos] = hora.split(':').map(Number);
-      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+      // Date.UTC, no new Date(y,m,d,h,mi) local: fecha/hora representan UTC
+      // directo en todo el sistema (sin conversión), igual que turno.fechaHora.
+      const nuevaFechaHora = new Date(Date.UTC(anio, mes - 1, dia, horas, minutos, 0));
       if (isNaN(nuevaFechaHora.getTime())) throw new BadRequestError('Formato de fecha u hora inválido. Use DD/MM/AAAA y HH:MM');
-      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+      await this.turnoService.proponerReprogramacion(usuarioAutenticado, idTurno, nuevaFechaHora, motivo);
       return res.status(200).json({ status: 'success', message: 'Propuesta de reprogramación registrada' });
     } catch (error) {
       return next(error);
@@ -247,8 +249,8 @@ export class TurnoController {
 
   proponerReprogramacion = async (req, res, next) => {
     try {
-      const idUsuario = req.params.id_usuario;
-      ValidadorId.validarIds(idUsuario);
+      const usuarioAutenticado = req.usuarioAutenticado;
+      
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
 
@@ -261,7 +263,9 @@ export class TurnoController {
       // Convertimos fecha y hora a un objeto Date
       const [dia, mes, anio] = fecha.split('/').map(Number);
       const [horas, minutos] = hora.split(':').map(Number);
-      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+      // Date.UTC, no new Date(y,m,d,h,mi) local: fecha/hora representan UTC
+      // directo en todo el sistema (sin conversión), igual que turno.fechaHora.
+      const nuevaFechaHora = new Date(Date.UTC(anio, mes - 1, dia, horas, minutos, 0));
 
       // Validamos que el formateo haya dado una fecha coherente
       if (isNaN(nuevaFechaHora.getTime())) {
@@ -269,7 +273,7 @@ export class TurnoController {
       }
 
       // Delegamos la lógica al Service
-      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+      await this.turnoService.proponerReprogramacion(usuarioAutenticado, idTurno, nuevaFechaHora, motivo);
 
       return res.status(200).json({
         status: 'success',

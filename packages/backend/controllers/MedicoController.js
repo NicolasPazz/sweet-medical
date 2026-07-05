@@ -2,6 +2,7 @@ import { medicoService } from '../services/MedicoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { DiaSemana } from '../utils/enum/DiaSemana.js';
 import { BadRequestError, NotFoundError } from '../errors/AppError.js';
+import { DateUtil } from '../utils/DateUtil.js';
 
 export class MedicoController {
   constructor({ medicoService: svc = medicoService } = {}) {
@@ -135,8 +136,26 @@ export class MedicoController {
           : turno.servicio
           ? { nombre: turno.servicio.nombre ?? 'N/A' }
           : null,
+        // IDs para poder pedirle al backend disponibilidad real al reprogramar
+        // (mismo servicio, mismo médico = el propio usuario autenticado).
+        servicio_id: turno.servicio ? String(turno.servicio._id) : null,
+        servicio_tipo: turno.servicio?.esTipo ? turno.servicio.esTipo() : null,
+        medico_id: String(medico.id || medico._id),
         sede: turno.sede ? { nombre: turno.sede.nombre ?? 'N/A' } : null,
-        propuestaCambio: turno.propuestaCambio ?? null,
+        // Antes se pasaba `turno.propuestaCambio` crudo: el objeto de dominio
+        // solo tiene `nuevaFechaHora` (no `nuevaHora`), así que el frontend
+        // (que muestra `propuestaCambio.nuevaHora`) siempre recibía undefined
+        // y quedaba "... hs" vacío. Derivamos nuevaHora acá igual que en
+        // TurnoService._mapearTurno.
+        propuestaCambio:
+          turno.propuestaCambio && turno.propuestaCambio.nuevaFechaHora
+            ? {
+                nuevaFechaHora: turno.propuestaCambio.nuevaFechaHora,
+                nuevaHora: DateUtil.toHHMM(turno.propuestaCambio.nuevaFechaHora),
+                motivo: turno.propuestaCambio.motivo,
+                proponenteId: turno.propuestaCambio.proponenteId,
+              }
+            : null,
       }));
 
       return res.status(200).json({ status: 'success', data: turnos });

@@ -234,6 +234,20 @@
   margin-top: 2px;
 }
 
+/* Estado "esperando respuesta" en el listado, cuando la propuesta la hizo
+   este mismo médico */
+.turno-propuesta-espera {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .turno-card-right {
   display: flex;
   flex-direction: column;
@@ -464,6 +478,19 @@
   font-size: 15px;
   color: #271f92;
   font-weight: 700;
+}
+
+/* Estado "esperando respuesta" cuando la propuesta fue propia del médico */
+.detalle-propuesta-espera {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 20px;
+  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Bloque de propuesta en el detalle */

@@ -120,9 +120,9 @@ export default function HistorialTurnosMedico() {
         if (esMultiRol) {
           // Con múltiples roles no colapsamos a un único "rol": el nav se
           // filtra más abajo según el switch (modo), no según el rol.
-          setUser({ roles, nombre: data.perfil?.nombre });
+          setUser({ roles, nombre: data.perfil?.nombre, id: data.usuario?.id });
         } else {
-          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre, id: data.usuario?.id });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -154,6 +154,14 @@ export default function HistorialTurnosMedico() {
   if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
+
+  // Con quién comparamos el proponente de una propuesta de reprogramación
+  // para saber si fue ESTE médico quien la hizo (y por lo tanto debe esperar
+  // la respuesta del paciente, en vez de poder aceptar/rechazar su propia
+  // propuesta).
+  const esPropuestaPropia = (turno) =>
+    !!turno.propuestaCambio &&
+    String(turno.propuestaCambio.proponenteId) === String(user?.id);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
@@ -256,6 +264,13 @@ export default function HistorialTurnosMedico() {
                 nuevaFechaHora,
                 nuevaHora: hora,
                 motivo,
+                // Antes no se guardaba quién propuso el cambio en la
+                // actualización optimista local (solo se persistía en el
+                // backend). Resultándo: hasta el próximo refresh, el propio
+                // médico que acababa de proponer la reprogramación veía sus
+                // propios botones de Aceptar/Rechazar, porque `proponenteId`
+                // era `undefined` y nunca coincidía con `usuarioId`.
+                proponenteId: user?.id,
               },
             }
             : t,
@@ -273,6 +288,7 @@ export default function HistorialTurnosMedico() {
     return (
       <DetalleTurnoMedico
         turno={turnoActualizado}
+        usuarioId={user?.id}
         cfgEstado={
           ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
         }
@@ -341,7 +357,7 @@ export default function HistorialTurnosMedico() {
                     {esPendiente && turno.propuestaCambio && (
                       <span className="turno-propuesta text-ellipsis">
                         → {formatFechaUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
-                        {turno.propuestaCambio.nuevaHora}
+                        {turno.propuestaCambio.nuevaHora || formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}
                       </span>
                     )}
                   </div>
@@ -361,7 +377,7 @@ export default function HistorialTurnosMedico() {
                       ✓ Confirmar
                     </button>
                   )}
-                  {esPendiente && (
+                  {esPendiente && !esPropuestaPropia(turno) && (
                     <div className="btns-reprogramacion-inline" onClick={(e) => e.stopPropagation()}>
                       <button
                         className="btn-aceptar-inline text-ellipsis"
@@ -376,6 +392,11 @@ export default function HistorialTurnosMedico() {
                         ✕ Rechazar
                       </button>
                     </div>
+                  )}
+                  {esPendiente && esPropuestaPropia(turno) && (
+                    <span className="turno-propuesta-espera text-ellipsis" onClick={(e) => e.stopPropagation()}>
+                      ⏳ Esperando respuesta del paciente
+                    </span>
                   )}
                   {puedeFinalizar && (
                     <button

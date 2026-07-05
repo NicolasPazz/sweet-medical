@@ -4,6 +4,11 @@ import { t } from '../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unifica
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(usuario, turno, motivo) {
+
+    console.log("turno.estado:", turno.estado);
+    console.log("¿Qué tipo de dato es?:", typeof turno.estado);
+    console.log("¿Tiene la función?:", typeof turno.estado.generarNotificacion);
+
     return turno.estado.generarNotificacion(usuario, motivo);
   }
 

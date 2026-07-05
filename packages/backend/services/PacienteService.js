@@ -3,6 +3,7 @@ import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.
 import { NotFoundError, ConflictError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { usuarioService } from './UsuarioService.js';
+import { DateUtil } from '../utils/DateUtil.js';
 
 export class PacienteService {
   constructor({
@@ -123,11 +124,18 @@ export class PacienteService {
         diaSemana: t.diaSemana,
         hora: t.hora,
         medico: t.medico ? t.medico.nombre : 'N/A',
+        medico_id: t.medico ? String(t.medico.id || t.medico._id) : null,
         servicio: t.servicio
           ? t.servicio.codigo
             ? `${t.servicio.codigo} - ${t.servicio.nombre}`
             : t.servicio.nombre
           : 'N/A',
+        // IDs necesarios para poder consultar disponibilidad real al reprogramar
+        // (ver ReprogramarTurno.jsx / ModalReprogramacion): antes esto solo
+        // tenía strings de display, sin forma de volver a pedirle al backend
+        // "qué horarios hay libres" para este mismo médico+servicio.
+        servicio_id: t.servicio ? String(t.servicio._id) : null,
+        servicio_tipo: t.servicio?.esTipo ? t.servicio.esTipo() : esPractica ? 'PRACTICA' : 'ESPECIALIDAD',
         sede: t.sede ? t.sede.nombre : 'N/A',
         estado:
           typeof t.estado?.getEstadoNombre === 'function'
@@ -137,6 +145,20 @@ export class PacienteService {
         costoEstimado: costoEstimado,
         cobertura: cobertura,
         historialTurnos,
+        // Antes este mapeo no devolvía nada de la propuesta de reprogramación:
+        // el paciente perdía por completo la tarjeta de "Propuesta del médico" /
+        // "Tu propuesta" apenas se refrescaba la página (la primera carga usaba
+        // el estado local optimista, pero el refetch a este endpoint no traía
+        // el campo). Mismo criterio que TurnoService._mapearTurno.
+        propuestaCambio:
+          t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
+            ? {
+                nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+                nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+                motivo: t.propuestaCambio.motivo,
+                proponenteId: t.propuestaCambio.proponenteId,
+              }
+            : null,
       };
     });
 

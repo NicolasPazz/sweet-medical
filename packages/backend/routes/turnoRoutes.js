@@ -479,7 +479,7 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/:id_usuario/propuesta-reprogramacion/:id_turno')
+  .route('/propuesta-reprogramacion/:id_turno')
   .patch(basicAuthUser, (req, res, next) => turnoController.proponerReprogramacion(req, res, next));
 
 /**
@@ -719,8 +719,13 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  */
 turnoRouter.route('/disponibles').get(basicAuthPaciente, turnoController.buscarTurnos());
 
-turnoRouter.route('/disponibilidad/fechas').get(basicAuthPaciente, turnoController.obtenerFechasDisponibles());
+// Nota: basicAuthUser (no basicAuthPaciente) a propósito — estos dos endpoints
+// también los usa el médico al proponer una reprogramación (necesita consultar
+// su propia disponibilidad real), y no dependen de ningún dato específico de
+// paciente (buscarFechasDisponibles/buscarHorariosDisponibles siempre pasan
+// paciente=null a buscarTurnos internamente).
+turnoRouter.route('/disponibilidad/fechas').get(basicAuthUser, turnoController.obtenerFechasDisponibles());
 
-turnoRouter.route('/disponibilidad/horarios').get(basicAuthPaciente, turnoController.obtenerHorariosDisponibles());
+turnoRouter.route('/disponibilidad/horarios').get(basicAuthUser, turnoController.obtenerHorariosDisponibles());
 
 export default turnoRouter;

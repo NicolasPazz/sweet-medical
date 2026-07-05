@@ -4,12 +4,11 @@ import './HistorialTurnos.css';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
-import { cancelarTurno, cancelarTurnoMedico, cancelarTurnoPaciente, proponerReprogramacion } from '../../../services/turnoService.js';
+import { cancelarTurno, cancelarTurnoMedico, cancelarTurnoPaciente, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
-import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
 import { formatFechaUTC } from '../../../lib/dateTime.js';
@@ -69,9 +68,9 @@ export default function HistorialTurnos() {
         if (esMultiRol) {
           // Con múltiples roles no colapsamos a un único "rol": el nav se
           // filtra más abajo según el switch (modo), no según el rol.
-          setUser({ roles, nombre: data.perfil?.nombre });
+          setUser({ roles, nombre: data.perfil?.nombre, id: data.usuario?.id });
         } else {
-          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre, id: data.usuario?.id });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -141,6 +140,43 @@ export default function HistorialTurnos() {
     }
   };
 
+  const handleAceptarReprogramacion = async () => {
+    try {
+      await responderReprogramacion(turnoSeleccionado._id, true, email, password);
+      setTurnos((prev) =>
+        prev.map((t) => {
+          if (t._id !== turnoSeleccionado._id) return t;
+          return {
+            ...t,
+            estado: 'RESERVADO',
+            fechaHora: t.propuestaCambio?.nuevaFechaHora ?? t.fechaHora,
+            hora: t.propuestaCambio?.nuevaHora ?? t.hora,
+            propuestaCambio: null,
+          };
+        }),
+      );
+      mostrarToast('Reprogramación aceptada exitosamente');
+      setVista('LISTADO');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al aceptar la reprogramación', 'error');
+    }
+  };
+
+  const handleRechazarReprogramacion = async () => {
+    try {
+      await responderReprogramacion(turnoSeleccionado._id, false, email, password);
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === turnoSeleccionado._id ? { ...t, estado: 'RESERVADO', propuestaCambio: null } : t,
+        ),
+      );
+      mostrarToast('Reprogramación rechazada');
+      setVista('LISTADO');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al rechazar la reprogramación', 'error');
+    }
+  };
+
   const handleProponerReprogramacion = async (fecha, hora, motivo) => {
     try {
       await proponerReprogramacion(turnoSeleccionado._id, fecha, hora, motivo, email, password);
@@ -155,13 +191,20 @@ export default function HistorialTurnos() {
             ? {
               ...t,
               estado: 'PENDIENTE_REPROGRAMACION',
-              propuestaCambio: { nuevaFechaHora, nuevaHora: hora, motivo },
+              propuestaCambio: {
+                nuevaFechaHora,
+                nuevaHora: hora,
+                motivo,
+                // Mismo problema que del lado del médico: sin proponenteId
+                // acá, el propio paciente veía sus botones de Aceptar/Rechazar
+                // apenas proponía el cambio, hasta el próximo refresh.
+                proponenteId: user?.id,
+              },
             }
             : t,
         ),
       );
       mostrarToast('Propuesta de reprogramación enviada exitosamente');
-      setVista('LISTADO');
     } catch (err) {
       mostrarToast(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación', 'error');
       throw err;
@@ -174,27 +217,16 @@ export default function HistorialTurnos() {
       <>
         <DetalleTurno
           turno={turnoActualizado}
+          usuarioId={user?.id}
           cfgEstado={
             ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
           }
           formatFecha={formatFechaUTC}
           onVolver={() => setVista('LISTADO')}
-          onIrAReprogramar={() => setVista('REPROGRAMAR')}
+          onProponerReprogramacion={handleProponerReprogramacion}
           onCancelar={handleCancelar}
-        />
-        <Toast mensaje={toast?.mensaje} tipo={toast?.tipo} />
-      </>
-    );
-  }
-
-  if (vista === 'REPROGRAMAR') {
-    return (
-      <>
-        <ReprogramarTurno
-          turno={turnoSeleccionado}
-          onVolver={() => setVista('DETALLE')}
-          onFinalizar={() => setVista('LISTADO')}
-          onEnviarSolicitud={handleProponerReprogramacion}
+          onAceptarReprogramacion={handleAceptarReprogramacion}
+          onRechazarReprogramacion={handleRechazarReprogramacion}
         />
         <Toast mensaje={toast?.mensaje} tipo={toast?.tipo} />
       </>

@@ -55,9 +55,10 @@ export const getFechasDisponibles = async (params, email, password) => {
 };
 
 export const getHorariosDisponibles = async (params, email, password) => {
-  const res = await api.get('/turnos/disponibilidad/horarios', { params },
-    { headers: authHeaders(email, password) }
-  );
+  const res = await api.get('/turnos/disponibilidad/horarios', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
