@@ -1,17 +1,21 @@
 class HomePage {
-  constructor(cy) {
-    this.cy = cy;
+  url = '/';
+
+  goto() {
+    cy.visit(this.url);
+    return this;
   }
 
   expectLoggedIn() {
-    this.cy.contains('h1, h2, h3', /Bienvenido a Sweet Medical/i).should('be.visible');
+    cy.reload();
+    cy.contains('a[href="/perfil"]', /Mi Perfil/i).should('be.visible');
     return this;
   }
 
   goToAgendarTurno() {
-    this.cy.get('a[href="/solicitar-turno"]').first().should('be.visible').click();
+    cy.get('a[href="/solicitar-turno"]').first().should('be.visible').click();
     return this;
   }
 }
 
-module.exports = HomePage;
+export default new HomePage();

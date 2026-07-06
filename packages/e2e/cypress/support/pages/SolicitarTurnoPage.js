@@ -1,39 +1,51 @@
 class SolicitarTurnoPage {
-  constructor(cy) {
-    this.cy = cy;
+  url = '/solicitar-turno';
+
+  goto() {
+    cy.visit(this.url);
+    return this;
   }
 
   expectPageVisible() {
-    this.cy.get('.paciente-select-dropdown').should('be.visible');
-    return this;
-  }
-
-  selectPacienteByIndex(index) {
-    this.cy
-      .get('.paciente-select-dropdown')
-      .should('be.visible')
-      .find('option')
-      .should('have.length.greaterThan', index);
-    this.cy.get('.paciente-select-dropdown').select(index);
-    this.cy.get('.paciente-selected-info').should('be.visible');
-    return this;
-  }
-
-  selectFirstService() {
-    this.cy.get('.service-card').first().should('be.visible').click();
-    return this;
-  }
-
-  goToMedicoStep() {
-    this.cy
-      .contains('button', /Continuar con/i)
+    cy.url().should('include', this.url).and('not.include', '/401').and('not.include', '/403');
+    cy.intercept('GET', '**/turnos**').as('getTurnos');
+    cy.get('.services-grid').should('be.visible');
+    cy
+      .get('.service-card')
+      .should('have.length.greaterThan', 0)
+      .first()
       .should('be.visible')
       .click();
     return this;
   }
 
+  selectFirstService() {
+    cy.wait('@getTurnos');
+    cy
+      .get('.service-card')
+      .first()
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.service-card')
+      .first()
+      .should('have.class', 'selected');
+    return this;
+
+  }
+
+  goToMedicoStep() {
+    cy
+      .contains('button', /Continuar con/i)
+      .should('be.visible')
+      .and('be.enabled')
+      .click();
+    return this;
+  }
+
   goToDisponibilidad() {
-    this.cy
+    cy
       .contains('button', /Ver Disponibilidad/i)
       .should('be.visible')
       .click();
@@ -41,22 +53,22 @@ class SolicitarTurnoPage {
   }
 
   selectFirstAvailableDay() {
-    this.cy.get('.cal-day.has-slots').first().should('be.visible').click();
+    cy.get('.cal-day.has-slots').first().should('be.visible').click();
     return this;
   }
 
   selectFirstSlot() {
-    this.cy.get('.slot-btn').first().should('be.visible').click();
+    cy.get('.slot-btn').first().should('be.visible').click();
     return this;
   }
 
   expectSlotAlert() {
-    this.cy.get('.slot-alert-info').should('be.visible');
+    cy.get('.slot-alert-info').should('be.visible');
     return this;
   }
 
   addTurnAndReturnToSearch() {
-    this.cy
+    cy
       .contains('button', /Sumar turno/i)
       .should('be.visible')
       .click();
@@ -64,18 +76,18 @@ class SolicitarTurnoPage {
   }
 
   expectCartCount(value) {
-    this.cy.get('.cart-count').should('be.visible').and('have.text', value);
+    cy.get('.cart-count').should('be.visible').and('have.text', value);
     return this;
   }
 
   openCartDropdown() {
-    this.cy.get('button[aria-label="Ver carrito"]').should('be.visible').click();
-    this.cy.get('.cart-dropdown').should('be.visible');
+    cy.get('button[aria-label="Ver carrito"]').should('be.visible').click();
+    cy.get('.cart-dropdown').should('be.visible');
     return this;
   }
 
   removeFirstCartItem() {
-    this.cy
+    cy
       .get('.cart-dropdown')
       .find('button[title="Quitar del carrito"]')
       .first()
@@ -85,10 +97,10 @@ class SolicitarTurnoPage {
   }
 
   expectCartEmpty() {
-    this.cy.contains(/No tenés turnos en el carrito/i).should('be.visible');
-    this.cy.get('.cart-count').should('not.exist');
+    cy.contains(/No tenés turnos en el carrito/i).should('be.visible');
+    cy.get('.cart-count').should('not.exist');
     return this;
   }
 }
 
-module.exports = SolicitarTurnoPage;
+export default new SolicitarTurnoPage();
