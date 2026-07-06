@@ -10,8 +10,7 @@ class SolicitarTurnoPage {
     cy.url().should('include', this.url).and('not.include', '/401').and('not.include', '/403');
     cy.intercept('GET', '**/turnos**').as('getTurnos');
     cy.get('.services-grid').should('be.visible');
-    cy
-      .get('.service-card')
+    cy.get('.service-card')
       .should('have.length.greaterThan', 0)
       .first()
       .should('be.visible')
@@ -21,23 +20,14 @@ class SolicitarTurnoPage {
 
   selectFirstService() {
     cy.wait('@getTurnos');
-    cy
-      .get('.service-card')
-      .first()
-      .should('be.visible')
-      .click();
+    cy.get('.service-card').first().should('be.visible').click();
 
-    cy
-      .get('.service-card')
-      .first()
-      .should('have.class', 'selected');
+    cy.get('.service-card').first().should('have.class', 'selected');
     return this;
-
   }
 
   goToMedicoStep() {
-    cy
-      .contains('button', /Continuar con/i)
+    cy.contains('button', /Continuar con/i)
       .should('be.visible')
       .and('be.enabled')
       .click();
@@ -45,8 +35,7 @@ class SolicitarTurnoPage {
   }
 
   goToDisponibilidad() {
-    cy
-      .contains('button', /Ver Disponibilidad/i)
+    cy.contains('button', /Ver Disponibilidad/i)
       .should('be.visible')
       .click();
     return this;
@@ -68,8 +57,7 @@ class SolicitarTurnoPage {
   }
 
   addTurnAndReturnToSearch() {
-    cy
-      .contains('button', /Sumar turno/i)
+    cy.contains('button', /Sumar turno/i)
       .should('be.visible')
       .click();
     return this;
@@ -87,8 +75,7 @@ class SolicitarTurnoPage {
   }
 
   removeFirstCartItem() {
-    cy
-      .get('.cart-dropdown')
+    cy.get('.cart-dropdown')
       .find('button[title="Quitar del carrito"]')
       .first()
       .should('be.visible')
