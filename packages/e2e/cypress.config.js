@@ -7,6 +7,7 @@ export default defineConfig({
   e2e: {
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     supportFile: 'cypress/support/e2e.js',
+    defaultCommandTimeout: 15000,
     env: {
       E2E_USER_EMAIL: process.env.E2E_USER_EMAIL,
       E2E_USER_PASSWORD: process.env.E2E_USER_PASSWORD,
