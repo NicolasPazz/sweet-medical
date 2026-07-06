@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../components/AuthProvider.jsx';
-import { agregarSede, getSedesMe } from '../../../services/userService.js';
+import { agregarSede, getSedesMe, getMe, getRolUsuario } from '../../../services/userService.js';
 import { getSedes } from '../../../services/turnoService.js';
 import Toast from '../../../components/Toast/Toast.jsx';
-import VolverGestion from '../../../components/UI/VolverGestion.jsx';
+import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
+import Spinner from '../../../components/ui/Spinner.jsx';
+import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import './GestionSedes.css';
 
 export default function GestionSedes() {
-  const { email, password } = useAuth();
+  const { isAuthenticated, email, password } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const [todasLasSedes, setTodasLasSedes] = useState([]);
   const [misSedesIds, setMisSedesIds] = useState(new Set());
@@ -16,6 +21,8 @@ export default function GestionSedes() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(false);
   const [toast, setToast] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
@@ -23,7 +30,50 @@ export default function GestionSedes() {
   };
 
   useEffect(() => {
+    const fetchUser = async () => {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
+        } finally {
+          setLoadingUser(false);
+        }
+      } else {
+        setUser(null);
+        setMultiplesFiltros(false);
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
+
+  useEffect(() => {
     const cargar = async () => {
+      if (!email || !password) {
+        setCargando(false);
+        return;
+      }
       try {
         const [todasRes, misRes] = await Promise.all([getSedes(), getSedesMe({ email, password })]);
         const todas = todasRes?.data ?? todasRes ?? [];
@@ -39,6 +89,24 @@ export default function GestionSedes() {
     };
     cargar();
   }, [email, password]);
+
+  if (!isAuthenticated) {
+    return <ErrorPage type="401" />;
+  }
+
+  if (loadingUser) {
+    return (
+      <div className="gs-sedes-page">
+        <div className="gs-sedes-container">
+          <Spinner size="default" text="Cargando..." />
+        </div>
+      </div>
+    );
+  }
+
+  if (rolVisible !== 'Médico') {
+    return <ErrorPage type="403" />;
+  }
 
   // Sedes disponibles = todas menos las que ya tengo
   const sedesDisponibles = todasLasSedes.filter(
@@ -87,7 +155,7 @@ export default function GestionSedes() {
 
           <div className="gs-sedes-form">
             {cargando ? (
-              <p className="gs-cargando">Cargando sedes...</p>
+              <Spinner size="default" text="Cargando sedes..." />
             ) : sedesDisponibles.length === 0 ? (
               <p className="gs-sin-sedes">
                 Ya tenés todas las sedes disponibles agregadas, o no hay sedes en el sistema.

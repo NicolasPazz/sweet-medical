@@ -12,4 +12,8 @@ export class Practica {
     this.costo = costo;
     this.tipo = 'PRACTICA';
   }
+
+  esTipo() {
+    return this.tipo || 'PRACTICA';
+  }
 }

@@ -10,4 +10,8 @@ export class Especialidad {
     this.costo = costo;
     this.tipo = 'ESPECIALIDAD';
   }
+
+  esTipo() {
+    return this.tipo || 'ESPECIALIDAD';
+  }
 }

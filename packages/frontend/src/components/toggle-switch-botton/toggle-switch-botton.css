@@ -1,0 +1,61 @@
+.switch {
+  --width-of-switch: 3.2em;
+  --height-of-switch: 1.7em;
+  --size-of-knob: 1.25em;
+  --knob-offset: 0.22em;
+  display: block;
+  position: relative;
+  width: var(--width-of-switch);
+  height: var(--height-of-switch);
+}
+
+.switch input {
+  /* input oculto, accesible solo para el toggle */
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+/* Riel del switch: colores del header (fondo sidebar / acento teal) */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+  border-radius: 30px;
+  box-sizing: border-box;
+}
+
+/* Círculo: siempre el mismo color, solo cambia de posición */
+.slider::before {
+  position: absolute;
+  content: '';
+  height: var(--size-of-knob);
+  width: var(--size-of-knob);
+  border-radius: 50%;
+  left: var(--knob-offset);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: left 0.3s ease;
+}
+
+/* Estado activo: usa el mismo teal de los links activos del nav (.header-nav a.active) */
+input:checked + .slider {
+  background: #12979f;
+  border-color: #12979f;
+}
+
+input:checked + .slider::before {
+  left: calc(100% - (var(--size-of-knob) + var(--knob-offset)));
+  /* el círculo NO cambia de color entre estados a propósito */
+  background: #ffffff;
+}

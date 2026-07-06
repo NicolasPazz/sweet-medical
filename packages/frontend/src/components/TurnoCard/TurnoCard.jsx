@@ -1,12 +1,8 @@
 import React from 'react';
 import './TurnoCard.css';
+import { formatFechaUTC, formatHoraUTC } from '../../lib/dateTime.js';
 
 export default function TurnoCard({ turno, cfg, onClickTurno }) {
-  function formatFecha(fechaHora) {
-    const d = new Date(fechaHora);
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-
   return (
     <li
       key={turno._id}
@@ -15,8 +11,8 @@ export default function TurnoCard({ turno, cfg, onClickTurno }) {
       style={{ cursor: 'pointer' }}
     >
       <div className="turno-card-left">
-        <span className="turno-fecha text-ellipsis">{formatFecha(turno.fechaHora)}</span>
-        <span className="turno-hora text-ellipsis">{turno.hora}</span>
+        <span className="turno-fecha text-ellipsis">{formatFechaUTC(turno.fechaHora)}</span>
+        <span className="turno-hora text-ellipsis">{formatHoraUTC(turno.fechaHora)}</span>
       </div>
       <div className="turno-card-center">
         <span className="turno-servicio text-ellipsis">
