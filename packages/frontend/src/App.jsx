@@ -9,6 +9,7 @@ import { GestionServicio } from './pages/GestionMedico/GestionServicio/GestionSe
 import { GestionAdmin } from './pages/GestionAdmin/GestionAdmin';
 import { GenerarUsuario } from './pages/GestionAdmin/GenerarUsuario/GenerarUsuario';
 import { GestionServicioAdmin } from './pages/GestionAdmin/GestionServicio/GestionServicio';
+import { GestionSedesAdmin } from './pages/GestionAdmin/GestionSedes/GestionSedes';
 import HistorialPaciente from './pages/GestionMedico/HistorialPaciente/HistorialPaciente';
 import DisponibilidadMedico from './pages/GestionMedico/DisponibilidadMedico/DisponibilidadMedico';
 import AgendarTurno from './pages/AgendarTurno/AgendarTurno';
@@ -21,6 +22,7 @@ import GestionSedes from './pages/GestionMedico/GestionSedes/GestionSedes.jsx';
 import './App.css';
 import Registro from './pages/Registro/Registro.jsx';
 import Contacto from './pages/Contacto.jsx';
+import OfertaMedica from './pages/OfertaMedica/OfertaMedica.jsx';
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
             <Route path="gestion-admin" element={<GestionAdmin />} />
             <Route path="gestion-admin/usuarios" element={<GenerarUsuario />} />
             <Route path="gestion-admin/servicio" element={<GestionServicioAdmin />} />
+            <Route path="gestion-admin/sedes" element={<GestionSedesAdmin />} />
 
             {/* Panel médico */}
             <Route path="gestion-medico" element={<GestionMedico />} />
@@ -52,6 +55,7 @@ function App() {
             <Route path="*" element={<ErrorPage type="404" />} />
             <Route path="404" element={<ErrorPage type="404" />} />
             <Route path="403" element={<ErrorPage type="403" />} />
+            <Route path="oferta-medica" element={<OfertaMedica />} />
             <Route path="contact" element={<Contacto />} />
           </Route>
         </Routes>

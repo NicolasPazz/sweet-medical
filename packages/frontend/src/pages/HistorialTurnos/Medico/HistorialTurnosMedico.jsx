@@ -10,9 +10,10 @@ import {
   getRolUsuario,
 } from '../../../services/userService.js';
 import {
-  cancelarTurno,
+  cancelarTurnoMedico,
   confirmarTurno,
   finalizarTurno,
+  proponerReprogramacion,
   responderReprogramacion,
 } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
@@ -20,6 +21,8 @@ import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
 import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
+import { formatFechaUTC, formatHoraUTC } from '../../../lib/dateTime.js';
 
 function ModalSede({ onConfirmar, onCerrar, email, password }) {
   const [sedes, setSedes] = useState([]);
@@ -90,11 +93,6 @@ function ModalSede({ onConfirmar, onCerrar, email, password }) {
   );
 }
 
-function formatFecha(fechaHora) {
-  const d = new Date(fechaHora);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
 export default function HistorialTurnosMedico() {
   const { isAuthenticated, email, password } = useAuth();
   const [turnos, setTurnos] = useState([]);
@@ -103,8 +101,11 @@ export default function HistorialTurnosMedico() {
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [toast, setToast] = useState(null);
   const [turnoAConfirmar, setTurnoAConfirmar] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   const mostrarToast = (mensaje, tipo = 'success') => {
     setToast({ mensaje, tipo });
@@ -115,6 +116,7 @@ export default function HistorialTurnosMedico() {
     const load = async () => {
       if (!email || !password) return;
       try {
+        console.log('HOLAAAAAA');
         const data = await getTurnosMedico({ email, password });
         setTurnos(data ?? []);
       } catch (err) {
@@ -129,25 +131,63 @@ export default function HistorialTurnosMedico() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (email && password) {
-        try {
-          const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        const roles = data.usuario?.roles ?? [];
+        const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+        setMultiplesFiltros(esMultiRol);
+
+        if (esMultiRol) {
+          // Con múltiples roles no colapsamos a un único "rol": el nav se
+          // filtra más abajo según el switch (modo), no según el rol.
+          setUser({ roles, nombre: data.perfil?.nombre, id: data.usuario?.id });
+        } else {
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre, id: data.usuario?.id });
         }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setMultiplesFiltros(false);
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password]);
+  }, [email, password, isAuthenticated]);
+
+  if (loadingUser) {
+    return (
+      <div className="historial-container">
+        <SkeletonTurnoList count={5} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
 
-  if (user?.rol !== 'Médico') {
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
+
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
+
+  // Con quién comparamos el proponente de una propuesta de reprogramación
+  // para saber si fue ESTE médico quien la hizo (y por lo tanto debe esperar
+  // la respuesta del paciente, en vez de poder aceptar/rechazar su propia
+  // propuesta).
+  const esPropuestaPropia = (turno) =>
+    !!turno.propuestaCambio && String(turno.propuestaCambio.proponenteId) === String(user?.id);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
@@ -182,7 +222,10 @@ export default function HistorialTurnosMedico() {
 
   const handleCancelar = async (idTurno, motivo) => {
     try {
-      await cancelarTurno(idTurno, motivo, email, password);
+      if (rolVisible === 'Médico') {
+        await cancelarTurnoMedico(idTurno, motivo, email, password);
+      }
+
       setTurnos((prev) =>
         prev.map((t) =>
           t._id === idTurno ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo } : t,
@@ -231,20 +274,61 @@ export default function HistorialTurnosMedico() {
     }
   };
 
+  const handleProponerReprogramacion = async (idTurno, fecha, hora, motivo) => {
+    try {
+      await proponerReprogramacion(idTurno, fecha, hora, motivo, email, password);
+
+      const [dia, mes, anio] = fecha.split('/').map(Number);
+      const [horas, minutos] = hora.split(':').map(Number);
+      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === idTurno
+            ? {
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Antes no se guardaba quién propuso el cambio en la
+                  // actualización optimista local (solo se persistía en el
+                  // backend). Resultándo: hasta el próximo refresh, el propio
+                  // médico que acababa de proponer la reprogramación veía sus
+                  // propios botones de Aceptar/Rechazar, porque `proponenteId`
+                  // era `undefined` y nunca coincidía con `usuarioId`.
+                  proponenteId: user?.id,
+                },
+              }
+            : t,
+        ),
+      );
+      mostrarToast('Propuesta de reprogramación enviada exitosamente');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al proponer la reprogramación', 'error');
+      throw err;
+    }
+  };
+
   if (vista === 'DETALLE' && turnoSeleccionado) {
     const turnoActualizado = turnos.find((t) => t._id === turnoSeleccionado._id);
     return (
       <DetalleTurnoMedico
         turno={turnoActualizado}
+        usuarioId={user?.id}
         cfgEstado={
           ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
         }
-        formatFecha={formatFecha}
+        formatFecha={formatFechaUTC}
         onVolver={() => setVista('LISTADO')}
         onConfirmar={(sede) => handleConfirmar(turnoActualizado._id, sede)}
         onCancelar={(motivo) => handleCancelar(turnoActualizado._id, motivo)}
         onAceptarReprogramacion={() => handleAceptarReprogramacion(turnoActualizado._id)}
         onRechazarReprogramacion={() => handleRechazarReprogramacion(turnoActualizado._id)}
+        onProponerReprogramacion={(fecha, hora, motivo) =>
+          handleProponerReprogramacion(turnoActualizado._id, fecha, hora, motivo)
+        }
       />
     );
   }
@@ -294,9 +378,11 @@ export default function HistorialTurnosMedico() {
                 >
                   <div className="turno-card-left">
                     <span className="turno-fecha text-ellipsis">
-                      {formatFecha(turno.fechaHora)}
+                      {formatFechaUTC(turno.fechaHora)}
                     </span>
-                    <span className="turno-hora text-ellipsis">{turno.hora}</span>
+                    <span className="turno-hora text-ellipsis">
+                      {formatHoraUTC(turno.fechaHora)}
+                    </span>
                   </div>
                   <div className="turno-card-center">
                     <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
@@ -306,8 +392,9 @@ export default function HistorialTurnosMedico() {
                     )}
                     {esPendiente && turno.propuestaCambio && (
                       <span className="turno-propuesta text-ellipsis">
-                        → {formatFecha(turno.propuestaCambio.nuevaFechaHora)}{' '}
-                        {turno.propuestaCambio.nuevaHora}
+                        → {formatFechaUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                        {turno.propuestaCambio.nuevaHora ||
+                          formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}
                       </span>
                     )}
                   </div>
@@ -329,7 +416,7 @@ export default function HistorialTurnosMedico() {
                       ✓ Confirmar
                     </button>
                   )}
-                  {esPendiente && (
+                  {esPendiente && !esPropuestaPropia(turno) && (
                     <div
                       className="btns-reprogramacion-inline"
                       onClick={(e) => e.stopPropagation()}
@@ -347,6 +434,14 @@ export default function HistorialTurnosMedico() {
                         ✕ Rechazar
                       </button>
                     </div>
+                  )}
+                  {esPendiente && esPropuestaPropia(turno) && (
+                    <span
+                      className="turno-propuesta-espera text-ellipsis"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      ⏳ Esperando respuesta del paciente
+                    </span>
                   )}
                   {puedeFinalizar && (
                     <button

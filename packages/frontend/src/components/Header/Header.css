@@ -1,7 +1,7 @@
 /* ─── Variables ─────────────────────────────────────────────────────────── */
 :root {
   --sidebar-width: 260px;
-  --header-height-mobile: 60px;
+  --header-height-mobile: 70px;
 }
 
 /* ─── Sidebar (desktop) ─────────────────────────────────────────────────── */
@@ -27,10 +27,9 @@
 .logo-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 0 24px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 24px;
+  padding: 0 24px;
 }
 
 .logo-img {
@@ -39,26 +38,32 @@
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
   transform: scale(1.5);
-  transform-origin: left center;
+  transform-origin: center center;
 }
 
-.logo-text h1 {
-  font-size: 18px;
-  color: #ffffff;
-  font-weight: 700;
-  line-height: 1.2;
+/* Toggle row */
+.logo-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px 16px;
+}
+
+.up-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+}
+
+.logo-toggle-label {
   margin: 0;
-  font-family: 'Playfair Display', serif;
-}
-
-.logo-text span {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  font-weight: 700;
-  display: block;
-  margin-top: 2px;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 /* ─── Navegación ────────────────────────────────────────────────────────── */
@@ -112,7 +117,7 @@
   white-space: nowrap;
 }
 
-/* ─── Sección Pie / Acciones ────────────────────────────────────────────── */
+/* ─── Sección Pie / Acciones (Desktop) ──────────────────────────────────── */
 .header-footer-section {
   padding: 20px 16px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -241,48 +246,58 @@
   background: rgba(0, 0, 0, 0.45);
   z-index: 99;
 }
-
 .nav-overlay.visible {
   display: block;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE – mobile breakpoint
+   RESPONSIVE – MOBILE BREAKPOINT
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* El sidebar se convierte en top navbar fija */
   .header {
     flex-direction: row;
     width: 100%;
     min-width: unset;
-    height: var(--header-height-mobile);
+    height: var(--header-height-mobile); /* 70px */
     position: fixed;
     top: 0;
     left: 0;
-    padding: 0 12px 0 16px;
+    padding: 0 12px; /* Un poco menos de padding lateral para dar espacio a todo */
     align-items: center;
+    justify-content: space-between;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 200;
-    gap: 0;
   }
 
-  /* Logo compacto */
+  .up-section {
+    border: none;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    height: 100%; /* Aprovecha todo el alto */
+  }
+
   .logo-container {
     padding: 0;
-    border-bottom: none;
-    margin-bottom: 0;
-    flex: 1;
-    min-width: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
   }
 
   .logo-img {
-    height: 36px;
-    transform: none;
+    height: 60px; /* ¡Logo gigante! Toma casi los 70px completos del header */
+    width: auto;
+    transform: none; /* Quitamos el scale para que el height lo controle limpio */
+    object-fit: contain;
   }
 
-  /* La nav se convierte en menú deslizante lateral */
+  .logo-toggle-row {
+    display: none; /* Ocultamos el toggle en la barra para ahorrar espacio */
+  }
+
   .header-nav {
     position: fixed;
     top: 0;
@@ -300,39 +315,58 @@
   .header-nav.open {
     left: 0;
   }
-
   .header-nav ul {
     flex-direction: column;
   }
 
-  /* Acciones: carrito + campana + botón de perfil en fila */
   .header-footer-section {
     flex-direction: row;
     align-items: center;
     padding: 0;
     border-top: none;
-    gap: 4px; /* gap entre el grupo de iconos y el botón de auth */
+    gap: 10px;
   }
 
   .header-actions-row {
-    gap: 4px; /* gap entre carrito y campanita */
+    gap: 8px;
   }
 
-  /* Separador visual entre campanita y botón de perfil */
+  .cart-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .cart-icon {
+    font-size: 16px;
+  }
+
   .header-auth-row {
     width: auto;
-    padding-left: 8px;
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
-    margin-left: 4px;
+    margin: 0;
   }
 
+  /* Restauramos el botón completo de "Mi Perfil" con forma de píldora */
   #iniciar-sesion {
-    padding: 7px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    gap: 6px;
+    padding: 8px 14px; /* Padding cómodo */
+    border-radius: 20px; /* Forma de píldora */
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Espacio entre ícono y texto */
+    font-size: 13px; /* Texto un pelín más chico para que encaje perfecto */
     box-shadow: none;
     white-space: nowrap;
+  }
+
+  /* Aseguramos que el texto se vea */
+  .auth-text {
+    display: inline-block;
+  }
+
+  .auth-icon {
+    font-size: 14px;
+    margin: 0;
   }
 
   .hamburger-btn {
@@ -341,6 +375,55 @@
     justify-content: center;
     padding-left: 10px;
     border-left: 1px solid rgba(255, 255, 255, 0.15);
-    margin-left: 4px;
+    margin: 0;
   }
+}
+
+/* ─── Estilos extra (Toggle, etc) ───────────────────────────────────────── */
+:root {
+  --bg-container: #1e293b;
+  --bg-slider: #10b981;
+  --text-color: #94a3b8;
+  --text-active: #ffffff;
+}
+
+.switch-container {
+  position: relative;
+  display: flex;
+  background-color: var(--bg-container);
+  padding: 4px;
+  border-radius: 50px;
+  width: 100%;
+  max-width: 400px;
+  user-select: none;
+}
+
+.switch-option {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 10px 0;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.switch-option.active {
+  color: var(--text-active);
+}
+
+.switch-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: calc(100% - 8px);
+  background-color: var(--bg-slider);
+  border-radius: 50px;
+  z-index: 1;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s ease;
 }

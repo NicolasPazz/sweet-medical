@@ -127,3 +127,33 @@ export async function eliminarPracticaAdmin({ email, password, idUsuario, id }) 
   });
   return res.status;
 }
+
+// ─── ABM de sedes (uso del panel de Administrador) ─────────────────────────
+
+const normalizarSede = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
+
+export async function crearSedeAdmin({ email, password, idUsuario, nombre, direccion }) {
+  const res = await axios.post(
+    `${getApiBaseUrl()}/sedes`,
+    { idUsuario, nombre, direccion },
+    { headers: authHeaders(email, password) },
+  );
+  return normalizarSede(res.data?.data);
+}
+
+export async function modificarSedeAdmin({ email, password, idUsuario, id, datos }) {
+  const res = await axios.patch(
+    `${getApiBaseUrl()}/sedes/${id}`,
+    { idUsuario, ...datos },
+    { headers: authHeaders(email, password) },
+  );
+  return normalizarSede(res.data?.data);
+}
+
+export async function eliminarSedeAdmin({ email, password, idUsuario, id }) {
+  const res = await axios.delete(`${getApiBaseUrl()}/sedes/${id}`, {
+    headers: authHeaders(email, password),
+    data: { idUsuario },
+  });
+  return res.status;
+}

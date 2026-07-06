@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
@@ -22,26 +23,47 @@ export default function Home() {
   const { email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista(); // Estado para el modo de vista
 
   useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles),
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles });
+          } else {
+            setUser({ rol: getRolUsuario(roles) });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
         } finally {
           setLoading(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoading(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
 
   if (loading) {
     return (
@@ -79,17 +101,19 @@ export default function Home() {
           un solo lugar.
         </p>
         <div className="home-hero-cta">
-          {user?.rol === 'Paciente' && (
+          {rolVisible === 'Paciente' && (
             <Link to="/solicitar-turno" className="cta-primary text-ellipsis">
               <FaCalendarAlt /> Agendar turno
             </Link>
           )}
-          {user?.rol === 'Paciente' && (
+          {/*
+          {rolVisible === 'Médico' && (
             <Link to="/historial-medico" className="cta-secondary text-ellipsis">
               Ver historial <FaArrowRight />
             </Link>
-          )}
-          {user?.rol === 'Médico' && (
+          )*/}
+
+          {rolVisible === 'Médico' && (
             <Link to="/gestion-medico" className="cta-secondary text-ellipsis">
               Gestión médica <FaArrowRight />
             </Link>
@@ -99,7 +123,7 @@ export default function Home() {
 
       {/* Cards de acceso rápido */}
       <section className="home-cards">
-        {user?.rol === 'Paciente' && (
+        {rolVisible === 'Paciente' && (
           <Link to="/solicitar-turno" className="home-card home-card--accent">
             <div className="home-card-icon">
               <FaCalendarAlt />
@@ -114,7 +138,7 @@ export default function Home() {
           </Link>
         )}
 
-        {user?.rol === 'Paciente' && (
+        {rolVisible === 'Paciente' && (
           <Link to="/historial-medico" className="home-card">
             <div className="home-card-icon">
               <FaHistory />
@@ -128,7 +152,7 @@ export default function Home() {
             <FaArrowRight className="home-card-arrow" />
           </Link>
         )}
-        {user?.rol === 'Médico' && (
+        {rolVisible === 'Médico' && (
           <Link to="/gestion-medico" className="home-card">
             <div className="home-card-icon">
               <FaBriefcaseMedical />

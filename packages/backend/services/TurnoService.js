@@ -44,14 +44,8 @@ export class TurnoService {
     this.servicioService = servicioSvc;
   }
 
-  async reservarTurno(dtoReserva) {
-    const usuario = await this.usuarioService.findById(dtoReserva.id_usuario);
-
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
-
-    const paciente = await this.pacienteService.findByIdUsuario(dtoReserva.id_usuario);
+  async reservarTurno(usuario, dtoReserva) {
+    const paciente = await this.pacienteService.findByIdUsuario(usuario.id);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
     }
@@ -70,9 +64,11 @@ export class TurnoService {
       throw new BadRequestError('Debe proporcionar una lista de IDs de slots para reservar');
     }
 
+    let cont = 0;
     let slots = [];
-
     for (const id_slot of dtoReserva.slotsIds) {
+      console.log('cont: ' + cont);
+      cont = cont + 1;
       ValidadorId.validarIds(id_slot);
       const slot = await this.slotRepository.findById(id_slot);
       if (slot == null) {
@@ -152,6 +148,14 @@ export class TurnoService {
       servicio.costo,
     );
 
+    console.log('ENTRO A MOTOR COSTOS DESDE RESERVAR TURNO');
+
+    const { costoEstimado } = MotorCostos.calcularPara(turno, paciente);
+
+    turno.costo = costoEstimado;
+
+    console.log('ESTE ES EL COSTO DIVERTIDO: ', turno.costo);
+
     turno.slotsAsociados.push(...slotsAOcupar);
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
@@ -171,13 +175,8 @@ export class TurnoService {
     return;
   }
 
-  async cancelarTurno(id_usuario, id_turno, esMedico, motivo) {
+  async cancelarTurno(usuario, id_turno, esMedico, motivo) {
     const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-
-    const usuario = await this.usuarioService.findById(id_usuario);
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
 
     const turno = await this.turnoRepository.findById(id_turno);
     if (turno == null) {
@@ -231,7 +230,8 @@ export class TurnoService {
     // Liberar o eliminar los slots según si la disponibilidad del médico sigue vigente
     for (const slot of turno.slotsAsociados) {
       const [anio, mes, dia] = slot.fecha.split('-').map(Number);
-      const diaSemanaSlot = diasSemana[new Date(anio, mes - 1, dia).getDay()];
+      // UTC, no local: la disponibilidad y los slots se persisten en UTC.
+      const diaSemanaSlot = diasSemana[new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay()];
 
       const sigueSiendoValido = turno.medico.disponibilidades.some((disp) =>
         estaEnDisponibilidad(diaSemanaSlot, slot.horaInicio, disp),
@@ -294,6 +294,16 @@ export class TurnoService {
       throw new ConflictError('El turno no está en estado confirmado');
     }
 
+    // Antes esto solo se validaba en el frontend (el botón "Finalizar" se
+    // ocultaba si la fecha no había pasado aún), pero el endpoint en sí no
+    // tenía ningún control: llamado directo a la API permitía finalizar un
+    // turno confirmado para una fecha futura.
+    if (Date.now() < turno.fechaHora.getTime()) {
+      throw new ConflictError(
+        'No se puede finalizar un turno cuya fecha y hora todavía no ha ocurrido',
+      );
+    }
+
     turno.actualizarEstado(usuario, new Realizado(turno), 'Turno finalizado');
 
     for (const slot of turno.slotsAsociados) {
@@ -350,17 +360,19 @@ export class TurnoService {
     const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
 
     // Función interna para formatear de forma segura cualquier variante de fecha de la DB
+    // Usamos DateUtil.toYYYYMMDD (UTC) en vez de toDateString() (que usa el
+    // huso horario LOCAL del servidor) para que la comparación de "mismo día"
+    // no dependa de dónde esté desplegado el proceso de Node.
     const parsearFechaSegura = (fechaInput) => {
-      if (!fechaInput) return new Date(NaN);
-      if (fechaInput instanceof Date) return fechaInput;
+      if (!fechaInput) return null;
       if (typeof fechaInput === 'string' && fechaInput.includes('/')) {
         const partes = fechaInput.split('/');
-        return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
+        return `${partes[2]}-${partes[1]}-${partes[0]}`;
       }
-      return new Date(fechaInput);
+      return DateUtil.toYYYYMMDD(fechaInput);
     };
 
-    const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha).toDateString();
+    const fechaTurnoTarget = parsearFechaSegura(turno.fechaHora || turno.fecha);
 
     logger.debug(`[CONFIRMAR TURNO] Iniciando validación de sede para Médico ID: ${idMedico}`);
     logger.debug(`[CONFIRMAR TURNO] Fecha Target del Turno (toDateString): "${fechaTurnoTarget}"`);
@@ -370,7 +382,7 @@ export class TurnoService {
 
     // CORRECCIÓN RESTRICCIÓN: Evaluamos que realmente exista una sede física grabada (con _id válido)
     const slotConSedeExistente = slotsDelMedico.find((s) => {
-      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
       return (
         fechaSlotStr === fechaTurnoTarget &&
         s.sede &&
@@ -432,7 +444,7 @@ export class TurnoService {
 
       logger.debug(`[CONFIRMAR TURNO] Filtrando slots disponibles para propagar...`);
       const slotsDisponiblesDelDia = slotsDelMedico.filter((s) => {
-        const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+        const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
         return fechaSlotStr === fechaTurnoTarget && s.estado === 'DISPONIBLE';
       });
 
@@ -479,7 +491,7 @@ export class TurnoService {
 
     // 4. Actualizamos el slot físico exacto que pertenece al horario de este turno
     const slotActual = slotsDelMedico.find((s) => {
-      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora).toDateString();
+      const fechaSlotStr = parsearFechaSegura(s.fecha || s.fechaHora);
       return fechaSlotStr === fechaTurnoTarget && s.horaInicio === turno.hora;
     });
 
@@ -673,6 +685,7 @@ export class TurnoService {
       id_medico: t.medico ? t.medico.id || t.medico._id : 'N/A',
       nombreMedico: t.medico && t.medico.nombre ? t.medico.nombre : 'N/A',
       id_paciente: t.paciente ? t.paciente.id || t.paciente._id : 'N/A',
+      nombrePaciente: t.paciente ? t.paciente.nombre : 'N/A',
       fechaHora: t.fechaHora ? t.fechaHora : 'N/A',
 
       // Contrato unificado: misma estructura exacta que el slot
@@ -697,6 +710,21 @@ export class TurnoService {
       costo: t.costo,
       diaSemana: t.diaSemana,
       hora: t.hora,
+
+      // Antes no se devolvía nada de esto: el frontend no tenía forma de saber
+      // QUIÉN propuso la reprogramación (médico o paciente), y por eso mostraba
+      // los botones de Aceptar/Rechazar a ambas partes por igual, incluso a
+      // quien había hecho la propuesta. `proponenteId` es la clave para que
+      // cada pantalla decida si le corresponde responder o solo esperar.
+      propuestaCambio:
+        t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
+          ? {
+              nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+              nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+              motivo: t.propuestaCambio.motivo,
+              proponenteId: t.propuestaCambio.proponenteId,
+            }
+          : null,
     };
   }
 
@@ -722,16 +750,23 @@ export class TurnoService {
     };
   }
 
-  async proponerReprogramacion(id_usuario, id_turno, nuevaFechaHora, motivo) {
-    const usuario = await this.usuarioService.findById(id_usuario);
-    if (usuario == null) {
-      throw new NotFoundError('Usuario no encontrado');
-    }
-
+  async proponerReprogramacion(usuarioAutenticado, id_turno, nuevaFechaHora, motivo) {
     const turno = await this.turnoRepository.findById(id_turno);
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
     }
+
+    if (turno && turno.estado) {
+      // Opción 1: Obtener los métodos de su prototipo de instancia
+      const metodos = Object.getOwnPropertyNames(Object.getPrototypeOf(turno.estado));
+      console.log('MÉTODOS DEL ESTADO:', metodos);
+    } else {
+      console.log('El turno o su estado no están definidos.');
+    }
+
+    console.log('turno.estado:', turno.estado);
+    console.log('¿Qué tipo de dato es?:', typeof turno.estado);
+    console.log('¿Tiene la función?:', typeof turno.estado.generarNotificacion);
 
     // 1. Validamos de forma segura el string del estado para evitar fallas de instanceof
     const nombreEstado =
@@ -747,8 +782,10 @@ export class TurnoService {
     const idUsuarioDelPaciente = turno.paciente?.usuario?._id || turno.paciente?.usuario;
     const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
 
-    const esPacienteDelTurno = String(idUsuarioDelPaciente) === String(usuario.id || usuario._id);
-    const esMedicoDelTurno = String(idUsuarioDelMedico) === String(usuario.id || usuario._id);
+    const esPacienteDelTurno =
+      String(idUsuarioDelPaciente) === String(usuarioAutenticado.id || usuarioAutenticado._id);
+    const esMedicoDelTurno =
+      String(idUsuarioDelMedico) === String(usuarioAutenticado.id || usuarioAutenticado._id);
 
     if (!esPacienteDelTurno && !esMedicoDelTurno) {
       throw new ForbiddenError(
@@ -764,7 +801,7 @@ export class TurnoService {
       );
     }
 
-    // 4. Convertimos la fecha/hora en el Service y buscamos el SLOT físico
+    // 4. Convertimos la fecha/hora en el Service y buscamos slots físicos
     const idMedico = turno.medico?._id || turno.medico?.id || turno.medico;
 
     // Hacemos la magia del formateo acá en la capa de servicio
@@ -775,33 +812,34 @@ export class TurnoService {
     const minutos = String(dateObj.getUTCMinutes()).padStart(2, '0');
     const horaBuscada = `${horas}:${minutos}`; // "08:00"
 
-    // Pasamos los parámetros ya masticados al repositorio
-    const slotDestino = await this.slotRepository.findByMedicFechaHora(
-      idMedico,
-      fechaBuscada,
-      horaBuscada,
+    // Antes acá solo se buscaba UN slot exacto con findByMedicFechaHora, lo
+    // cual alcanza si el servicio dura lo mismo que un slot, pero no valida
+    // que haya suficientes slots CONTIGUOS para servicios más largos (ej. un
+    // servicio de 45 min sobre una grilla de slots de 30 min). Reusamos la
+    // misma lógica de agrupación que usa la búsqueda de turnos
+    // (Agenda.generarTurnosSegunMedicoYServicio) para armar el/los slots
+    // reales que cubrirían la duración completa del servicio de este turno.
+    const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
+    const slotsDelDiaDisponibles = slotsDelMedico.filter(
+      (s) => s.fecha === fechaBuscada && s.estado === 'DISPONIBLE',
     );
 
-    if (!slotDestino) {
-      throw new ConflictError(
-        'El horario propuesto no se encuentra disponible para este profesional',
-      );
-    }
-
-    // 5. Validamos que el bache de destino sea de la misma especialidad/servicio
-    const idServicioOriginal = String(turno.servicio?._id || turno.servicio?.id || turno.servicio);
-    const idServicioDestino = String(
-      slotDestino.servicio?._id || slotDestino.servicio?.id || slotDestino.servicio,
+    const turnosVirtualesDelDia = Agenda.generarTurnosSegunMedicoYServicio(
+      turno.medico,
+      slotsDelDiaDisponibles,
+      turno.servicio,
     );
 
-    if (idServicioOriginal !== idServicioDestino) {
+    const turnoVirtualDestino = turnosVirtualesDelDia.find((tv) => tv.hora === horaBuscada);
+
+    if (!turnoVirtualDestino) {
       throw new ConflictError(
-        `No se puede reprogramar: El horario seleccionado corresponde al servicio de "${slotDestino.servicio?.nombre || 'otra especialidad'}" y su turno original es de "${turno.servicio?.nombre}"`,
+        'El horario propuesto no se encuentra disponible para este profesional, o no hay suficientes slots contiguos para cubrir la duración del servicio.',
       );
     }
 
     // Delegamos al dominio para transicionar a PENDIENTE_REPROGRAMACION
-    const notificacion = turno.solicitarReprogramacion(usuario, nuevaFechaHora, motivo);
+    const notificacion = turno.solicitarReprogramacion(usuarioAutenticado, nuevaFechaHora, motivo);
 
     if (notificacion) {
       await this.notificacionService.save(notificacion);
@@ -852,48 +890,55 @@ export class TurnoService {
     if (aceptado) {
       const idMedico = turno.medico?._id || turno.medico?.id || turno.medico;
 
-      // --- PASO A: LIBERAR SLOT VIEJO ---
-      // Desglosamos la fecha/hora actual del turno (antes de modificarla)
-      const dateVieja = new Date(turno.fechaHora);
-      const fechaViejaStr = dateVieja.toISOString().split('T')[0];
-      const horaViejaStr = `${String(dateVieja.getUTCHours()).padStart(2, '0')}:${String(dateVieja.getUTCMinutes()).padStart(2, '0')}`;
-
-      // Buscamos el slot actual del turno (Ojo: este no filtramos por 'DISPONIBLE' porque está ocupado)
-      const slotViejo = await this.slotRepository.model.findOne({
-        medico: idMedico,
-        fecha: fechaViejaStr,
-        horaInicio: horaViejaStr,
-      });
-
-      if (slotViejo) {
+      // --- PASO A: LIBERAR TODOS LOS SLOTS VIEJOS ---
+      // Antes esto solo liberaba UN slot re-derivado por fecha/hora string; si
+      // el servicio ocupaba más de un slot, los demás quedaban RESERVADOS para
+      // siempre (fantasmas). Ahora usamos turno.slotsAsociados directamente,
+      // que es la fuente de verdad de qué slots ocupa este turno hoy.
+      for (const slotViejo of turno.slotsAsociados) {
         slotViejo.estado = 'DISPONIBLE';
         slotViejo.turnoAsociado = null;
         await this.slotRepository.save(slotViejo);
       }
 
-      // --- PASO B: RESERVAR SLOT NUEVO ---
+      // --- PASO B: RESERVAR LOS SLOTS NUEVOS (con cobertura de duración) ---
       // Desglosamos la nueva fecha/hora propuesta
       const dateNueva = new Date(turno.propuestaCambio.nuevaFechaHora);
       const fechaNuevaStr = dateNueva.toISOString().split('T')[0];
       const horaNuevaStr = `${String(dateNueva.getUTCHours()).padStart(2, '0')}:${String(dateNueva.getUTCMinutes()).padStart(2, '0')}`;
 
-      // Usamos el método limpio que definimos antes
-      const slotNuevo = await this.slotRepository.findByMedicFechaHora(
-        idMedico,
-        fechaNuevaStr,
-        horaNuevaStr,
+      // Igual que en proponerReprogramacion: no alcanza con buscar un solo
+      // slot exacto, hay que agrupar los slots contiguos necesarios para
+      // cubrir la duración completa del servicio (Agenda ya hace esto).
+      const slotsDelMedico = await this.slotRepository.findAllSlotsByMedicId(idMedico);
+      const slotsDelDiaDisponibles = slotsDelMedico.filter(
+        (s) => s.fecha === fechaNuevaStr && s.estado === 'DISPONIBLE',
       );
 
-      if (!slotNuevo) {
+      const turnosVirtualesDelDia = Agenda.generarTurnosSegunMedicoYServicio(
+        turno.medico,
+        slotsDelDiaDisponibles,
+        turno.servicio,
+      );
+
+      const turnoVirtualDestino = turnosVirtualesDelDia.find((tv) => tv.hora === horaNuevaStr);
+
+      if (!turnoVirtualDestino) {
         throw new ConflictError('El horario de la propuesta ya no se encuentra disponible.');
       }
 
-      slotNuevo.estado = 'RESERVADO';
-      slotNuevo.turnoAsociado = turno.id || turno._id;
-      await this.slotRepository.save(slotNuevo);
+      const slotsNuevos = turnoVirtualDestino.slotsAsociados;
+
+      for (const slotNuevo of slotsNuevos) {
+        slotNuevo.estado = 'RESERVADO';
+        slotNuevo.turnoAsociado = turno.id || turno._id;
+        await this.slotRepository.save(slotNuevo);
+      }
 
       // --- PASO C: EFECTUAR CAMBIO EN EL TURNO ---
       turno.fechaHora = dateNueva;
+      turno.hora = horaNuevaStr; // antes quedaba desactualizado, rompiendo confirmarTurno después
+      turno.slotsAsociados = slotsNuevos;
 
       const notificacion = turno.actualizarEstado(
         usuario,
@@ -924,16 +969,38 @@ export class TurnoService {
     return turno;
   }
 
+  /**
+   * Devuelve el instante UTC correspondiente a las 00:00:00.000 del día
+   * siguiente a `fecha`. Usa `Date.UTC(...)` en vez de `setDate()/setHours()`
+   * locales, para que el resultado no dependa del huso horario del servidor
+   * (todo el sistema opera en UTC).
+   */
   obtenerHoraInicio(fecha) {
-    const inicioDeMañana = new Date(fecha);
-    inicioDeMañana.setDate(fecha.getDate() + 1);
-    return inicioDeMañana.setHours(0, 0, 0, 0);
+    return Date.UTC(
+      fecha.getUTCFullYear(),
+      fecha.getUTCMonth(),
+      fecha.getUTCDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    );
   }
 
+  /**
+   * Devuelve el instante UTC correspondiente a las 23:59:59.999 del día
+   * siguiente a `fecha`. Ver nota de `obtenerHoraInicio`.
+   */
   obtenerHoraFin(fecha) {
-    const finDeMañana = new Date(fecha);
-    finDeMañana.setDate(fecha.getDate() + 1);
-    return finDeMañana.setHours(23, 59, 59, 999);
+    return Date.UTC(
+      fecha.getUTCFullYear(),
+      fecha.getUTCMonth(),
+      fecha.getUTCDate() + 1,
+      23,
+      59,
+      59,
+      999,
+    );
   }
 
   async obtenerTurnosParaManiana() {
@@ -1030,7 +1097,11 @@ export class TurnoService {
     }
 
     const dtosMapeados = turnosFiltrados.map((turno) => {
-      const esPractica = turno.servicio?.tipo === 'PRACTICA';
+      // Usamos turno.servicio.esTipo() (método real via loadClass en
+      // Especialidad/Practica) en vez de turno.servicio?.tipo: ese campo
+      // nunca se persiste en el schema de Especialidad/Practica, así que
+      // siempre daba undefined y esPractica quedaba mal calculado.
+      const esPractica = turno.servicio?.esTipo?.() === 'PRACTICA';
       const turnoAdaptado = {
         ...turno,
         practica: esPractica ? turno.servicio : null,
@@ -1047,8 +1118,10 @@ export class TurnoService {
           ? b.costoEstimado - a.costoEstimado
           : a.costoEstimado - b.costoEstimado;
       } else {
-        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`).getTime();
-        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`).getTime();
+        // Sufijo 'Z' explícito: fecha/hora ya son UTC, no hay que dejarlo ambiguo
+        // (un ISO sin offset se interpreta como hora local según el motor de JS).
+        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}:00Z`).getTime();
+        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}:00Z`).getTime();
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
       }
     });

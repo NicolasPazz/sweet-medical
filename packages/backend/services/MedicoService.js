@@ -1,6 +1,7 @@
 import { medicoRepository } from '../infrastructure/repositories/MedicoRepository.js';
 import { usuarioService } from './UsuarioService.js';
 import { ConflictError, NotFoundError, BadRequestError } from '../errors/AppError.js';
+import { DateUtil } from '../utils/DateUtil.js';
 
 export class MedicoService {
   constructor({
@@ -79,8 +80,6 @@ export class MedicoService {
       return h * 60 + m;
     };
 
-    // Agrupar por día y dentro de cada día verificar que no haya franjas
-    // contenidas o exactamente iguales a otra
     const porDia = {};
     for (const franja of normalizadas) {
       const dia = franja.diaSemana;

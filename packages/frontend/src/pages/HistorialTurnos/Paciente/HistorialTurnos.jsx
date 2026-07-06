@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './HistorialTurnos.css';
-import { TURNOS_MOCK, ESTADO_CONFIG } from '../../../mockdata/turnos.js';
+import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
+import {
+  cancelarTurnoMedico,
+  cancelarTurnoPaciente,
+  proponerReprogramacion,
+  responderReprogramacion,
+} from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
-
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
-import ReprogramarTurno from '../../ReprogramarTurno/ReprogramarTurno.jsx';
-
-function formatFecha(fechaHora) {
-  const d = new Date(fechaHora);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
+import Toast from '../../../components/Toast/Toast.jsx';
+import { formatFechaUTC } from '../../../lib/dateTime.js';
 
 export default function HistorialTurnos() {
   const [filtro, setFiltro] = useState('TODOS');
@@ -22,18 +24,32 @@ export default function HistorialTurnos() {
   const [vista, setVista] = useState('LISTADO');
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
+  const [toast, setToast] = useState(null);
+
+  const mostrarToast = (mensaje, tipo = 'success') => {
+    setToast({ mensaje, tipo });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   useEffect(() => {
     const load = async () => {
-      if (!email || !password) return;
+      if (!email || !password) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
       try {
+        console.log(email + ', ' + password);
         const data = await getHistorialPacienteMe({ email, password });
-        setTurnos(data ?? []);
+        setTurnos(data?.turnos ?? []);
       } catch (err) {
         console.error('Error al cargar turnos:', err);
-        setTurnos([...TURNOS_MOCK]);
+        setTurnos([]);
       } finally {
         setLoading(false);
       }
@@ -43,101 +59,237 @@ export default function HistorialTurnos() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (email && password) {
-        try {
-          const data = await getMe({ email, password });
-          setUser({ rol: getRolUsuario(data.usuario?.roles) });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+      if (!isAuthenticated) {
+        setLoadingUser(false);
+        return;
+      }
+      try {
+        const data = await getMe({ email, password });
+        const roles = data.usuario?.roles ?? [];
+        const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+        setMultiplesFiltros(esMultiRol);
+
+        if (esMultiRol) {
+          // Con múltiples roles no colapsamos a un único "rol": el nav se
+          // filtra más abajo según el switch (modo), no según el rol.
+          setUser({ roles, nombre: data.perfil?.nombre, id: data.usuario?.id });
+        } else {
+          setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre, id: data.usuario?.id });
         }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setMultiplesFiltros(false);
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
       }
     };
     fetchUser();
-  }, [email, password]);
+  }, [email, password, isAuthenticated]);
+
+  if (loadingUser) {
+    return (
+      <div className="historial-container">
+        <SkeletonTurnoList count={5} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
 
-  if (user?.rol !== 'Paciente') {
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-paciente'
+      ? 'Paciente'
+      : 'Médico'
+    : user?.rol;
+
+  if (rolVisible !== 'Paciente') {
     return <ErrorPage type="403" />;
   }
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
-  const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
+  let turnosFiltrados = null;
 
+  if (turnos) {
+    turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
+  } else {
+    turnosFiltrados = null;
+  }
   const handleAbrirDetalle = (turno) => {
     setTurnoSeleccionado(turno);
     setVista('DETALLE');
   };
 
-  if (vista === 'DETALLE') {
-    return (
-      <DetalleTurno
-        turno={turnoSeleccionado}
-        cfgEstado={
-          ESTADO_CONFIG[turnoSeleccionado.estado] ?? { label: turnoSeleccionado.estado, color: '' }
-        }
-        formatFecha={formatFecha}
-        onVolver={() => setVista('LISTADO')}
-        onIrAReprogramar={() => setVista('REPROGRAMAR')}
-      />
-    );
-  }
+  const handleCancelar = async (motivo) => {
+    try {
+      if (rolVisible === 'Paciente') {
+        await cancelarTurnoPaciente(turnoSeleccionado._id, motivo, email, password);
+      } else if (rolVisible === 'Médico') {
+        await cancelarTurnoMedico(turnoSeleccionado._id, motivo, email, password);
+      }
 
-  if (vista === 'REPROGRAMAR') {
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === turnoSeleccionado._id
+            ? { ...t, estado: 'CANCELADO', motivoCancelacion: motivo }
+            : t,
+        ),
+      );
+      setVista('LISTADO');
+      mostrarToast('Turno cancelado exitosamente');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al cancelar el turno', 'error');
+    }
+  };
+
+  const handleAceptarReprogramacion = async () => {
+    try {
+      await responderReprogramacion(turnoSeleccionado._id, true, email, password);
+      setTurnos((prev) =>
+        prev.map((t) => {
+          if (t._id !== turnoSeleccionado._id) return t;
+          return {
+            ...t,
+            estado: 'RESERVADO',
+            fechaHora: t.propuestaCambio?.nuevaFechaHora ?? t.fechaHora,
+            hora: t.propuestaCambio?.nuevaHora ?? t.hora,
+            propuestaCambio: null,
+          };
+        }),
+      );
+      mostrarToast('Reprogramación aceptada exitosamente');
+      setVista('LISTADO');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al aceptar la reprogramación', 'error');
+    }
+  };
+
+  const handleRechazarReprogramacion = async () => {
+    try {
+      await responderReprogramacion(turnoSeleccionado._id, false, email, password);
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === turnoSeleccionado._id
+            ? { ...t, estado: 'RESERVADO', propuestaCambio: null }
+            : t,
+        ),
+      );
+      mostrarToast('Reprogramación rechazada');
+      setVista('LISTADO');
+    } catch (err) {
+      mostrarToast(err.response?.data?.message ?? 'Error al rechazar la reprogramación', 'error');
+    }
+  };
+
+  const handleProponerReprogramacion = async (fecha, hora, motivo) => {
+    try {
+      await proponerReprogramacion(turnoSeleccionado._id, fecha, hora, motivo, email, password);
+
+      const [dia, mes, anio] = fecha.split('/').map(Number);
+      const [horas, minutos] = hora.split(':').map(Number);
+      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+
+      setTurnos((prev) =>
+        prev.map((t) =>
+          t._id === turnoSeleccionado._id
+            ? {
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Mismo problema que del lado del médico: sin proponenteId
+                  // acá, el propio paciente veía sus botones de Aceptar/Rechazar
+                  // apenas proponía el cambio, hasta el próximo refresh.
+                  proponenteId: user?.id,
+                },
+              }
+            : t,
+        ),
+      );
+      mostrarToast('Propuesta de reprogramación enviada exitosamente');
+    } catch (err) {
+      mostrarToast(
+        err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación',
+        'error',
+      );
+      throw err;
+    }
+  };
+
+  if (vista === 'DETALLE') {
+    const turnoActualizado =
+      turnos.find((t) => t._id === turnoSeleccionado._id) ?? turnoSeleccionado;
     return (
-      <ReprogramarTurno
-        turno={turnoSeleccionado}
-        onVolver={() => setVista('DETALLE')}
-        onFinalizar={() => setVista('LISTADO')}
-      />
+      <>
+        <DetalleTurno
+          turno={turnoActualizado}
+          usuarioId={user?.id}
+          cfgEstado={
+            ESTADO_CONFIG[turnoActualizado.estado] ?? { label: turnoActualizado.estado, color: '' }
+          }
+          formatFecha={formatFechaUTC}
+          onVolver={() => setVista('LISTADO')}
+          onProponerReprogramacion={handleProponerReprogramacion}
+          onCancelar={handleCancelar}
+          onAceptarReprogramacion={handleAceptarReprogramacion}
+          onRechazarReprogramacion={handleRechazarReprogramacion}
+        />
+        <Toast mensaje={toast?.mensaje} tipo={toast?.tipo} />
+      </>
     );
   }
 
   return (
-    <div className="historial-container">
-      <div className="historial-header">
-        <h1 className="historial-title text-ellipsis">Mis Turnos</h1>
-        <p className="historial-subtitle text-ellipsis">Historial y turnos próximos</p>
+    <>
+      <div className="historial-container">
+        <div className="historial-header">
+          <h1 className="historial-title text-ellipsis">Mis Turnos</h1>
+          <p className="historial-subtitle text-ellipsis">Historial y turnos próximos</p>
+        </div>
+
+        <div className="filtros">
+          {estados.map((e) => (
+            <button
+              key={e}
+              className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
+              onClick={() => setFiltro(e)}
+            >
+              {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <SkeletonTurnoList count={5} />
+        ) : turnosFiltrados.length === 0 ? (
+          <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
+        ) : (
+          <ul className="turnos-lista">
+            {turnosFiltrados.map((turno) => {
+              const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
+              return (
+                <TurnoCard
+                  key={turno._id}
+                  turno={turno}
+                  cfg={cfg}
+                  onClickTurno={handleAbrirDetalle}
+                />
+              );
+            })}
+          </ul>
+        )}
+
+        <Link to="/solicitar-turno" className="btn-nuevo-turno text-ellipsis">
+          + Nuevo turno
+        </Link>
       </div>
-
-      <div className="filtros">
-        {estados.map((e) => (
-          <button
-            key={e}
-            className={`filtro-btn ${filtro === e ? 'activo' : ''} text-ellipsis`}
-            onClick={() => setFiltro(e)}
-          >
-            {e === 'TODOS' ? 'Todos' : ESTADO_CONFIG[e].label}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <SkeletonTurnoList count={5} />
-      ) : turnosFiltrados.length === 0 ? (
-        <p className="historial-vacio text-ellipsis">No hay turnos para mostrar.</p>
-      ) : (
-        <ul className="turnos-lista">
-          {turnosFiltrados.map((turno) => {
-            const cfg = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: '' };
-            return (
-              <TurnoCard
-                key={turno._id}
-                turno={turno}
-                cfg={cfg}
-                onClickTurno={handleAbrirDetalle}
-              />
-            );
-          })}
-        </ul>
-      )}
-
-      <Link to="/solicitar-turno" className="btn-nuevo-turno text-ellipsis">
-        + Nuevo turno
-      </Link>
-    </div>
+      <Toast mensaje={toast?.mensaje} tipo={toast?.tipo} />
+    </>
   );
 }

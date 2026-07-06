@@ -2,20 +2,26 @@ import { BadRequestError } from '../errors/AppError.js';
 import { turnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/logger.js';
+import { PacienteService } from '../services/PacienteService.js';
 
 export class TurnoController {
-  constructor({ turnoService: svc = turnoService } = {}) {
+  constructor({ turnoService: svc = turnoService, pacienteService: pSvc = PacienteService } = {}) {
     this.turnoService = svc;
+    this.pacienteService = pSvc;
   }
 
   reservarTurno = async (req, res, next) => {
     try {
       const dtoReserva = req.body;
 
-      ValidadorId.validarIds(dtoReserva.id_usuario);
+      console.log(dtoReserva);
+
+      console.log('Usuario autenticado id: ' + req.usuarioAutenticado.id);
+
+      ValidadorId.validarIds(req.usuarioAutenticado.id);
       ValidadorId.validarIds(dtoReserva.id_servicio);
 
-      await this.turnoService.reservarTurno(dtoReserva);
+      await this.turnoService.reservarTurno(req.usuarioAutenticado, dtoReserva);
 
       return res.status(200).json({ status: 'success', message: 'Turno reservado exitosamente' });
     } catch (error) {
@@ -24,23 +30,21 @@ export class TurnoController {
   };
 
   cancelarTurnoPaciente = async (req, res, next) => {
-    return this.cancelarTurno(req, res, next, false);
+    return this.cancelarTurnoMe(req, res, next, false);
   };
 
   cancelarTurnoMedico = async (req, res, next) => {
-    return this.cancelarTurno(req, res, next, true);
+    return this.cancelarTurnoMe(req, res, next, true);
   };
 
   // Versiones autenticadas por header
-  cancelarTurnoMe = async (req, res, next) => {
+  cancelarTurnoMe = async (req, res, next, esMedico) => {
     try {
-      const idUsuario = req.usuarioAutenticado.id;
+      const usuario = req.usuarioAutenticado;
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { motivo } = req.body;
-      if (!motivo) throw new BadRequestError('Debe escribir algún motivo');
-      const esMedico = req.usuarioAutenticado.roles?.includes('MEDICO');
-      await this.turnoService.cancelarTurno(idUsuario, idTurno, esMedico, motivo);
+      await this.turnoService.cancelarTurno(usuario, idTurno, esMedico, motivo);
       return res.status(200).json({ status: 'success', message: 'Turno cancelado exitosamente' });
     } catch (error) {
       return next(error);
@@ -75,7 +79,7 @@ export class TurnoController {
 
   proponerReprogramacionMe = async (req, res, next) => {
     try {
-      const idUsuario = req.usuarioAutenticado.id;
+      const usuarioAutenticado = req.usuarioAutenticado;
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
       const { fecha, hora, motivo } = req.body;
@@ -83,10 +87,17 @@ export class TurnoController {
         throw new BadRequestError('Faltan datos obligatorios (fecha, hora o motivo)');
       const [dia, mes, anio] = fecha.split('/').map(Number);
       const [horas, minutos] = hora.split(':').map(Number);
-      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+      // Date.UTC, no new Date(y,m,d,h,mi) local: fecha/hora representan UTC
+      // directo en todo el sistema (sin conversión), igual que turno.fechaHora.
+      const nuevaFechaHora = new Date(Date.UTC(anio, mes - 1, dia, horas, minutos, 0));
       if (isNaN(nuevaFechaHora.getTime()))
         throw new BadRequestError('Formato de fecha u hora inválido. Use DD/MM/AAAA y HH:MM');
-      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+      await this.turnoService.proponerReprogramacion(
+        usuarioAutenticado,
+        idTurno,
+        nuevaFechaHora,
+        motivo,
+      );
       return res
         .status(200)
         .json({ status: 'success', message: 'Propuesta de reprogramación registrada' });
@@ -252,8 +263,8 @@ export class TurnoController {
 
   proponerReprogramacion = async (req, res, next) => {
     try {
-      const idUsuario = req.params.id_usuario;
-      ValidadorId.validarIds(idUsuario);
+      const usuarioAutenticado = req.usuarioAutenticado;
+
       const idTurno = req.params.id_turno;
       ValidadorId.validarIds(idTurno);
 
@@ -266,7 +277,9 @@ export class TurnoController {
       // Convertimos fecha y hora a un objeto Date
       const [dia, mes, anio] = fecha.split('/').map(Number);
       const [horas, minutos] = hora.split(':').map(Number);
-      const nuevaFechaHora = new Date(anio, mes - 1, dia, horas, minutos, 0);
+      // Date.UTC, no new Date(y,m,d,h,mi) local: fecha/hora representan UTC
+      // directo en todo el sistema (sin conversión), igual que turno.fechaHora.
+      const nuevaFechaHora = new Date(Date.UTC(anio, mes - 1, dia, horas, minutos, 0));
 
       // Validamos que el formateo haya dado una fecha coherente
       if (isNaN(nuevaFechaHora.getTime())) {
@@ -274,7 +287,12 @@ export class TurnoController {
       }
 
       // Delegamos la lógica al Service
-      await this.turnoService.proponerReprogramacion(idUsuario, idTurno, nuevaFechaHora, motivo);
+      await this.turnoService.proponerReprogramacion(
+        usuarioAutenticado,
+        idTurno,
+        nuevaFechaHora,
+        motivo,
+      );
 
       return res.status(200).json({
         status: 'success',
@@ -330,7 +348,6 @@ export class TurnoController {
           limit = '10',
           sortBy = 'costo',
           sortOrder = 'asc',
-          pacienteId,
         } = req.query;
 
         // Parseo
@@ -385,10 +402,11 @@ export class TurnoController {
           sortOrder: sortOrderNormalized,
         };
 
-        let paciente = req.user?.paciente ?? null;
+        const usuario = req.usuarioAutenticado;
+        let paciente;
 
-        if (!paciente && pacienteId) {
-          paciente = await this.turnoService.buscarPacientePorId(pacienteId);
+        if (!usuario && usuario.roles.includes('PACIENTE')) {
+          paciente = await this.pacienteService.findByIdUsuario(usuario.id);
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');

@@ -63,7 +63,7 @@ app.launch = function () {
   const host = getHost();
   const baseUrl = getPublicBaseUrl(portToUse);
 
-  this.listen(portToUse, host, async () => {
+  this.httpServer = this.listen(portToUse, host, async () => {
     logger.info(`Servidor escuchando en ${host}:${portToUse}`);
     logger.info(`URL pública configurada: ${baseUrl}`);
     logger.info(`Health check: ${baseUrl}/health`);
@@ -91,6 +91,24 @@ app.launch = function () {
     } catch (error) {
       logger.error('No se pudo conectar a la ruta automática:', error.message);
     }
+  });
+
+  // Evita que conexiones HTTP keep-alive abiertas retengan el puerto
+  // ocupado más de la cuenta cuando `node --watch` intenta reiniciar el proceso.
+  this.httpServer.keepAliveTimeout = 5000;
+
+  return this.httpServer;
+};
+
+/**
+ * Cierra el servidor HTTP de forma prolija (deja de aceptar conexiones nuevas
+ * y espera a que terminen las conexiones activas). Se usa en el shutdown
+ * graceful desde index.js para liberar el puerto entre reinicios.
+ */
+app.shutdown = function () {
+  return new Promise((resolve) => {
+    if (!this.httpServer) return resolve();
+    this.httpServer.close(() => resolve());
   });
 };
 

@@ -28,6 +28,11 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
+              <Link to="/oferta-medica" className="text-ellipsis">
+                Oferta Médica
+              </Link>
+            </li>
+            <li>
               <Link to="/contacto" className="text-ellipsis">
                 Contacto
               </Link>

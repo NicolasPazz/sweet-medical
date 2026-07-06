@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import mongoose from 'mongoose';
 import server from './app.js';
 import { MongoDBClient } from './infrastructure/config/database.js';
 import { logger } from './utils/logger.js';
@@ -11,6 +12,52 @@ import { pacienteService } from './services/PacienteService.js';
 import { turnoService } from './services/TurnoService.js';
 
 const PORT = getPort();
+
+// --- Shutdown graceful ---------------------------------------------------
+// Sin esto, cuando `node --watch` (o nodemon) mata el proceso para
+// reiniciarlo tras guardar un archivo, el puerto HTTP y la conexión a
+// MongoDB pueden quedar sin liberar del todo. El siguiente arranque falla
+// entonces con EADDRINUSE (o la conexión a Mongo queda en un estado raro),
+// y el back deja de reflejar cambios hasta que se lo mata y corre a mano.
+let cerrando = false;
+async function apagarProlijamente(motivo) {
+  if (cerrando) return;
+  cerrando = true;
+  logger.warn(`[Shutdown] Señal recibida (${motivo}). Cerrando servidor y conexión a MongoDB...`);
+
+  try {
+    await server.shutdown();
+    logger.info('[Shutdown] Servidor HTTP cerrado.');
+  } catch (error) {
+    logger.error('[Shutdown] Error cerrando el servidor HTTP:', error.message);
+  }
+
+  try {
+    await mongoose.connection.close();
+    logger.info('[Shutdown] Conexión a MongoDB cerrada.');
+  } catch (error) {
+    logger.error('[Shutdown] Error cerrando la conexión a MongoDB:', error.message);
+  }
+
+  process.exit(0);
+}
+
+process.on('SIGINT', () => apagarProlijamente('SIGINT'));
+process.on('SIGTERM', () => apagarProlijamente('SIGTERM'));
+
+// Si algo async se escapa sin try/catch (ej. un cronjob o una promesa
+// suelta), esto evita que el proceso quede "zombie" sin loguear nada:
+// lo dejamos morir de forma prolija y con el motivo bien visible, para
+// que `node --watch` pueda levantarlo limpio en el próximo restart.
+process.on('unhandledRejection', (reason) => {
+  logger.error('[FATAL] Promesa rechazada sin capturar:', reason?.stack || reason);
+  apagarProlijamente('unhandledRejection');
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('[FATAL] Excepción no capturada:', error?.stack || error);
+  apagarProlijamente('uncaughtException');
+});
 
 const start = async () => {
   try {
@@ -56,6 +103,7 @@ const start = async () => {
     server.launch();
   } catch (error) {
     logger.error('Error al iniciar la aplicación:', error);
+    process.exit(1);
   }
 };
 

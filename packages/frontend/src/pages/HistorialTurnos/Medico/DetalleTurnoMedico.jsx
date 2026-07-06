@@ -1,97 +1,10 @@
 import { useState, useEffect } from 'react';
 import './HistorialTurnosMedico.css';
 import CancelarTurnoModal from '../../../components/CancelarTurnoModal/CancelarTurnoModal.jsx';
+import ReprogramacionModal from '../../../components/ReprogramacionModal/ReprogramacionModal.jsx';
 import { getSedesMe } from '../../../services/userService.js';
-import { proponerReprogramacion } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
-
-function ModalReprogramacion({ onConfirmar, onCerrar }) {
-  const { email, password } = useAuth();
-  const [fecha, setFecha] = useState('');
-  const [hora, setHora] = useState('');
-  const [motivo, setMotivo] = useState('');
-  const [errores, setErrores] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleFechaChange = (e) => {
-    let v = e.target.value.replace(/\D/g, '');
-    if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
-    if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5);
-    if (v.length > 10) v = v.slice(0, 10);
-    setFecha(v);
-    if (errores.fecha) setErrores((p) => ({ ...p, fecha: false }));
-  };
-
-  const handleSubmit = async () => {
-    const e = {};
-    if (!fecha || !/^\d{2}\/\d{2}\/\d{4}$/.test(fecha)) e.fecha = true;
-    if (!hora) e.hora = true;
-    if (!motivo.trim()) e.motivo = true;
-    setErrores(e);
-    if (Object.keys(e).length > 0) return;
-    setSubmitting(true);
-    try {
-      await onConfirmar({ fecha, hora, motivo, email, password });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onCerrar}>
-      <div className="modal-box" onClick={(ev) => ev.stopPropagation()}>
-        <h3 className="modal-titulo">Proponer reprogramación</h3>
-        <p className="modal-subtitulo">Proponé una nueva fecha y hora para el turno.</p>
-
-        <label className="modal-label">Nueva fecha *</label>
-        <input
-          className={`modal-input${errores.fecha ? ' input-error' : ''}`}
-          type="text"
-          placeholder="DD/MM/YYYY"
-          value={fecha}
-          maxLength={10}
-          onChange={handleFechaChange}
-        />
-        {errores.fecha && <span className="modal-error">⚠ Fecha inválida (DD/MM/YYYY)</span>}
-
-        <label className="modal-label">Nuevo horario *</label>
-        <input
-          className={`modal-input${errores.hora ? ' input-error' : ''}`}
-          type="time"
-          value={hora}
-          onChange={(e) => {
-            setHora(e.target.value);
-            setErrores((p) => ({ ...p, hora: false }));
-          }}
-        />
-        {errores.hora && <span className="modal-error">⚠ El horario es obligatorio</span>}
-
-        <label className="modal-label">Motivo *</label>
-        <textarea
-          className={`modal-input${errores.motivo ? ' input-error' : ''}`}
-          placeholder="Motivo de la reprogramación"
-          rows={3}
-          value={motivo}
-          onChange={(e) => {
-            setMotivo(e.target.value);
-            setErrores((p) => ({ ...p, motivo: false }));
-          }}
-          style={{ resize: 'none', fontFamily: 'inherit' }}
-        />
-        {errores.motivo && <span className="modal-error">⚠ El motivo es obligatorio</span>}
-
-        <div className="modal-acciones">
-          <button className="btn-cancelar-accion" onClick={onCerrar}>
-            Cancelar
-          </button>
-          <button className="btn-confirmar-accion" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? 'Enviando...' : '→ Proponer'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { formatHoraUTC } from '../../../lib/dateTime.js';
 
 function ModalSede({ onConfirmar, onCerrar }) {
   const { email, password } = useAuth();
@@ -175,6 +88,7 @@ const PUEDE_CANCELAR = ['RESERVADO', 'CONFIRMADO', 'PENDIENTE_REPROGRAMACION'];
 
 export default function DetalleTurnoMedico({
   turno,
+  usuarioId,
   cfgEstado,
   formatFecha,
   onVolver,
@@ -182,6 +96,7 @@ export default function DetalleTurnoMedico({
   onCancelar,
   onAceptarReprogramacion,
   onRechazarReprogramacion,
+  onProponerReprogramacion,
 }) {
   const [modalCancelar, setModalCancelar] = useState(false);
   const [modalSede, setModalSede] = useState(false);
@@ -192,6 +107,12 @@ export default function DetalleTurnoMedico({
   const puedeConfirmar = PUEDE_CONFIRMAR.includes(turno.estado);
   const puedeCancelar = PUEDE_CANCELAR.includes(turno.estado);
   const esPendiente = turno.estado === 'PENDIENTE_REPROGRAMACION';
+  // Si fue este mismo médico quien propuso el cambio, no puede aceptar ni
+  // rechazar su propia propuesta: solo puede esperar la respuesta del paciente.
+  const esPropuestaPropia =
+    esPendiente &&
+    !!turno.propuestaCambio &&
+    String(turno.propuestaCambio.proponenteId) === String(usuarioId);
 
   const handleConfirmar = () => setModalSede(true);
 
@@ -252,7 +173,7 @@ export default function DetalleTurnoMedico({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Horario:</span>
-          <span className="detalle-value text-ellipsis">{turno.hora} hs</span>
+          <span className="detalle-value text-ellipsis">{formatHoraUTC(turno.fechaHora)} hs</span>
         </div>
 
         <div className="detalle-info-row">
@@ -269,7 +190,9 @@ export default function DetalleTurnoMedico({
 
         {esPendiente && turno.propuestaCambio && (
           <div className="detalle-propuesta-bloque">
-            <p className="detalle-propuesta-titulo text-ellipsis">📅 Propuesta del paciente</p>
+            <p className="detalle-propuesta-titulo text-ellipsis">
+              📅 {esPropuestaPropia ? 'Tu propuesta de reprogramación' : 'Propuesta del paciente'}
+            </p>
             <div className="detalle-info-row">
               <span className="detalle-label text-ellipsis">Nueva fecha propuesta:</span>
               <span className="detalle-value text-ellipsis">
@@ -279,7 +202,9 @@ export default function DetalleTurnoMedico({
             <div className="detalle-info-row">
               <span className="detalle-label text-ellipsis">Nuevo horario:</span>
               <span className="detalle-value text-ellipsis">
-                {turno.propuestaCambio.nuevaHora} hs
+                {turno.propuestaCambio.nuevaHora ||
+                  formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                hs
               </span>
             </div>
           </div>
@@ -307,7 +232,7 @@ export default function DetalleTurnoMedico({
               ✓ Confirmar Turno
             </button>
           )}
-          {esPendiente && (
+          {esPendiente && !esPropuestaPropia && (
             <>
               <button className="btn-cancelar-accion text-ellipsis" onClick={handleRechazar}>
                 ✕ Rechazar
@@ -316,6 +241,11 @@ export default function DetalleTurnoMedico({
                 ✓ Aceptar reprogramación
               </button>
             </>
+          )}
+          {esPendiente && esPropuestaPropia && (
+            <span className="detalle-propuesta-espera text-ellipsis">
+              ⏳ Esperando respuesta del paciente
+            </span>
           )}
         </div>
       </div>
@@ -331,9 +261,10 @@ export default function DetalleTurnoMedico({
         <ModalSede onConfirmar={handleConfirmarConSede} onCerrar={() => setModalSede(false)} />
       )}
       {modalReprogramacion && (
-        <ModalReprogramacion
-          onConfirmar={async ({ fecha, hora, motivo, email, password }) => {
-            await proponerReprogramacion(turno._id, fecha, hora, motivo, email, password);
+        <ReprogramacionModal
+          turno={turno}
+          onConfirmar={async ({ fecha, hora, motivo }) => {
+            await onProponerReprogramacion(fecha, hora, motivo);
             setModalReprogramacion(false);
           }}
           onCerrar={() => setModalReprogramacion(false)}

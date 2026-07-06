@@ -1,10 +1,11 @@
 import express from 'express';
 import { PacienteController } from '../controllers/PacienteController.js';
-import { basicAuthUser } from '../middlewares/basicAuth.js';
+import { basicAuthMedico, basicAuthPaciente, basicAuthUser } from '../middlewares/basicAuth.js';
 
 const pacienteRouter = express.Router();
 const pacienteController = new PacienteController();
 
+// Creo que este endpoint ya no se va a usar más
 /**
  * @swagger
  * /pacientes/all:
@@ -42,21 +43,25 @@ pacienteRouter
 // Historial del paciente autenticado por header
 pacienteRouter
   .route('/me/turnos')
-  .get(basicAuthUser, (req, res, next) => pacienteController.obtenerHistorialMe(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) =>
+    pacienteController.obtenerHistorialMe(req, res, next),
+  );
 
 /**
  * @swagger
- * /pacientes/{id_usuario}/turnos:
+ * /pacientes/{dni}/turnos:
  *   get:
  *     summary: Obtener historial de turnos de un paciente
- *     description: Retorna el historial completo de turnos de un paciente específico, incluyendo todos los estados por los que ha pasado cada turno
+ *     description: Retorna los datos del paciente junto con el historial completo de sus turnos, incluyendo todos los estados por los que ha pasado cada turno. Requiere autenticación de un médico.
  *     tags:
  *       - Pacientes
+ *     security:
+ *       - basicAuth: []
  *     parameters:
- *       - name: id_usuario
+ *       - name: dni
  *         in: path
  *         required: true
- *         description: ID único del paciente (MongoDB ObjectId)
+ *         description: DNI del paciente
  *         schema:
  *           type: string
  *     responses:
@@ -71,11 +76,29 @@ pacienteRouter
  *                   type: string
  *                   example: success
  *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Turno'
+ *                   type: object
+ *                   properties:
+ *                     paciente:
+ *                       type: object
+ *                       properties:
+ *                         id_usuario:
+ *                           type: string
+ *                         id_paciente:
+ *                           type: string
+ *                         nombre:
+ *                           type: string
+ *                         dni:
+ *                           type: string
+ *                         obraSocial:
+ *                           type: string
+ *                         plan:
+ *                           type: string
+ *                     turnos:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Turno'
  *       400:
- *         description: ID mal formado
+ *         description: DNI mal formado
  *         content:
  *           application/json:
  *             schema:
@@ -86,7 +109,7 @@ pacienteRouter
  *         description: Error interno del servidor
  */
 pacienteRouter
-  .route('/:id_usuario/turnos')
-  .get((req, res, next) => pacienteController.obtenerHistorial(req, res, next));
+  .route('/:dni/turnos')
+  .get(basicAuthMedico, (req, res, next) => pacienteController.obtenerHistorial(req, res, next));
 
 export default pacienteRouter;

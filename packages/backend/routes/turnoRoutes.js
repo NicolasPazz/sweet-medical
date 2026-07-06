@@ -1,6 +1,6 @@
 import express from 'express';
 import { TurnoController } from '../controllers/TurnoController.js';
-import { basicAuthUser } from '../middlewares/basicAuth.js';
+import { basicAuthMedico, basicAuthPaciente, basicAuthUser } from '../middlewares/basicAuth.js';
 
 const turnoController = new TurnoController();
 const turnoRouter = express.Router();
@@ -53,7 +53,7 @@ const turnoRouter = express.Router();
  */
 turnoRouter
   .route('/paciente/reserva')
-  .patch((req, res, next) => turnoController.reservarTurno(req, res, next));
+  .patch(basicAuthPaciente, (req, res, next) => turnoController.reservarTurno(req, res, next));
 
 // Rutas autenticadas por header (sin id_usuario en ruta)
 turnoRouter
@@ -140,8 +140,10 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/paciente/:id_usuario/cancelacion/:id_turno')
-  .patch((req, res, next) => turnoController.cancelarTurnoPaciente(req, res, next));
+  .route('/paciente/cancelacion/:id_turno')
+  .patch(basicAuthPaciente, (req, res, next) =>
+    turnoController.cancelarTurnoPaciente(req, res, next),
+  );
 
 /**
  * @swagger
@@ -192,8 +194,8 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/medico/:id_usuario/cancelacion/:id_turno')
-  .patch((req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
+  .route('/medico/cancelacion/:id_turno')
+  .patch(basicAuthMedico, (req, res, next) => turnoController.cancelarTurnoMedico(req, res, next));
 
 /**
  * @swagger
@@ -261,7 +263,7 @@ turnoRouter
  */
 turnoRouter
   .route('/medico/:id_usuario/confirmar/:id_turno')
-  .patch((req, res, next) => turnoController.confirmarTurno(req, res, next));
+  .patch(basicAuthMedico, (req, res, next) => turnoController.confirmarTurno(req, res, next));
 
 /**
  * @swagger
@@ -308,7 +310,7 @@ turnoRouter
  */
 turnoRouter
   .route('/medico/:id_usuario/historial/:dni_paciente')
-  .get((req, res, next) => turnoController.obtenerHistorial(req, res, next));
+  .get(basicAuthMedico, (req, res, next) => turnoController.obtenerHistorial(req, res, next));
 
 /**
  * @swagger
@@ -416,7 +418,7 @@ turnoRouter
 
 turnoRouter
   .route('/:id_usuario/realizado/:id_turno')
-  .patch((req, res, next) => turnoController.finalizarTurno(req, res, next));
+  .patch(basicAuthMedico, (req, res, next) => turnoController.finalizarTurno(req, res, next));
 
 /**
  * @swagger
@@ -483,8 +485,8 @@ turnoRouter
  *         description: Error interno del servidor
  */
 turnoRouter
-  .route('/:id_usuario/propuesta-reprogramacion/:id_turno')
-  .patch((req, res, next) => turnoController.proponerReprogramacion(req, res, next));
+  .route('/propuesta-reprogramacion/:id_turno')
+  .patch(basicAuthUser, (req, res, next) => turnoController.proponerReprogramacion(req, res, next));
 
 /**
  * @swagger
@@ -551,7 +553,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/responder-reprogramacion/:id_turno')
-  .patch((req, res, next) => turnoController.responderReprogramacion(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.responderReprogramacion(req, res, next),
+  );
 
 /**
  * @swagger
@@ -598,7 +602,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/disponibilidad/:id_servicio')
-  .get((req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) =>
+    turnoController.obtenerDisponibilidad(req, res, next),
+  );
 
 /**
  * @swagger
@@ -639,8 +645,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/all')
-  .get((req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) => turnoController.obtenerTurnosMedico(req, res, next));
 
+// No debería llamarse
 /**
  * @swagger
  * /turnos/all:
@@ -720,10 +727,19 @@ turnoRouter.route('/all').get((req, res, next) => turnoController.getAll(req, re
  *       500:
  *         description: Error interno del servidor
  */
-turnoRouter.route('/disponibles').get(turnoController.buscarTurnos());
+turnoRouter.route('/disponibles').get(basicAuthPaciente, turnoController.buscarTurnos());
 
-turnoRouter.route('/disponibilidad/fechas').get(turnoController.obtenerFechasDisponibles());
+// Nota: basicAuthUser (no basicAuthPaciente) a propósito — estos dos endpoints
+// también los usa el médico al proponer una reprogramación (necesita consultar
+// su propia disponibilidad real), y no dependen de ningún dato específico de
+// paciente (buscarFechasDisponibles/buscarHorariosDisponibles siempre pasan
+// paciente=null a buscarTurnos internamente).
+turnoRouter
+  .route('/disponibilidad/fechas')
+  .get(basicAuthUser, turnoController.obtenerFechasDisponibles());
 
-turnoRouter.route('/disponibilidad/horarios').get(turnoController.obtenerHorariosDisponibles());
+turnoRouter
+  .route('/disponibilidad/horarios')
+  .get(basicAuthUser, turnoController.obtenerHorariosDisponibles());
 
 export default turnoRouter;

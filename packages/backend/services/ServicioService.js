@@ -70,7 +70,7 @@ export class ServicioService {
     }
     logger.debug(servicio);
     if (servicio.codigo === undefined && datosActualizados.codigo !== undefined) {
-      throw new BadRequestError('No se puede modificar ni asignar un código a una Especialidad.');
+      throw new BadRequestError('No se puede modificar ni asignar un cÃ³digo a una Especialidad.');
     }
 
     const actualTipo =
