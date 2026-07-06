@@ -1,9 +1,9 @@
-const { defineConfig } = require('cypress');
-const dotenv = require('dotenv');
+import { defineConfig } from 'cypress';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-module.exports = defineConfig({
+export default defineConfig({
   e2e: {
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     supportFile: 'cypress/support/e2e.js',

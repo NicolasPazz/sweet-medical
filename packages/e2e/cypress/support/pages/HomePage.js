@@ -1,4 +1,3 @@
-// Ruta: packages/e2e/cypress/support/pages/HomePage.js
 class HomePage {
   constructor(cy) {
     this.cy = cy;

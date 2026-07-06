@@ -1,4 +1,3 @@
-// Ruta: packages/e2e/cypress/e2e/flow_preselection.cy.js
 const LoginPage = require('../support/pages/LoginPage');
 const HomePage = require('../support/pages/HomePage');
 const SolicitarTurnoPage = require('../support/pages/SolicitarTurnoPage');

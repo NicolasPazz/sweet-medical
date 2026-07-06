@@ -1,4 +1,3 @@
-// Ruta: packages/e2e/cypress/support/pages/SolicitarTurnoPage.js
 class SolicitarTurnoPage {
   constructor(cy) {
     this.cy = cy;
