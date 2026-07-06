@@ -1,26 +1,20 @@
 class LoginPage {
-  constructor(cy) {
-    this.cy = cy;
-  }
+  url = '/login';
 
   goto() {
-    this.cy.visit('/login');
+    cy.visit(this.url);
     return this;
   }
 
   login(email, password) {
-    this.cy
-      .get('input[placeholder="Tu correo electrónico"]')
-      .should('be.visible')
-      .clear()
-      .type(email);
-    this.cy.get('input[placeholder="Tu contraseña"]').should('be.visible').clear().type(password);
-    this.cy
-      .contains('button', /Iniciar sesión/i)
+    cy.get('input[placeholder="Tu correo electrónico"]').should('be.visible').clear().type(email);
+    cy.get('input[placeholder="Tu contraseña"]').should('be.visible').clear().type(password);
+    cy.contains('button', /Iniciar sesión/i)
       .should('be.visible')
       .click();
+    cy.url().should('not.include', '/login');
     return this;
   }
 }
 
-module.exports = LoginPage;
+export default new LoginPage();
