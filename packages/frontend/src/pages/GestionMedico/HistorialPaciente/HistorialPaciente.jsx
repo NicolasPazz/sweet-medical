@@ -10,7 +10,7 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;

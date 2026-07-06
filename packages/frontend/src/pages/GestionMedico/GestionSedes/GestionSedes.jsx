@@ -4,8 +4,8 @@ import { agregarSede, getSedesMe, getMe, getRolUsuario } from '../../../services
 import { getSedes } from '../../../services/turnoService.js';
 import Toast from '../../../components/Toast/Toast.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import Spinner from '../../../components/ui/Spinner.jsx';
-import VolverGestion from '../../../components/ui/VolverGestion.jsx';
+import Spinner from '../../../components/UI/Spinner.jsx';
+import VolverGestion from '../../../components/UI/VolverGestion.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import './GestionSedes.css';
 

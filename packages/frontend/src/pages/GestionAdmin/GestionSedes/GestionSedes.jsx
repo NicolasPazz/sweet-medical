@@ -10,7 +10,7 @@ import {
 import { getMe, getRolUsuario } from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import { SkeletonServicioList } from '../../../components/ui/Skeleton.jsx';
+import { SkeletonServicioList } from '../../../components/UI/Skeleton.jsx';
 
 const EMPTY_FORM = () => ({
   nombre: '',

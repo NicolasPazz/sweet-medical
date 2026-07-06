@@ -12,7 +12,7 @@ import {
 } from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
-import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
+import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
 import DetalleTurno from '../../DetalleTurno/DetalleTurno.jsx';
 import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 import Toast from '../../../components/Toast/Toast.jsx';
