@@ -302,19 +302,4 @@ export class SeedingController {
     }
   };
 
-  correrProcesoBatch = async (req, res, next) => {
-    try {
-      logger.info('Proceso batch iniciado manualmente');
-
-      await this.turnoService.refrescarSlots();
-
-      return res.status(201).json({
-        status: 'success',
-        message: 'Proceso batch realizado exitosamente',
-      });
-    } catch (error) {
-      logger.error('Error al correr el proceso batch:', error.message);
-      return next(error);
-    }
-  };
 }

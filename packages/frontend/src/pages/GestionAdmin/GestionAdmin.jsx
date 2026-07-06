@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { correrProcesoBatch } from '@/services/adminService';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
@@ -36,6 +37,7 @@ export function GestionAdmin() {
   const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updatingBatch, setUpdatingBatch] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,6 +59,19 @@ export function GestionAdmin() {
     };
     fetchUser();
   }, [email, password]);
+
+  const handleActualizarDisponibilidades = async () => {
+    try {
+      setUpdatingBatch(true);
+      await correrProcesoBatch({ email, password });
+      alert('¡Disponibilidades actualizadas con éxito!'); // O usar una notificación de Antd
+    } catch (error) {
+      console.error('Error al correr el proceso batch:', error);
+      alert('Hubo un error al actualizar las disponibilidades.');
+    } finally {
+      setUpdatingBatch(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -97,7 +112,32 @@ export function GestionAdmin() {
           <p className="ga-subtitle text-ellipsis">
             Seleccioná una sección para administrar el sistema.
           </p>
+
+          <div style={{ marginTop: '16px' }}>
+            <button
+              className="ga-btn-batch" // Puedes agregar esta clase a tu CSS o dejar los estilos inline
+              onClick={handleActualizarDisponibilidades}
+              disabled={updatingBatch}
+              style={{
+                backgroundColor: '#271f92',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '6px',
+                cursor: updatingBatch ? 'not-allowed' : 'pointer',
+                opacity: updatingBatch ? 0.7 : 1,
+                fontWeight: 'bold',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {updatingBatch && <LoadingOutlined spin />}
+              {updatingBatch ? 'Actualizando...' : 'Actualizar disponibilidades'}
+            </button>
+          </div>
         </div>
+
 
         <div className="ga-grid">
           {OPCIONES.map((op) => (

@@ -45,3 +45,16 @@ export const crearUsuarioAdmin = async ({
   );
   return res.data?.data ?? res.data;
 };
+
+export const correrProcesoBatch = async ({ email, password }) => {
+  console.log("email: " + email);
+  console.log("password: " + password);
+
+  const res = await axios.post(
+    `${getApiBaseUrl()}/admins/proceso-batch`,
+    {},
+    { headers: headers(email, password) },
+  );
+
+  return res.data?.data ?? res.data;
+}

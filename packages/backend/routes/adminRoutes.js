@@ -20,4 +20,8 @@ router
   .route('/usuario')
   .post(basicAuthAdmin, (req, res, next) => adminController.crearUsuarioAdmin(req, res, next));
 
+router
+  .route('/proceso-batch')
+  .post(basicAuthAdmin, (req, res, next) => adminController.correrProcesoBatch(req, res, next));
+
 export default router;
