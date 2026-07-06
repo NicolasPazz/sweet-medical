@@ -1015,6 +1015,8 @@ export class TurnoService {
   async buscarTurnos(filtros, paciente, paginacion = {}, options = { paginar: true }) {
     const { page = 1, limit = 10, sortBy = 'costo', sortOrder = 'asc' } = paginacion;
 
+    console.log("Paciente: ", paciente);
+
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError(
         'Debe especificar una especialidad o práctica para calcular la disponibilidad.',
@@ -1143,17 +1145,22 @@ export class TurnoService {
     };
   }
 
-  async buscarFechasDisponibles(filtros) {
+  async buscarFechasDisponibles(filtros, paciente) {
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');
     }
 
-    const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
+    console.log("Paciente: ", paciente);
+
+    const turnosDisponibles = await this.buscarTurnos(filtros, paciente, {}, { paginar: false });
     const fechas = [...new Set(turnosDisponibles.map((t) => t.fecha))].filter((f) => f);
     return { fechas };
   }
 
-  async buscarHorariosDisponibles(filtros) {
+  async buscarHorariosDisponibles(filtros, paciente) {
+
+    console.log("Paciente: ", paciente);
+
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');
     }
@@ -1161,7 +1168,7 @@ export class TurnoService {
       throw new BadRequestError('Debe especificar una fecha (fechaDesde y fechaHasta iguales).');
     }
 
-    const turnosDisponibles = await this.buscarTurnos(filtros, null, {}, { paginar: false });
+    const turnosDisponibles = await this.buscarTurnos(filtros, paciente, {}, { paginar: false });
 
     const horarios = turnosDisponibles.map((t) => ({
       hora: t.hora,

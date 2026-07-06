@@ -2,10 +2,10 @@ import { BadRequestError } from '../errors/AppError.js';
 import { turnoService } from '../services/TurnoService.js';
 import { ValidadorId } from '../utils/ValidadorId.js';
 import { logger } from '../utils/logger.js';
-import { PacienteService } from '../services/PacienteService.js';
+import { pacienteService } from '../services/PacienteService.js';
 
 export class TurnoController {
-  constructor({ turnoService: svc = turnoService, pacienteService: pSvc = PacienteService } = {}) {
+  constructor({ turnoService: svc = turnoService, pacienteService: pSvc = pacienteService } = {}) {
     this.turnoService = svc;
     this.pacienteService = pSvc;
   }
@@ -405,8 +405,14 @@ export class TurnoController {
         const usuario = req.usuarioAutenticado;
         let paciente;
 
-        if (!usuario && usuario.roles.includes('PACIENTE')) {
+        console.log('Usuario autenticado: ', usuario);
+
+        if (usuario && usuario.roles.includes('PACIENTE')) {
+
+
           paciente = await this.pacienteService.findByIdUsuario(usuario.id);
+
+          console.log('Paciente encontrado: ', paciente);
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
@@ -435,7 +441,24 @@ export class TurnoController {
 
         const filtros = { especialidad, practica, profesionalId };
 
-        const resultado = await this.turnoService.buscarFechasDisponibles(filtros);
+        const usuario = req.usuarioAutenticado;
+        let paciente;
+
+        console.log('Usuario autenticado: ', usuario);
+
+        if (usuario && usuario.roles.includes('PACIENTE')) {
+
+
+          paciente = await this.pacienteService.findByIdUsuario(usuario.id);
+
+          console.log('Paciente encontrado: ', paciente);
+
+          if (!paciente) {
+            throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
+          }
+        }
+
+        const resultado = await this.turnoService.buscarFechasDisponibles(filtros, paciente);
 
         return res.status(200).json({
           status: 'success',
@@ -463,7 +486,23 @@ export class TurnoController {
           fechaHasta: fecha,
         };
 
-        const resultado = await this.turnoService.buscarHorariosDisponibles(filtros);
+        const usuario = req.usuarioAutenticado;
+        let paciente;
+
+        console.log('Usuario autenticado: ', usuario);
+
+        if (usuario && usuario.roles.includes('PACIENTE')) {
+
+          paciente = await this.pacienteService.findByIdUsuario(usuario.id);
+
+          console.log('Paciente encontrado: ', paciente);
+
+          if (!paciente) {
+            throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
+          }
+        }
+
+        const resultado = await this.turnoService.buscarHorariosDisponibles(filtros, paciente);
 
         return res.status(200).json({
           status: 'success',

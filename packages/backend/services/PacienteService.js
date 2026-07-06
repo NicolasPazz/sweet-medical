@@ -73,7 +73,7 @@ export class PacienteService {
     console.log('paciente: ' + paciente.id);
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
-    console.log('TURNOS: ' + turnos);
+    
     const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       // 'esTipo' ya no se parchea acá: ahora vive directamente en el sub-schema
