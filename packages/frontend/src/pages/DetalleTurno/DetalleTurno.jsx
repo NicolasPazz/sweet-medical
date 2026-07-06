@@ -54,23 +54,31 @@ export default function DetalleTurno({
         <h1 className="historial-title text-ellipsis" style={{ marginTop: '15px' }}>
           Detalle del Turno
         </h1>
-        <p className="historial-subtitle text-ellipsis">Comprobante e información de tu cita médica</p>
+        <p className="historial-subtitle text-ellipsis">
+          Comprobante e información de tu cita médica
+        </p>
       </div>
 
       <div className="detalle-card">
         <div className="detalle-header-block">
           <span className="detalle-id text-ellipsis">ID de Turno: #{turno._id}</span>
-          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>{cfgEstado?.label}</span>
+          <span className={`turno-estado ${cfgEstado?.color} text-ellipsis`}>
+            {cfgEstado?.label}
+          </span>
         </div>
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Especialidad / Servicio:</span>
-          <span className="detalle-value text-ellipsis">{turno.servicio?.nombre ?? turno.servicio ?? 'General'}</span>
+          <span className="detalle-value text-ellipsis">
+            {turno.servicio?.nombre ?? turno.servicio ?? 'General'}
+          </span>
         </div>
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Profesional Médico:</span>
-          <span className="detalle-value text-ellipsis">{turno.medico?.nombre ?? turno.medico ?? 'N/A'}</span>
+          <span className="detalle-value text-ellipsis">
+            {turno.medico?.nombre ?? turno.medico ?? 'N/A'}
+          </span>
         </div>
 
         <div className="detalle-info-row">
@@ -85,7 +93,9 @@ export default function DetalleTurno({
 
         <div className="detalle-info-row">
           <span className="detalle-label text-ellipsis">Sede de atención:</span>
-          <span className="detalle-value text-ellipsis">{turno.sede?.nombre ?? turno.sede ?? 'No asignada'}</span>
+          <span className="detalle-value text-ellipsis">
+            {turno.sede?.nombre ?? turno.sede ?? 'No asignada'}
+          </span>
         </div>
 
         <div className="detalle-info-row">
@@ -109,7 +119,9 @@ export default function DetalleTurno({
             <div className="detalle-info-row">
               <span className="detalle-label text-ellipsis">Nuevo horario:</span>
               <span className="detalle-value text-ellipsis">
-                {turno.propuestaCambio.nuevaHora || formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)} hs
+                {turno.propuestaCambio.nuevaHora ||
+                  formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
+                hs
               </span>
             </div>
           </div>
@@ -117,7 +129,10 @@ export default function DetalleTurno({
 
         <div className="detalle-acciones-group">
           {puedeCancelar && !esPendiente && (
-            <button className="btn-cancelar-accion text-ellipsis" onClick={() => setModalCancelar(true)}>
+            <button
+              className="btn-cancelar-accion text-ellipsis"
+              onClick={() => setModalCancelar(true)}
+            >
               ❌ Cancelar Cita
             </button>
           )}
@@ -132,7 +147,10 @@ export default function DetalleTurno({
           )}
           {esPendiente && !esPropuestaPropia && (
             <>
-              <button className="btn-cancelar-accion text-ellipsis" onClick={onRechazarReprogramacion}>
+              <button
+                className="btn-cancelar-accion text-ellipsis"
+                onClick={onRechazarReprogramacion}
+              >
                 ✕ Rechazar
               </button>
               <button

@@ -97,10 +97,9 @@ export function GenerarUsuario() {
 
     setEnviando(true);
     try {
-      const rolesSeleccionados = [
-        roles.paciente && 'PACIENTE',
-        roles.medico && 'MEDICO',
-      ].filter(Boolean);
+      const rolesSeleccionados = [roles.paciente && 'PACIENTE', roles.medico && 'MEDICO'].filter(
+        Boolean,
+      );
 
       // Crear el usuario con todos los roles seleccionados en una sola operación,
       // para que quede un único Usuario con ambos roles en vez de dos usuarios separados.
@@ -115,17 +114,11 @@ export function GenerarUsuario() {
         roles: rolesSeleccionados,
       });
 
-      const rolesCreados = [
-        roles.paciente && 'Paciente',
-        roles.medico && 'Médico',
-      ]
+      const rolesCreados = [roles.paciente && 'Paciente', roles.medico && 'Médico']
         .filter(Boolean)
         .join(' y ');
 
-      mostrarToast(
-        `Usuario ${rolesCreados} creado correctamente (inactivo).`,
-        'success',
-      );
+      mostrarToast(`Usuario ${rolesCreados} creado correctamente (inactivo).`, 'success');
       setForm(EMPTY_FORM);
       setErrores({});
       setRoles({ paciente: true, medico: false });
@@ -147,9 +140,7 @@ export function GenerarUsuario() {
 
         <div className="gu-header">
           <h1 className="gu-title text-ellipsis">Generación de Usuarios</h1>
-          <p className="gu-subtitle text-ellipsis">
-            Generá un nuevo usuario
-          </p>
+          <p className="gu-subtitle text-ellipsis">Generá un nuevo usuario</p>
         </div>
 
         <div className="gu-card">

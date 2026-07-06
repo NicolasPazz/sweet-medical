@@ -52,10 +52,9 @@ export const agregarSede = async ({ email, password, nombre, direccion }) => {
 };
 
 export const getSedesMe = async ({ email, password }) => {
-  const response = await axios.get(
-    `${getApiBaseUrl()}/medicos/me/sedes`,
-    { headers: headers(email, password) },
-  );
+  const response = await axios.get(`${getApiBaseUrl()}/medicos/me/sedes`, {
+    headers: headers(email, password),
+  });
   return response.data.data;
 };
 
@@ -81,10 +80,9 @@ export const getHistorialPacienteMe = async ({ email, password }) => {
 };
 
 export const getNotificacionesNoLeidas = async ({ email, password }) => {
-  const response = await axios.get(
-    `${getApiBaseUrl()}/notificaciones/no-leidas`,
-    { headers: headers(email, password) },
-  );
+  const response = await axios.get(`${getApiBaseUrl()}/notificaciones/no-leidas`, {
+    headers: headers(email, password),
+  });
   return response.data.data;
 };
 
@@ -107,12 +105,10 @@ export const actualizarDisponibilidad = async ({ email, password, disponibilidad
 };
 
 export const getHistorialPacienteByMedico = async ({ email, password, dni }) => {
+  console.log('DNI: ' + dni);
 
-  console.log("DNI: " + dni);
-
-  const response = await axios.get(
-    `${getApiBaseUrl()}/pacientes/${dni}/turnos`,
-    { headers: headers(email, password) }
-  );
+  const response = await axios.get(`${getApiBaseUrl()}/pacientes/${dni}/turnos`, {
+    headers: headers(email, password),
+  });
   return response.data;
 };

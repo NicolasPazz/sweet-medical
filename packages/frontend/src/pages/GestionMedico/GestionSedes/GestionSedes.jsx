@@ -50,8 +50,7 @@ export default function GestionSedes() {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
           setUser(null);
-        }
-        finally {
+        } finally {
           setLoadingUser(false);
         }
       } else {
@@ -64,7 +63,9 @@ export default function GestionSedes() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   useEffect(() => {
@@ -74,10 +75,7 @@ export default function GestionSedes() {
         return;
       }
       try {
-        const [todasRes, misRes] = await Promise.all([
-          getSedes(),
-          getSedesMe({ email, password }),
-        ]);
+        const [todasRes, misRes] = await Promise.all([getSedes(), getSedesMe({ email, password })]);
         const todas = todasRes?.data ?? todasRes ?? [];
         const mias = misRes ?? [];
         setTodasLasSedes(todas);
@@ -122,9 +120,7 @@ export default function GestionSedes() {
       return;
     }
 
-    const sede = todasLasSedes.find(
-      (s) => (s._id ?? s.id)?.toString() === sedeSeleccionada,
-    );
+    const sede = todasLasSedes.find((s) => (s._id ?? s.id)?.toString() === sedeSeleccionada);
 
     setSubmitting(true);
     try {
@@ -185,15 +181,15 @@ export default function GestionSedes() {
                         </option>
                       ))}
                     </select>
-                    {error && <span className="gs-icono-error" title="Campo requerido">⚠</span>}
+                    {error && (
+                      <span className="gs-icono-error" title="Campo requerido">
+                        ⚠
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <button
-                  className="gs-sedes-btn"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                >
+                <button className="gs-sedes-btn" onClick={handleSubmit} disabled={submitting}>
                   {submitting ? 'Agregando...' : '+ Agregar sede'}
                 </button>
               </>

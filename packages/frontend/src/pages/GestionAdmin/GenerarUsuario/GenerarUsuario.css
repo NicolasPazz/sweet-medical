@@ -109,7 +109,10 @@
   background: #f8fafc;
   cursor: pointer;
   user-select: none;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
 }
 
 .gu-checkbox-wrapper:hover {
@@ -139,7 +142,9 @@
   cursor: pointer;
   display: grid;
   place-content: center;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .gu-checkbox-wrapper input[type='checkbox']::before {

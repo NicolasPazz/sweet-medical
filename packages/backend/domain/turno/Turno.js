@@ -53,7 +53,6 @@ export class Turno {
   }
 
   actualizarEstado(usuario, nuevoEstado, motivo) {
-
     const estadoEnum = nuevoEstado.getEstadoNombre();
 
     const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, usuario, motivo);
@@ -71,10 +70,9 @@ export class Turno {
       proponenteId: usuario.id || usuario._id,
     };
 
-
-    console.log("usuario: ", usuario);
-    console.log("nuevaFechaHora: ",nuevaFechaHora);
-    console.log("motivo: ", motivo);
+    console.log('usuario: ', usuario);
+    console.log('nuevaFechaHora: ', nuevaFechaHora);
+    console.log('motivo: ', motivo);
 
     const notificacion = this.actualizarEstado(
       usuario,

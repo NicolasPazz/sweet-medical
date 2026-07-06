@@ -97,7 +97,8 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
           </div>
         ) : (
           items.map((item, index) => {
-            const servicioNombre = item.especialidad || item.practica || item.servicio?.nombre || 'Consulta Médica';
+            const servicioNombre =
+              item.especialidad || item.practica || item.servicio?.nombre || 'Consulta Médica';
             const medicoNombre = item.medico?.nombre || 'Médico General';
             const itemId = item.id || item._id || index; // Fallback al index por seguridad de Key
 
@@ -110,7 +111,10 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
                   <p className="cart-item__meta text-ellipsis">
                     {item.fecha || 'Propuesta'} - {item.hora || '00:00'} hs
                   </p>
-                  <p className="cart-item__sede text-ellipsis" style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>
+                  <p
+                    className="cart-item__sede text-ellipsis"
+                    style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}
+                  >
                     📍 Sede: {item.sede?.nombre || 'No especificada'}
                   </p>
                 </div>
@@ -133,7 +137,7 @@ export default function CarritoDropdown({ open, setOpen, onConfirmarReserva, anc
           <div className="cart-footer__total-row">
             <span className="text-ellipsis">Total estimado:</span>
             <span className="cart-footer__price text-ellipsis">
-              {totalCosto === 0 ? "Sin costo (Cubierto)" : `$${totalCosto.toLocaleString('es-AR')}`}
+              {totalCosto === 0 ? 'Sin costo (Cubierto)' : `$${totalCosto.toLocaleString('es-AR')}`}
             </span>
           </div>
           <button

@@ -8,7 +8,7 @@ export default function AuthProvider({ children }) {
 
   const isAuthenticated = !!email && !!password;
 
-  const login_front = ({email, password}) => {
+  const login_front = ({ email, password }) => {
     setEmailData(email);
     setPasswordData(password);
     localStorage.setItem('email', email);

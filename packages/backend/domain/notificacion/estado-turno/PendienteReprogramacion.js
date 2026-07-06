@@ -41,7 +41,7 @@ export class PendienteReprogramacion {
           servicio,
           fecha: fechaFormateada,
           motivo,
-          interpolation: { escapeValue: false }
+          interpolation: { escapeValue: false },
         }),
       );
     }
@@ -57,7 +57,7 @@ export class PendienteReprogramacion {
           servicio,
           fecha: fechaFormateada,
           motivo,
-          interpolation: { escapeValue: false }
+          interpolation: { escapeValue: false },
         }),
       );
     } else {

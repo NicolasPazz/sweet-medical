@@ -135,9 +135,7 @@ export class Agenda {
 
         // Aritmética de días en milisegundos UTC (sin DST, sin depender del
         // huso horario del servidor) en vez de setDate()/getDate() locales.
-        const fechaSlot = new Date(
-          ahora.getTime() + (diasHastaPrimerDia + 7 * i) * MS_POR_DIA,
-        );
+        const fechaSlot = new Date(ahora.getTime() + (diasHastaPrimerDia + 7 * i) * MS_POR_DIA);
         const fechaSlotStr = fechaUTCAString(fechaSlot);
 
         while (actualMinutos + offset <= tiempoLimite) {
@@ -450,28 +448,28 @@ export class Agenda {
   }
 
   /**
- * Parsea un string de hora (HH:mm) y lo aplica al día actual o a una fecha base.
- * @param {string} horaString - El string con la hora (ej: "8:00", "14:30").
- * @param {Date} [fechaBase=new Date()] - Opcional. La fecha sobre la cual aplicar la hora. Por defecto es hoy.
- * @returns {Date} El objeto Date modificado con la hora especificada.
- */
- parsearHoraADate(horaString, fechaBase = new Date()) {
-  // 1. Separar el string en componentes de hora y minuto usando split
-  const [horas, minutos] = horaString.split(':').map(Number);
+   * Parsea un string de hora (HH:mm) y lo aplica al día actual o a una fecha base.
+   * @param {string} horaString - El string con la hora (ej: "8:00", "14:30").
+   * @param {Date} [fechaBase=new Date()] - Opcional. La fecha sobre la cual aplicar la hora. Por defecto es hoy.
+   * @returns {Date} El objeto Date modificado con la hora especificada.
+   */
+  parsearHoraADate(horaString, fechaBase = new Date()) {
+    // 1. Separar el string en componentes de hora y minuto usando split
+    const [horas, minutos] = horaString.split(':').map(Number);
 
-  // Validar que el formato sea correcto y los números sean válidos
-  if (isNaN(horas) || isNaN(minutos) || horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
-    throw new Error("Formato de hora inválido. Debe ser HH:mm entre 00:00 y 23:59");
+    // Validar que el formato sea correcto y los números sean válidos
+    if (isNaN(horas) || isNaN(minutos) || horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
+      throw new Error('Formato de hora inválido. Debe ser HH:mm entre 00:00 y 23:59');
+    }
+
+    // 2. Clonar la fecha base para no mutar el objeto original si se pasa por parámetro
+    const nuevaFecha = new Date(fechaBase.getTime());
+
+    // 3. Establecer horas, minutos, y limpiar segundos/milisegundos para una comparación limpia
+    nuevaFecha.setHours(horas, minutos, 0, 0);
+
+    return nuevaFecha;
   }
-
-  // 2. Clonar la fecha base para no mutar el objeto original si se pasa por parámetro
-  const nuevaFecha = new Date(fechaBase.getTime());
-
-  // 3. Establecer horas, minutos, y limpiar segundos/milisegundos para una comparación limpia
-  nuevaFecha.setHours(horas, minutos, 0, 0);
-
-  return nuevaFecha;
-}
 
   static generarTurnosSegunMedicoYServicio(medico, slots, servicio) {
     const turnosGenerados = [];

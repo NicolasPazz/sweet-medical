@@ -60,7 +60,9 @@ export default function Home() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   if (loading) {
@@ -76,7 +78,10 @@ export default function Home() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
           Cargando...
         </span>
       </div>
@@ -125,7 +130,9 @@ export default function Home() {
             </div>
             <div className="home-card-body">
               <span className="home-card-title text-ellipsis">Agendar Turno</span>
-              <span className="home-card-desc text-ellipsis">Elegí servicio, médico y horario disponible</span>
+              <span className="home-card-desc text-ellipsis">
+                Elegí servicio, médico y horario disponible
+              </span>
             </div>
             <FaArrowRight className="home-card-arrow" />
           </Link>
@@ -138,7 +145,9 @@ export default function Home() {
             </div>
             <div className="home-card-body">
               <span className="home-card-title text-ellipsis">Historial Médico</span>
-              <span className="home-card-desc text-ellipsis">Revisá tus turnos y consultas anteriores</span>
+              <span className="home-card-desc text-ellipsis">
+                Revisá tus turnos y consultas anteriores
+              </span>
             </div>
             <FaArrowRight className="home-card-arrow" />
           </Link>
@@ -150,7 +159,9 @@ export default function Home() {
             </div>
             <div className="home-card-body">
               <span className="home-card-title text-ellipsis">Gestión médica</span>
-              <span className="home-card-desc text-ellipsis">Administrá tus actividades como médico</span>
+              <span className="home-card-desc text-ellipsis">
+                Administrá tus actividades como médico
+              </span>
             </div>
             <FaArrowRight className="home-card-arrow" />
           </Link>
@@ -172,17 +183,23 @@ export default function Home() {
         <div className="home-feature">
           <FaShieldAlt className="home-feature-icon" />
           <h3 className="text-ellipsis">Datos seguros</h3>
-          <p className="text-ellipsis-multiline">Tu información médica está protegida y solo accesible por vos.</p>
+          <p className="text-ellipsis-multiline">
+            Tu información médica está protegida y solo accesible por vos.
+          </p>
         </div>
         <div className="home-feature">
           <FaClock className="home-feature-icon" />
           <h3 className="text-ellipsis">Turnos 24/7</h3>
-          <p className="text-ellipsis-multiline">Agendá en cualquier momento sin necesidad de llamar.</p>
+          <p className="text-ellipsis-multiline">
+            Agendá en cualquier momento sin necesidad de llamar.
+          </p>
         </div>
         <div className="home-feature">
           <FaUserMd className="home-feature-icon" />
           <h3 className="text-ellipsis">Especialistas</h3>
-          <p className="text-ellipsis-multiline">Accedé a una red de profesionales de la salud certificados.</p>
+          <p className="text-ellipsis-multiline">
+            Accedé a una red de profesionales de la salud certificados.
+          </p>
         </div>
       </section>
     </div>

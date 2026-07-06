@@ -43,7 +43,9 @@ pacienteRouter
 // Historial del paciente autenticado por header
 pacienteRouter
   .route('/me/turnos')
-  .get(basicAuthPaciente, (req, res, next) => pacienteController.obtenerHistorialMe(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) =>
+    pacienteController.obtenerHistorialMe(req, res, next),
+  );
 
 /**
  * @swagger

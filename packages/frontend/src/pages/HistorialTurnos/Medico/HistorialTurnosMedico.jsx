@@ -3,8 +3,21 @@ import './HistorialTurnosMedico.css';
 import { TURNOS_MEDICO_MOCK } from '../../../mockdata/turnosMedico.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import DetalleTurnoMedico from './DetalleTurnoMedico.jsx';
-import { getMe, getTurnosMedico, getSedesMe, getRolUsuario } from '../../../services/userService.js';
-import { cancelarTurno, cancelarTurnoMedico, cancelarTurnoPaciente, confirmarTurno, finalizarTurno, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
+import {
+  getMe,
+  getTurnosMedico,
+  getSedesMe,
+  getRolUsuario,
+} from '../../../services/userService.js';
+import {
+  cancelarTurno,
+  cancelarTurnoMedico,
+  cancelarTurnoPaciente,
+  confirmarTurno,
+  finalizarTurno,
+  proponerReprogramacion,
+  responderReprogramacion,
+} from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -27,7 +40,10 @@ function ModalSede({ onConfirmar, onCerrar, email, password }) {
   }, []);
 
   const handleSubmit = () => {
-    if (!sedeSeleccionada) { setError(true); return; }
+    if (!sedeSeleccionada) {
+      setError(true);
+      return;
+    }
     onConfirmar(sedeSeleccionada);
   };
 
@@ -40,12 +56,17 @@ function ModalSede({ onConfirmar, onCerrar, email, password }) {
         {cargando ? (
           <p style={{ fontSize: 13, color: '#94a3b8' }}>Cargando sedes...</p>
         ) : sedes.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#b91c1c' }}>No tenés sedes registradas. Agregá una desde Gestión Médica.</p>
+          <p style={{ fontSize: 13, color: '#b91c1c' }}>
+            No tenés sedes registradas. Agregá una desde Gestión Médica.
+          </p>
         ) : (
           <select
             className={`modal-input${error ? ' input-error' : ''}`}
             value={sedeSeleccionada}
-            onChange={(e) => { setSedeSeleccionada(e.target.value); setError(false); }}
+            onChange={(e) => {
+              setSedeSeleccionada(e.target.value);
+              setError(false);
+            }}
             autoFocus
           >
             <option value="">-- Seleccioná una sede --</option>
@@ -58,8 +79,14 @@ function ModalSede({ onConfirmar, onCerrar, email, password }) {
         )}
         {error && <span className="modal-error">⚠ Debés seleccionar una sede</span>}
         <div className="modal-acciones">
-          <button className="btn-cancelar-accion" onClick={onCerrar}>Cancelar</button>
-          <button className="btn-confirmar-accion" onClick={handleSubmit} disabled={cargando || sedes.length === 0}>
+          <button className="btn-cancelar-accion" onClick={onCerrar}>
+            Cancelar
+          </button>
+          <button
+            className="btn-confirmar-accion"
+            onClick={handleSubmit}
+            disabled={cargando || sedes.length === 0}
+          >
             ✓ Confirmar
           </button>
         </div>
@@ -91,7 +118,7 @@ export default function HistorialTurnosMedico() {
     const load = async () => {
       if (!email || !password) return;
       try {
-        console.log("HOLAAAAAA");
+        console.log('HOLAAAAAA');
         const data = await getTurnosMedico({ email, password });
         setTurnos(data ?? []);
       } catch (err) {
@@ -148,7 +175,9 @@ export default function HistorialTurnosMedico() {
   }
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   if (rolVisible !== 'Médico') {
@@ -160,8 +189,7 @@ export default function HistorialTurnosMedico() {
   // la respuesta del paciente, en vez de poder aceptar/rechazar su propia
   // propuesta).
   const esPropuestaPropia = (turno) =>
-    !!turno.propuestaCambio &&
-    String(turno.propuestaCambio.proponenteId) === String(user?.id);
+    !!turno.propuestaCambio && String(turno.propuestaCambio.proponenteId) === String(user?.id);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
 
@@ -175,7 +203,9 @@ export default function HistorialTurnosMedico() {
   const handleConfirmar = async (idTurno, sede) => {
     try {
       await confirmarTurno(idTurno, email, password, sede);
-      setTurnos((prev) => prev.map((t) => (t._id === idTurno ? { ...t, estado: 'CONFIRMADO' } : t)));
+      setTurnos((prev) =>
+        prev.map((t) => (t._id === idTurno ? { ...t, estado: 'CONFIRMADO' } : t)),
+      );
       mostrarToast('Turno confirmado exitosamente');
     } catch (err) {
       mostrarToast(err.response?.data?.message ?? 'Error al confirmar el turno', 'error');
@@ -258,21 +288,21 @@ export default function HistorialTurnosMedico() {
         prev.map((t) =>
           t._id === idTurno
             ? {
-              ...t,
-              estado: 'PENDIENTE_REPROGRAMACION',
-              propuestaCambio: {
-                nuevaFechaHora,
-                nuevaHora: hora,
-                motivo,
-                // Antes no se guardaba quién propuso el cambio en la
-                // actualización optimista local (solo se persistía en el
-                // backend). Resultándo: hasta el próximo refresh, el propio
-                // médico que acababa de proponer la reprogramación veía sus
-                // propios botones de Aceptar/Rechazar, porque `proponenteId`
-                // era `undefined` y nunca coincidía con `usuarioId`.
-                proponenteId: user?.id,
-              },
-            }
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Antes no se guardaba quién propuso el cambio en la
+                  // actualización optimista local (solo se persistía en el
+                  // backend). Resultándo: hasta el próximo refresh, el propio
+                  // médico que acababa de proponer la reprogramación veía sus
+                  // propios botones de Aceptar/Rechazar, porque `proponenteId`
+                  // era `undefined` y nunca coincidía con `usuarioId`.
+                  proponenteId: user?.id,
+                },
+              }
             : t,
         ),
       );
@@ -311,7 +341,9 @@ export default function HistorialTurnosMedico() {
         <VolverGestion />
         <div className="historial-header">
           <h1 className="historial-title text-ellipsis">Turnos del Médico</h1>
-          <p className="historial-subtitle text-ellipsis">Historial y próximos turnos de tus pacientes</p>
+          <p className="historial-subtitle text-ellipsis">
+            Historial y próximos turnos de tus pacientes
+          </p>
         </div>
 
         <div className="filtros">
@@ -347,23 +379,32 @@ export default function HistorialTurnosMedico() {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="turno-card-left">
-                    <span className="turno-fecha text-ellipsis">{formatFechaUTC(turno.fechaHora)}</span>
-                    <span className="turno-hora text-ellipsis">{formatHoraUTC(turno.fechaHora)}</span>
+                    <span className="turno-fecha text-ellipsis">
+                      {formatFechaUTC(turno.fechaHora)}
+                    </span>
+                    <span className="turno-hora text-ellipsis">
+                      {formatHoraUTC(turno.fechaHora)}
+                    </span>
                   </div>
                   <div className="turno-card-center">
                     <span className="turno-servicio text-ellipsis">{turno.servicio?.nombre}</span>
                     <span className="turno-medico text-ellipsis">{turno.paciente?.nombre}</span>
-                    {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
+                    {turno.sede && (
+                      <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>
+                    )}
                     {esPendiente && turno.propuestaCambio && (
                       <span className="turno-propuesta text-ellipsis">
                         → {formatFechaUTC(turno.propuestaCambio.nuevaFechaHora)}{' '}
-                        {turno.propuestaCambio.nuevaHora || formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}
+                        {turno.propuestaCambio.nuevaHora ||
+                          formatHoraUTC(turno.propuestaCambio.nuevaFechaHora)}
                       </span>
                     )}
                   </div>
                   <div className="turno-card-right">
                     <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
-                    <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
+                    <span className="turno-costo text-ellipsis">
+                      ${turno.costo?.toLocaleString('es-AR')}
+                    </span>
                   </div>
 
                   {puedeConfirmar && (
@@ -378,7 +419,10 @@ export default function HistorialTurnosMedico() {
                     </button>
                   )}
                   {esPendiente && !esPropuestaPropia(turno) && (
-                    <div className="btns-reprogramacion-inline" onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className="btns-reprogramacion-inline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         className="btn-aceptar-inline text-ellipsis"
                         onClick={() => handleAceptarReprogramacion(turno._id)}
@@ -394,7 +438,10 @@ export default function HistorialTurnosMedico() {
                     </div>
                   )}
                   {esPendiente && esPropuestaPropia(turno) && (
-                    <span className="turno-propuesta-espera text-ellipsis" onClick={(e) => e.stopPropagation()}>
+                    <span
+                      className="turno-propuesta-espera text-ellipsis"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       ⏳ Esperando respuesta del paciente
                     </span>
                   )}

@@ -34,17 +34,16 @@ export class PacienteController {
   };
 
   validarDNI = (dni) => {
+    if (!dni) throw new BadRequestError('No se ingreso el DNI o es invalido');
 
-    if (!dni) throw new BadRequestError("No se ingreso el DNI o es invalido");
-
-    const dniLimpio = String(dni).replaceAll(".", "").trim();
+    const dniLimpio = String(dni).replaceAll('.', '').trim();
 
     const regexDNI = /^\d+$/;
 
     if (!regexDNI.test(dniLimpio)) {
-      throw new BadRequestError("DNI no válido ingresado. Debe contener solo números y puntos.");
+      throw new BadRequestError('DNI no válido ingresado. Debe contener solo números y puntos.');
     }
-  }
+  };
 
   leerPacientes = async (req, res, next) => {
     try {

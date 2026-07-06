@@ -6,13 +6,11 @@ const modoContexto = createContext();
 // 2. Creamos el componente Proveedor
 export default function ModoVistaContext({ children }) {
   // Aquí declaramos el useState que queremos compartir globalmente
-  const [modo, setModo] = useState("modo-paciente");
+  const [modo, setModo] = useState('modo-paciente');
 
   return (
     // Pasamos tanto la variable como la función para actualizarla en el 'value'
-    <modoContexto.Provider value={{ modo, setModo }}>
-      {children}
-    </modoContexto.Provider>
+    <modoContexto.Provider value={{ modo, setModo }}>{children}</modoContexto.Provider>
   );
 }
 

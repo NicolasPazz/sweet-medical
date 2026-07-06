@@ -15,9 +15,7 @@ export class MedicoRepository {
   }
 
   async findByIdUsuario(usuarioId) {
-    return await this.model
-      .findOne({ usuario: usuarioId })
-      .populate('turnosActualesYFuturos');
+    return await this.model.findOne({ usuario: usuarioId }).populate('turnosActualesYFuturos');
   }
 
   async findByMatricula(matricula) {

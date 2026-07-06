@@ -60,7 +60,9 @@ export class PracticaService {
     if (!medico) throw new NotFoundError('Médico no encontrado');
     const practica = await this.practicaRepository.findById(practicaId);
     if (!practica) throw new NotFoundError('Práctica no encontrada');
-    const yaLaTiene = medico.practicas.some((p) => p._id?.toString() === practicaId || p.toString() === practicaId);
+    const yaLaTiene = medico.practicas.some(
+      (p) => p._id?.toString() === practicaId || p.toString() === practicaId,
+    );
     if (yaLaTiene) throw new ConflictError('El médico ya tiene asignada esa práctica');
     return await this.medicoService.agregarPracticaAMedico(medico._id, practicaId);
   }

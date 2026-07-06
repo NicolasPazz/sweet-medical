@@ -22,7 +22,9 @@ export class Cancelado {
     // Por eso hay que priorizar ._id / el propio valor, y nunca .id.
     const actorId = actor?._id || actor;
     const pacienteUsuarioId = this.turno.paciente
-      ? this.turno.paciente.usuario?.id || this.turno.paciente.usuario?._id || this.turno.paciente.usuario
+      ? this.turno.paciente.usuario?.id ||
+        this.turno.paciente.usuario?._id ||
+        this.turno.paciente.usuario
       : null;
     if (
       !(pacienteUsuarioId == null) &&
@@ -36,10 +38,14 @@ export class Cancelado {
         remitente,
         t('CANCELACION_A_MEDICO', {
           nombre: this.turno.paciente.nombre,
-          fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + ' (' + DateUtil.toHHMM(this.turno.fechaHora) + ')',
+          fecha:
+            DateUtil.toDDMMYYYY(this.turno.fechaHora) +
+            ' (' +
+            DateUtil.toHHMM(this.turno.fechaHora) +
+            ')',
           servicio,
           motivo,
-          interpolation: { escapeValue: false }
+          interpolation: { escapeValue: false },
         }),
       );
     } else {
@@ -50,10 +56,10 @@ export class Cancelado {
           remitente,
           t('CANCELACION_A_PACIENTE', {
             nombre: this.turno.medico.nombre,
-            fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + "(" + this.turno.hora + ")",
+            fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + '(' + this.turno.hora + ')',
             servicio,
             motivo,
-            interpolation: { escapeValue: false }
+            interpolation: { escapeValue: false },
           }),
         );
       } else {

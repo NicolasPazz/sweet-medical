@@ -4,10 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import './NotificationBell.css';
 import { useAuth } from '../AuthProvider.jsx';
-import {
-  getNotificacionesNoLeidas,
-  marcarNotificacionLeida,
-} from '../../services/userService.js';
+import { getNotificacionesNoLeidas, marcarNotificacionLeida } from '../../services/userService.js';
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -31,12 +28,10 @@ export default function NotificationBell() {
   const [dropdownStyle, setDropdownStyle] = useState({});
   const [cargando, setCargando] = useState(false);
 
-
-
   const containerRef = useRef(null);
   const pollRef = useRef(null);
 
-  // Fetch de notificaciones no leídas 
+  // Fetch de notificaciones no leídas
   const fetchNotificaciones = useCallback(async () => {
     if (!email || !password) return;
     try {
@@ -65,7 +60,6 @@ export default function NotificationBell() {
 
     return () => clearInterval(pollRef.current);
   }, [isAuthenticated, fetchNotificaciones]);
-
 
   if (!isAuthenticated) return null;
 
@@ -129,11 +123,11 @@ export default function NotificationBell() {
   const maxH = isMobile
     ? window.innerHeight - (containerRef.current?.getBoundingClientRect().bottom ?? 0) - 24
     : Math.min(
-      600,
-      window.innerHeight -
-      (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
-      16,
-    );
+        600,
+        window.innerHeight -
+          (window.innerHeight - (containerRef.current?.getBoundingClientRect().top ?? 0)) -
+          16,
+      );
 
   return (
     <div className="nb-wrapper" ref={containerRef}>

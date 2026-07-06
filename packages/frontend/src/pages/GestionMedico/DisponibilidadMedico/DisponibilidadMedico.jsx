@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import './DisponibilidadMedico.css';
-import { getMe, getMedicoByUser, actualizarDisponibilidad, getRolUsuario } from '../../../services/userService.js';
+import {
+  getMe,
+  getMedicoByUser,
+  actualizarDisponibilidad,
+  getRolUsuario,
+} from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/ui/Spinner.jsx';
@@ -152,7 +157,7 @@ export default function DisponibilidadMedico() {
         const res = await getMedicoByUser({ email, password });
         const medico = res?.data ?? res;
         setMedico(medico);
-        
+
         const disponibilidades = medico?.disponibilidades || [];
         setDisponibilidades(disponibilidades);
       } catch (err) {
@@ -165,7 +170,7 @@ export default function DisponibilidadMedico() {
     load();
   }, [email, password]);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
         try {
@@ -186,8 +191,7 @@ export default function DisponibilidadMedico() {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
           setUser(null);
-        }
-        finally {
+        } finally {
           setLoadingUser(false);
         }
       } else {
@@ -200,7 +204,9 @@ export default function DisponibilidadMedico() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   if (!isAuthenticated) {
@@ -326,7 +332,9 @@ export default function DisponibilidadMedico() {
                 <div>
                   <div className="dm-medico-nombre text-ellipsis">{medico.nombre}</div>
                   {medico.matricula && (
-                    <div className="dm-medico-meta text-ellipsis">Matrícula: {medico.matricula}</div>
+                    <div className="dm-medico-meta text-ellipsis">
+                      Matrícula: {medico.matricula}
+                    </div>
                   )}
                 </div>
               </div>
@@ -337,10 +345,18 @@ export default function DisponibilidadMedico() {
                 </button>
               ) : (
                 <div className="dm-edit-actions">
-                  <button className="dm-btn-secondary text-ellipsis" onClick={handleCancelEdit} disabled={saving}>
+                  <button
+                    className="dm-btn-secondary text-ellipsis"
+                    onClick={handleCancelEdit}
+                    disabled={saving}
+                  >
                     Cancelar
                   </button>
-                  <button className="dm-btn-primary text-ellipsis" onClick={handleSave} disabled={saving}>
+                  <button
+                    className="dm-btn-primary text-ellipsis"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
                     {saving ? (
                       <Spinner size="small" text="Guardando..." inline />
                     ) : (
@@ -367,7 +383,10 @@ export default function DisponibilidadMedico() {
                   <div className="dm-empty">
                     <div className="dm-empty-icon">📅</div>
                     <p className="text-ellipsis">No tenés franjas horarias configuradas.</p>
-                    <button className="dm-btn-primary text-ellipsis" onClick={() => setIsEditing(true)}>
+                    <button
+                      className="dm-btn-primary text-ellipsis"
+                      onClick={() => setIsEditing(true)}
+                    >
                       + Agregar disponibilidad
                     </button>
                   </div>

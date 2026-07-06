@@ -132,7 +132,6 @@ router
   .route('/:id_notificacion')
   .patch(basicAuthUser, (req, res, next) => notificacionController.marcarComoLeida(req, res, next));
 
-
 // NO SÉ COMO MANEJAR ESTE CASO CON EL BASIC AUTH:
 /**
  * @swagger

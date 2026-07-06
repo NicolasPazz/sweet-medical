@@ -1,6 +1,6 @@
 /**
  * Utilidades centralizadas de fecha/hora para el frontend.
-**/
+ **/
 
 const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
@@ -20,7 +20,6 @@ export function formatFechaUTC(fechaHoraISO) {
   const anio = d.getUTCFullYear();
   return `${dia}/${mes}/${anio}`;
 }
-
 
 export function formatHoraUTC(fechaHoraISO) {
   if (!fechaHoraISO) return '';

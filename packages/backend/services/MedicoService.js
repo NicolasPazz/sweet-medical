@@ -30,11 +30,11 @@ export class MedicoService {
 
     // Crear la sede
     const { sedeRepository } = await import('../infrastructure/repositories/SedeRepository.js');
-    const sedeExistente = await sedeRepository.findAll().then((sedes) =>
-      sedes.find((s) => s.nombre.toLowerCase() === nombre.toLowerCase()),
-    );
+    const sedeExistente = await sedeRepository
+      .findAll()
+      .then((sedes) => sedes.find((s) => s.nombre.toLowerCase() === nombre.toLowerCase()));
 
-    const sede = sedeExistente ?? await sedeRepository.save({ nombre, direccion });
+    const sede = sedeExistente ?? (await sedeRepository.save({ nombre, direccion }));
 
     // Verificar que no la tenga ya
     const yaLaTiene = medico.sedes?.some(
@@ -63,7 +63,6 @@ export class MedicoService {
     return await this.medicoRepository.findAll();
   }
 
-
   async actualizarDisponibilidad(usuario, disponibilidades) {
     const medico = await this.medicoRepository.findByIdUsuario(usuario.id);
 
@@ -81,7 +80,6 @@ export class MedicoService {
       return h * 60 + m;
     };
 
-
     const porDia = {};
     for (const franja of normalizadas) {
       const dia = franja.diaSemana;
@@ -90,9 +88,7 @@ export class MedicoService {
     }
 
     for (const [dia, franjas] of Object.entries(porDia)) {
-      const ordenadas = [...franjas].sort(
-        (a, b) => toMin(a.horaDesde) - toMin(b.horaDesde),
-      );
+      const ordenadas = [...franjas].sort((a, b) => toMin(a.horaDesde) - toMin(b.horaDesde));
 
       for (let i = 0; i < ordenadas.length; i++) {
         for (let j = 0; j < ordenadas.length; j++) {
@@ -141,7 +137,9 @@ export class MedicoService {
 
   async crearMedico(data) {
     if (!data?.usuario || !data?.matricula || !data?.nombre) {
-      throw new Error('Faltan datos obligatorios para crear el médico (usuario, matricula, nombre)');
+      throw new Error(
+        'Faltan datos obligatorios para crear el médico (usuario, matricula, nombre)',
+      );
     }
 
     const medicoExistente = await this.medicoRepository.findByMatricula(data.matricula);
@@ -163,7 +161,6 @@ export class MedicoService {
 
     return medico;
   }
-
 }
 
 export const medicoService = new MedicoService();

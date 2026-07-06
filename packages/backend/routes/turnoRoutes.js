@@ -70,11 +70,15 @@ turnoRouter
 
 turnoRouter
   .route('/me/propuesta-reprogramacion/:id_turno')
-  .patch(basicAuthUser, (req, res, next) => turnoController.proponerReprogramacionMe(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.proponerReprogramacionMe(req, res, next),
+  );
 
 turnoRouter
   .route('/me/responder-reprogramacion/:id_turno')
-  .patch(basicAuthUser, (req, res, next) => turnoController.responderReprogramacionMe(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.responderReprogramacionMe(req, res, next),
+  );
 
 /**
  * @swagger
@@ -137,7 +141,9 @@ turnoRouter
  */
 turnoRouter
   .route('/paciente/cancelacion/:id_turno')
-  .patch(basicAuthPaciente, (req, res, next) => turnoController.cancelarTurnoPaciente(req, res, next));
+  .patch(basicAuthPaciente, (req, res, next) =>
+    turnoController.cancelarTurnoPaciente(req, res, next),
+  );
 
 /**
  * @swagger
@@ -547,7 +553,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/responder-reprogramacion/:id_turno')
-  .patch(basicAuthUser, (req, res, next) => turnoController.responderReprogramacion(req, res, next));
+  .patch(basicAuthUser, (req, res, next) =>
+    turnoController.responderReprogramacion(req, res, next),
+  );
 
 /**
  * @swagger
@@ -594,7 +602,9 @@ turnoRouter
  */
 turnoRouter
   .route('/:id_usuario/disponibilidad/:id_servicio')
-  .get(basicAuthPaciente, (req, res, next) => turnoController.obtenerDisponibilidad(req, res, next));
+  .get(basicAuthPaciente, (req, res, next) =>
+    turnoController.obtenerDisponibilidad(req, res, next),
+  );
 
 /**
  * @swagger
@@ -724,8 +734,12 @@ turnoRouter.route('/disponibles').get(basicAuthPaciente, turnoController.buscarT
 // su propia disponibilidad real), y no dependen de ningún dato específico de
 // paciente (buscarFechasDisponibles/buscarHorariosDisponibles siempre pasan
 // paciente=null a buscarTurnos internamente).
-turnoRouter.route('/disponibilidad/fechas').get(basicAuthUser, turnoController.obtenerFechasDisponibles());
+turnoRouter
+  .route('/disponibilidad/fechas')
+  .get(basicAuthUser, turnoController.obtenerFechasDisponibles());
 
-turnoRouter.route('/disponibilidad/horarios').get(basicAuthUser, turnoController.obtenerHorariosDisponibles());
+turnoRouter
+  .route('/disponibilidad/horarios')
+  .get(basicAuthUser, turnoController.obtenerHorariosDisponibles());
 
 export default turnoRouter;

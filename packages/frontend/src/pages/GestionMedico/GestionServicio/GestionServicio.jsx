@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
+import { especialidadesMock, practicasMock } from '../../../mockdata/servicios.js';
 import {
-  especialidadesMock,
-  practicasMock,
-} from '../../../mockdata/servicios.js';
-import { getAllEspecialidadesByMedic, getAllPracticaByMedic, agregarEspecialidadAMedico, agregarPracticaAMedico, eliminarEspecialidadAMedico, eliminarPracticaAMedico } from '../../../services/ServiciosService.js';
+  getAllEspecialidadesByMedic,
+  getAllPracticaByMedic,
+  agregarEspecialidadAMedico,
+  agregarPracticaAMedico,
+  eliminarEspecialidadAMedico,
+  eliminarPracticaAMedico,
+} from '../../../services/ServiciosService.js';
 import { getEspecialidades, getPracticas } from '../../../services/turnoService.js';
 import './GestionServicio.css';
 import { getMe, getRolUsuario } from '../../../services/userService.js';
@@ -24,15 +28,18 @@ function AsignarServicioModal({ onClose, onAsignado, especialidadesUsuario, prac
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const cargarCatalogo = async () => { 
+    const cargarCatalogo = async () => {
       setLoadingCatalogo(true);
       setError('');
       try {
         const res = tipo === 'ESPECIALIDAD' ? await getEspecialidades() : await getPracticas();
         const lista = res?.data ?? [];
-        const serviciosYaAsignados = tipo === 'ESPECIALIDAD' ? especialidadesUsuario : practicasUsuario;
+        const serviciosYaAsignados =
+          tipo === 'ESPECIALIDAD' ? especialidadesUsuario : practicasUsuario;
         const idsYaAsignados = new Set(serviciosYaAsignados.map((s) => s.id ?? s._id?.toString()));
-        setCatalogoServicios(lista.filter((serv) => !idsYaAsignados.has(serv._id?.toString() ?? serv.id)));
+        setCatalogoServicios(
+          lista.filter((serv) => !idsYaAsignados.has(serv._id?.toString() ?? serv.id)),
+        );
       } catch (e) {
         console.error('Error cargando catálogo:', e);
         setError('No se pudo cargar el catálogo de servicios.');
@@ -93,7 +100,9 @@ function AsignarServicioModal({ onClose, onAsignado, especialidadesUsuario, prac
                     <div className="gs-catalogo-item-nombre text-ellipsis">{s.nombre}</div>
                     <div className="gs-catalogo-item-meta">
                       <span className="text-ellipsis">⏱ {s.duracionTurnoEnMins} min</span>
-                      <span className="text-ellipsis">💲 ${Number(s.costo).toLocaleString('es-AR')}</span>
+                      <span className="text-ellipsis">
+                        💲 ${Number(s.costo).toLocaleString('es-AR')}
+                      </span>
                       {s.codigo && <span className="text-ellipsis">🔖 {s.codigo}</span>}
                     </div>
                   </div>
@@ -127,8 +136,8 @@ function ConfirmDeleteModal({ servicio, onClose, onDeleted }) {
       <div className="gs-modal">
         <div className="gs-modal-title text-ellipsis">🗑️ Eliminar asignación</div>
         <p className="gs-modal-body text-ellipsis-multiline">
-          ¿Estás seguro que querés dejar de ofrecer <strong>{servicio.nombre}</strong>? Vas a
-          poder volver a asignártelo más adelante si querés.
+          ¿Estás seguro que querés dejar de ofrecer <strong>{servicio.nombre}</strong>? Vas a poder
+          volver a asignártelo más adelante si querés.
         </p>
         <div className="gs-modal-footer">
           <button className="gs-btn-secondary text-ellipsis" onClick={onClose}>
@@ -154,7 +163,9 @@ function ServicioCard({ servicio, onDelete }) {
         <div className="gs-card-meta">
           <span className={`gs-badge ${badgeClass} text-ellipsis`}>{servicio.tipo}</span>
           <span className="text-ellipsis">⏱ {servicio.duracionTurnoEnMins} min</span>
-          <span className="text-ellipsis">💲 ${Number(servicio.costo).toLocaleString('es-AR')}</span>
+          <span className="text-ellipsis">
+            💲 ${Number(servicio.costo).toLocaleString('es-AR')}
+          </span>
           {servicio.codigo && <span className="text-ellipsis">🔖 {servicio.codigo}</span>}
         </div>
       </div>
@@ -204,14 +215,13 @@ export function GestionServicio() {
             // filtra más abajo según el switch (modo), no según el rol.
             setUser({ roles, id: data.perfil?._id ?? data.perfil?.id });
           } else {
-            setUser({ rol: getRolUsuario(roles), id: data.perfil?._id ?? data.perfil?.id});
+            setUser({ rol: getRolUsuario(roles), id: data.perfil?._id ?? data.perfil?.id });
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
           setUser(null);
-        }
-        finally {
+        } finally {
           setLoadingUser(false);
         }
       } else {
@@ -224,7 +234,9 @@ export function GestionServicio() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   useEffect(() => {
@@ -317,7 +329,11 @@ export function GestionServicio() {
       const { tipo, id } = modalEliminar;
       let statusCode;
       if (tipo === 'ESPECIALIDAD') {
-        statusCode = await eliminarEspecialidadAMedico({ email, password, especialidad: modalEliminar });
+        statusCode = await eliminarEspecialidadAMedico({
+          email,
+          password,
+          especialidad: modalEliminar,
+        });
       } else {
         statusCode = await eliminarPracticaAMedico({ email, password, practica: modalEliminar });
       }
@@ -351,7 +367,9 @@ export function GestionServicio() {
         <div className="gs-header">
           <div>
             <h1 className="gs-title text-ellipsis">Gestión de Servicios</h1>
-            <p className="gs-subtitle text-ellipsis">Elegí qué especialidades y prácticas ofrecés.</p>
+            <p className="gs-subtitle text-ellipsis">
+              Elegí qué especialidades y prácticas ofrecés.
+            </p>
           </div>
           <button className="gs-btn-primary text-ellipsis" onClick={() => setModalAsignar(true)}>
             + Asignarme servicio
@@ -389,15 +407,13 @@ export function GestionServicio() {
         ) : serviciosFiltrados.length === 0 ? (
           <div className="gs-empty">
             <div className="gs-empty-icon">🩺</div>
-            <div className="text-ellipsis">No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} asignados.</div>
+            <div className="text-ellipsis">
+              No hay servicios{filtro !== 'TODOS' ? ` de tipo ${filtro}` : ''} asignados.
+            </div>
           </div>
         ) : (
           serviciosFiltrados.map((serv) => (
-            <ServicioCard
-              key={serv.id}
-              servicio={serv}
-              onDelete={setModalEliminar}
-            />
+            <ServicioCard key={serv.id} servicio={serv} onDelete={setModalEliminar} />
           ))
         )}
       </div>

@@ -61,7 +61,14 @@ export async function eliminarPracticaAMedico({ email, password, practica }) {
 
 const normalizarServicio = (item) => ({ ...item, id: item.id ?? item._id?.toString() });
 
-export async function crearEspecialidadAdmin({ email, password, idUsuario, nombre, duracionTurnoEnMins, costo }) {
+export async function crearEspecialidadAdmin({
+  email,
+  password,
+  idUsuario,
+  nombre,
+  duracionTurnoEnMins,
+  costo,
+}) {
   const res = await axios.post(
     `${getApiBaseUrl()}/especialidades`,
     { idUsuario, nombre, duracionTurnoEnMins, costo },
@@ -87,7 +94,15 @@ export async function eliminarEspecialidadAdmin({ email, password, idUsuario, id
   return res.status;
 }
 
-export async function crearPracticaAdmin({ email, password, idUsuario, codigo, nombre, duracionTurnoEnMins, costo }) {
+export async function crearPracticaAdmin({
+  email,
+  password,
+  idUsuario,
+  codigo,
+  nombre,
+  duracionTurnoEnMins,
+  costo,
+}) {
   const res = await axios.post(
     `${getApiBaseUrl()}/practicas`,
     { idUsuario, codigo, nombre, duracionTurnoEnMins, costo },

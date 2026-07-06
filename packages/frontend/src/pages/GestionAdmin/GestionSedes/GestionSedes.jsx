@@ -91,8 +91,8 @@ function ConfirmDeleteModal({ sede, onClose, onDeleted, eliminando }) {
       <div className="gs-modal">
         <div className="gs-modal-title">🗑️ Eliminar sede</div>
         <p className="gs-modal-body">
-          ¿Estás seguro que querés eliminar <strong>{sede.nombre}</strong>? Esta acción no se
-          puede deshacer.
+          ¿Estás seguro que querés eliminar <strong>{sede.nombre}</strong>? Esta acción no se puede
+          deshacer.
         </p>
         <div className="gs-modal-footer">
           <button className="gs-btn-secondary" onClick={onClose} disabled={eliminando}>

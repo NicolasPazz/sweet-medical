@@ -62,7 +62,6 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar, onEnvia
     };
 
     cargarFechas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email, password]);
 
   const handleSeleccionarFecha = async (fechaStr) => {
@@ -111,7 +110,9 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar, onEnvia
         setEnviando(false);
         onFinalizar();
       } catch (err) {
-        setErrorEnvio(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación');
+        setErrorEnvio(
+          err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación',
+        );
         setEnviando(false);
         return;
       }
@@ -173,7 +174,9 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar, onEnvia
         {/* Paso 2: Selección de Horario (real, consultado al backend para esa fecha) */}
         {fecha && (
           <div className="reprogramar-paso-section">
-            <label className="reprogramar-paso-title text-ellipsis">2. Seleccioná un horario disponible:</label>
+            <label className="reprogramar-paso-title text-ellipsis">
+              2. Seleccioná un horario disponible:
+            </label>
             {cargandoHorarios ? (
               <p className="reprogramar-vacio">Buscando horarios disponibles...</p>
             ) : horariosDisponibles.length === 0 ? (
@@ -216,9 +219,7 @@ export default function ReprogramarTurno({ turno, onVolver, onFinalizar, onEnvia
           </div>
         )}
 
-        {errorEnvio && (
-          <p style={{ color: '#b91c1c', fontSize: 13 }}>⚠ {errorEnvio}</p>
-        )}
+        {errorEnvio && <p style={{ color: '#b91c1c', fontSize: 13 }}>⚠ {errorEnvio}</p>}
 
         {/* Botón finalizador de flujo transformado a Solicitud */}
         <button

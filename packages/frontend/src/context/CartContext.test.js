@@ -124,10 +124,7 @@ describe('useCart', () => {
   });
 
   it('recupera el carrito guardado en localStorage al montar el provider', () => {
-    window.localStorage.setItem(
-      'sweet-medical:cart',
-      JSON.stringify({ items: [turnoA, turnoB] }),
-    );
+    window.localStorage.setItem('sweet-medical:cart', JSON.stringify({ items: [turnoA, turnoB] }));
 
     const { result } = renderHook(() => useCart(), { wrapper: createWrapper() });
 

@@ -14,7 +14,8 @@ const OPCIONES = [
     path: 'usuarios',
     icono: '🧑‍⚕️',
     titulo: 'Generación de Usuarios',
-    descripcion: 'Dá de alta nuevos usuarios con uno o más roles (Paciente y/o Médico). Quedan inactivos hasta asignarles credenciales.',
+    descripcion:
+      'Dá de alta nuevos usuarios con uno o más roles (Paciente y/o Médico). Quedan inactivos hasta asignarles credenciales.',
   },
   {
     path: 'servicio',
@@ -74,7 +75,10 @@ export function GestionAdmin() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
           Cargando...
         </span>
       </div>
@@ -90,7 +94,9 @@ export function GestionAdmin() {
       <div className="ga-container">
         <div className="ga-header">
           <h1 className="ga-title text-ellipsis">Panel de Administración</h1>
-          <p className="ga-subtitle text-ellipsis">Seleccioná una sección para administrar el sistema.</p>
+          <p className="ga-subtitle text-ellipsis">
+            Seleccioná una sección para administrar el sistema.
+          </p>
         </div>
 
         <div className="ga-grid">

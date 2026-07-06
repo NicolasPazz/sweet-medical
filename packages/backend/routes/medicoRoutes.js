@@ -107,7 +107,9 @@ medicoRouter
  */
 medicoRouter
   .route('/disponibilidad')
-  .patch(basicAuthMedico, (req, res, next) => medicoController.actualizarDisponibilidad(req, res, next));
+  .patch(basicAuthMedico, (req, res, next) =>
+    medicoController.actualizarDisponibilidad(req, res, next),
+  );
 
 medicoRouter
   .route('/me/sedes')

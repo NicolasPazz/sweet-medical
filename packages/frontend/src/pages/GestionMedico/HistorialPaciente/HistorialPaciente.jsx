@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
-import { getMe, getRolUsuario, getHistorialPacienteByMedico } from '../../../services/userService.js';
+import {
+  getMe,
+  getRolUsuario,
+  getHistorialPacienteByMedico,
+} from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
@@ -78,11 +82,15 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <span className="turno-id text-ellipsis"> {turno.id_turno} </span>
                   <span className="turno-servicio text-ellipsis">{turno.servicio}</span>
                   <span className="turno-medico text-ellipsis">{turno.medico}</span>
-                  {turno.sede && <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>}
+                  {turno.sede && (
+                    <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>
+                  )}
                 </div>
                 <div className="turno-card-right">
                   <span className={`turno-estado ${cfg.color} text-ellipsis`}>{cfg.label}</span>
-                  <span className="turno-costo text-ellipsis">${turno.costo?.toLocaleString('es-AR')}</span>
+                  <span className="turno-costo text-ellipsis">
+                    ${turno.costo?.toLocaleString('es-AR')}
+                  </span>
                 </div>
                 <span className="turno-chevron">{expandido ? '▲' : '▼'}</span>
 
@@ -94,7 +102,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                         const hCfg = ESTADO_CONFIG[h.estado] ?? { label: h.estado, color: '' };
                         return (
                           <li key={i} className="turno-historial-item">
-                            <span className={`turno-estado ${hCfg.color} text-ellipsis`}>{hCfg.label}</span>
+                            <span className={`turno-estado ${hCfg.color} text-ellipsis`}>
+                              {hCfg.label}
+                            </span>
                             <span className="turno-historial-fecha text-ellipsis">
                               {formatFecha(h.fechaHoraIngreso)}
                             </span>
@@ -149,8 +159,7 @@ export default function HistorialPaciente() {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
           setUser(null);
-        }
-        finally {
+        } finally {
           setLoadingUser(false);
         }
       } else {
@@ -163,7 +172,9 @@ export default function HistorialPaciente() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   if (!isAuthenticated) {
@@ -183,7 +194,10 @@ export default function HistorialPaciente() {
         }}
       >
         <Spin indicator={spinIcon} />
-        <span className="text-ellipsis" style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}>
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
           Cargando...
         </span>
       </div>
@@ -198,7 +212,7 @@ export default function HistorialPaciente() {
     const trimmed = dni.trim();
     if (!trimmed) return;
 
-    console.log(trimmed + "..." + dni);
+    console.log(trimmed + '...' + dni);
 
     setEstado('searching');
     // Simula latencia de búsqueda
@@ -296,11 +310,7 @@ export default function HistorialPaciente() {
           </p>
         )}
 
-        {estado === 'error' && (
-          <p className="hp-error text-ellipsis">
-            {error}.
-          </p>
-        )}
+        {estado === 'error' && <p className="hp-error text-ellipsis">{error}.</p>}
       </div>
     </div>
   );

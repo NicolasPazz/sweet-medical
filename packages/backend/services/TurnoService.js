@@ -45,7 +45,6 @@ export class TurnoService {
   }
 
   async reservarTurno(usuario, dtoReserva) {
-
     const paciente = await this.pacienteService.findByIdUsuario(usuario.id);
     if (paciente == null) {
       throw new NotFoundError('Paciente no encontrado');
@@ -68,7 +67,7 @@ export class TurnoService {
     let cont = 0;
     let slots = [];
     for (const id_slot of dtoReserva.slotsIds) {
-      console.log("cont: " + cont);
+      console.log('cont: ' + cont);
       cont = cont + 1;
       ValidadorId.validarIds(id_slot);
       const slot = await this.slotRepository.findById(id_slot);
@@ -149,13 +148,13 @@ export class TurnoService {
       servicio.costo,
     );
 
-    console.log("ENTRO A MOTOR COSTOS DESDE RESERVAR TURNO");
+    console.log('ENTRO A MOTOR COSTOS DESDE RESERVAR TURNO');
 
     const { costoEstimado } = MotorCostos.calcularPara(turno, paciente);
 
     turno.costo = costoEstimado;
 
-    console.log("ESTE ES EL COSTO DIVERTIDO: ", turno.costo);
+    console.log('ESTE ES EL COSTO DIVERTIDO: ', turno.costo);
 
     turno.slotsAsociados.push(...slotsAOcupar);
 
@@ -178,7 +177,6 @@ export class TurnoService {
 
   async cancelarTurno(usuario, id_turno, esMedico, motivo) {
     const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-
 
     const turno = await this.turnoRepository.findById(id_turno);
     if (turno == null) {
@@ -693,9 +691,9 @@ export class TurnoService {
       // Contrato unificado: misma estructura exacta que el slot
       sede: tieneSedeValida
         ? {
-          id_sede: t.sede._id ? t.sede._id.toString() : null,
-          nombre: t.sede.nombre || 'N/A',
-        }
+            id_sede: t.sede._id ? t.sede._id.toString() : null,
+            nombre: t.sede.nombre || 'N/A',
+          }
         : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
@@ -743,9 +741,9 @@ export class TurnoService {
       estado: s.estado,
       sede: tieneSedeValida
         ? {
-          id_sede: s.sede._id ? s.sede._id.toString() : null,
-          nombre: s.sede.nombre || 'N/A',
-        }
+            id_sede: s.sede._id ? s.sede._id.toString() : null,
+            nombre: s.sede.nombre || 'N/A',
+          }
         : null,
 
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
@@ -753,7 +751,6 @@ export class TurnoService {
   }
 
   async proponerReprogramacion(usuarioAutenticado, id_turno, nuevaFechaHora, motivo) {
-
     const turno = await this.turnoRepository.findById(id_turno);
     if (turno == null) {
       throw new NotFoundError('Turno no encontrado');
@@ -762,14 +759,14 @@ export class TurnoService {
     if (turno && turno.estado) {
       // Opción 1: Obtener los métodos de su prototipo de instancia
       const metodos = Object.getOwnPropertyNames(Object.getPrototypeOf(turno.estado));
-      console.log("MÉTODOS DEL ESTADO:", metodos);
+      console.log('MÉTODOS DEL ESTADO:', metodos);
     } else {
-      console.log("El turno o su estado no están definidos.");
+      console.log('El turno o su estado no están definidos.');
     }
 
-    console.log("turno.estado:", turno.estado);
-    console.log("¿Qué tipo de dato es?:", typeof turno.estado);
-    console.log("¿Tiene la función?:", typeof turno.estado.generarNotificacion);
+    console.log('turno.estado:', turno.estado);
+    console.log('¿Qué tipo de dato es?:', typeof turno.estado);
+    console.log('¿Tiene la función?:', typeof turno.estado.generarNotificacion);
 
     // 1. Validamos de forma segura el string del estado para evitar fallas de instanceof
     const nombreEstado =
@@ -785,8 +782,10 @@ export class TurnoService {
     const idUsuarioDelPaciente = turno.paciente?.usuario?._id || turno.paciente?.usuario;
     const idUsuarioDelMedico = turno.medico?.usuario?._id || turno.medico?.usuario;
 
-    const esPacienteDelTurno = String(idUsuarioDelPaciente) === String(usuarioAutenticado.id || usuarioAutenticado._id);
-    const esMedicoDelTurno = String(idUsuarioDelMedico) === String(usuarioAutenticado.id || usuarioAutenticado._id);
+    const esPacienteDelTurno =
+      String(idUsuarioDelPaciente) === String(usuarioAutenticado.id || usuarioAutenticado._id);
+    const esMedicoDelTurno =
+      String(idUsuarioDelMedico) === String(usuarioAutenticado.id || usuarioAutenticado._id);
 
     if (!esPacienteDelTurno && !esMedicoDelTurno) {
       throw new ForbiddenError(
@@ -981,7 +980,10 @@ export class TurnoService {
       fecha.getUTCFullYear(),
       fecha.getUTCMonth(),
       fecha.getUTCDate() + 1,
-      0, 0, 0, 0,
+      0,
+      0,
+      0,
+      0,
     );
   }
 
@@ -994,7 +996,10 @@ export class TurnoService {
       fecha.getUTCFullYear(),
       fecha.getUTCMonth(),
       fecha.getUTCDate() + 1,
-      23, 59, 59, 999,
+      23,
+      59,
+      59,
+      999,
     );
   }
 

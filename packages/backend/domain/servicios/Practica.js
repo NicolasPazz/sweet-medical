@@ -13,7 +13,7 @@ export class Practica {
     this.tipo = 'PRACTICA';
   }
 
-  esTipo(){
+  esTipo() {
     return this.tipo || 'PRACTICA';
   }
 }

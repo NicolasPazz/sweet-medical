@@ -48,8 +48,9 @@ export default function CancelarTurnoModal({ turno, onClose, onConfirm }) {
         ) : (
           <>
             <p className="ctm-body">
-              Estás por cancelar el turno del <strong>{formatFechaUTC(turno.fechaHora)}</strong> a las{' '}
-              <strong>{formatHoraUTC(turno.fechaHora)} hs</strong>. Esta acción no se puede deshacer.
+              Estás por cancelar el turno del <strong>{formatFechaUTC(turno.fechaHora)}</strong> a
+              las <strong>{formatHoraUTC(turno.fechaHora)} hs</strong>. Esta acción no se puede
+              deshacer.
             </p>
 
             <label className="ctm-label text-ellipsis">

@@ -20,7 +20,7 @@ export class UsuarioService {
     return await this.usuarioRepository.findByDni(dni);
   }
 
-  async findByDniAndRole(dni, rol){
+  async findByDniAndRole(dni, rol) {
     return await this.usuarioRepository.findByDniAndRole(dni, rol);
   }
 

@@ -31,8 +31,8 @@ export class Reservado {
         // <-- Cambiado a 't'
         nombre: this.turno.paciente.nombre,
         servicio,
-        fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + "(" + this.turno.hora + ")",
-        interpolation: { escapeValue: false }
+        fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + '(' + this.turno.hora + ')',
+        interpolation: { escapeValue: false },
       }),
     );
   }

@@ -7,11 +7,21 @@ import { register } from '../../services/authService.js';
 const CAMPOS_OBLIGATORIOS = ['dni', 'email', 'password'];
 
 // Definido FUERA del componente para que React no lo desmonte en cada render
-function CampoInput({ id, label, placeholder, tipo = 'text', obligatorio = false, value, error, onChange }) {
+function CampoInput({
+  id,
+  label,
+  placeholder,
+  tipo = 'text',
+  obligatorio = false,
+  value,
+  error,
+  onChange,
+}) {
   return (
     <div className="registro-campo">
       <label htmlFor={id}>
-        {label}{obligatorio && ' *'}
+        {label}
+        {obligatorio && ' *'}
       </label>
       <div className="input-wrapper">
         <input
@@ -22,7 +32,11 @@ function CampoInput({ id, label, placeholder, tipo = 'text', obligatorio = false
           className={error ? 'input-error' : ''}
           onChange={onChange}
         />
-        {error && <span className="icono-error" title="Campo inválido">⚠</span>}
+        {error && (
+          <span className="icono-error" title="Campo inválido">
+            ⚠
+          </span>
+        )}
       </div>
     </div>
   );
@@ -109,17 +123,25 @@ export default function Registro() {
         <p className="registro-subtitulo">Completá tus datos para activar tu cuenta</p>
 
         <form onSubmit={(e) => e.preventDefault()}>
-
           {/* Fila 1: DNI + Email */}
           <div className="registro-fila">
             <CampoInput
-              id="dni" label="DNI" placeholder="Ej: 12345678" obligatorio
-              value={formData.dni} error={errores.dni}
+              id="dni"
+              label="DNI"
+              placeholder="Ej: 12345678"
+              obligatorio
+              value={formData.dni}
+              error={errores.dni}
               onChange={(e) => handleChange('dni', e.target.value)}
             />
             <CampoInput
-              id="email" label="Correo electrónico" placeholder="tu@email.com" tipo="email" obligatorio
-              value={formData.email} error={errores.email}
+              id="email"
+              label="Correo electrónico"
+              placeholder="tu@email.com"
+              tipo="email"
+              obligatorio
+              value={formData.email}
+              error={errores.email}
               onChange={(e) => handleChange('email', e.target.value)}
             />
           </div>
@@ -127,13 +149,21 @@ export default function Registro() {
           {/* Fila 2: Password + Nombre de usuario */}
           <div className="registro-fila">
             <CampoInput
-              id="password" label="Contraseña" placeholder="Mínimo 6 caracteres" tipo="password" obligatorio
-              value={formData.password} error={errores.password}
+              id="password"
+              label="Contraseña"
+              placeholder="Mínimo 6 caracteres"
+              tipo="password"
+              obligatorio
+              value={formData.password}
+              error={errores.password}
               onChange={(e) => handleChange('password', e.target.value)}
             />
             <CampoInput
-              id="nombreUsuario" label="Nombre de usuario" placeholder="Ej: juan123"
-              value={formData.nombreUsuario} error={errores.nombreUsuario}
+              id="nombreUsuario"
+              label="Nombre de usuario"
+              placeholder="Ej: juan123"
+              value={formData.nombreUsuario}
+              error={errores.nombreUsuario}
               onChange={(e) => handleChange('nombreUsuario', e.target.value)}
             />
           </div>
@@ -141,8 +171,11 @@ export default function Registro() {
           {/* Fila 3: Teléfono + Fecha */}
           <div className="registro-fila">
             <CampoInput
-              id="numTel" label="Teléfono" placeholder="Ej: 1123456789"
-              value={formData.numTel} error={errores.numTel}
+              id="numTel"
+              label="Teléfono"
+              placeholder="Ej: 1123456789"
+              value={formData.numTel}
+              error={errores.numTel}
               onChange={(e) => handleChange('numTel', e.target.value)}
             />
             <div className="registro-campo">
@@ -158,7 +191,9 @@ export default function Registro() {
                   onChange={handleFechaChange}
                 />
                 {errores.fechaNacimiento && (
-                  <span className="icono-error" title="Formato inválido (DD/MM/YYYY)">⚠</span>
+                  <span className="icono-error" title="Formato inválido (DD/MM/YYYY)">
+                    ⚠
+                  </span>
                 )}
               </div>
             </div>
@@ -177,7 +212,6 @@ export default function Registro() {
               />
             </div>
           </div>
-
         </form>
 
         <div className="registro-button">

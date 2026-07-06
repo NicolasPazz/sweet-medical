@@ -23,9 +23,9 @@ export class MotorCostos {
 
     tipo = prestacion.esTipo();
 
-    console.log("TIPO DE SERVICIO: ", tipo);
+    console.log('TIPO DE SERVICIO: ', tipo);
 
-    console.log("PLAN:", paciente?.plan);
+    console.log('PLAN:', paciente?.plan);
 
     // El objeto plan en BD debería estar instanciado como PlanPrepaga, PlanParticular, etc.
     // Si no hay paciente o este no tiene plan, instanciamos un particular como fallback.
@@ -35,12 +35,11 @@ export class MotorCostos {
 
     const resultado = planEfectivo.calcularCosto(prestacion, tipo);
 
-    console.log("RESULTADO:", resultado);
+    console.log('RESULTADO:', resultado);
 
     return {
       tipoCobertura: resultado.nivel,
       costoEstimado: resultado.costo,
     };
-
   }
 }

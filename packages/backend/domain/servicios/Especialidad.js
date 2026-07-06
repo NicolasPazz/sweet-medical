@@ -11,8 +11,7 @@ export class Especialidad {
     this.tipo = 'ESPECIALIDAD';
   }
 
-  esTipo(){
+  esTipo() {
     return this.tipo || 'ESPECIALIDAD';
   }
-
 }

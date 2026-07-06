@@ -1,5 +1,10 @@
 import bcrypt from 'bcryptjs';
-import { ConflictError, NotFoundError, BadRequestError, UnauthorizedError } from '../errors/AppError.js';
+import {
+  ConflictError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+} from '../errors/AppError.js';
 import { usuarioService } from './UsuarioService.js';
 import { medicoService } from './MedicoService.js';
 import { pacienteService } from './PacienteService.js';
@@ -81,7 +86,6 @@ export class AuthService {
 
     return;
   }
-
 }
 
 export const authService = new AuthService();

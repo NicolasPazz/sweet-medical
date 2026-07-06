@@ -13,7 +13,12 @@ export class AdminController {
   crearPacienteAdmin = async (req, res, next) => {
     try {
       const { dni, nombre, obraSocial, plan } = req.body;
-      const resultado = await this.adminService.crearPacienteAdmin({ dni, nombre, obraSocial, plan });
+      const resultado = await this.adminService.crearPacienteAdmin({
+        dni,
+        nombre,
+        obraSocial,
+        plan,
+      });
       return res.status(201).json({ status: 'created', data: resultado });
     } catch (error) {
       return next(error);
@@ -42,7 +47,14 @@ export class AdminController {
   crearUsuarioAdmin = async (req, res, next) => {
     try {
       const { dni, nombre, matricula, obraSocial, plan, roles } = req.body;
-      const resultado = await this.adminService.crearUsuarioAdmin({ dni, nombre, matricula, obraSocial, plan, roles });
+      const resultado = await this.adminService.crearUsuarioAdmin({
+        dni,
+        nombre,
+        matricula,
+        obraSocial,
+        plan,
+        roles,
+      });
       return res.status(201).json({ status: 'created', data: resultado });
     } catch (error) {
       return next(error);

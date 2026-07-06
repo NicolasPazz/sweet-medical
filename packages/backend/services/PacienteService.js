@@ -43,7 +43,7 @@ export class PacienteService {
       usuario: usuarioId,
       nombre: nombre,
       obraSocial: obraSocial,
-      plan: plan
+      plan: plan,
     });
   }
 
@@ -58,7 +58,6 @@ export class PacienteService {
     }
 
     return this.obtenerHistorialTurnosIdUsuario(usuario.id);
-
   }
 
   async obtenerHistorialTurnosIdUsuario(idUsuario) {
@@ -69,15 +68,11 @@ export class PacienteService {
     return this.obtenerHistorialTurnos(paciente);
   }
 
-
-
   async obtenerHistorialTurnos(paciente) {
-
-
-    console.log("paciente: " + paciente.id);
+    console.log('paciente: ' + paciente.id);
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
-    console.log("TURNOS: " + turnos);
+    console.log('TURNOS: ' + turnos);
     const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       // 'esTipo' ya no se parchea acá: ahora vive directamente en el sub-schema
@@ -102,20 +97,19 @@ export class PacienteService {
 
       const historialTurnos = Array.isArray(t.historialEstados)
         ? t.historialEstados.map((h) => ({
-          id_cambio: h._id || h.id,
-          fechaHoraIngreso: h.fechaHoraIngreso,
-          estado: h.estado,
-          motivo: h.motivo,
-          usuario: h.usuario
-            ? {
-              id: h.usuario._id || h.usuario.id || h.usuario,
-              nombre: h.usuario.nombre || null,
-              email: h.usuario.email || null,
-            }
-            : null,
-        }))
+            id_cambio: h._id || h.id,
+            fechaHoraIngreso: h.fechaHoraIngreso,
+            estado: h.estado,
+            motivo: h.motivo,
+            usuario: h.usuario
+              ? {
+                  id: h.usuario._id || h.usuario.id || h.usuario,
+                  nombre: h.usuario.nombre || null,
+                  email: h.usuario.email || null,
+                }
+              : null,
+          }))
         : [];
-
 
       return {
         _id: t.id || t._id,
@@ -135,7 +129,11 @@ export class PacienteService {
         // tenía strings de display, sin forma de volver a pedirle al backend
         // "qué horarios hay libres" para este mismo médico+servicio.
         servicio_id: t.servicio ? String(t.servicio._id) : null,
-        servicio_tipo: t.servicio?.esTipo ? t.servicio.esTipo() : esPractica ? 'PRACTICA' : 'ESPECIALIDAD',
+        servicio_tipo: t.servicio?.esTipo
+          ? t.servicio.esTipo()
+          : esPractica
+            ? 'PRACTICA'
+            : 'ESPECIALIDAD',
         sede: t.sede ? t.sede.nombre : 'N/A',
         estado:
           typeof t.estado?.getEstadoNombre === 'function'
@@ -170,7 +168,7 @@ export class PacienteService {
       obraSocial: paciente.obraSocial ? paciente.obraSocial.nombre : 'N/A',
       plan: paciente.plan ? paciente.plan.nombre : 'N/A',
     };
-    console.log("TURNOS FORMATEADOS: " + turnosFormateados);
+    console.log('TURNOS FORMATEADOS: ' + turnosFormateados);
     return {
       paciente: pacienteFormateado,
       turnos: turnosFormateados,

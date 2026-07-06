@@ -22,7 +22,14 @@ import './AgendarTurno.css';
 import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 // Importamos íconos para mejorar la UI visualmente
-import { FaSearch, FaUserMd, FaCalendarAlt, FaClock, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import {
+  FaSearch,
+  FaUserMd,
+  FaCalendarAlt,
+  FaClock,
+  FaCheckCircle,
+  FaExclamationCircle,
+} from 'react-icons/fa';
 
 // Meta información dinámica para especialidades y prácticas
 const SERVICE_META = {
@@ -100,13 +107,11 @@ export default function AgendarTurno() {
             : null;
 
           handleSelectPaciente(pacienteNormalizado, perfil);
-
         } catch (error) {
           console.error('Error fetching user data:', error);
           setMultiplesFiltros(false);
           setUser(null);
-        }
-        finally {
+        } finally {
           setLoadingUser(false);
         }
       } else {
@@ -119,7 +124,9 @@ export default function AgendarTurno() {
   }, [email, password]);
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-medico' ? 'Médico' : 'Paciente')
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
     : user?.rol;
 
   const [especialidades, setEspecialidades] = useState([]);
@@ -203,7 +210,7 @@ export default function AgendarTurno() {
 
   const handleSelectPaciente = (pac, perfil) => {
     setSelectedPaciente(pac);
-    setSelectedPerfil(perfil)
+    setSelectedPerfil(perfil);
     cargarHistorial();
     setStep(1);
     clearCart();
@@ -247,7 +254,8 @@ export default function AgendarTurno() {
   }, [selectedService, selectedMedico, step, email, password]);
 
   useEffect(() => {
-    if (step < 4 || !selectedDate || !selectedService || !selectedPaciente || !email || !password) return;
+    if (step < 4 || !selectedDate || !selectedService || !selectedPaciente || !email || !password)
+      return;
 
     const fetchSlots = async () => {
       setLoading(true);
@@ -371,7 +379,7 @@ export default function AgendarTurno() {
       console.error('Error al realizar la reserva:', err);
       setError(
         err.response?.data?.message ||
-        'Ocurrió un error al reservar el turno. Verifique los parámetros.',
+          'Ocurrió un error al reservar el turno. Verifique los parámetros.',
       );
     } finally {
       setLoading(false);
@@ -396,7 +404,9 @@ export default function AgendarTurno() {
       <div className="agendar-container">
         <div className="card">
           <div className="success-screen">
-            <div className="success-icon"><FaCheckCircle color="#fff" /></div>
+            <div className="success-icon">
+              <FaCheckCircle color="#fff" />
+            </div>
             <h2>¡Turno(s) Confirmado(s)!</h2>
             <p className="wizard-subtitle">
               Tus reservas han sido procesadas exitosamente para el paciente{' '}
@@ -449,7 +459,11 @@ export default function AgendarTurno() {
         </div>
 
         {selectedPaciente && (
-          <HistorialSection historial={historialCitas} loadingHistorial={loadingHistorial} paciente={selectedPaciente} />
+          <HistorialSection
+            historial={historialCitas}
+            loadingHistorial={loadingHistorial}
+            paciente={selectedPaciente}
+          />
         )}
       </div>
     );
@@ -464,7 +478,9 @@ export default function AgendarTurno() {
       {!isAuthenticated ? (
         <div className="card">
           <div className="card-body no-patient-selected">
-            <div className="no-patient-icon"><FaExclamationCircle /></div>
+            <div className="no-patient-icon">
+              <FaExclamationCircle />
+            </div>
             <h3>Sesión no iniciada</h3>
           </div>
         </div>
@@ -495,7 +511,9 @@ export default function AgendarTurno() {
           {error && (
             <div className="error-alert">
               <span>⚠️ {error}</span>
-              <button className="close-alert-btn" onClick={() => setError(null)}>✕</button>
+              <button className="close-alert-btn" onClick={() => setError(null)}>
+                ✕
+              </button>
             </div>
           )}
 
@@ -503,7 +521,9 @@ export default function AgendarTurno() {
           {step === 1 && (
             <div className="card">
               <div className="card-header">
-                <div className="card-header-icon"><FaSearch /></div>
+                <div className="card-header-icon">
+                  <FaSearch />
+                </div>
                 <div>
                   <h2>¿Qué servicio médico necesitás?</h2>
                   <p className="wizard-subtitle">
@@ -571,15 +591,21 @@ export default function AgendarTurno() {
             <div className="wizard-layout-two-columns">
               <div className="card">
                 <div className="card-header">
-                  <div className="card-header-icon"><FaUserMd /></div>
+                  <div className="card-header-icon">
+                    <FaUserMd />
+                  </div>
                   <div>
                     <h2>Selección de Profesional</h2>
-                    <p className="wizard-subtitle">Filtros aplicados para: {selectedService?.nombre}</p>
+                    <p className="wizard-subtitle">
+                      Filtros aplicados para: {selectedService?.nombre}
+                    </p>
                   </div>
                 </div>
                 <div className="card-body">
                   <div className="search-wrap">
-                    <span className="search-icon"><FaSearch /></span>
+                    <span className="search-icon">
+                      <FaSearch />
+                    </span>
                     <input
                       className="search-input"
                       placeholder="Buscar médico por nombre..."
@@ -633,8 +659,12 @@ export default function AgendarTurno() {
                   </div>
 
                   <div className="btn-row">
-                    <button className="btn btn-ghost" onClick={() => setStep(1)}>← Volver</button>
-                    <button className="btn btn-primary" onClick={() => setStep(3)}>Ver Disponibilidad →</button>
+                    <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                      ← Volver
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setStep(3)}>
+                      Ver Disponibilidad →
+                    </button>
                   </div>
                 </div>
               </div>
@@ -648,10 +678,14 @@ export default function AgendarTurno() {
             <div className="wizard-layout-two-columns">
               <div className="card">
                 <div className="card-header">
-                  <div className="card-header-icon"><FaCalendarAlt /></div>
+                  <div className="card-header-icon">
+                    <FaCalendarAlt />
+                  </div>
                   <div>
                     <h2>Seleccioná la Fecha</h2>
-                    <p className="wizard-subtitle">Los días con punto azul tienen turnos disponibles</p>
+                    <p className="wizard-subtitle">
+                      Los días con punto azul tienen turnos disponibles
+                    </p>
                   </div>
                 </div>
                 <div className="card-body">
@@ -689,7 +723,9 @@ export default function AgendarTurno() {
                   )}
 
                   <div className="btn-row">
-                    <button className="btn btn-ghost" onClick={() => setStep(2)}>← Volver</button>
+                    <button className="btn btn-ghost" onClick={() => setStep(2)}>
+                      ← Volver
+                    </button>
                     <button
                       className="btn btn-primary"
                       disabled={!selectedDate}
@@ -710,7 +746,9 @@ export default function AgendarTurno() {
             <div className="wizard-layout-two-columns">
               <div className="card">
                 <div className="card-header">
-                  <div className="card-header-icon"><FaClock /></div>
+                  <div className="card-header-icon">
+                    <FaClock />
+                  </div>
                   <div>
                     <h2>Horarios Disponibles</h2>
                     <p className="wizard-subtitle">
@@ -801,7 +839,9 @@ export default function AgendarTurno() {
                   )}
 
                   <div className="btn-row">
-                    <button className="btn btn-ghost" onClick={() => setStep(3)}>← Volver</button>
+                    <button className="btn btn-ghost" onClick={() => setStep(3)}>
+                      ← Volver
+                    </button>
                     <div className="actions-group" style={{ display: 'flex', gap: '10px' }}>
                       {selectedSlot && (
                         <button
@@ -811,7 +851,8 @@ export default function AgendarTurno() {
                             if (!cartItems.some((i) => i.id === selectedSlot.id)) {
                               addTurn({
                                 ...selectedSlot,
-                                especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
+                                especialidad:
+                                  searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
                                 practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
                                 medico: selectedSlot.medico || selectedMedico,
                                 id_servicio_seleccionado: selectedService._id,
@@ -836,7 +877,8 @@ export default function AgendarTurno() {
                           if (selectedSlot && !cartItems.some((i) => i.id === selectedSlot.id)) {
                             addTurn({
                               ...selectedSlot,
-                              especialidad: searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
+                              especialidad:
+                                searchMode === 'ESPECIALIDAD' ? selectedService.nombre : null,
                               practica: searchMode === 'PRACTICA' ? selectedService.nombre : null,
                               medico: selectedSlot.medico || selectedMedico,
                               id_servicio_seleccionado: selectedService._id,
@@ -885,10 +927,14 @@ export default function AgendarTurno() {
             <div className="confirm-layout-centered">
               <div className="card">
                 <div className="card-header">
-                  <div className="card-header-icon"><FaCheckCircle /></div>
+                  <div className="card-header-icon">
+                    <FaCheckCircle />
+                  </div>
                   <div>
                     <h2>Confirmar Reserva de Cita</h2>
-                    <p className="wizard-subtitle">Revisá los detalles de tus turnos preseleccionados antes de guardarlos</p>
+                    <p className="wizard-subtitle">
+                      Revisá los detalles de tus turnos preseleccionados antes de guardarlos
+                    </p>
                   </div>
                 </div>
                 <div className="card-body">
@@ -898,7 +944,10 @@ export default function AgendarTurno() {
                       key={item.id || index}
                       style={{ marginBottom: '1.5rem' }}
                     >
-                      <div className="confirm-header-inside" style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}>
+                      <div
+                        className="confirm-header-inside"
+                        style={{ fontWeight: 'bold', paddingBottom: '0.5rem' }}
+                      >
                         Turno #{index + 1}
                       </div>
 
@@ -920,7 +969,10 @@ export default function AgendarTurno() {
                             {item.especialidad || item.practica || selectedService?.nombre}
                           </div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 1)}>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleEditarTurno(item, 1)}
+                        >
                           ✎ Cambiar
                         </button>
                       </div>
@@ -929,13 +981,18 @@ export default function AgendarTurno() {
                         <div>
                           <div className="confirm-label">Profesional Asignado</div>
                           <div className="confirm-value">
-                            {item.medico?.nombre || selectedMedico?.nombre || 'Cualquier Profesional disponible'}
+                            {item.medico?.nombre ||
+                              selectedMedico?.nombre ||
+                              'Cualquier Profesional disponible'}
                           </div>
                           <div className="confirm-sub">
                             Sede: {item.sede?.nombre || 'No asignada'}
                           </div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 2)}>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleEditarTurno(item, 2)}
+                        >
                           ✎ Cambiar
                         </button>
                       </div>
@@ -947,7 +1004,10 @@ export default function AgendarTurno() {
                             {item.fecha || selectedDate} a las {item.hora} hs
                           </div>
                         </div>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleEditarTurno(item, 4)}>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleEditarTurno(item, 4)}
+                        >
                           ✎ Cambiar
                         </button>
                       </div>
@@ -966,7 +1026,9 @@ export default function AgendarTurno() {
                   ))}
 
                   <div className="btn-row">
-                    <button className="btn btn-ghost" onClick={() => setStep(4)}>← Volver</button>
+                    <button className="btn btn-ghost" onClick={() => setStep(4)}>
+                      ← Volver
+                    </button>
                     <button
                       className="btn btn-success"
                       onClick={handleConfirmReservation}
@@ -983,7 +1045,11 @@ export default function AgendarTurno() {
       )}
 
       {selectedPaciente && (
-        <HistorialSection historial={historialCitas} loadingHistorial={loadingHistorial} paciente={selectedPaciente} />
+        <HistorialSection
+          historial={historialCitas}
+          loadingHistorial={loadingHistorial}
+          paciente={selectedPaciente}
+        />
       )}
     </div>
   );
@@ -1015,7 +1081,7 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
       const valB = isNaN(dateB) ? 0 : dateB;
       return sortOrder === 'ASC' ? valA - valB : valB - valA;
     } else if (sortBy === 'costo') {
-      const getCost = (t) => t.costoEstimado === 0 ? 0 : (t.costoEstimado ?? t.costo ?? 0);
+      const getCost = (t) => (t.costoEstimado === 0 ? 0 : (t.costoEstimado ?? t.costo ?? 0));
       const costoA = getCost(a);
       const costoB = getCost(b);
       return sortOrder === 'ASC' ? costoA - costoB : costoB - costoA;
@@ -1036,7 +1102,12 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
         {!loadingHistorial && safeHistorial.length > 0 && (
           <div className="historial-sort-controls">
             <label htmlFor="sort-historial">Ordenar por:</label>
-            <select id="sort-historial" className="historial-select" value={`${sortBy}-${sortOrder}`} onChange={handleSortChange}>
+            <select
+              id="sort-historial"
+              className="historial-select"
+              value={`${sortBy}-${sortOrder}`}
+              onChange={handleSortChange}
+            >
               <option value="fecha-DESC">Fecha (Más recientes primero)</option>
               <option value="fecha-ASC">Fecha (Más antiguos primero)</option>
               <option value="costo-ASC">Costo (Menor a mayor)</option>
@@ -1070,35 +1141,51 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
               </thead>
               <tbody>
                 {currentData.map((turno) => {
-                  const isRealizado = turno.estado === 'REALIZADO' || turno.estado?.getEstadoNombre?.() === 'REALIZADO';
-                  const isReservado = turno.estado === 'RESERVADO' || turno.estado?.getEstadoNombre?.() === 'RESERVADO';
-                  const isCancelado = turno.estado === 'CANCELADO' || turno.estado?.getEstadoNombre?.() === 'CANCELADO';
-                  const isDisponible = turno.estado === 'DISPONIBLE' || turno.estado?.getEstadoNombre?.() === 'DISPONIBLE';
+                  const isRealizado =
+                    turno.estado === 'REALIZADO' ||
+                    turno.estado?.getEstadoNombre?.() === 'REALIZADO';
+                  const isReservado =
+                    turno.estado === 'RESERVADO' ||
+                    turno.estado?.getEstadoNombre?.() === 'RESERVADO';
+                  const isCancelado =
+                    turno.estado === 'CANCELADO' ||
+                    turno.estado?.getEstadoNombre?.() === 'CANCELADO';
+                  const isDisponible =
+                    turno.estado === 'DISPONIBLE' ||
+                    turno.estado?.getEstadoNombre?.() === 'DISPONIBLE';
                   let estadoLabel = turno.estado || 'RESERVADO';
                   if (typeof turno.estado?.getEstadoNombre === 'function') {
                     estadoLabel = turno.estado.getEstadoNombre();
                   }
 
                   const fechaFormatted = turno.fechaHora
-                    ? turno.fechaHora.includes('T') ? turno.fechaHora.split('T')[0] : turno.fechaHora
+                    ? turno.fechaHora.includes('T')
+                      ? turno.fechaHora.split('T')[0]
+                      : turno.fechaHora
                     : 'Sin fecha';
 
                   return (
                     <tr key={turno.id || turno._id || turno.id_turno}>
-                      <td><strong>{turno.medico || 'No especificado'}</strong></td>
+                      <td>
+                        <strong>{turno.medico || 'No especificado'}</strong>
+                      </td>
                       <td>{turno.servicio || 'General'}</td>
                       <td>{fechaFormatted}</td>
                       <td>{turno.hora ? `${turno.hora} hs` : 'Sin definir'}</td>
                       <td>{turno.sede || 'No especificada'}</td>
                       <td>
-                        <span className={`estado-badge ${isRealizado ? 'realizado' : ''} ${isReservado ? 'reservado' : ''} ${isCancelado ? 'cancelado' : ''} ${isDisponible ? 'disponible' : ''}`}>
+                        <span
+                          className={`estado-badge ${isRealizado ? 'realizado' : ''} ${isReservado ? 'reservado' : ''} ${isCancelado ? 'cancelado' : ''} ${isDisponible ? 'disponible' : ''}`}
+                        >
                           {estadoLabel}
                         </span>
                       </td>
                       <td>{turno.cobertura || 'No cubierta'}</td>
                       <td>
                         <span className="costo-texto">
-                          {turno.costoEstimado === 0 ? 'Cubierto 100% ($0)' : `$${turno.costoEstimado ?? turno.costo ?? 0}`}
+                          {turno.costoEstimado === 0
+                            ? 'Cubierto 100% ($0)'
+                            : `$${turno.costoEstimado ?? turno.costo ?? 0}`}
                         </span>
                       </td>
                     </tr>
@@ -1109,10 +1196,24 @@ function HistorialSection({ historial, loadingHistorial, paciente }) {
           </div>
 
           <div className="historial-pagination">
-            <span className="pagination-info">Mostrando página <strong>{currentPage}</strong> de <strong>{totalPages}</strong></span>
+            <span className="pagination-info">
+              Mostrando página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
+            </span>
             <div className="pagination-buttons">
-              <button className="btn btn-ghost btn-sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>← Anterior</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Siguiente →</button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                ← Anterior
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente →
+              </button>
             </div>
           </div>
         </>

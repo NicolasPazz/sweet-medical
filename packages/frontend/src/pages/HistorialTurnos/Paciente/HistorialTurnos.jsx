@@ -4,7 +4,13 @@ import './HistorialTurnos.css';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import TurnoCard from '../../../components/TurnoCard/TurnoCard.jsx';
 import { getMe, getHistorialPacienteMe, getRolUsuario } from '../../../services/userService.js';
-import { cancelarTurno, cancelarTurnoMedico, cancelarTurnoPaciente, proponerReprogramacion, responderReprogramacion } from '../../../services/turnoService.js';
+import {
+  cancelarTurno,
+  cancelarTurnoMedico,
+  cancelarTurnoPaciente,
+  proponerReprogramacion,
+  responderReprogramacion,
+} from '../../../services/turnoService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { SkeletonTurnoList } from '../../../components/ui/Skeleton.jsx';
@@ -39,7 +45,7 @@ export default function HistorialTurnos() {
       }
       setLoading(true);
       try {
-        console.log(email + ", " + password);
+        console.log(email + ', ' + password);
         const data = await getHistorialPacienteMe({ email, password });
         setTurnos(data?.turnos ?? []);
       } catch (err) {
@@ -96,7 +102,9 @@ export default function HistorialTurnos() {
   }
 
   const rolVisible = multiplesFiltros
-    ? (modo === 'modo-paciente' ? 'Paciente' : 'Médico')
+    ? modo === 'modo-paciente'
+      ? 'Paciente'
+      : 'Médico'
     : user?.rol;
 
   if (rolVisible !== 'Paciente') {
@@ -121,8 +129,7 @@ export default function HistorialTurnos() {
     try {
       if (rolVisible === 'Paciente') {
         await cancelarTurnoPaciente(turnoSeleccionado._id, motivo, email, password);
-      }
-      else if (rolVisible === 'Médico') {
+      } else if (rolVisible === 'Médico') {
         await cancelarTurnoMedico(turnoSeleccionado._id, motivo, email, password);
       }
 
@@ -167,7 +174,9 @@ export default function HistorialTurnos() {
       await responderReprogramacion(turnoSeleccionado._id, false, email, password);
       setTurnos((prev) =>
         prev.map((t) =>
-          t._id === turnoSeleccionado._id ? { ...t, estado: 'RESERVADO', propuestaCambio: null } : t,
+          t._id === turnoSeleccionado._id
+            ? { ...t, estado: 'RESERVADO', propuestaCambio: null }
+            : t,
         ),
       );
       mostrarToast('Reprogramación rechazada');
@@ -189,30 +198,34 @@ export default function HistorialTurnos() {
         prev.map((t) =>
           t._id === turnoSeleccionado._id
             ? {
-              ...t,
-              estado: 'PENDIENTE_REPROGRAMACION',
-              propuestaCambio: {
-                nuevaFechaHora,
-                nuevaHora: hora,
-                motivo,
-                // Mismo problema que del lado del médico: sin proponenteId
-                // acá, el propio paciente veía sus botones de Aceptar/Rechazar
-                // apenas proponía el cambio, hasta el próximo refresh.
-                proponenteId: user?.id,
-              },
-            }
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Mismo problema que del lado del médico: sin proponenteId
+                  // acá, el propio paciente veía sus botones de Aceptar/Rechazar
+                  // apenas proponía el cambio, hasta el próximo refresh.
+                  proponenteId: user?.id,
+                },
+              }
             : t,
         ),
       );
       mostrarToast('Propuesta de reprogramación enviada exitosamente');
     } catch (err) {
-      mostrarToast(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación', 'error');
+      mostrarToast(
+        err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación',
+        'error',
+      );
       throw err;
     }
   };
 
   if (vista === 'DETALLE') {
-    const turnoActualizado = turnos.find((t) => t._id === turnoSeleccionado._id) ?? turnoSeleccionado;
+    const turnoActualizado =
+      turnos.find((t) => t._id === turnoSeleccionado._id) ?? turnoSeleccionado;
     return (
       <>
         <DetalleTurno

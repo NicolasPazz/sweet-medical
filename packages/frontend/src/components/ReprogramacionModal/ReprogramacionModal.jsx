@@ -74,7 +74,6 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
     };
 
     cargarFechas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email, password]);
 
   const handleSeleccionarFecha = async (fechaISO) => {
@@ -120,7 +119,9 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
     try {
       await onConfirmar({ fecha, hora, motivo: motivo.trim() });
     } catch (err) {
-      setErrorEnvio(err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación');
+      setErrorEnvio(
+        err.response?.data?.message ?? 'Error al enviar la propuesta de reprogramación',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -164,7 +165,9 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
               {cargandoHorarios ? (
                 <p className="reprogramacion-modal-info">Buscando horarios disponibles...</p>
               ) : horariosDisponibles.length === 0 ? (
-                <p className="reprogramacion-modal-info">No hay horarios disponibles para esa fecha.</p>
+                <p className="reprogramacion-modal-info">
+                  No hay horarios disponibles para esa fecha.
+                </p>
               ) : (
                 // Sólo esta grilla scrollea (con scrollbar propio y angosto)
                 // cuando hay muchos horarios; antes se scrolleaba el modal
@@ -177,7 +180,10 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
                       key={h.hora}
                       type="button"
                       className={`hora-slot-btn ${hora === h.hora ? 'seleccionado' : ''}`}
-                      onClick={() => { setHora(h.hora); setErrores((p) => ({ ...p, hora: false })); }}
+                      onClick={() => {
+                        setHora(h.hora);
+                        setErrores((p) => ({ ...p, hora: false }));
+                      }}
                     >
                       {h.hora} hs
                     </button>
@@ -194,7 +200,10 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
             placeholder="Motivo de la reprogramación"
             rows={3}
             value={motivo}
-            onChange={(e) => { setMotivo(e.target.value); setErrores((p) => ({ ...p, motivo: false })); }}
+            onChange={(e) => {
+              setMotivo(e.target.value);
+              setErrores((p) => ({ ...p, motivo: false }));
+            }}
             style={{ resize: 'none', fontFamily: 'inherit' }}
           />
           {errores.motivo && <span className="modal-error">⚠ El motivo es obligatorio</span>}
@@ -202,8 +211,14 @@ export default function ReprogramacionModal({ turno, onConfirmar, onCerrar }) {
         </div>
 
         <div className="modal-acciones reprogramacion-modal-footer">
-          <button className="btn-cancelar-accion" onClick={onCerrar}>Cancelar</button>
-          <button className="btn-confirmar-accion" onClick={handleSubmit} disabled={submitting || !fecha || !hora}>
+          <button className="btn-cancelar-accion" onClick={onCerrar}>
+            Cancelar
+          </button>
+          <button
+            className="btn-confirmar-accion"
+            onClick={handleSubmit}
+            disabled={submitting || !fecha || !hora}
+          >
             {submitting ? 'Enviando...' : '→ Proponer'}
           </button>
         </div>
