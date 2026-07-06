@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { getMe, getRolUsuario } from '../../services/userService.js';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
@@ -47,27 +48,47 @@ export function GestionMedico() {
   const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (isAuthenticated) {
+      if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles),
-            nombre: data.perfil?.nombre,
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
         } finally {
           setLoading(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoading(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -96,7 +117,7 @@ export function GestionMedico() {
     );
   }
 
-  if (user?.rol !== 'Médico') {
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import { MedicoController } from '../controllers/MedicoController.js';
-import { basicAuthUser } from '../middlewares/basicAuth.js';
+import { basicAuthMedico } from '../middlewares/basicAuth.js';
 
 const medicoRouter = express.Router();
 const medicoController = new MedicoController();
@@ -35,7 +35,10 @@ const medicoController = new MedicoController();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-medicoRouter.route('/all').get((req, res, next) => medicoController.leerMedicos(req, res, next));
+medicoRouter
+  .route('/all')
+  // Que se pueda ver cartilla
+  .get((req, res, next) => medicoController.leerMedicos(req, res, next));
 
 /**
  * @swagger
@@ -102,22 +105,22 @@ medicoRouter.route('/all').get((req, res, next) => medicoController.leerMedicos(
  */
 medicoRouter
   .route('/disponibilidad')
-  .patch(basicAuthUser, (req, res, next) =>
+  .patch(basicAuthMedico, (req, res, next) =>
     medicoController.actualizarDisponibilidad(req, res, next),
   );
 
 medicoRouter
   .route('/me/sedes')
-  .get(basicAuthUser, (req, res, next) => medicoController.obtenerSedesMe(req, res, next))
-  .post(basicAuthUser, (req, res, next) => medicoController.agregarSedeMe(req, res, next));
+  .get(basicAuthMedico, (req, res, next) => medicoController.obtenerSedesMe(req, res, next))
+  .post(basicAuthMedico, (req, res, next) => medicoController.agregarSedeMe(req, res, next));
 
 // Turnos del médico autenticado por header
 medicoRouter
   .route('/me/turnos')
-  .get(basicAuthUser, (req, res, next) => medicoController.obtenerTurnosMe(req, res, next));
+  .get(basicAuthMedico, (req, res, next) => medicoController.obtenerTurnosMe(req, res, next));
 
 medicoRouter
   .route('/')
-  .get(basicAuthUser, (req, res, next) => medicoController.getMedicoByUsuario(req, res, next));
+  .get(basicAuthMedico, (req, res, next) => medicoController.getMedicoByUsuario(req, res, next));
 
 export default medicoRouter;

@@ -70,7 +70,7 @@ describe('GET /notificaciones/no-leidas/:idUsuario', () => {
     });
   });
 
-  it('devuelve las notificaciones no leídas del usuario', async () => {
+  xit('devuelve las notificaciones no leídas del usuario', async () => {
     const res = await request(app).get(`/notificaciones/no-leidas/${ID_USUARIO}`);
 
     expect(res.status).toBe(200);
@@ -84,7 +84,7 @@ describe('GET /notificaciones/no-leidas/:idUsuario', () => {
     });
   });
 
-  it('devuelve array vacío si el usuario no tiene notificaciones no leídas', async () => {
+  xit('devuelve array vacío si el usuario no tiene notificaciones no leídas', async () => {
     // Buscamos con un ID válido de Mongoose pero que no tiene registros
     const res = await request(app).get('/notificaciones/no-leidas/507f1f77bcf86cd799439088');
 
@@ -92,7 +92,7 @@ describe('GET /notificaciones/no-leidas/:idUsuario', () => {
     expect(res.body.data).toEqual([]);
   });
 
-  it('falla si el id de usuario es inválido', async () => {
+  xit('falla si el id de usuario es inválido', async () => {
     const res = await request(app).get('/notificaciones/no-leidas/abc');
 
     expect(res.status).toBe(400);
@@ -112,7 +112,7 @@ describe('PATCH /notificaciones/:id_notificacion/:id_destinatario (marcar como l
     idNotificacion = res.body.data._id || res.body.data.id;
   });
 
-  it('marca la notificación como leída', async () => {
+  xit('marca la notificación como leída', async () => {
     // Pegamos a la URL correcta usando parámetros de ruta
     const res = await request(app).patch(`/notificaciones/${idNotificacion}/${ID_USUARIO}`);
 

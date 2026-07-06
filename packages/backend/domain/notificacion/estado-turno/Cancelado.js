@@ -1,8 +1,8 @@
 import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
-import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
-
+import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 'import { DateUtil } from '../../../utils/DateUtil.js';
+import { DateUtil } from '../../../utils/DateUtil.js';
 export class Cancelado {
   id;
   constructor(turno) {
@@ -13,13 +13,19 @@ export class Cancelado {
     return EstadoTurno.CANCELADO;
   }
 
-  generarNotificacion(remitente) {
+  generarNotificacion(remitente, motivo) {
     const actor = this.turno.obtenerUltimoActor();
     const servicio = this.turno.obtenerNombreServicio();
 
-    const actorId = actor?.id || actor?._id;
-    const pacienteUsuarioId = this.turno.paciente ? this.turno.paciente.id : null;
-
+    // obtenerUltimoActor() puede devolver un ObjectId crudo (recién casteado al pushear
+    // al historial) y ObjectId.id NO es el hex string sino un buffer interno.
+    // Por eso hay que priorizar ._id / el propio valor, y nunca .id.
+    const actorId = actor?._id || actor;
+    const pacienteUsuarioId = this.turno.paciente
+      ? this.turno.paciente.usuario?.id ||
+        this.turno.paciente.usuario?._id ||
+        this.turno.paciente.usuario
+      : null;
     if (
       !(pacienteUsuarioId == null) &&
       this.turno.paciente &&
@@ -32,7 +38,14 @@ export class Cancelado {
         remitente,
         t('CANCELACION_A_MEDICO', {
           nombre: this.turno.paciente.nombre,
+          fecha:
+            DateUtil.toDDMMYYYY(this.turno.fechaHora) +
+            ' (' +
+            DateUtil.toHHMM(this.turno.fechaHora) +
+            ')',
           servicio,
+          motivo,
+          interpolation: { escapeValue: false },
         }),
       );
     } else {
@@ -42,8 +55,11 @@ export class Cancelado {
           this.turno.paciente.usuario,
           remitente,
           t('CANCELACION_A_PACIENTE', {
-            fecha: this.turno.fechaHora?.toLocaleDateString() || '',
+            nombre: this.turno.medico.nombre,
+            fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + '(' + this.turno.hora + ')',
             servicio,
+            motivo,
+            interpolation: { escapeValue: false },
           }),
         );
       } else {

@@ -1,17 +1,22 @@
 import './Perfil.css';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../components/AuthProvider.jsx';
 import ErrorPage from '../ErrorPage/ErrorPage.jsx';
 import { getMe, getRolUsuario } from '../../services/userService.js';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 32, color: '#271f92' }} spin />;
 
 export default function Perfil() {
   const { isAuthenticated, email, password, logout } = useAuth();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,10 +24,14 @@ export default function Perfil() {
         try {
           const data = await getMe({ email, password });
           // Aplanamos los datos para que el template los consuma igual
+
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+          setMultiplesFiltros(esMultiRol);
+
           setUser({
             email: data.usuario?.email,
             dni: data.usuario?.dni,
-            roles: data.usuario?.roles,
             nombreUsuario: data.usuario?.nombreUsuario,
             numTel: data.usuario?.numTel,
             direccion: data.usuario?.direccion,
@@ -49,8 +58,19 @@ export default function Perfil() {
               data.perfil?.plan?.coberturasEspecialidad?.map((c) => c.especialidad?.nombre) ?? [],
             coberturasPractica:
               data.perfil?.plan?.coberturasPractica?.map((c) => c.practica?.nombre) ?? [],
-            rol: getRolUsuario(data.usuario?.roles),
           });
+
+          if (esMultiRol) {
+            setUser((estadoAnterior) => ({
+              ...estadoAnterior,
+              roles: roles,
+            }));
+          } else {
+            setUser((estadoAnterior) => ({
+              ...estadoAnterior,
+              rol: getRolUsuario(roles),
+            }));
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -62,6 +82,12 @@ export default function Perfil() {
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-paciente'
+      ? 'Paciente'
+      : 'Médico'
+    : user?.rol;
 
   // Protección de ruta: si no está autenticado, va a la página de error 401
   if (!isAuthenticated) {
@@ -92,6 +118,14 @@ export default function Perfil() {
     );
   }
 
+  const handleLogout = () => {
+    // Primero navegamos: Perfil se desmonta de inmediato, todavía con sesión
+    // activa, así que nunca llega a re-renderizarse con isAuthenticated=false.
+    navigate('/login');
+    // Recién después, ya en /login (que no depende de la sesión), limpiamos el auth.
+    setTimeout(() => logout(), 0);
+  };
+
   return (
     <div className="perfil-page">
       {/* --- HEADER --- */}
@@ -106,13 +140,7 @@ export default function Perfil() {
             src={user?.avatar || '/avatar.png'}
             alt="Avatar de usuario"
           />
-          <button
-            className="btn-logout text-ellipsis"
-            onClick={() => {
-              logout();
-              window.location.href = '/login';
-            }}
-          >
+          <button className="btn-logout text-ellipsis" onClick={handleLogout}>
             Cerrar sesión
           </button>
         </div>
@@ -122,7 +150,7 @@ export default function Perfil() {
       <div className="profile-container">
         {/* COLUMNA IZQUIERDA: Dinámica según el Rol */}
         <div className="left-section">
-          {user?.rol === 'Paciente' ? (
+          {rolVisible === 'Paciente' ? (
             <>
               <h2 className="section-title text-ellipsis">🏥 Mi Cobertura</h2>
               <div className="cobertura-row">
@@ -173,7 +201,7 @@ export default function Perfil() {
               <tbody>
                 <tr>
                   <td className="text-ellipsis">
-                    <strong>Rol:</strong> {user?.rol || 'N/A'}
+                    <strong>Rol:</strong> {rolVisible || 'N/A'}
                   </td>
                 </tr>
                 <tr>

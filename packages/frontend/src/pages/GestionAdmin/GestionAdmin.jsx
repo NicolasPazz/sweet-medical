@@ -15,13 +15,19 @@ const OPCIONES = [
     icono: '🧑‍⚕️',
     titulo: 'Generación de Usuarios',
     descripcion:
-      'Dá de alta nuevos usuarios Paciente o Médico (quedan inactivos hasta asignarles credenciales).',
+      'Dá de alta nuevos usuarios con uno o más roles (Paciente y/o Médico). Quedan inactivos hasta asignarles credenciales.',
   },
   {
     path: 'servicio',
     icono: '🩺',
     titulo: 'ABM de Servicios',
     descripcion: 'Alta, modificación y baja de especialidades y prácticas del sistema.',
+  },
+  {
+    path: 'sedes',
+    icono: '🏥',
+    titulo: 'ABM de Sedes',
+    descripcion: 'Alta, modificación y baja de las sedes de atención del sistema.',
   },
 ];
 

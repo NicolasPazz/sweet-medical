@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&display=swap');
+
+@keyframes slideIn {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.gs-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Roboto Mono', monospace;
+  padding-top: 80px;
+}
+
+.gs-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* ─── Cabecera ───────────────────────────────────────────────────────────── */
+.gs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gs-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.gs-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* ─── Botones ────────────────────────────────────────────────────────────── */
+.gs-btn-primary {
+  background: #271f92;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.gs-btn-primary:hover {
+  background: #160ca3;
+}
+.gs-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.gs-btn-secondary {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gs-btn-secondary:hover {
+  background: #f1f5f9;
+}
+.gs-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gs-btn-danger {
+  background: #dc2626;
+}
+.gs-btn-danger:hover {
+  background: #b91c1c;
+}
+
+.gs-btn-edit {
+  background: #eef0ff;
+  color: #271f92;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gs-btn-edit:hover {
+  background: #dde0ff;
+}
+
+.gs-btn-delete {
+  background: #fef2f2;
+  color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gs-btn-delete:hover {
+  background: #fee2e2;
+}
+
+/* ─── Tarjeta de sede ────────────────────────────────────────────────────── */
+.gs-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s;
+}
+.gs-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.gs-card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.gs-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gs-card-meta {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.gs-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── Estados vacío / cargando ───────────────────────────────────────────── */
+.gs-empty,
+.gs-loader {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+.gs-loader {
+  font-size: 13px;
+}
+
+.gs-empty-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+/* ─── Overlay / Modal ────────────────────────────────────────────────────── */
+.gs-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.gs-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.gs-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+
+.gs-modal-body {
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.gs-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ─── Formulario ─────────────────────────────────────────────────────────── */
+.gs-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gs-input,
+.gs-select {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  background: #f8fafc;
+  transition: border-color 0.15s;
+}
+.gs-input:focus,
+.gs-select:focus {
+  border-color: #271f92;
+}
+.gs-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.gs-select {
+  cursor: pointer;
+}
+
+/* ─── Error inline ───────────────────────────────────────────────────────── */
+.gs-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+/* ─── Toast ──────────────────────────────────────────────────────────────── */
+.gs-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 200;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: slideIn 0.2s ease;
+}
+.gs-toast--success {
+  background: #16a34a;
+}
+.gs-toast--error {
+  background: #dc2626;
+}

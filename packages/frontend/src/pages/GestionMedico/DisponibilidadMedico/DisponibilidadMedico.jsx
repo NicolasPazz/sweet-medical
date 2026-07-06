@@ -10,6 +10,7 @@ import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import Spinner from '../../../components/UI/Spinner.jsx';
 import VolverGestion from '../../../components/UI/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 
@@ -134,6 +135,7 @@ function DisponibilidadRow({ disp, index, onChange, onRemove, onBlur, isEditing 
 export default function DisponibilidadMedico() {
   const { isAuthenticated, email, password } = useAuth();
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [medico, setMedico] = useState(null);
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -141,16 +143,23 @@ export default function DisponibilidadMedico() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const load = async () => {
-      if (!email || !password) return;
+      if (!email || !password) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await getMedicoByUser({ email, password });
         const medico = res?.data ?? res;
         setMedico(medico);
-        setDisponibilidades(medico?.disponibilidades?.map((d) => ({ ...d })) || []);
+
+        const disponibilidades = medico?.disponibilidades || [];
+        setDisponibilidades(disponibilidades);
       } catch (err) {
         console.error('Error al cargar médico:', err);
         setError('No se pudo conectar con el servidor.');
@@ -166,22 +175,57 @@ export default function DisponibilidadMedico() {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles) === 'Médico' ? 'MEDICO' : 'PACIENTE',
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
+        } finally {
+          setLoadingUser(false);
         }
+      } else {
+        setUser(null);
+        setMultiplesFiltros(false);
+        setLoadingUser(false);
       }
     };
     fetchUser();
   }, [email, password]);
 
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
+
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
   }
 
-  if (user && user.rol !== 'MEDICO') {
+  if (loadingUser) {
+    return (
+      <div className="dm-page">
+        <div className="dm-container">
+          <div className="dm-card">
+            <Spinner size="default" text="Cargando..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 
@@ -269,13 +313,14 @@ export default function DisponibilidadMedico() {
         <div className="dm-header">
           <h1 className="dm-title text-ellipsis">Mi Disponibilidad</h1>
           <p className="dm-subtitle text-ellipsis">
-            Consultá y administrá tus horarios de atención.
+            Consultá y administrá tus horarios de atención. Los horarios se ingresan y muestran en
+            hora UTC (no la hora local de tu navegador).
           </p>
         </div>
 
         {loading ? (
           <div className="dm-card">
-            <Spinner size="md" text="Cargando disponibilidad..." />
+            <Spinner size="default" text="Cargando disponibilidad..." />
           </div>
         ) : error && !medico ? (
           <div className="dm-card dm-error-card text-ellipsis-multiline">⚠️ {error}</div>
@@ -313,7 +358,7 @@ export default function DisponibilidadMedico() {
                     disabled={saving}
                   >
                     {saving ? (
-                      <Spinner size="sm" text="Guardando..." inline />
+                      <Spinner size="small" text="Guardando..." inline />
                     ) : (
                       '💾 Guardar cambios'
                     )}

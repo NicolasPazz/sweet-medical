@@ -18,11 +18,26 @@ const MONTHS = [
 ];
 
 export default function MiniCalendar({ selectedDate, onSelectDate, availableDates = [] }) {
+  // Parsea un string 'YYYY-MM-DD' a sus componentes numéricos SIN pasar por
+  // el constructor Date(string) (que interpreta como medianoche UTC y luego
+  // se lee con getMonth()/getFullYear() locales, pudiendo mostrar el mes
+  // equivocado si el navegador está en un huso horario detrás de UTC).
+  const parsearYYYYMMDD = (str) => {
+    const [anio, mes, dia] = str.split('-').map(Number);
+    return { anio, mes: mes - 1, dia };
+  };
+
   const [viewDate, setViewDate] = useState(() => {
     // Si hay una fecha seleccionada, iniciar en ese mes; sino, usar hoy
-    if (selectedDate) return new Date(selectedDate);
+    if (selectedDate) {
+      const { anio, mes, dia } = parsearYYYYMMDD(selectedDate);
+      return new Date(anio, mes, dia);
+    }
     // Si hay fechas disponibles, iniciar en el mes de la primera disponible
-    if (availableDates.length > 0) return new Date(availableDates[0]);
+    if (availableDates.length > 0) {
+      const { anio, mes, dia } = parsearYYYYMMDD(availableDates[0]);
+      return new Date(anio, mes, dia);
+    }
     return new Date();
   });
 

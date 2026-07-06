@@ -1,0 +1,310 @@
+/* ==========================================================================
+   Contenedor Principal y Header
+   ========================================================================== */
+.oferta-container {
+  padding: 2rem;
+  width: 100%;
+  /* Aprovecha todo el ancho de la pantalla disponible */
+  box-sizing: border-box;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+.oferta-header {
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+
+.oferta-header h1 {
+  color: #0d5c5a;
+  /* Verde azulado corporativo */
+  font-size: 2.2rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.oferta-header p {
+  color: #555;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Barra de Navegación por Pestañas (Tabs)
+   ========================================================================== */
+.oferta-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.oferta-tabs button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.oferta-tabs button:hover {
+  color: #0d5c5a;
+  background-color: #f1f5f9;
+}
+
+/* Estado activo de la pestaña */
+.oferta-tabs button.active {
+  color: #ffffff;
+  background-color: #0d5c5a;
+  /* Fondo teal para destacar */
+  box-shadow: 0 4px 6px -1px rgba(13, 92, 90, 0.2);
+}
+
+/* ==========================================================================
+   Grilla Adaptativa (Layout de Tarjetas)
+   ========================================================================== */
+.oferta-contenido {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.grid-oferta {
+  display: grid;
+  /* Usa auto-fill para multiplicar columnas dinámicamente si sobra espacio */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ==========================================================================
+   Diseño de Tarjetas (Cards Generales)
+   ========================================================================== */
+.oferta-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Mantiene la metadata pegada abajo de todo */
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.oferta-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+/* Contenedor Circular para los Íconos Dinámicos */
+.oferta-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  /* Transforma el fondo en un círculo perfecto */
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.oferta-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.oferta-card__subtitle {
+  font-size: 0.95rem;
+  color: #0d5c5a;
+  font-weight: 500;
+  margin: 0;
+}
+
+.oferta-card__description {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Metadata o detalles del pie de la tarjeta (Precio, Días, etc.) */
+.oferta-card__meta {
+  margin-top: auto;
+  /* Empuja el contenedor al fondo de la card */
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ==========================================================================
+   Sección Específica de Médicos (Nuestro Equipo)
+   ========================================================================== */
+
+/* Cabecera del Médico (Alinea ícono y textos horizontalmente) */
+.medico-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.medico-card-top .oferta-card__icon {
+  margin-bottom: 0;
+  /* Quita el margen inferior viejo para centrarlo horizontalmente */
+}
+
+/* Separadores de bloques dentro del médico */
+.medico-servicios-seccion,
+.medico-horarios-seccion {
+  margin-top: 0.85rem;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 0.85rem;
+}
+
+/* Etiquetas de sección (Especialidades, Prácticas, Horarios) */
+.medico-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* Contenedor de Tags */
+.medico-tags-container {
+  margin-bottom: 0.75rem;
+}
+
+.medico-tags-container:last-child {
+  margin-bottom: 0;
+}
+
+.medico-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Diseño de cada Tag individual */
+.tag-servicio {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.tag-servicio.esp {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.tag-servicio.prac {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Lista de Horarios Limpia (Sin puntitos de lista) */
+.lista-disponibilidad {
+  list-style: none !important;
+  list-style-type: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.item-disponibilidad {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  background: #f8fafc;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+}
+
+.dia-texto {
+  font-weight: 600;
+  color: #334155;
+}
+
+.horas-texto {
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+  /* Evita que los números bailen de ancho */
+}
+
+.sin-datos {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Animaciones y Media Queries (Responsive)
+   ========================================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .oferta-container {
+    padding: 1rem;
+  }
+
+  .oferta-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .oferta-tabs {
+    flex-direction: column;
+    /* Pestañas verticales en celulares */
+    gap: 0.5rem;
+    border-bottom: none;
+  }
+
+  .oferta-tabs button {
+    width: 100%;
+    text-align: center;
+    padding: 0.6rem;
+  }
+}

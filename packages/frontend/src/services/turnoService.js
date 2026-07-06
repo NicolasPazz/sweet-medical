@@ -28,23 +28,37 @@ export const getSedes = async () => {
   return res.data;
 };
 
+export const getObrasSociales = async () => {
+  const res = await api.get('/obras-sociales');
+  return res.data;
+};
+
 export const getPacientes = async () => {
   const res = await api.get('/pacientes/all');
   return res.data;
 };
 
-export const buscarTurnosDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibles', { params });
+export const buscarTurnosDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibles', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
-export const getFechasDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibilidad/fechas', { params });
+export const getFechasDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibilidad/fechas', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
-export const getHorariosDisponibles = async (params) => {
-  const res = await api.get('/turnos/disponibilidad/horarios', { params });
+export const getHorariosDisponibles = async (params, email, password) => {
+  const res = await api.get('/turnos/disponibilidad/horarios', {
+    params,
+    headers: authHeaders(email, password),
+  });
   return res.data;
 };
 
@@ -58,6 +72,24 @@ export const reservarTurno = async (data, email, password) => {
 export const cancelarTurno = async (id_turno, motivo, email, password) => {
   const res = await axios.patch(
     `${getApiBaseUrl()}/turnos/me/cancelacion/${id_turno}`,
+    { motivo },
+    { headers: authHeaders(email, password) },
+  );
+  return res.data;
+};
+
+export const cancelarTurnoPaciente = async (id_turno, motivo, email, password) => {
+  const res = await axios.patch(
+    `${getApiBaseUrl()}/turnos/paciente/cancelacion/${id_turno}`,
+    { motivo },
+    { headers: authHeaders(email, password) },
+  );
+  return res.data;
+};
+
+export const cancelarTurnoMedico = async (id_turno, motivo, email, password) => {
+  const res = await axios.patch(
+    `${getApiBaseUrl()}/turnos/medico/cancelacion/${id_turno}`,
     { motivo },
     { headers: authHeaders(email, password) },
   );
@@ -103,4 +135,14 @@ export const responderReprogramacion = async (id_turno, aceptado, email, passwor
 export const getHistorialPaciente = async (idUsuario) => {
   const res = await api.get(`/pacientes/${idUsuario}/turnos`);
   return res.data;
+};
+
+export const getHistorialPacienteMe = async ({ email, password }) => {
+  const res = await axios.get(`${getApiBaseUrl()}/pacientes/me/turnos`, {
+    headers: authHeaders(email, password),
+  });
+  console.log('RES: ' + res);
+  console.log('RES.DATA: ' + res.data);
+  console.log('RES.DATA.TURNOS: ' + res.data.data.turnos);
+  return res.data.data;
 };

@@ -1,32 +1,32 @@
 import { useState, useEffect } from 'react';
-import { PACIENTES_MOCK, HISTORIAL_POR_PACIENTE } from '../../../mockdata/pacientes.js';
 import { ESTADO_CONFIG } from '../../../mockdata/turnos.js';
 import './HistorialPaciente.css';
-import { getMe, getRolUsuario } from '../../../services/userService.js';
+import {
+  getMe,
+  getRolUsuario,
+  getHistorialPacienteByMedico,
+} from '../../../services/userService.js';
 import { useAuth } from '../../../components/AuthProvider.jsx';
 import ErrorPage from '../../ErrorPage/ErrorPage.jsx';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import { SkeletonTurnoList } from '../../../components/UI/Skeleton.jsx';
 import VolverGestion from '../../../components/UI/VolverGestion.jsx';
+import { useModoVista } from '../../../components/ModoVistaContext.jsx';
 
 const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
 
 function formatFecha(fechaHora) {
   const d = new Date(fechaHora);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dia = String(d.getUTCDate()).padStart(2, '0');
+  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const anio = d.getUTCFullYear();
+  return `${dia}/${mes}/${anio}`;
 }
 
 // ─── Vista: Listado de turnos del paciente encontrado ─────────────────────
 function HistorialPacienteListado({ paciente, turnos, onVolver }) {
   const [filtro, setFiltro] = useState('TODOS');
   const [turnoExpandido, setTurnoExpandido] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const estados = ['TODOS', ...Object.keys(ESTADO_CONFIG)];
   const turnosFiltrados = filtro === 'TODOS' ? turnos : turnos.filter((t) => t.estado === filtro);
@@ -57,9 +57,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
         ))}
       </div>
 
-      {loading ? (
-        <SkeletonTurnoList count={4} />
-      ) : turnosFiltrados.length === 0 ? (
+      {turnosFiltrados.length === 0 ? (
         <p className="historial-vacio text-ellipsis-multiline">
           {turnos.length === 0
             ? 'Este paciente no tiene turnos registrados.'
@@ -81,8 +79,9 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <span className="turno-hora text-ellipsis">{turno.hora}</span>
                 </div>
                 <div className="turno-card-center">
-                  <span className="turno-servicio text-ellipsis">{turno.servicio_nombre}</span>
-                  <span className="turno-medico text-ellipsis">{turno.nombreMedico}</span>
+                  <span className="turno-id text-ellipsis"> {turno.id_turno} </span>
+                  <span className="turno-servicio text-ellipsis">{turno.servicio}</span>
+                  <span className="turno-medico text-ellipsis">{turno.medico}</span>
                   {turno.sede && (
                     <span className="turno-sede text-ellipsis">{turno.sede.nombre}</span>
                   )}
@@ -99,7 +98,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                   <div className="turno-historial" onClick={(e) => e.stopPropagation()}>
                     <p className="turno-historial-titulo text-ellipsis">Historial de estados</p>
                     <ul className="turno-historial-lista">
-                      {turno.historialEstados.map((h, i) => {
+                      {turno.historialTurnos.map((h, i) => {
                         const hCfg = ESTADO_CONFIG[h.estado] ?? { label: h.estado, color: '' };
                         return (
                           <li key={i} className="turno-historial-item">
@@ -107,7 +106,7 @@ function HistorialPacienteListado({ paciente, turnos, onVolver }) {
                               {hCfg.label}
                             </span>
                             <span className="turno-historial-fecha text-ellipsis">
-                              {formatFecha(h.fechaHoraCambio)}
+                              {formatFecha(h.fechaHoraIngreso)}
                             </span>
                             <span className="turno-historial-motivo text-ellipsis">{h.motivo}</span>
                             <span className="turno-historial-actor text-ellipsis">@{h.actor}</span>
@@ -135,26 +134,48 @@ export default function HistorialPaciente() {
   const [historial, setHistorial] = useState([]);
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [error, setError] = useState(null);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista();
 
   useEffect(() => {
     const fetchUser = async () => {
       if (email && password) {
         try {
           const data = await getMe({ email, password });
-          setUser({
-            rol: getRolUsuario(data.usuario?.roles),
-          });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles, nombre: data.perfil?.nombre });
+          } else {
+            setUser({ rol: getRolUsuario(roles), nombre: data.perfil?.nombre });
+          }
         } catch (error) {
           console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
         } finally {
           setLoadingUser(false);
         }
       } else {
+        setUser(null);
+        setMultiplesFiltros(false);
         setLoadingUser(false);
       }
     };
     fetchUser();
   }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
 
   if (!isAuthenticated) {
     return <ErrorPage type="401" />;
@@ -183,29 +204,40 @@ export default function HistorialPaciente() {
     );
   }
 
-  if (user?.rol !== 'Médico') {
+  if (rolVisible !== 'Médico') {
     return <ErrorPage type="403" />;
   }
 
-  const handleBuscar = () => {
+  const handleBuscar = async () => {
     const trimmed = dni.trim();
     if (!trimmed) return;
 
+    console.log(trimmed + '...' + dni);
+
     setEstado('searching');
     // Simula latencia de búsqueda
-    setTimeout(() => {
-      const paciente = PACIENTES_MOCK.find((p) => p.dni === trimmed);
-      if (!paciente) {
+
+    try {
+      const data = await getHistorialPacienteByMedico({ email, password, dni: trimmed });
+
+      console.log(data.data.paciente);
+      console.log(data.data.turnos);
+      if (!data.data.paciente) {
         setEstado('not_found');
         setPacienteEncontrado(null);
         setHistorial([]);
         return;
       }
-      const turnos = HISTORIAL_POR_PACIENTE[paciente.id_paciente] ?? [];
-      setPacienteEncontrado(paciente);
-      setHistorial(turnos);
+      setPacienteEncontrado(data.data.paciente);
+      setHistorial(data.data.turnos);
       setEstado('found');
-    }, 500);
+    } catch (error) {
+      setError(error.response.data.message);
+      setEstado('error');
+      setPacienteEncontrado(null);
+      setHistorial([]);
+      return;
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -277,18 +309,8 @@ export default function HistorialPaciente() {
             No se encontró ningún paciente con el DNI <strong>{dni}</strong>.
           </p>
         )}
-      </div>
 
-      <div className="hp-hint">
-        <p className="hp-hint-titulo text-ellipsis">DNIs de prueba disponibles:</p>
-        <ul className="hp-hint-lista">
-          {PACIENTES_MOCK.map((p) => (
-            <li key={p.dni} className="hp-hint-item" onClick={() => setDni(p.dni)}>
-              <span className="hp-hint-dni text-ellipsis">{p.dni}</span>
-              <span className="hp-hint-nombre text-ellipsis">{p.nombre}</span>
-            </li>
-          ))}
-        </ul>
+        {estado === 'error' && <p className="hp-error text-ellipsis">{error}.</p>}
       </div>
     </div>
   );

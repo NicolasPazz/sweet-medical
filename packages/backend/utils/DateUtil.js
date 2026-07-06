@@ -1,4 +1,6 @@
 export class DateUtil {
+  static DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+
   /**
    * Extrae la fecha en formato YYYY-MM-DD de un Date o String
    * sin riesgo de desfase por Timezone si la entrada ya es una fecha local.
@@ -49,6 +51,10 @@ export class DateUtil {
   /**
    * Calcula el límite superior (fechaHasta) sumando N días a una fecha base.
    * Retorna formato YYYY-MM-DD.
+   *
+   * Usa aritmética en milisegundos UTC (`getTime()` + N*86400000) en vez de
+   * `getDate()/setDate()` (que son locales del servidor donde corra Node),
+   * para que el resultado no dependa del huso horario del proceso.
    * @param {string|Date} baseDate
    * @param {number} daysToAdd
    * @returns {string}
@@ -57,7 +63,26 @@ export class DateUtil {
     const d = new Date(baseDate);
     if (isNaN(d.getTime())) return null;
 
-    d.setDate(d.getDate() + daysToAdd);
-    return this.toYYYYMMDD(d);
+    const MS_POR_DIA = 24 * 60 * 60 * 1000;
+    const resultado = new Date(d.getTime() + daysToAdd * MS_POR_DIA);
+    return this.toYYYYMMDD(resultado);
+  }
+
+  /**
+   * Formatea una fecha en DD/MM/AAAA usando componentes UTC (no el huso
+   * horario del servidor), para mostrar en mensajes/notificaciones al
+   * usuario. Consistente con `formatFechaUTC` del frontend.
+   * @param {Date|string} dateInput
+   * @returns {string}
+   */
+  static toDDMMYYYY(dateInput) {
+    if (!dateInput) return '';
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(d.getTime())) return '';
+
+    const dia = String(d.getUTCDate()).padStart(2, '0');
+    const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const anio = d.getUTCFullYear();
+    return `${dia}/${mes}/${anio}`;
   }
 }

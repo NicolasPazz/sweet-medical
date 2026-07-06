@@ -1,3 +1,35 @@
+/* ── Chips de fecha disponible (mismo estilo que los de hora) ── */
+.fecha-slot-btn {
+  font-family: 'Roboto Mono', monospace;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fecha-slot-btn:hover {
+  border-color: #271f92;
+  color: #271f92;
+}
+
+.fecha-slot-btn.seleccionado {
+  background-color: #271f92;
+  color: #fff;
+  border-color: #271f92;
+  box-shadow: 0 4px 12px rgba(39, 31, 146, 0.15);
+}
+
+.reprogramar-vacio {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  color: #94a3b8;
+  padding: 10px 0;
+}
 /* ── Contenedor del Bloque de Reprogramación ── */
 .reprogramar-card {
   width: 100%;

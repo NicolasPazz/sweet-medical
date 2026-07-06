@@ -2,6 +2,7 @@ import { logger } from '../../../utils/logger.js';
 import { Notificacion } from '../Notificacion.js';
 import { EstadoTurno } from '../../turno/EstadoTurno.js';
 import { t } from '../../../utils/i18n/i18n.js'; // <-- Cambiado a 't'
+import { DateUtil } from '../../../utils/DateUtil.js';
 
 export class Confirmado {
   id;
@@ -13,7 +14,7 @@ export class Confirmado {
     return EstadoTurno.CONFIRMADO;
   }
 
-  generarNotificacion(remitente) {
+  generarNotificacion(remitente, _motivo) {
     const servicio = this.turno.obtenerNombreServicio();
 
     // LOG: Registro técnico en consola
@@ -27,9 +28,10 @@ export class Confirmado {
       remitente,
       t('CONFIRMACION_TURNO_DETALLADA', {
         servicio: servicio,
-        fecha: this.turno.fechaHora?.toLocaleDateString() || '',
-        sede: this.turno.sede.nombre,
+        fecha: DateUtil.toDDMMYYYY(this.turno.fechaHora) + '(' + this.turno.hora + ')',
+        sede: this.turno.sede?.nombre || '(Sin asignar)',
         medico: this.turno.medico.nombre,
+        interpolation: { escapeValue: false }, // <- Evita que cambie las "/" por "&#x2F;"
       }),
     );
   }

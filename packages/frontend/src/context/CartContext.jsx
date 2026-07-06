@@ -1,12 +1,55 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 
 export const ADD_TURN = 'ADD_TURN';
 export const REMOVE_TURN = 'REMOVE_TURN';
 export const CLEAR_CART = 'CLEAR_CART';
 
 export const initialState = { items: [] };
+
+export const CART_STORAGE_KEY = 'sweet-medical:cart';
+
+function isBrowser() {
+  return typeof window !== 'undefined' && !!window.localStorage;
+}
+
+/**
+ * Lee el carrito persistido en localStorage. Si no existe, está corrupto
+ * o el formato no es el esperado, devuelve el estado inicial vacío.
+ * @returns {typeof initialState}
+ */
+export function loadPersistedCart() {
+  if (!isBrowser()) return initialState;
+
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return initialState;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.items)) return initialState;
+
+    return { items: parsed.items };
+  } catch {
+    return initialState;
+  }
+}
+
+/**
+ * Persiste el carrito en localStorage. Falla en silencio si el storage
+ * no está disponible (SSR, modo privado sin soporte, cuota excedida, etc).
+ * @param {typeof initialState} state
+ */
+export function persistCart(state) {
+  if (!isBrowser()) return;
+
+  try {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Si falla la escritura (cuota excedida, storage deshabilitado, etc.)
+    // el carrito sigue funcionando en memoria durante la sesión.
+  }
+}
 
 /**
  * @param {{ costoEstimado?: number|null }} item
@@ -68,7 +111,11 @@ export function cartReducer(state, action) {
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, initialState, loadPersistedCart);
+
+  useEffect(() => {
+    persistCart(state);
+  }, [state]);
 
   const addTurn = useCallback((turn) => {
     dispatch({ type: ADD_TURN, payload: turn });
