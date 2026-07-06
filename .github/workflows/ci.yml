@@ -28,10 +28,18 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Iniciar MongoDB en modo Replica Set (Para Transacciones ACID)
+      - name: Iniciar MongoDB en modo Replica Set
+        if: matrix.package == 'backend' && matrix.task == 'test'
         run: |
           docker run -d -p 27017:27017 --name mongodb-ci mongo:6.0 --replSet rs0
-          sleep 3
+
+          echo "Esperando a que el motor de MongoDB arranque..."
+          until docker exec mongodb-ci mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
+            echo "Aguardando 1 segundo..."
+            sleep 1
+          done
+
+          echo "MongoDB listo. Inicializando Replica Set..."
           docker exec mongodb-ci mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
 
       - name: Instalar Dependencias
@@ -59,11 +67,18 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Iniciar MongoDB en modo Replica Set (Para Transacciones ACID)
+      - name: Iniciar MongoDB en modo Replica Set
         run: |
-          docker run -d -p 27017:27017 --name mongodb-e2e mongo:6.0 --replSet rs0
-          sleep 3
-          docker exec mongodb-e2e mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
+          docker run -d -p 27017:27017 --name mongodb-ci mongo:6.0 --replSet rs0
+
+          echo "Esperando a que el motor de MongoDB arranque..."
+          until docker exec mongodb-ci mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
+            echo "Aguardando 1 segundo..."
+            sleep 1
+          done
+
+          echo "MongoDB listo. Inicializando Replica Set..."
+          docker exec mongodb-ci mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
 
       - name: Instalar Dependencias del Monorepo
         run: npm ci
