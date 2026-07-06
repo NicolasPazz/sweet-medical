@@ -30,6 +30,7 @@
     "test:backend": "npm test -w @sweet-medical/backend",
     "test:backend:verbose": "npm test -w @sweet-medical/backend -- --verbose",
     "test:backend:silent": "npm test -w @sweet-medical/backend -- --silent",
+    "test:backend:integracion": "npm test -w @sweet-medical/backend -- ServicioController.integration.test.js",
     "test:frontend": "npm test -w @sweet-medical/frontend",
     "test:frontend:verbose": "npm test -w @sweet-medical/frontend -- --verbose",
     "test:frontend:silent": "npm test -w @sweet-medical/frontend -- --silent",

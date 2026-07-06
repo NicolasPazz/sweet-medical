@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "test:e2e": "npm run cypress:run"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
