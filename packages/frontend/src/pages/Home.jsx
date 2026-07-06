@@ -5,7 +5,6 @@ import './Home.css';
 
 export default function Home() {
   const manejarBusqueda = (termino) => {
-    console.log('Buscando turnos para:', termino);
     // fetch(`/api/turnos?q=${termino}`)
   };
 

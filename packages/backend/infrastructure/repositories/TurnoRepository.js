@@ -53,16 +53,16 @@ export class TurnoRepository {
   }
 
   // CREAR
-  async save(turno) {
+  async save(turno, session = null) {
     const id = turno.id || turno._id;
 
     if (id) {
-      return await this.update(id, turno);
+      return await this.update(id, turno, session);
     }
 
     const nuevoTurno = new this.model(turno);
     nuevoTurno.slotsAsociados = (turno.slotsAsociados || []).map((s) => s._id || s.id || s);
-    return await nuevoTurno.save();
+    return await nuevoTurno.save({ session });
   }
 
   async saveAll(turnos) {
@@ -70,7 +70,7 @@ export class TurnoRepository {
   }
 
   // ACTUALIZAR
-  async update(id, datosActualizados) {
+  async update(id, datosActualizados, session = null) {
     const estadoLimpio = this._obtenerStringEstado(datosActualizados.estado);
 
     const payload = datosActualizados._doc
@@ -82,7 +82,7 @@ export class TurnoRepository {
       (s) => s._id || s.id || s,
     );
 
-    return await this.model.findByIdAndUpdate(id, payload, { new: true });
+    return await this.model.findByIdAndUpdate(id, payload, { new: true, session });
   }
 
   // ELIMINAR

@@ -29,7 +29,18 @@ export class MongoDBClient {
     });
 
     try {
-      const connectionString = `${MONGODB_URI}/${MONGODB_DB_NAME}?authSource=admin`;
+      // Query params armados dinámicamente: `authSource=admin` siempre, y
+      // `replicaSet` solo si se definió MONGODB_REPLICA_SET (típicamente para
+      // desarrollo local, donde convertimos el mongod standalone en un
+      // Replica Set de 1 nodo para poder usar transacciones). En Atlas no
+      // hace falta: el replicaSet ya viene indicado en la propia URI
+      // `mongodb+srv://...`.
+      const queryParams = new URLSearchParams({ authSource: 'admin' });
+      if (process.env.MONGODB_REPLICA_SET) {
+        queryParams.set('replicaSet', process.env.MONGODB_REPLICA_SET);
+      }
+
+      const connectionString = `${MONGODB_URI}/${MONGODB_DB_NAME}?${queryParams.toString()}`;
       await mongoose.connect(connectionString);
 
       logger.info(`[MongoDB] conectado a ${mongoose.connection.host}`);

@@ -31,23 +31,59 @@ export class SlotRepository {
     });
   }
 
+  // CONCURRENCIA: operación atómica de check-and-set. Solo transiciona el
+  // slot a RESERVADO si en el momento exacto del update su estado en la DB
+  // sigue siendo DISPONIBLE. Esto evita la race condition de "leer
+  // DISPONIBLE -> reservar" cuando dos requests piden el mismo slot al mismo
+  // tiempo: Mongo garantiza atomicidad a nivel documento en findOneAndUpdate,
+  // así que solo uno de los dos requests puede ganar. El que pierde recibe
+  // `null` y debe tratarlo como conflicto (slot ya tomado).
+  async reservarSiDisponible(id, session = null) {
+    return await this.model.findOneAndUpdate(
+      { _id: id, estado: 'DISPONIBLE' },
+      { $set: { estado: 'RESERVADO' } },
+      { new: true, session },
+    );
+  }
+
+  // Segundo paso atómico, separado de reservarSiDisponible: una vez que el
+  // Turno ya tiene _id (recién se guarda en ese momento), asociamos el slot
+  // al turno sin volver a tocar el campo `estado` (ya quedó en RESERVADO).
+  async asignarTurnoAsociado(id, turnoId, session = null) {
+    return await this.model.findByIdAndUpdate(
+      id,
+      { $set: { turnoAsociado: turnoId } },
+      { new: true, session },
+    );
+  }
+
+  // Operación atómica inversa a reservarSiDisponible, para cancelaciones /
+  // liberación de slots.
+  async liberarSlot(id, session = null) {
+    return await this.model.findByIdAndUpdate(
+      id,
+      { $set: { estado: 'DISPONIBLE', turnoAsociado: null } },
+      { new: true, session },
+    );
+  }
+
   // CREAR / ACTUALIZAR
-  async save(slot) {
+  async save(slot, session = null) {
     const id = slot.id || slot._id;
 
     if (id) {
-      return await this.update(id, slot);
+      return await this.update(id, slot, session);
     }
 
     const nuevoSlot = new this.model(slot);
-    return await nuevoSlot.save();
+    return await nuevoSlot.save({ session });
   }
 
   async saveAll(slots) {
     return await this.model.insertMany(slots);
   }
 
-  async update(id, datosActualizados) {
+  async update(id, datosActualizados, session = null) {
     let sedeUpdate = null;
     if (datosActualizados.sede) {
       sedeUpdate = {
@@ -65,7 +101,7 @@ export class SlotRepository {
           sede: sedeUpdate,
         },
       },
-      { new: true },
+      { new: true, session },
     );
   }
 

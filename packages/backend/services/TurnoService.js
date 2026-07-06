@@ -67,7 +67,6 @@ export class TurnoService {
     let cont = 0;
     let slots = [];
     for (const id_slot of dtoReserva.slotsIds) {
-      console.log('cont: ' + cont);
       cont = cont + 1;
       ValidadorId.validarIds(id_slot);
       const slot = await this.slotRepository.findById(id_slot);
@@ -136,8 +135,6 @@ export class TurnoService {
       );
     }
 
-    slotsAOcupar.forEach((s) => (s.estado = 'RESERVADO'));
-
     const turno = new Turno(
       medico,
       paciente,
@@ -148,28 +145,56 @@ export class TurnoService {
       servicio.costo,
     );
 
-    console.log('ENTRO A MOTOR COSTOS DESDE RESERVAR TURNO');
-
     const { costoEstimado } = MotorCostos.calcularPara(turno, paciente);
 
     turno.costo = costoEstimado;
-
-    console.log('ESTE ES EL COSTO DIVERTIDO: ', turno.costo);
 
     turno.slotsAsociados.push(...slotsAOcupar);
 
     const notificacion = turno.actualizarEstado(usuario, new Reservado(turno), 'Reserva de turno');
 
+    // --- SECCIÓN CRÍTICA DE CONCURRENCIA ---
+    // Todo lo anterior son lecturas, potencialmente desactualizadas si otro
+    // request reservó el mismo slot entre medio. La garantía real de que no
+    // haya doble reserva se aplica acá: cada slot se marca RESERVADO con una
+    // operación atómica condicionada (`reservarSiDisponible`), que solo tiene
+    // éxito si en la base de datos el slot sigue estando DISPONIBLE en ese
+    // instante exacto. Todo el bloque corre dentro de una transacción de
+    // Mongo (requiere Replica Set, que es lo que provee Atlas) para que la
+    // reserva de los slots y la creación del turno sean atómicas entre sí: o
+    // se aplican todos los cambios, o no se aplica ninguno.
+    const session = await mongoose.startSession();
+    let turnoGuardado;
+    try {
+      await session.withTransaction(async () => {
+        for (const slotAOcupar of slotsAOcupar) {
+          const idSlot = slotAOcupar.id || slotAOcupar._id;
+          const slotReservado = await this.slotRepository.reservarSiDisponible(idSlot, session);
+          if (slotReservado == null) {
+            // Otro request se adelantó y ya tomó este slot entre que lo
+            // leímos más arriba y este punto: abortamos toda la
+            // transacción, ningún cambio queda aplicado.
+            throw new ConflictError(
+              `El slot con ID ${idSlot} ya no está disponible para reserva`,
+            );
+          }
+        }
+
+        turnoGuardado = await this.turnoRepository.save(turno, session);
+
+        const turnoId = turnoGuardado.id || turnoGuardado._id;
+
+        for (const slotAOcupar of slotsAOcupar) {
+          const idSlot = slotAOcupar.id || slotAOcupar._id;
+          await this.slotRepository.asignarTurnoAsociado(idSlot, turnoId, session);
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
+
     if (notificacion) {
       await this.notificacionService.save(notificacion);
-    }
-    const turnoGuardado = await this.turnoRepository.save(turno);
-
-    const turnoId = turnoGuardado.id || turnoGuardado._id;
-
-    for (const slotAOcupar of slotsAOcupar) {
-      slotAOcupar.turnoAsociado = turnoId;
-      await this.slotRepository.save(slotAOcupar);
     }
 
     return;
@@ -691,9 +716,9 @@ export class TurnoService {
       // Contrato unificado: misma estructura exacta que el slot
       sede: tieneSedeValida
         ? {
-            id_sede: t.sede._id ? t.sede._id.toString() : null,
-            nombre: t.sede.nombre || 'N/A',
-          }
+          id_sede: t.sede._id ? t.sede._id.toString() : null,
+          nombre: t.sede.nombre || 'N/A',
+        }
         : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
@@ -719,11 +744,11 @@ export class TurnoService {
       propuestaCambio:
         t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
           ? {
-              nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
-              nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
-              motivo: t.propuestaCambio.motivo,
-              proponenteId: t.propuestaCambio.proponenteId,
-            }
+            nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+            nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+            motivo: t.propuestaCambio.motivo,
+            proponenteId: t.propuestaCambio.proponenteId,
+          }
           : null,
     };
   }
@@ -741,9 +766,9 @@ export class TurnoService {
       estado: s.estado,
       sede: tieneSedeValida
         ? {
-            id_sede: s.sede._id ? s.sede._id.toString() : null,
-            nombre: s.sede.nombre || 'N/A',
-          }
+          id_sede: s.sede._id ? s.sede._id.toString() : null,
+          nombre: s.sede.nombre || 'N/A',
+        }
         : null,
 
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
@@ -759,14 +784,9 @@ export class TurnoService {
     if (turno && turno.estado) {
       // Opción 1: Obtener los métodos de su prototipo de instancia
       const metodos = Object.getOwnPropertyNames(Object.getPrototypeOf(turno.estado));
-      console.log('MÉTODOS DEL ESTADO:', metodos);
     } else {
-      console.log('El turno o su estado no están definidos.');
     }
 
-    console.log('turno.estado:', turno.estado);
-    console.log('¿Qué tipo de dato es?:', typeof turno.estado);
-    console.log('¿Tiene la función?:', typeof turno.estado.generarNotificacion);
 
     // 1. Validamos de forma segura el string del estado para evitar fallas de instanceof
     const nombreEstado =
@@ -1015,7 +1035,6 @@ export class TurnoService {
   async buscarTurnos(filtros, paciente, paginacion = {}, options = { paginar: true }) {
     const { page = 1, limit = 10, sortBy = 'costo', sortOrder = 'asc' } = paginacion;
 
-    console.log("Paciente: ", paciente);
 
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError(
@@ -1150,7 +1169,6 @@ export class TurnoService {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');
     }
 
-    console.log("Paciente: ", paciente);
 
     const turnosDisponibles = await this.buscarTurnos(filtros, paciente, {}, { paginar: false });
     const fechas = [...new Set(turnosDisponibles.map((t) => t.fecha))].filter((f) => f);
@@ -1159,7 +1177,6 @@ export class TurnoService {
 
   async buscarHorariosDisponibles(filtros, paciente) {
 
-    console.log("Paciente: ", paciente);
 
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');

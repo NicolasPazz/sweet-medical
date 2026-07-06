@@ -70,10 +70,9 @@ export class PacienteService {
   }
 
   async obtenerHistorialTurnos(paciente) {
-    console.log('paciente: ' + paciente.id);
 
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
-    
+
     const turnosFormateados = turnos.map((t) => {
       const esPractica = !!t.servicio?.codigo;
       // 'esTipo' ya no se parchea acá: ahora vive directamente en el sub-schema
@@ -98,18 +97,18 @@ export class PacienteService {
 
       const historialTurnos = Array.isArray(t.historialEstados)
         ? t.historialEstados.map((h) => ({
-            id_cambio: h._id || h.id,
-            fechaHoraIngreso: h.fechaHoraIngreso,
-            estado: h.estado,
-            motivo: h.motivo,
-            usuario: h.usuario
-              ? {
-                  id: h.usuario._id || h.usuario.id || h.usuario,
-                  nombre: h.usuario.nombre || null,
-                  email: h.usuario.email || null,
-                }
-              : null,
-          }))
+          id_cambio: h._id || h.id,
+          fechaHoraIngreso: h.fechaHoraIngreso,
+          estado: h.estado,
+          motivo: h.motivo,
+          usuario: h.usuario
+            ? {
+              id: h.usuario._id || h.usuario.id || h.usuario,
+              nombre: h.usuario.nombre || null,
+              email: h.usuario.email || null,
+            }
+            : null,
+        }))
         : [];
 
       return {
@@ -152,11 +151,11 @@ export class PacienteService {
         propuestaCambio:
           t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
             ? {
-                nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
-                nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
-                motivo: t.propuestaCambio.motivo,
-                proponenteId: t.propuestaCambio.proponenteId,
-              }
+              nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+              nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+              motivo: t.propuestaCambio.motivo,
+              proponenteId: t.propuestaCambio.proponenteId,
+            }
             : null,
       };
     });
@@ -169,7 +168,6 @@ export class PacienteService {
       obraSocial: paciente.obraSocial ? paciente.obraSocial.nombre : 'N/A',
       plan: paciente.plan ? paciente.plan.nombre : 'N/A',
     };
-    console.log('TURNOS FORMATEADOS: ' + turnosFormateados);
     return {
       paciente: pacienteFormateado,
       turnos: turnosFormateados,

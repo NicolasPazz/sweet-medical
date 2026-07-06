@@ -212,7 +212,6 @@ export default function HistorialPaciente() {
     const trimmed = dni.trim();
     if (!trimmed) return;
 
-    console.log(trimmed + '...' + dni);
 
     setEstado('searching');
     // Simula latencia de búsqueda
@@ -220,8 +219,6 @@ export default function HistorialPaciente() {
     try {
       const data = await getHistorialPacienteByMedico({ email, password, dni: trimmed });
 
-      console.log(data.data.paciente);
-      console.log(data.data.turnos);
       if (!data.data.paciente) {
         setEstado('not_found');
         setPacienteEncontrado(null);

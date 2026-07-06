@@ -15,11 +15,59 @@ const app = express();
 
 // --- Middlewares Globales ---
 app.use(express.json());
+
+// CORS: además de orígenes exactos, soportamos patrones con wildcard (ej:
+// "https://*.devtunnels.ms") para que compartir el proyecto vía VS Code Port
+// Forwarding (o GitHub Codespaces) funcione sin tener que editar el .env cada
+// vez que se genera un subdominio nuevo de túnel.
+//
+// IMPORTANTE: process.env.ALLOWED_ORIGINS se lee una sola vez, al arrancar
+// el proceso (vía dotenv). Si editás el .env con el server ya corriendo,
+// hace falta reiniciar el proceso (`npm run dev` de nuevo) para que tome el
+// valor nuevo: `node --watch` reinicia ante cambios en archivos .js, pero no
+// releé el .env por sí solo.
+function construirValidadorDeOrigenes(origenesPermitidos) {
+  const patrones = origenesPermitidos.map((entrada) => {
+    if (!entrada.includes('*')) return entrada;
+
+    // Escapamos los caracteres especiales de regex y reemplazamos el
+    // wildcard '*' por '.*', todo en un solo paso con String.replace +
+    // callback (evita reusar una regex global con .test() en un loop, que
+    // en JS arrastra estado entre llamadas vía lastIndex y da resultados
+    // inconsistentes).
+    const escapado = entrada.replace(/[.+?^${}()|[\]\\]|\*/g, (m) =>
+      m === '*' ? '.*' : `\\${m}`,
+    );
+    return new RegExp(`^${escapado}$`);
+  });
+
+  return function validarOrigen(origin, callback) {
+    // Sin header Origin (curl, Postman, llamadas server-to-server): no es
+    // una request de navegador sujeta a CORS, se deja pasar.
+    if (!origin) return callback(null, true);
+
+    const permitido = patrones.some((patron) =>
+      typeof patron === 'string' ? patron === origin : patron.test(origin),
+    );
+
+    if (permitido) return callback(null, true);
+
+    logger.warn(`[CORS] Origen rechazado: ${origin}`);
+    return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+  };
+}
+
+const origenesPermitidos = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
+logger.info(`[CORS] Orígenes permitidos: ${origenesPermitidos.join(', ')}`);
+
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-      : true,
+    origin: construirValidadorDeOrigenes(origenesPermitidos),
   }),
 );
 

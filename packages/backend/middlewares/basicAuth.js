@@ -64,9 +64,7 @@ export async function basicAuthAdmin(req, res, next) {
 export async function basicAuthUser(req, res, next) {
   try {
     const usuario = await resolverUsuario(req);
-    console.log('Usuario autenticado en basic auth: ', usuario);
     req.usuarioAutenticado = usuario;
-    console.log('Usuario2 autenticado en basic auth: ', usuario);
     next();
   } catch (error) {
     next(error);

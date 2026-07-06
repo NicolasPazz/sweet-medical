@@ -53,12 +53,10 @@ export class ServicioRepository {
 
   // ACTUALIZAR
   async updateEspecialidad(id, updatedData) {
-    logger.debug('VOY A UPDATEAAAR');
     return await this.especialidadRepository.update(id, updatedData);
   }
 
   async updatePractica(id, updatedData) {
-    logger.debug('VOY A UPDATEAAAR');
     return await this.practicaRepository.update(id, updatedData);
   }
 
