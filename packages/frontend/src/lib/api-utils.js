@@ -7,7 +7,10 @@ const BACKEND_PORT = 3001;
 // Forwarding o GitHub Codespaces. Formatos típicos:
 //   VS Code Dev Tunnels:  <id>-3000.<region>.devtunnels.ms
 //   GitHub Codespaces:    <id>-3000.app.github.dev
-const PATRONES_TUNEL = [/^(.+)-(\d+)(\.[\w.-]*devtunnels\.ms)$/, /^(.+)-(\d+)(\.app\.github\.dev)$/];
+const PATRONES_TUNEL = [
+  /^(.+)-(\d+)(\.[\w.-]*devtunnels\.ms)$/,
+  /^(.+)-(\d+)(\.app\.github\.dev)$/,
+];
 
 /**
  * Si la app se está sirviendo desde un túnel (VS Code Port Forwarding o

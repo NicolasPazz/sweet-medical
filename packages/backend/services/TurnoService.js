@@ -174,9 +174,7 @@ export class TurnoService {
             // Otro request se adelantó y ya tomó este slot entre que lo
             // leímos más arriba y este punto: abortamos toda la
             // transacción, ningún cambio queda aplicado.
-            throw new ConflictError(
-              `El slot con ID ${idSlot} ya no está disponible para reserva`,
-            );
+            throw new ConflictError(`El slot con ID ${idSlot} ya no está disponible para reserva`);
           }
         }
 
@@ -716,9 +714,9 @@ export class TurnoService {
       // Contrato unificado: misma estructura exacta que el slot
       sede: tieneSedeValida
         ? {
-          id_sede: t.sede._id ? t.sede._id.toString() : null,
-          nombre: t.sede.nombre || 'N/A',
-        }
+            id_sede: t.sede._id ? t.sede._id.toString() : null,
+            nombre: t.sede.nombre || 'N/A',
+          }
         : null,
 
       servicio_id: t.servicio ? (t.servicio._id ? t.servicio._id : 'N/A') : 'N/A',
@@ -744,11 +742,11 @@ export class TurnoService {
       propuestaCambio:
         t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
           ? {
-            nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
-            nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
-            motivo: t.propuestaCambio.motivo,
-            proponenteId: t.propuestaCambio.proponenteId,
-          }
+              nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+              nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+              motivo: t.propuestaCambio.motivo,
+              proponenteId: t.propuestaCambio.proponenteId,
+            }
           : null,
     };
   }
@@ -766,9 +764,9 @@ export class TurnoService {
       estado: s.estado,
       sede: tieneSedeValida
         ? {
-          id_sede: s.sede._id ? s.sede._id.toString() : null,
-          nombre: s.sede.nombre || 'N/A',
-        }
+            id_sede: s.sede._id ? s.sede._id.toString() : null,
+            nombre: s.sede.nombre || 'N/A',
+          }
         : null,
 
       id_turno_asociado: s.turnoAsociado ? s.turnoAsociado.toString() : null,
@@ -784,9 +782,7 @@ export class TurnoService {
     if (turno && turno.estado) {
       // Opción 1: Obtener los métodos de su prototipo de instancia
       const metodos = Object.getOwnPropertyNames(Object.getPrototypeOf(turno.estado));
-    } else {
     }
-
 
     // 1. Validamos de forma segura el string del estado para evitar fallas de instanceof
     const nombreEstado =
@@ -1035,7 +1031,6 @@ export class TurnoService {
   async buscarTurnos(filtros, paciente, paginacion = {}, options = { paginar: true }) {
     const { page = 1, limit = 10, sortBy = 'costo', sortOrder = 'asc' } = paginacion;
 
-
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError(
         'Debe especificar una especialidad o práctica para calcular la disponibilidad.',
@@ -1169,15 +1164,12 @@ export class TurnoService {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');
     }
 
-
     const turnosDisponibles = await this.buscarTurnos(filtros, paciente, {}, { paginar: false });
     const fechas = [...new Set(turnosDisponibles.map((t) => t.fecha))].filter((f) => f);
     return { fechas };
   }
 
   async buscarHorariosDisponibles(filtros, paciente) {
-
-
     if (!filtros.especialidad && !filtros.practica) {
       throw new BadRequestError('Debe especificar una especialidad o práctica.');
     }

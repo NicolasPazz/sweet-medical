@@ -4,7 +4,6 @@ import { t } from '../../utils/i18n/i18n.js'; // <-- Cambiado a 't' para unifica
 
 export class FactoryNotificacion {
   static crearSegunEstadoTurno(usuario, turno, motivo) {
-
     return turno.estado.generarNotificacion(usuario, motivo);
   }
 

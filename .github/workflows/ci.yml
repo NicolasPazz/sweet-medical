@@ -15,12 +15,6 @@ jobs:
     name: ${{ matrix.package }} (${{ matrix.task }})
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +28,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Iniciar MongoDB en modo Replica Set (Para Transacciones ACID)
+        run: |
+          docker run -d -p 27017:27017 --name mongodb-ci mongo:6.0 --replSet rs0
+          sleep 3
+          docker exec mongodb-ci mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
+
       - name: Instalar Dependencias
         run: npm ci
 
@@ -41,18 +41,13 @@ jobs:
         env:
           MONGODB_URI: 'mongodb://127.0.0.1:27017'
           MONGODB_DB_NAME: 'sweetmedical_ci_test'
+          MONGODB_REPLICA_SET: 'rs0'
         run: npm run ${{ matrix.task }}:${{ matrix.package }}
 
   e2e-tests:
     needs: verify-app
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
 
     steps:
       - name: Checkout Código
@@ -63,6 +58,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Iniciar MongoDB en modo Replica Set (Para Transacciones ACID)
+        run: |
+          docker run -d -p 27017:27017 --name mongodb-e2e mongo:6.0 --replSet rs0
+          sleep 3
+          docker exec mongodb-e2e mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
 
       - name: Instalar Dependencias del Monorepo
         run: npm ci
@@ -85,6 +86,7 @@ jobs:
           BASE_URL: 'http://localhost:3000'
           MONGODB_URI: 'mongodb://127.0.0.1:27017'
           MONGODB_DB_NAME: 'sweetmedical_ci_test'
+          MONGODB_REPLICA_SET: 'rs0'
           CYPRESS_E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
           CYPRESS_E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
 

@@ -100,7 +100,6 @@ export class AdminService {
       throw new BadRequestError('matricula es obligatoria para crear un Médico');
     }
 
-
     if (rolesNormalizados.includes('PACIENTE') && (!obraSocial || !plan)) {
       throw new BadRequestError('Debe indicarse obra social y plan');
     }

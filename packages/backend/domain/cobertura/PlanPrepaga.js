@@ -10,7 +10,6 @@ export class PlanPrepaga extends Plan {
   calcularCosto(prestacion, tipo) {
     let nivel = NivelCobertura.NO_CUBIERTA;
 
-
     if (tipo === 'ESPECIALIDAD') {
       nivel = this.obtenerCoberturaPorEspecialidad(prestacion) || NivelCobertura.NO_CUBIERTA;
     } else if (tipo === 'PRACTICA') {

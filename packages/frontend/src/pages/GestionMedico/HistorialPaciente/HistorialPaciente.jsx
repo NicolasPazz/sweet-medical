@@ -212,7 +212,6 @@ export default function HistorialPaciente() {
     const trimmed = dni.trim();
     if (!trimmed) return;
 
-
     setEstado('searching');
     // Simula latencia de búsqueda
 

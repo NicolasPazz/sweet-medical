@@ -14,8 +14,6 @@ export class TurnoController {
     try {
       const dtoReserva = req.body;
 
-
-
       ValidadorId.validarIds(req.usuarioAutenticado.id);
       ValidadorId.validarIds(dtoReserva.id_servicio);
 
@@ -403,12 +401,8 @@ export class TurnoController {
         const usuario = req.usuarioAutenticado;
         let paciente;
 
-
         if (usuario && usuario.roles.includes('PACIENTE')) {
-
-
           paciente = await this.pacienteService.findByIdUsuario(usuario.id);
-
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
@@ -440,12 +434,8 @@ export class TurnoController {
         const usuario = req.usuarioAutenticado;
         let paciente;
 
-
         if (usuario && usuario.roles.includes('PACIENTE')) {
-
-
           paciente = await this.pacienteService.findByIdUsuario(usuario.id);
-
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');
@@ -483,11 +473,8 @@ export class TurnoController {
         const usuario = req.usuarioAutenticado;
         let paciente;
 
-
         if (usuario && usuario.roles.includes('PACIENTE')) {
-
           paciente = await this.pacienteService.findByIdUsuario(usuario.id);
-
 
           if (!paciente) {
             throw new BadRequestError('Paciente no encontrado con el ID proporcionado');

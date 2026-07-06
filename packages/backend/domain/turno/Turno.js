@@ -70,7 +70,6 @@ export class Turno {
       proponenteId: usuario.id || usuario._id,
     };
 
-
     const notificacion = this.actualizarEstado(
       usuario,
       new PendienteReprogramacion(this),

@@ -196,18 +196,18 @@ export default function HistorialTurnos() {
         prev.map((t) =>
           t._id === turnoSeleccionado._id
             ? {
-              ...t,
-              estado: 'PENDIENTE_REPROGRAMACION',
-              propuestaCambio: {
-                nuevaFechaHora,
-                nuevaHora: hora,
-                motivo,
-                // Mismo problema que del lado del médico: sin proponenteId
-                // acá, el propio paciente veía sus botones de Aceptar/Rechazar
-                // apenas proponía el cambio, hasta el próximo refresh.
-                proponenteId: user?.id,
-              },
-            }
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Mismo problema que del lado del médico: sin proponenteId
+                  // acá, el propio paciente veía sus botones de Aceptar/Rechazar
+                  // apenas proponía el cambio, hasta el próximo refresh.
+                  proponenteId: user?.id,
+                },
+              }
             : t,
         ),
       );

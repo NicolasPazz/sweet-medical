@@ -285,21 +285,21 @@ export default function HistorialTurnosMedico() {
         prev.map((t) =>
           t._id === idTurno
             ? {
-              ...t,
-              estado: 'PENDIENTE_REPROGRAMACION',
-              propuestaCambio: {
-                nuevaFechaHora,
-                nuevaHora: hora,
-                motivo,
-                // Antes no se guardaba quién propuso el cambio en la
-                // actualización optimista local (solo se persistía en el
-                // backend). Resultándo: hasta el próximo refresh, el propio
-                // médico que acababa de proponer la reprogramación veía sus
-                // propios botones de Aceptar/Rechazar, porque `proponenteId`
-                // era `undefined` y nunca coincidía con `usuarioId`.
-                proponenteId: user?.id,
-              },
-            }
+                ...t,
+                estado: 'PENDIENTE_REPROGRAMACION',
+                propuestaCambio: {
+                  nuevaFechaHora,
+                  nuevaHora: hora,
+                  motivo,
+                  // Antes no se guardaba quién propuso el cambio en la
+                  // actualización optimista local (solo se persistía en el
+                  // backend). Resultándo: hasta el próximo refresh, el propio
+                  // médico que acababa de proponer la reprogramación veía sus
+                  // propios botones de Aceptar/Rechazar, porque `proponenteId`
+                  // era `undefined` y nunca coincidía con `usuarioId`.
+                  proponenteId: user?.id,
+                },
+              }
             : t,
         ),
       );

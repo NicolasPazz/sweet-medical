@@ -35,9 +35,7 @@ function construirValidadorDeOrigenes(origenesPermitidos) {
     // callback (evita reusar una regex global con .test() en un loop, que
     // en JS arrastra estado entre llamadas vía lastIndex y da resultados
     // inconsistentes).
-    const escapado = entrada.replace(/[.+?^${}()|[\]\\]|\*/g, (m) =>
-      m === '*' ? '.*' : `\\${m}`,
-    );
+    const escapado = entrada.replace(/[.+?^${}()|[\]\\]|\*/g, (m) => (m === '*' ? '.*' : `\\${m}`));
     return new RegExp(`^${escapado}$`);
   });
 

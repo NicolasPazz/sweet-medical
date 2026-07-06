@@ -105,7 +105,6 @@ export const actualizarDisponibilidad = async ({ email, password, disponibilidad
 };
 
 export const getHistorialPacienteByMedico = async ({ email, password, dni }) => {
-
   const response = await axios.get(`${getApiBaseUrl()}/pacientes/${dni}/turnos`, {
     headers: headers(email, password),
   });

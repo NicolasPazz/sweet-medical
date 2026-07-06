@@ -933,7 +933,7 @@ export default function AgendarTurno() {
                     <p className="wizard-subtitle">
                       Revisá los detalles de tus turnos preseleccionados antes de guardarlos
                     </p>
-                  </div>  
+                  </div>
                 </div>
                 <div className="card-body">
                   {cartItems.map((item, index) => (

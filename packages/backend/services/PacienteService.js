@@ -70,7 +70,6 @@ export class PacienteService {
   }
 
   async obtenerHistorialTurnos(paciente) {
-
     const turnos = await this.turnoRepository.findAllByPatientId(paciente.id || paciente._id);
 
     const turnosFormateados = turnos.map((t) => {
@@ -97,18 +96,18 @@ export class PacienteService {
 
       const historialTurnos = Array.isArray(t.historialEstados)
         ? t.historialEstados.map((h) => ({
-          id_cambio: h._id || h.id,
-          fechaHoraIngreso: h.fechaHoraIngreso,
-          estado: h.estado,
-          motivo: h.motivo,
-          usuario: h.usuario
-            ? {
-              id: h.usuario._id || h.usuario.id || h.usuario,
-              nombre: h.usuario.nombre || null,
-              email: h.usuario.email || null,
-            }
-            : null,
-        }))
+            id_cambio: h._id || h.id,
+            fechaHoraIngreso: h.fechaHoraIngreso,
+            estado: h.estado,
+            motivo: h.motivo,
+            usuario: h.usuario
+              ? {
+                  id: h.usuario._id || h.usuario.id || h.usuario,
+                  nombre: h.usuario.nombre || null,
+                  email: h.usuario.email || null,
+                }
+              : null,
+          }))
         : [];
 
       return {
@@ -151,11 +150,11 @@ export class PacienteService {
         propuestaCambio:
           t.propuestaCambio && t.propuestaCambio.nuevaFechaHora
             ? {
-              nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
-              nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
-              motivo: t.propuestaCambio.motivo,
-              proponenteId: t.propuestaCambio.proponenteId,
-            }
+                nuevaFechaHora: t.propuestaCambio.nuevaFechaHora,
+                nuevaHora: DateUtil.toHHMM(t.propuestaCambio.nuevaFechaHora),
+                motivo: t.propuestaCambio.motivo,
+                proponenteId: t.propuestaCambio.proponenteId,
+              }
             : null,
       };
     });
