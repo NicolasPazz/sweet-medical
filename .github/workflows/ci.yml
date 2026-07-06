@@ -47,6 +47,13 @@ jobs:
     needs: verify-app
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout Código
         uses: actions/checkout@v4
@@ -59,6 +66,12 @@ jobs:
 
       - name: Instalar Dependencias del Monorepo
         run: npm ci
+
+      - name: Instalar dependencias de sistema para Cypress (Act/Local)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0t64 libgbm1 libnss3 libasound2t64
+        continue-on-error: true
 
       - name: Ejecutar Pruebas E2E en Cypress
         uses: cypress-io/github-action@v6
