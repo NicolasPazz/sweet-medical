@@ -1,6 +1,6 @@
 import { pacienteRepository } from '../infrastructure/repositories/PacienteRepository.js';
 import { turnoRepository } from '../infrastructure/repositories/TurnoRepository.js';
-import { NotFoundError } from '../errors/AppError.js';
+import { NotFoundError, BadRequestError } from '../errors/AppError.js';
 import { MotorCostos } from '../domain/cobertura/MotorCostos.js';
 import { logger } from '../utils/logger.js';
 import { usuarioService } from './UsuarioService.js';
@@ -38,13 +38,37 @@ export class PacienteService {
       throw new Error('El usuario es obligatorio para crear un paciente');
     }
 
+    // Normalizamos '' (string vacío, lo que manda el <select> del front
+    // cuando no se elige nada) a null. obraSocial/plan son ObjectId en el
+    // schema: si les llega '' tal cual, Mongoose tira CastError al guardar
+    // en vez de guardar "sin obra social" como corresponde.
+    const obraSocialNormalizada = obraSocial || null;
+    const planNormalizado = plan || null;
+
+    // Regla de negocio: obraSocial y plan van siempre juntos (los dos o
+    // ninguno). No existe un "plan sin obra social" (el plan siempre
+    // pertenece a una obra social específica) ni una "obra social sin plan"
+    // (si el paciente tiene obra social, tiene que tener un plan de esa obra
+    // social elegido).
+    if (!obraSocialNormalizada && planNormalizado) {
+      throw new BadRequestError(
+        'No se puede seleccionar un plan sin indicar primero una obra social',
+      );
+    }
+
+    if (obraSocialNormalizada && !planNormalizado) {
+      throw new BadRequestError(
+        'Si se indica una obra social, también hay que seleccionar un plan',
+      );
+    }
+
     const usuarioId = usuario?._id ?? usuario?.id ?? usuario;
 
     return await this.pacienteRepository.save({
       usuario: usuarioId,
       nombre: nombre,
-      obraSocial: obraSocial,
-      plan: plan,
+      obraSocial: obraSocialNormalizada,
+      plan: planNormalizado,
     });
   }
 

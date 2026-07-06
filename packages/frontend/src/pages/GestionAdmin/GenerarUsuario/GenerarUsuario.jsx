@@ -82,8 +82,14 @@ export function GenerarUsuario() {
       nuevosErrores.matricula = !form.matricula.trim();
     }
     if (roles.paciente) {
-      nuevosErrores.obraSocial = !form.obraSocial;
-      nuevosErrores.plan = !form.plan;
+      // Regla: obra social y plan van siempre juntos (los dos o ninguno). El
+      // caso "plan sin obra social" ya es imposible por el `disabled` del
+      // select de abajo, pero lo validamos igual por robustez. Sí puede
+      // pasar el caso real: obra social elegida pero plan todavía vacío.
+      const tieneObraSocial = !!form.obraSocial;
+      const tienePlan = !!form.plan;
+      nuevosErrores.obraSocial = !tieneObraSocial && tienePlan;
+      nuevosErrores.plan = tieneObraSocial && !tienePlan;
     }
     setErrores(nuevosErrores);
     return !Object.values(nuevosErrores).some(Boolean);
@@ -207,7 +213,7 @@ export function GenerarUsuario() {
                 ))}
               </select>
               {errores.obraSocial && (
-                <span className="gu-error-text">La obra social es obligatoria.</span>
+                <span className="gu-error-text">No se puede elegir un plan sin obra social.</span>
               )}
 
               <label className="gu-label">Plan</label>
@@ -226,7 +232,11 @@ export function GenerarUsuario() {
                   </option>
                 ))}
               </select>
-              {errores.plan && <span className="gu-error-text">El plan es obligatorio.</span>}
+              {errores.plan && (
+                <span className="gu-error-text">
+                  Elegí un plan, o quitá la obra social si el paciente no tiene cobertura.
+                </span>
+              )}
             </>
           )}
 

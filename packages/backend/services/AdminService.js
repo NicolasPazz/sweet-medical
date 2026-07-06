@@ -100,9 +100,10 @@ export class AdminService {
       throw new BadRequestError('matricula es obligatoria para crear un Médico');
     }
 
-    if (rolesNormalizados.includes('PACIENTE') && (!obraSocial || !plan)) {
-      throw new BadRequestError('Debe indicarse obra social y plan');
-    }
+    // La validación de obraSocial/plan (el paciente puede no tener obra
+    // social, pero no puede tener un plan sin obra social) la hace
+    // pacienteService.crearPaciente, punto único para ambos flujos de alta
+    // de paciente (este endpoint y /admins/paciente).
 
     // Verificar que no exista usuario con ese DNI para esos roles
     for (const rol of rolesNormalizados) {
