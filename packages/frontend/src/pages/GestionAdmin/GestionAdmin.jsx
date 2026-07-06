@@ -30,6 +30,12 @@ const OPCIONES = [
     titulo: 'ABM de Sedes',
     descripcion: 'Alta, modificación y baja de las sedes de atención del sistema.',
   },
+  {
+    path: null,
+    icono: '🗓️',
+    titulo: 'Actualizar disponibilidades',
+    descripcion: 'Actualización de horarios de disponibilidad de todos los médicos',
+  },
 ];
 
 export function GestionAdmin() {
@@ -113,44 +119,42 @@ export function GestionAdmin() {
             Seleccioná una sección para administrar el sistema.
           </p>
 
-          <div style={{ marginTop: '16px' }}>
-            <button
-              className="ga-btn-batch" // Puedes agregar esta clase a tu CSS o dejar los estilos inline
-              onClick={handleActualizarDisponibilidades}
-              disabled={updatingBatch}
-              style={{
-                backgroundColor: '#271f92',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '6px',
-                cursor: updatingBatch ? 'not-allowed' : 'pointer',
-                opacity: updatingBatch ? 0.7 : 1,
-                fontWeight: 'bold',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {updatingBatch && <LoadingOutlined spin />}
-              {updatingBatch ? 'Actualizando...' : 'Actualizar disponibilidades'}
-            </button>
-          </div>
         </div>
 
 
         <div className="ga-grid">
-          {OPCIONES.map((op) => (
-            <button key={op.path} className="ga-card" onClick={() => navigate(op.path)}>
-              <div className="ga-card-icono">{op.icono}</div>
-              <div className="ga-card-titulo text-ellipsis">{op.titulo}</div>
-              <div className="ga-card-descripcion text-ellipsis-multiline">{op.descripcion}</div>
-              <div className="ga-card-arrow">→</div>
-            </button>
-          ))}
+          {OPCIONES.map((op, index) => {
+            // Verificamos si es la tarjeta del proceso batch para saber si aplicar estados de carga
+            const isBatchCard = !op.path;
+
+            return (
+              <button
+                key={op.path || `batch-${index}`}
+                className="ga-card"
+                disabled={isBatchCard && updatingBatch}
+                style={isBatchCard && updatingBatch ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+                onClick={() => {
+                  if (op.path) {
+                    navigate(op.path);
+                  } else {
+                    handleActualizarDisponibilidades();
+                  }
+                }}
+              >
+                <div className="ga-card-icono">
+                  {isBatchCard && updatingBatch ? <LoadingOutlined spin style={{ color: '#271f92' }} /> : op.icono}
+                </div>
+                <div className="ga-card-titulo text-ellipsis">
+                  {isBatchCard && updatingBatch ? 'Actualizando...' : op.titulo}
+                </div>
+                <div className="ga-card-descripcion text-ellipsis-multiline">{op.descripcion}</div>
+                <div className="ga-card-arrow">→</div>
+              </button>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
