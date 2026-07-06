@@ -1,0 +1,14 @@
+{
+  "name": "@sweet-medical/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "cypress": "^15.18.0",
+    "dotenv": "^17.4.2"
+  }
+}

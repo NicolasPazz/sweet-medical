@@ -12,6 +12,7 @@ export default defineConfig([
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
+      '**/e2e/**',
       '**/*.test.js',
       '**/*.test.jsx',
       '**/*.spec.js',
