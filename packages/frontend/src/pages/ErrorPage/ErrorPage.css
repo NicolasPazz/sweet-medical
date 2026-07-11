@@ -1,0 +1,107 @@
+.error-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8fafc; /* Un gris muy sutil de fondo */
+}
+
+.error-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 40px 30px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.error-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.error-view-icon {
+  font-size: 4rem;
+}
+
+/* Colores semánticos para diferenciar los errores */
+.triage-color {
+  color: #eab308; /* Amarillo/Dorado de advertencia */
+}
+
+.shield-color {
+  color: #ef4444; /* Rojo de restricción médica */
+}
+
+.error-code-text {
+  font-size: 5rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  color: #1e293b;
+  letter-spacing: -0.05em;
+}
+
+.error-title-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.error-message-text {
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  padding: 0 10px;
+}
+
+.error-actions-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+/* Estilos de Botones */
+.error-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary-error {
+  background-color: #0284c7; /* Celeste/Azul corporativo Sweet Medical */
+  color: #ffffff;
+  border: none;
+}
+
+.btn-primary-error:hover {
+  background-color: #0369a1;
+}
+
+.btn-secondary-error {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary-error:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}

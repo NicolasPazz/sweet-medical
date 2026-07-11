@@ -1,0 +1,207 @@
+import { Link } from 'react-router-dom';
+import {
+  FaCalendarAlt,
+  FaHistory,
+  FaBriefcaseMedical,
+  FaEnvelope,
+  FaArrowRight,
+  FaShieldAlt,
+  FaClock,
+  FaUserMd,
+} from 'react-icons/fa';
+import './Home.css';
+import { useAuth } from '../../components/AuthProvider.jsx';
+import { useState, useEffect } from 'react';
+import { getMe, getRolUsuario } from '../../services/userService.js';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+import { useModoVista } from '../../components/ModoVistaContext.jsx';
+
+const spinIcon = <LoadingOutlined style={{ fontSize: 28, color: '#271f92' }} spin />;
+
+export default function Home() {
+  const { email, password } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [multiplesFiltros, setMultiplesFiltros] = useState(false);
+  const { modo } = useModoVista(); // Estado para el modo de vista
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (email && password) {
+        try {
+          const data = await getMe({ email, password });
+          const roles = data.usuario?.roles ?? [];
+          const esMultiRol = roles.includes('PACIENTE') && roles.includes('MEDICO');
+
+          setMultiplesFiltros(esMultiRol);
+
+          if (esMultiRol) {
+            // Con múltiples roles no colapsamos a un único "rol": el nav se
+            // filtra más abajo según el switch (modo), no según el rol.
+            setUser({ roles });
+          } else {
+            setUser({ rol: getRolUsuario(roles) });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setMultiplesFiltros(false);
+          setUser(null);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setUser(null);
+        setMultiplesFiltros(false);
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [email, password]);
+
+  const rolVisible = multiplesFiltros
+    ? modo === 'modo-medico'
+      ? 'Médico'
+      : 'Paciente'
+    : user?.rol;
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
+        <Spin indicator={spinIcon} />
+        <span
+          className="text-ellipsis"
+          style={{ color: '#94a3b8', fontFamily: 'Roboto Mono, monospace', fontSize: 13 }}
+        >
+          Cargando...
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="home-container">
+      {/* Hero */}
+      <section className="home-hero">
+        <div className="home-hero-badge text-ellipsis">Plataforma de salud digital</div>
+        <h1 className="home-title text-ellipsis">
+          Bienvenido a <span>Sweet Medical</span>
+        </h1>
+        <p className="home-subtitle text-ellipsis-multiline">
+          Gestioná tus turnos, revisá tu historial médico y accedé a todos los servicios de salud en
+          un solo lugar.
+        </p>
+        <div className="home-hero-cta">
+          {rolVisible === 'Paciente' && (
+            <Link to="/solicitar-turno" className="cta-primary text-ellipsis">
+              <FaCalendarAlt /> Agendar turno
+            </Link>
+          )}
+          {/*
+          {rolVisible === 'Médico' && (
+            <Link to="/historial-medico" className="cta-secondary text-ellipsis">
+              Ver historial <FaArrowRight />
+            </Link>
+          )*/}
+
+          {rolVisible === 'Médico' && (
+            <Link to="/gestion-medico" className="cta-secondary text-ellipsis">
+              Gestión médica <FaArrowRight />
+            </Link>
+          )}
+        </div>
+      </section>
+
+      {/* Cards de acceso rápido */}
+      <section className="home-cards">
+        {rolVisible === 'Paciente' && (
+          <Link to="/solicitar-turno" className="home-card home-card--accent">
+            <div className="home-card-icon">
+              <FaCalendarAlt />
+            </div>
+            <div className="home-card-body">
+              <span className="home-card-title text-ellipsis">Agendar Turno</span>
+              <span className="home-card-desc text-ellipsis">
+                Elegí servicio, médico y horario disponible
+              </span>
+            </div>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
+        )}
+
+        {rolVisible === 'Paciente' && (
+          <Link to="/historial-medico" className="home-card">
+            <div className="home-card-icon">
+              <FaHistory />
+            </div>
+            <div className="home-card-body">
+              <span className="home-card-title text-ellipsis">Historial Médico</span>
+              <span className="home-card-desc text-ellipsis">
+                Revisá tus turnos y consultas anteriores
+              </span>
+            </div>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
+        )}
+        {rolVisible === 'Médico' && (
+          <Link to="/gestion-medico" className="home-card">
+            <div className="home-card-icon">
+              <FaBriefcaseMedical />
+            </div>
+            <div className="home-card-body">
+              <span className="home-card-title text-ellipsis">Gestión médica</span>
+              <span className="home-card-desc text-ellipsis">
+                Administrá tus actividades como médico
+              </span>
+            </div>
+            <FaArrowRight className="home-card-arrow" />
+          </Link>
+        )}
+        <Link to="/contact" className="home-card">
+          <div className="home-card-icon">
+            <FaEnvelope />
+          </div>
+          <div className="home-card-body">
+            <span className="home-card-title text-ellipsis">Contacto</span>
+            <span className="home-card-desc text-ellipsis">Comunicate con nuestro equipo</span>
+          </div>
+          <FaArrowRight className="home-card-arrow" />
+        </Link>
+      </section>
+
+      {/* Features */}
+      <section className="home-features">
+        <div className="home-feature">
+          <FaShieldAlt className="home-feature-icon" />
+          <h3 className="text-ellipsis">Datos seguros</h3>
+          <p className="text-ellipsis-multiline">
+            Tu información médica está protegida y solo accesible por vos.
+          </p>
+        </div>
+        <div className="home-feature">
+          <FaClock className="home-feature-icon" />
+          <h3 className="text-ellipsis">Turnos 24/7</h3>
+          <p className="text-ellipsis-multiline">
+            Agendá en cualquier momento sin necesidad de llamar.
+          </p>
+        </div>
+        <div className="home-feature">
+          <FaUserMd className="home-feature-icon" />
+          <h3 className="text-ellipsis">Especialistas</h3>
+          <p className="text-ellipsis-multiline">
+            Accedé a una red de profesionales de la salud certificados.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}

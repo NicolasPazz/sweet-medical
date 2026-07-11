@@ -1,0 +1,116 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop, testing/e2e]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-app:
+    name: ${{ matrix.package }} (${{ matrix.task }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [backend, frontend]
+        task: [lint, test]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Iniciar MongoDB en modo Replica Set
+        if: matrix.package == 'backend' && matrix.task == 'test'
+        run: |
+          docker run -d -p 27017:27017 --name mongodb-ci mongo:6.0 --replSet rs0
+
+          echo "Esperando a que el motor de MongoDB arranque..."
+          until docker exec mongodb-ci mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
+            echo "Aguardando 1 segundo..."
+            sleep 1
+          done
+
+          echo "MongoDB listo. Inicializando Replica Set..."
+          docker exec mongodb-ci mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
+
+      - name: Instalar Dependencias
+        run: npm ci
+
+      - name: Ejecutar Tarea
+        env:
+          MONGODB_URI: 'mongodb://127.0.0.1:27017'
+          MONGODB_DB_NAME: 'sweetmedical_ci_test'
+          MONGODB_REPLICA_SET: 'rs0'
+        run: npm run ${{ matrix.task }}:${{ matrix.package }}
+
+  e2e-tests:
+    needs: verify-app
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Iniciar MongoDB en modo Replica Set
+        run: |
+          docker run -d -p 27017:27017 --name mongodb-ci mongo:6.0 --replSet rs0
+
+          echo "Esperando a que el motor de MongoDB arranque..."
+          until docker exec mongodb-ci mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
+            echo "Aguardando 1 segundo..."
+            sleep 1
+          done
+
+          echo "MongoDB listo. Inicializando Replica Set..."
+          docker exec mongodb-ci mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '127.0.0.1:27017'}]})"
+
+      - name: Instalar Dependencias del Monorepo
+        run: npm ci
+
+      - name: Instalar dependencias de sistema para Cypress (Act/Local)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0t64 libgbm1 libnss3 libasound2t64
+        continue-on-error: true
+
+      - name: Ejecutar Pruebas E2E en Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: packages/e2e
+          install: false
+          start: npm --prefix ../.. run dev
+          wait-on: http://localhost:3000
+          command: npm run test:e2e
+        env:
+          BASE_URL: 'http://localhost:3000'
+          MONGODB_URI: 'mongodb://127.0.0.1:27017'
+          MONGODB_DB_NAME: 'sweetmedical_ci_test'
+          MONGODB_REPLICA_SET: 'rs0'
+          CYPRESS_E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          CYPRESS_E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+
+      - name: Subir Artefactos de Cypress (Si falla)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            packages/e2e/cypress/screenshots
+            packages/e2e/cypress/videos
+          retention-days: 3

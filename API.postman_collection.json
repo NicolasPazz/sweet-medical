@@ -1,0 +1,771 @@
+{
+	"info": {
+		"_postman_id": "1acda39e-09ba-4376-88a4-7e6ebcd99477",
+		"name": "API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43637471",
+		"_collection_link": "https://nicolaspaz-7741775.postman.co/workspace/Nicolas-Paz's-Workspace~290c9eb3-6d31-4de4-8a70-01f6b216242d/collection/43637471-1acda39e-09ba-4376-88a4-7e6ebcd99477?action=share&source=collection_link&creator=43637471"
+	},
+	"item": [
+		{
+			"name": "Medico",
+			"item": [
+				{
+					"name": "Obtener todos los médicos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/medicos/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"medicos",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar disponibilidad del médico",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id_medico\": \"6a09445b494fc900abd87fc7\",\r\n  \"disponibilidades\": [\r\n    {\r\n      \"diaSemana\": \"MARTES\",\r\n      \"horaDesde\": \"07:00\",\r\n      \"horaHasta\": \"09:00\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/medicos/disponibilidad",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"medicos",
+								"disponibilidad"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notificacion",
+			"item": [
+				{
+					"name": "Obtener notificaciones leídas por usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/leidas/:id_usuario",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								"leidas",
+								":id_usuario"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a094cd4c574263fbc394079"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener notificaciones no leídas por usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/no-leidas/:id_usuario",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								"no-leidas",
+								":id_usuario"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a094cd4c574263fbc394079"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar notificación como leída",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"idUsuario\": 11\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones/:id_notificacion/:id_destinatario",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones",
+								":id_notificacion",
+								":id_destinatario"
+							],
+							"variable": [
+								{
+									"key": "id_notificacion",
+									"value": "6a097638003f7095933258ae"
+								},
+								{
+									"key": "id_destinatario",
+									"value": "6a094cd4c574263fbc394079"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear notificación",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"destinatario\": \"6a094cd4c574263fbc394079\",\n  \"remitente\": \"6a094f8dc1afd9653f377d7e\",\n  \"mensaje\": \"Su turno con el Dr. Martínez fue confirmado para el 2026-06-20 a las 10:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/notificaciones",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"notificaciones"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Paciente",
+			"item": [
+				{
+					"name": "Obtener todos los pacientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/pacientes/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"pacientes",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener historial de turnos por paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/pacientes/:id_usuario/turnos",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"pacientes",
+								":id_usuario",
+								"turnos"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f0e"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Servicio",
+			"item": [
+				{
+					"name": "Obtener todos los servicios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener servicio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/:id_servicio",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								":id_servicio"
+							],
+							"variable": [
+								{
+									"key": "id_servicio",
+									"value": "6a095df6f9c1b371811eca40"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar servicio",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": \"000000000000000000000001\",\n  \"nombre\": \"Consulta de Cardiologíaaaaaaaaaaaaa\",\n  \"duracionTurnoEnMins\": 45,\n  \"costo\": 8500\n}\n\n/*{\n  \"idUsuario\": \"000000000000000000000001\",\n  \"codigo\": \"ECO\",\n  \"nombre\": \"Ecografia\",\n  \"duracionTurnoEnMins\": 10,\n  \"costo\": 20000\n}*/",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modificar servicio",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "/*{\n  \"idUsuario\": \"000000000000000000000001\",\n  \"nombre\": \"Consulta de Cardiología Avanzada\",\n  \"duracionTurnoEnMins\": 450,\n  \"costo\": 92000\n}*/\n\n{\n  \"idUsuario\": \"000000000000000000000001\",\n  \"codigo\": \"MAS\",\n  \"nombre\": \"Masajes\",\n  \"duracionTurnoEnMins\": 450,\n  \"costo\": 92000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/:id_servicio",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								":id_servicio"
+							],
+							"variable": [
+								{
+									"key": "id_servicio",
+									"value": "6a095793763748b4d6650eee"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar servicio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"idUsuario\": \"000000000000000000000001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/servicios/:id_servicio",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"servicios",
+								":id_servicio"
+							],
+							"variable": [
+								{
+									"key": "id_servicio",
+									"value": "6a095793763748b4d6650eef"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Turno",
+			"item": [
+				{
+					"name": "Obtener todos los turnos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener todos los turnos del médico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/:id_usuario/all",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								":id_usuario",
+								"all"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a09dd781c91c496abde71bd"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener historial de turnos de un paciente por Médico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/medico/:id_usuario_del_medico/historial/:id_usuario_del_paciente",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"medico",
+								":id_usuario_del_medico",
+								"historial",
+								":id_usuario_del_paciente"
+							],
+							"variable": [
+								{
+									"key": "id_usuario_del_medico",
+									"value": "6a095793763748b4d6650f03"
+								},
+								{
+									"key": "id_usuario_del_paciente",
+									"value": "6a095793763748b4d6650f0e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar disponibilidad de turno para paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/:id_usuario_del_medico/disponibilidad/:id_servicio",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								":id_usuario_del_medico",
+								"disponibilidad",
+								":id_servicio"
+							],
+							"variable": [
+								{
+									"key": "id_usuario_del_medico",
+									"value": "6a095793763748b4d6650f03"
+								},
+								{
+									"key": "id_servicio",
+									"value": "6a095793763748b4d6650ee0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar turnos disponibles (Paginado)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/disponibles?page=2&limit=2&especialidad=Cardiología&fechaDesde=2025-06-01&sortBy=fecha&sortOrder=asc",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"disponibles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "especialidad",
+									"value": "Cardiología"
+								},
+								{
+									"key": "fechaDesde",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "sortBy",
+									"value": "fecha"
+								},
+								{
+									"key": "sortOrder",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reservar turno para paciente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/paciente/:id_usuario/reserva/:id_turno",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"paciente",
+								":id_usuario",
+								"reserva",
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f0e"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f7a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirmar turno",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/medico/:id_usuario/confirmar/:id_turno",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"medico",
+								":id_usuario",
+								"confirmar",
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f05"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f7a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar turno por paciente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"motivo\": \"El paciente no puede asistir\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/paciente/:id_usuario/cancelacion/:id_turno",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"paciente",
+								":id_usuario",
+								"cancelacion",
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f0e"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f76"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar turno por el Médico",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"motivo\": \"Reprogramación por imprevisto del médico\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/medico/:id_usuario/cancelacion/:id_turno",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								"medico",
+								":id_usuario",
+								"cancelacion",
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario",
+									"value": "6a095793763748b4d6650f04"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f78"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar turno como realizado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/turnos/:id_usuario_del_medico/realizado/:id_turno",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"turnos",
+								":id_usuario_del_medico",
+								"realizado",
+								":id_turno"
+							],
+							"variable": [
+								{
+									"key": "id_usuario_del_medico",
+									"value": "6a095793763748b4d6650f05"
+								},
+								{
+									"key": "id_turno",
+									"value": "6a095793763748b4d6650f7a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Seeding",
+			"item": [
+				{
+					"name": "Registrar datos iniciales",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{backendBaseURL}}/seeding/datos-iniciales",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"seeding",
+								"datos-iniciales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refrescar turnos",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{backendBaseURL}}/seeding/refrescar-turnos",
+							"host": [
+								"{{backendBaseURL}}"
+							],
+							"path": [
+								"seeding",
+								"refrescar-turnos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "backendBaseURL",
+			"value": ""
+		}
+	]
+}

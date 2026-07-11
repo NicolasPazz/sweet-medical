@@ -1,11 +1,26 @@
 export class Usuario {
-  constructor(id, nombreUsuario, password) {
-    this.id = id;
-    this.nombreUsuario = nombreUsuario;
-    this.password = password;
+  id;
+  nombreUsuario;
+  email;
+  password;
+  roles;
+  dni;
+  activo;
+  numTel;
+  direccion;
+  fechaNacimiento;
+
+  // Usuario del sistema para operaciones internas
+  static USUARIO_SISTEMA = { id: null, _id: null, nombreUsuario: 'SISTEMA' };
+
+  static setUsuarioSistema(usuario) {
+    Usuario.USUARIO_SISTEMA = usuario;
   }
 
-  static get USUARIO_SISTEMA() {
-    return new Usuario("SYS-000", "SISTEMA", null);
+  constructor(nombreUsuario, password) {
+    this.nombreUsuario = nombreUsuario;
+    this.password = password;
+    this.roles = [];
+    this.activo = false;
   }
 }

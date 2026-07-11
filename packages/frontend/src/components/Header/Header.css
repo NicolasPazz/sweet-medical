@@ -1,0 +1,429 @@
+/* ─── Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --sidebar-width: 260px;
+  --header-height-mobile: 70px;
+}
+
+/* ─── Sidebar (desktop) ─────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background-color: #064b50;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px 0 24px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  align-items: stretch;
+  z-index: 101;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Logo ──────────────────────────────────────────────────────────────── */
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+  transform: scale(1.5);
+  transform-origin: center center;
+}
+
+/* Toggle row */
+.logo-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px 16px;
+}
+
+.up-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+}
+
+.logo-toggle-label {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* ─── Navegación ────────────────────────────────────────────────────────── */
+.header-nav {
+  flex: 1;
+  padding: 0 12px;
+}
+
+.header-nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.header-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.header-nav a.active {
+  background-color: #12979f;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(18, 151, 159, 0.25);
+  font-weight: 600;
+}
+
+.header-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.header-label {
+  white-space: nowrap;
+}
+
+/* ─── Sección Pie / Acciones (Desktop) ──────────────────────────────────── */
+.header-footer-section {
+  padding: 20px 16px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ─── Carrito ───────────────────────────────────────────────────────────── */
+.cart-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.cart-btn--active {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.cart-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.cart-icon {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #f26e4b;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #064b50;
+}
+
+/* ─── Auth Row ──────────────────────────────────────────────────────────── */
+.header-auth-row {
+  display: flex;
+  width: 100%;
+}
+
+#iniciar-sesion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  width: 100%;
+  color: #ffffff;
+  background-color: #f26e4b;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(242, 110, 75, 0.2);
+  box-sizing: border-box;
+}
+
+#iniciar-sesion:hover {
+  background-color: #e05c38;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(242, 110, 75, 0.3);
+}
+
+#iniciar-sesion:active {
+  transform: scale(0.98);
+}
+
+.auth-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ─── Botón hamburger (solo mobile) ────────────────────────────────────── */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── Overlay para cerrar el menú en mobile ─────────────────────────────── */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+.nav-overlay.visible {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE – MOBILE BREAKPOINT
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: row;
+    width: 100%;
+    min-width: unset;
+    height: var(--header-height-mobile); /* 70px */
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 0 12px; /* Un poco menos de padding lateral para dar espacio a todo */
+    align-items: center;
+    justify-content: space-between;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+  }
+
+  .up-section {
+    border: none;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    height: 100%; /* Aprovecha todo el alto */
+  }
+
+  .logo-container {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-img {
+    height: 60px; /* ¡Logo gigante! Toma casi los 70px completos del header */
+    width: auto;
+    transform: none; /* Quitamos el scale para que el height lo controle limpio */
+    object-fit: contain;
+  }
+
+  .logo-toggle-row {
+    display: none; /* Ocultamos el toggle en la barra para ahorrar espacio */
+  }
+
+  .header-nav {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 260px;
+    height: 100vh;
+    background-color: #064b50;
+    padding: 80px 12px 24px;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    overflow-y: auto;
+  }
+
+  .header-nav.open {
+    left: 0;
+  }
+  .header-nav ul {
+    flex-direction: column;
+  }
+
+  .header-footer-section {
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    border-top: none;
+    gap: 10px;
+  }
+
+  .header-actions-row {
+    gap: 8px;
+  }
+
+  .cart-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .cart-icon {
+    font-size: 16px;
+  }
+
+  .header-auth-row {
+    width: auto;
+    margin: 0;
+  }
+
+  /* Restauramos el botón completo de "Mi Perfil" con forma de píldora */
+  #iniciar-sesion {
+    padding: 8px 14px; /* Padding cómodo */
+    border-radius: 20px; /* Forma de píldora */
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Espacio entre ícono y texto */
+    font-size: 13px; /* Texto un pelín más chico para que encaje perfecto */
+    box-shadow: none;
+    white-space: nowrap;
+  }
+
+  /* Aseguramos que el texto se vea */
+  .auth-text {
+    display: inline-block;
+  }
+
+  .auth-icon {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 0;
+  }
+}
+
+/* ─── Estilos extra (Toggle, etc) ───────────────────────────────────────── */
+:root {
+  --bg-container: #1e293b;
+  --bg-slider: #10b981;
+  --text-color: #94a3b8;
+  --text-active: #ffffff;
+}
+
+.switch-container {
+  position: relative;
+  display: flex;
+  background-color: var(--bg-container);
+  padding: 4px;
+  border-radius: 50px;
+  width: 100%;
+  max-width: 400px;
+  user-select: none;
+}
+
+.switch-option {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 10px 0;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.switch-option.active {
+  color: var(--text-active);
+}
+
+.switch-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: calc(100% - 8px);
+  background-color: var(--bg-slider);
+  border-radius: 50px;
+  z-index: 1;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s ease;
+}

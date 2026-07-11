@@ -1,0 +1,157 @@
+.gs-sedes-page {
+  min-height: 100vh;
+  background-color: #f2f6f6;
+  padding: 32px 20px;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.gs-sedes-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.gs-sedes-header {
+  margin-bottom: 28px;
+}
+
+.gs-sedes-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #064b50;
+  margin: 0 0 4px;
+}
+
+.gs-sedes-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.gs-sedes-form {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gs-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gs-campo label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gs-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.gs-sedes-form input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: 'Roboto Mono', monospace;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.gs-sedes-form input:focus {
+  border-color: #12979f;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(18, 151, 159, 0.1);
+}
+
+.gs-sedes-form input.input-error {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+
+.gs-icono-error {
+  position: absolute;
+  right: 10px;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.gs-select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: 'Roboto Mono', monospace;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.gs-select:focus {
+  border-color: #12979f;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(18, 151, 159, 0.1);
+}
+
+.gs-select.input-error {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+
+.gs-cargando {
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.gs-sin-sedes {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  padding: 12px 0;
+  line-height: 1.5;
+}
+
+.gs-sedes-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #064b50;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Roboto Mono', monospace;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.gs-sedes-btn:hover {
+  background-color: #0a6e74;
+  transform: translateY(-1px);
+}
+
+.gs-sedes-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

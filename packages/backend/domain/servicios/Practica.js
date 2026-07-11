@@ -1,9 +1,19 @@
 export class Practica {
-  constructor(id, codigo, nombre, duracionTurnoEnMins, costo) {
-    this.id = id;
+  id;
+  codigo;
+  nombre;
+  duracionTurnoEnMins;
+  costo;
+
+  constructor(codigo, nombre, duracionTurnoEnMins, costo) {
     this.codigo = codigo;
     this.nombre = nombre;
     this.duracionTurnoEnMins = duracionTurnoEnMins;
     this.costo = costo;
+    this.tipo = 'PRACTICA';
+  }
+
+  esTipo() {
+    return this.tipo || 'PRACTICA';
   }
 }

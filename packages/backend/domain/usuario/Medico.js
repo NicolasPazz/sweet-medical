@@ -1,8 +1,19 @@
-import { logger } from "../../utils/logger.js";
+import { logger } from '../../utils/logger.js';
+import { Agenda } from '../agenda/Agenda.js';
+import { GeneradorDisponibilidad } from '../agenda/GeneradorDisponibilidad.js';
 
 export class Medico {
-  constructor(id, usuario, matricula, nombre) {
-    this.id = id;
+  id;
+  usuario;
+  matricula;
+  nombre;
+  especialidades;
+  practicas;
+  sedes;
+  disponibilidades;
+  turnosActualesYFuturos;
+
+  constructor(usuario, matricula, nombre) {
     this.usuario = usuario;
     this.matricula = matricula;
     this.nombre = nombre;
@@ -10,11 +21,17 @@ export class Medico {
     this.practicas = [];
     this.sedes = [];
     this.disponibilidades = [];
+    this.turnosActualesYFuturos = [];
   }
 
   definirDisponibilidad(disponibilidad) {
-    this.disponibilidades.push(disponibilidad);
-    logger.debug(`Disponibilidad definida para el médico ${this.nombre} el día 
-      ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`);
+    GeneradorDisponibilidad.actualizarDisponibilidad(disponibilidad, this.disponibilidades);
+    logger.debug(
+      `Disponibilidad definida para el médico ${this.nombre} el día ${disponibilidad.dia} de ${disponibilidad.horaInicio} a ${disponibilidad.horaFin}`,
+    );
+  }
+
+  refrescarTurnos() {
+    this.turnosActualesYFuturos = Agenda.refrescarTurnosSegunDisponibilidadDe(this);
   }
 }

@@ -1,24 +1,32 @@
-import { logger } from "../utils/logger.js";
-
 export class Plan {
-  constructor(id, nombre) {
-    this.id = id;
+  id;
+  nombre;
+  coberturasEspecialidad;
+  coberturasPractica;
+
+  constructor(nombre) {
     this.nombre = nombre;
     this.coberturasEspecialidad = [];
     this.coberturasPractica = [];
   }
 
   obtenerCoberturaPorEspecialidad(especialidad) {
-    const cobertura = this.coberturasEspecialidad.find(
-      (c) => c.especialidad.id === especialidad.id
-    );
-    logger.debug(`Cobertura encontrada para la especialidad ${especialidad.nombre}:`, cobertura);
-    return cobertura;
+    const idBuscado = especialidad?.id ?? especialidad?._id;
+
+    return this.coberturasEspecialidad.find(
+      (c) => String(c.especialidad?.id || c.especialidad) === String(idBuscado),
+    )?.nivel;
   }
 
   obtenerCoberturaPorPractica(practica) {
-    const cobertura = this.coberturasPractica.find((c) => c.practica.id === practica.id);
-    logger.debug(`Cobertura encontrada para la práctica ${practica.nombre}:`, cobertura);
-    return cobertura;
+    const idBuscado = practica?.id ?? practica?._id;
+
+    return this.coberturasPractica.find(
+      (c) => String(c.practica?.id || c.practica) === String(idBuscado),
+    )?.nivel;
+  }
+
+  calcularCosto() {
+    throw new Error('calcularCosto debe ser implementado por subclases');
   }
 }

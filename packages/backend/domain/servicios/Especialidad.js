@@ -1,8 +1,17 @@
 export class Especialidad {
-  constructor(id, nombre, duracionTurnoEnMins, costoConsulta) {
-    this.id = id;
+  id;
+  nombre;
+  duracionTurnoEnMins;
+  costo;
+
+  constructor(nombre, duracionTurnoEnMins, costo) {
     this.nombre = nombre;
     this.duracionTurnoEnMins = duracionTurnoEnMins;
-    this.costoConsulta = costoConsulta;
+    this.costo = costo;
+    this.tipo = 'ESPECIALIDAD';
+  }
+
+  esTipo() {
+    return this.tipo || 'ESPECIALIDAD';
   }
 }

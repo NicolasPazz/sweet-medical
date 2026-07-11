@@ -1,43 +1,90 @@
-import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
-import { EstadoTurno } from "./EstadoTurno.js";
-import { FactoryNotificacion } from "../notificacion/FactoryNotificacion.js";
-import { logger } from "../../utils/logger.js";
+import { CambioEstadoTurno } from './CambioEstadoTurno.js';
+import { PendienteReprogramacion } from '../notificacion/estado-turno/PendienteReprogramacion.js';
+import { FactoryNotificacion } from '../notificacion/FactoryNotificacion.js';
+import { logger } from '../../utils/logger.js';
+import { DateUtil } from '../../utils/DateUtil.js';
 
 export class Turno {
-  constructor(id, medico, paciente, fechaHora, sede, servicio, costo) {
-    this.id = id;
+  id;
+  medico;
+  paciente;
+  fechaHora;
+  sede;
+  servicio;
+  estado;
+  historialEstados;
+  costo;
+  hora;
+  slotsAsociados;
+  propuestaCambio = null;
+
+  constructor(medico, paciente, fecha, horaInicio, sede, servicio, costo) {
     this.medico = medico;
     this.paciente = paciente;
-    this.fechaHora = fechaHora;
+    this.fechaHora = Turno.combinarFechaYHoraUTC(fecha, horaInicio);
+    this.hora = horaInicio;
     this.sede = sede;
-
-    this.practica = servicio.costo ? servicio : null;
-    this.especialidad = servicio.costoConsulta ? servicio : null;
-
-    this.estado = EstadoTurno.DISPONIBLE;
+    // OJO: no usar `servicio?.costo ? servicio : null` acá. Un servicio con
+    // costo=0 (ej: consulta gratuita, promoción) es válido y NO debería
+    // descartarse solo porque su precio es un valor falsy en JS. Lo único que
+    // importa acá es si el servicio existe.
+    this.servicio = servicio ?? null;
     this.historialEstados = [];
     this.costo = costo;
+    this.slotsAsociados = [];
   }
 
-  actualizarEstado(nuevoEstado, quien, motivo) {
-    const nuevoCambio = new CambioEstadoTurno(nuevoEstado, this, quien, motivo);
+  /**
+   * Combina la parte de FECHA de `fecha` (se descarta cualquier hora que ya
+   * viniera pegada ahí, como el sufijo "T08:00:00Z" que arma Agenda.js) con
+   * `horaInicio` ("HH:MM"). Ambos representan siempre hora UTC: la
+   * disponibilidad del médico se persiste en UTC (convertida desde el
+   * navegador que la cargó, ver `MedicoService.actualizarDisponibilidad`), y
+   * los Slots se generan directamente a partir de esa disponibilidad, así que
+   * ya llegan en UTC sin conversión adicional acá.
+   */
+  static combinarFechaYHoraUTC(fecha, horaInicio) {
+    const fechaStr =
+      fecha instanceof Date ? fecha.toISOString().split('T')[0] : String(fecha).split('T')[0];
+
+    const horaValida = horaInicio && /^\d{2}:\d{2}$/.test(horaInicio) ? horaInicio : '00:00';
+
+    return new Date(`${fechaStr}T${horaValida}:00Z`);
+  }
+
+  actualizarEstado(usuario, nuevoEstado, motivo) {
+    const estadoEnum = nuevoEstado.getEstadoNombre();
+
+    const nuevoCambio = new CambioEstadoTurno(estadoEnum, this, usuario, motivo);
     this.historialEstados.push(nuevoCambio);
     this.estado = nuevoEstado;
-    logger.debug(
-      `Turno ${this.id} actualizado a estado ${nuevoEstado} por ${quien.nombre} con motivo: ${motivo}`
+
+    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(usuario, this, motivo);
+    return notificacion;
+  }
+
+  solicitarReprogramacion(usuario, nuevaFechaHora, motivo) {
+    this.propuestaCambio = {
+      nuevaFechaHora,
+      motivo,
+      proponenteId: usuario.id || usuario._id,
+    };
+
+    const notificacion = this.actualizarEstado(
+      usuario,
+      new PendienteReprogramacion(this),
+      `Solicitud de reprogramación para el ${DateUtil.toDDMMYYYY(nuevaFechaHora)}`,
     );
 
-    // Esta funcion debe devolver void, esto se hará en un service mas adelante
-    const notificacion = FactoryNotificacion.crearSegunEstadoTurno(this);
     return notificacion;
   }
 
   obtenerNombreServicio() {
-    return this.practica ? this.practica.nombre : this.especialidad.nombre;
+    return this.servicio ? this.servicio.nombre : null;
   }
 
   obtenerUltimoActor() {
-    if (this.historialEstados.length === 0) {
+    if (!this.historialEstados || this.historialEstados.length === 0) {
       logger.warn(`Turno ${this.id} no tiene historial de estados para obtener el último actor.`);
       return null;
     }

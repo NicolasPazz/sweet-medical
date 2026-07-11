@@ -1,0 +1,14 @@
+{
+  "CONFIRMACION_TURNO": "Hola {{paciente}}, tu turno con el Dr. {{medico}} para {{especialidad}} ha sido confirmado para el {{fecha}}.",
+  "CONFIRMACION_TURNO_DETALLADA": "Tu turno para {{servicio}} el {{fecha}} en la sede {{sede}} con el Dr. {{medico}} ha sido confirmado.",
+  "RECORDATORIO_MEDICO": "Recordatorio: Mañana tenés un turno con {{nombre}}.",
+  "RECORDATORIO_PACIENTE": "Recordatorio: Mañana es tu turno con el Dr. {{nombre}}.",
+  "CANCELACION_A_MEDICO": "El paciente {{nombre}} ha cancelado su turno del {{fecha}} para {{servicio}}. Motivo: {{motivo}}",
+  "CANCELACION_A_PACIENTE": "El profesional {{nombre}} ha cancelado tu turno del {{fecha}} para {{servicio}}. Motivo: {{motivo}}",
+  "RESERVA_A_MEDICO": "Nuevo turno reservado por el paciente {{nombre}} para {{servicio}} el {{fecha}}.",
+  "PROPUESTA_REPROGRAMACION_A_PACIENTE": "El paciente {{nombre}} solicitó reprogramar su turno para {{servicio}} el {{fecha}}. Motivo: {{motivo}}",
+  "PROPUESTA_REPROGRAMACION_A_MEDICO": "El médico {{nombre}} solicitó reprogramar su turno para {{servicio}} el {{fecha}}. Motivo: {{motivo}}",
+  "PROPUESTA_ACEPTADA": "Propuesta de reprogramación aceptada con éxito.",
+  "PROPUESTA_RECHAZADA": "Propuesta de reprogramación rechazada por la contraparte.",
+  "PROPUESTA_RECIBIDA": "El {{rolProponente}} ha solicitado reprogramar el turno para el {{fecha}}."
+}

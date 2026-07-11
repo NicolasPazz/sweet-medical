@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+echo ""
+echo "===================================================="
+echo "Corriendo resumen de tests..."
+echo "===================================================="
+(npm run test) || true

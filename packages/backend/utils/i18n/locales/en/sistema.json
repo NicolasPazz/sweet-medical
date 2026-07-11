@@ -1,0 +1,16 @@
+{
+  "LOG_GENERANDO_TURNOS": "Generating appointments for specialty {{servicio}} and doctor {{medico}}",
+  "LOG_REFRESCANDO_TURNOS": "Refreshing appointments for doctor {{medico}}",
+  "LOG_PLAN_AGREGADO": "Plan {{plan}} added to health insurance {{obraSocial}}",
+  "LOG_COBERTURA_ESPECIALIDAD": "Coverage level found for specialty {{especialidad}}:",
+  "LOG_COBERTURA_PRACTICA": "Coverage found for procedure {{practica}}:",
+  "LOG_CANCELACION_PACIENTE": "Creating notification for appointment {{id}} in CANCELLED status by patient {{nombre}} for service {{servicio}}.",
+  "LOG_CANCELACION_PROFESIONAL": "Creating notification for appointment {{id}} in CANCELLED status by professional {{nombre}} for service {{servicio}}.",
+  "LOG_CONFIRMACION_PROFESIONAL": "Creating notification for appointment {{id}} in CONFIRMED status by professional {{nombre}} for service {{servicio}}.",
+  "LOG_RESERVA_PACIENTE": "Creating notification for appointment {{id}} in RESERVED status by patient {{nombre}} for service {{servicio}}.",
+  "LOG_SIN_NOTIFICACION": "No notification created for appointment {{id}} in state {{estado}}.",
+  "LOG_NOTIFICACION_LEIDA": "Notification {{id}} marked as read on: {{fecha}}",
+  "LOG_TURNO_ACTUALIZADO": "Appointment {{id}} updated to state {{estado}} by {{quien}} with motive: {{motivo}}",
+  "LOG_TURNO_SIN_HISTORIAL": "Appointment {{id}} has no status history to retrieve the last actor.",
+  "LOG_DISPONIBILIDAD_DEFINIDA": "Availability defined for doctor {{nombre}} on {{dia}} from {{inicio}} to {{fin}}"
+}

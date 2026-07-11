@@ -1,0 +1,16 @@
+{
+  "LOG_GENERANDO_TURNOS": "Generando turnos para especialidad {{servicio}} y médico {{medico}}",
+  "LOG_REFRESCANDO_TURNOS": "Refrescando turnos para médico {{medico}}",
+  "LOG_PLAN_AGREGADO": "Plan {{plan}} agregado a obra social {{obraSocial}}",
+  "LOG_COBERTURA_ESPECIALIDAD": "Nivel Cobertura encontrada para la especialidad {{especialidad}}:",
+  "LOG_COBERTURA_PRACTICA": "Cobertura encontrada para la práctica {{practica}}:",
+  "LOG_CANCELACION_PACIENTE": "Creando notificación para turno {{id}} en estado CANCELADO por paciente {{nombre}} para servicio {{servicio}}.",
+  "LOG_CANCELACION_PROFESIONAL": "Creando notificación para turno {{id}} en estado CANCELADO por profesional {{nombre}} para servicio {{servicio}}.",
+  "LOG_CONFIRMACION_PROFESIONAL": "Creando notificación para turno {{id}} en estado CONFIRMADO por profesional {{nombre}} para servicio {{servicio}}.",
+  "LOG_RESERVA_PACIENTE": "Creando notificación para turno {{id}} en estado RESERVADO por paciente {{nombre}} para servicio {{servicio}}.",
+  "LOG_SIN_NOTIFICACION": "No se crea notificación para turno {{id}} en estado {{estado}}.",
+  "LOG_NOTIFICACION_LEIDA": "Notificación {{id}} marcada como leída el: {{fecha}}",
+  "LOG_TURNO_ACTUALIZADO": "Turno {{id}} actualizado a estado {{estado}} por {{quien}} con motivo: {{motivo}}",
+  "LOG_TURNO_SIN_HISTORIAL": "Turno {{id}} no tiene historial de estados para obtener el último actor.",
+  "LOG_DISPONIBILIDAD_DEFINIDA": "Disponibilidad definida para el médico {{nombre}} el día {{dia}} de {{inicio}} a {{fin}}"
+}
