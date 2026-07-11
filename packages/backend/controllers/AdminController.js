@@ -1,8 +1,12 @@
 import { adminService } from '../services/AdminService.js';
-
+import { turnoService } from '../services/TurnoService.js';
+import { logger } from '../utils/logger.js';
 export class AdminController {
-  constructor({ adminService: svc = adminService } = {}) {
+  constructor({ adminService: svc = adminService, turnoService: turnoSvc = turnoService
+  } 
+  = {}) {
     this.adminService = svc;
+    this.turnoService = turnoSvc;
   }
 
   /**
@@ -57,6 +61,22 @@ export class AdminController {
       });
       return res.status(201).json({ status: 'created', data: resultado });
     } catch (error) {
+      return next(error);
+    }
+  };
+
+  correrProcesoBatch = async (req, res, next) => {
+    try {
+      logger.info('Proceso batch iniciado manualmente');
+
+      await this.turnoService.refrescarSlots();
+
+      return res.status(201).json({
+        status: 'success',
+        message: 'Proceso batch realizado exitosamente',
+      });
+    } catch (error) {
+      logger.error('Error al correr el proceso batch:', error.message);
       return next(error);
     }
   };
