@@ -40,9 +40,7 @@ async function resolverUsuario(req) {
   return usuario;
 }
 
-/**
- * Verifica credenciales Basic y que el usuario tenga rol ADMIN.
- */
+
 export async function basicAuthAdmin(req, res, next) {
   try {
     const usuario = await resolverUsuario(req);
@@ -58,9 +56,6 @@ export async function basicAuthAdmin(req, res, next) {
   }
 }
 
-/**
- * Verifica credenciales Basic sin chequear rol (cualquier usuario activo).
- */
 export async function basicAuthUser(req, res, next) {
   try {
     const usuario = await resolverUsuario(req);
