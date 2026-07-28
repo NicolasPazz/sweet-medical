@@ -1,113 +1,184 @@
-Este repositorio es la base para el Trabajo Práctico de la materia **Desarrollo de Software (DDS)** de la carrera **Ingeniería en Sistemas de Información** de la **UTN FRBA**. Se trata de un **monorepo** que integra una aplicación frontend con Create React App y un backend con Express, facilitando el desarrollo y la gestión de ambos proyectos en un único entorno.
+# Sweet Medical
 
-## 📦 Estructura del Proyecto
+Plataforma web de gestión de turnos médicos con cobertura de obra social, diseñada para conectar pacientes con profesionales de la salud de forma eficiente y escalable.
 
-El monorepo está organizado de la siguiente manera:
+## Tech Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| **Frontend** | React, Vite, Axios |
+| **Backend** | Node.js, Express |
+| **Base de Datos** | MongoDB (Mongoose ODM) |
+| **Testing** | Jest (unitario e integración), Cypress (E2E) |
+| **API Docs** | Swagger |
+| **CI/CD** | GitHub Actions |
+
+---
+
+## Arquitectura del Proyecto
 
 ```
-.
+sweet-medical/
 ├── packages/
-│   ├── backend/        # Servidor Express.js
-│   └── frontend/       # Aplicación React (Create React App)
-├── package.json        # Configuración del monorepo (root)
-├── README.md           # Este archivo
-└── .env.example        # Ejemplo de configuración de variables de entorno
+│   ├── backend/          # API REST (Express)
+│   ├── frontend/         # UI (React + Vite)
+│   └── e2e/              # Tests end-to-end (Cypress)
+├── package.json          # Monorepo root (npm workspaces)
+└── packages/backend/.env.example
 ```
 
-## ⚙️ Paquetes
+### Infraestructura en Producción
 
-Este monorepo utiliza **`npm workspaces`** para gestionar los diferentes paquetes.
+| Componente | Proveedor | URL |
+|-----------|-----------|-----|
+| **Frontend** | Netlify | `https://sweet-medical-ui.netlify.app` |
+| **Dominio personalizado** | No-IP + Netlify | `https://sweetmedical.ddns.net` |
+| **Backend** | Render | `https://sweet-medical-be.onrender.com` |
+| **Base de datos** | MongoDB Atlas | Cluster cloud compartido |
 
-### Backend (`packages/backend`)
+---
 
-El backend está construido con Express.js y utiliza las siguientes dependencias:
+## Funcionalidades Principales
 
-- **`express`**: El framework web para Node.js, utilizado para construir la API.
-- **`cors`**: Middleware para Express que habilita Cross-Origin Resource Sharing (CORS), necesario para permitir que el frontend acceda al backend desde un origen diferente.
-- **`dotenv`**: Carga variables de entorno desde un archivo `.env` en `process.env`. Es crucial para configurar el puerto del servidor y los orígenes permitidos.
+### Gestión de Turnos
+- Reserva, cancelación y modificación de turnos con validaciones de plazo y estado
+- Búsqueda con filtros por profesional, especialidad, práctica, sede y rango de fechas
+- Visualización de cobertura y costo estimado según obra social y plan del paciente
+- Preselección múltiple de turnos (módulo tipo carrito en frontend)
 
-La idea es dar lo mínimo para levantar el servidor, y que durante el desarrollo del TP se vayan agregando las dependencias necesarias.
+### Administración de Médicos
+- Definición de disponibilidad horaria
+- Generación batch asincrónica de turnos disponibles
+- Gestión de servicios (alta, modificación, baja de especialidades/prácticas)
+- Confirmación y marcado de turnos como realizados
+- Consulta de historial de turnos por paciente
 
-### Frontend (`packages/frontend`)
+### Notificaciones
+- Notificaciones ante reserva, confirmación, cancelación y modificación de turnos
+- Recordatorio automático al día previo del turno
+- Endpoints para consultar notificaciones leídas / no leídas y marcado como leídas
 
-El frontend es una aplicación de React generada con Create React App.
+### Cobertura de Obra Social
+- Soporte para cobertura TOTAL, PARCIAL y NO CUBIERTA según plan del paciente
+- Cálculo automático del costo final al momento de la reserva
 
-## 🚀 Inicio Rápido
+---
 
-Seguí estos pasos para poner en marcha el proyecto:
+## Inicio Rápido (Desarrollo Local)
 
-### 1\. Instalación de Dependencias
-
-Desde la raíz del monorepo, ejecutá:
+### 1. Instalar dependencias
 
 ```bash
 npm install
 ```
 
-Esto instalará todas las dependencias para la raíz y para los paquetes `frontend` y `backend`.
+### 2. Configurar variables de entorno
 
-### 2\. Configuración de Variables de Entorno
-
-Crea un archivo `.env` en el directorio `packages/backend`. Puedes usar el archivo `.env.example` como plantilla.
-
-```
+```bash
 # packages/backend/.env
+PORT=3001
+HOST=0.0.0.0
+NODE_ENV=development
+API_PUBLIC_URL=http://localhost:3001
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=sweet_medical_db
 ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-SERVER_PORT=3001
+DURACION_SLOT_MINUTOS=30
+NUM_SEMANAS_GENERAR_SLOTS=4
+DEFAULT_COPAGO=0.5
+MAX_RANGO_BUSQUEDA_DIAS=30
+SALT_ROUNDS=10
 ```
 
-- **`ALLOWED_ORIGINS`**: Define los orígenes permitidos para las solicitudes CORS. Asegurate de incluir la URL donde se ejecuta tu frontend (por defecto, `http://localhost:3000` para Create React App). Cuando se haga el despliegue en nube acá se deberá incluir la URL donde se desplegó el frontend.
-- **`SERVER_PORT`**: El puerto en el que se ejecutará el servidor backend (ej. `8000`).
+Usá `packages/backend/.env.example` como referencia.
 
-### 3\. Ejecución de la Aplicación
-
-Podés iniciar el frontend y el backend por separado o ambos a la vez:
-
-#### Ejecutar el Backend
+### 3. Ejecutar en desarrollo
 
 ```bash
-npm run start:backend
-```
+# Backend + Frontend simultáneamente
+npm run dev
 
-Para el desarrollo con reinicio automático:
-
-```bash
+# Individual
 npm run dev:backend
+npm run dev:frontend
 ```
 
-#### Ejecutar el Frontend
+---
+
+## Estrategia de Versionado (Git Flow)
+
+### Ramas principales
+- **`main`** — Código estable en producción.
+- **`develop`** — Integración de funcionalidades en curso.
+
+### Ramas de soporte
+- **`feature/<nombre>`** — Nuevos requerimientos. Salen de `develop` y vuelven a `develop`.
+- **`bugfix/<nombre>`** — Correcciones durante integración.
+
+### Flujo
+1. Sincronizar `develop` local → `git pull origin develop`
+2. Crear rama de tarea → `git checkout -b feature/mi-tarea`
+3. Commits atómicos con mensajes claros
+4. PR hacia `develop` con code review de otro integrante
+5. Al completar el hito, PR de `develop` → `main`
+
+---
+
+## Pipeline CI/CD
+
+El despliegue a producción es completamente automatizado:
+
+```
+[Código local] → [Push a GitHub] → [GitHub Actions: tests] → [Autodeploy Backend (Render)] → [Autodeploy Frontend (Netlify)]
+```
+
+- GitHub Actions ejecuta tests de integración (Jest) y E2E (Cypress) ante cada push o PR a `main`.
+- Si alguna prueba falla, el pipeline se detiene y protege el entorno de producción.
+- Netlify y Render despliegan automáticamente al detectar cambios en la rama principal.
+
+---
+
+## Documentación de la API
+
+Disponible en Swagger al levantar el backend:
+
+```
+http://localhost:3001/api-docs
+```
+
+El spec JSON se sirve en `http://localhost:3001/swagger.json`.
+
+---
+
+## Despliegue
+
+### Variables de entorno en producción
+
+| Variable | Descripción |
+|----------|-------------|
+| `NODE_ENV` | `production` |
+| `MONGODB_URI` | URI de conexión a MongoDB Atlas |
+| `MONGODB_DB_NAME` | `sweet_medical_db` |
+| `ALLOWED_ORIGINS` | Orígenes permitidos para CORS (Netlify, dominio personalizado) |
+| `API_PUBLIC_URL` | URL pública del backend para Swagger |
+| `VITE_API_URL` | URL del backend (inyectada en build del frontend) |
+
+### URLs en producción
+
+- **App:** [https://sweetmedical.ddns.net](https://sweetmedical.ddns.net)
+- **API:** [https://sweet-medical-be.onrender.com](https://sweet-medical-be.onrender.com)
+
+---
+
+## Testing
 
 ```bash
-npm run start:frontend
+# Tests unitarios (backend)
+npm run test:backend
+
+# Tests de integración (controladores)
+npm run test:backend:integracion
+
+# Tests E2E (frontend)
+npm run test:e2e
 ```
-
-#### Ejecutar Ambos (Desarrollo)
-
-Para iniciar el backend en modo `dev` y el frontend simultáneamente, usá:
-
-```bash
-npm run start:dev
-```
-
-# Estrategia de Control de Versiones (Git Flow)
-
-## 1. Ramas Principales
-
-- **`main`**: Contiene el código estable, funcional y testeado. Solo se actualiza al finalizar cada iteración. Es la rama que finalmente se desplegará en producción.
-- **`develop`**: Es la rama de integración principal. Todo el código nuevo de las funcionalidades en curso converge acá.
-
-## 2. Ramas de Soporte
-
-- **`feature/<nombre-tarea>`**: Utilizadas para desarrollar cada nuevo requerimiento (ej. `feature/modelo-dominio`, `feature/health-check`).
-  - **Salen de:** `develop`
-  - **Vuelven a:** `develop`
-- **`bugfix/<nombre-error>`**: Utilizadas para resolver errores puntuales detectados durante la integración en `develop`.
-
-## 3. Flujo de Trabajo
-
-1. **Sincronización:** El desarrollador se posiciona en `develop` y sincroniza su repositorio local (`git pull origin develop`).
-2. **Creación de Rama:** Se crea una nueva rama para la tarea asignada (`git checkout -b feature/modelo-objetos`).
-3. **Desarrollo y Commits:** Se escribe el código realizando commits atómicos y con mensajes claros.
-4. **Pull Request (PR):** Al finalizar la tarea, se sube la rama y se abre un PR hacia `develop`.
-5. **Code Review y Merge:** Otro integrante del equipo revisa el PR. Si todo está correcto, se aprueba y se integra (merge) el código a `develop`.
-6. **Release:** Al finalizar todos los requerimientos de la iteración actual, se realiza un PR desde `develop` hacia `main` para marcar la versión entregable.
